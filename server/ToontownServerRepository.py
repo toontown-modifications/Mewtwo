@@ -1,6 +1,6 @@
 from direct.directnotify.DirectNotifyGlobal import directNotify
 from direct.distributed.AstronInternalRepository import AstronInternalRepository
-from direct.distributed.DistributedObjectAI import DistributedObjectAI
+from direct.distributed.DistributedObjectUD import DistributedObjectUD
 from ExtAgent import ExtAgent
 
 class ToontownServerRepository(AstronInternalRepository):
@@ -21,8 +21,8 @@ class ToontownServerRepository(AstronInternalRepository):
     def handleConnected(self):
         AstronInternalRepository.handleConnected(self)
 
-        # Generate a DistributedObjectAI to act as a "root object".
-        self.rootObject = DistributedObjectAI(self)
+        # Generate a DistributedObjectUD to act as a "root object".
+        self.rootObject = DistributedObjectUD(self)
         self.rootObject.generateWithRequiredAndId(2, 0, 0)
 
         self.extAgent = ExtAgent(self)
