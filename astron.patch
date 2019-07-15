@@ -1,0 +1,275 @@
+diff --git a/src/clientagent/AstronClient.cpp b/src/clientagent/AstronClient.cpp
+index bd79874..62783f7 100644
+--- a/src/clientagent/AstronClient.cpp
++++ b/src/clientagent/AstronClient.cpp
+@@ -16,6 +16,7 @@ using dclass::Field;
+ 
+ 
+ static ConfigGroup astronclient_config("libastron", ca_client_config);
++static ConfigVariable<uint32_t> extagent_id_config("extagent_id", 0, astronclient_config);
+ static ConfigVariable<bool> relocate_owned("relocate", false, astronclient_config);
+ static ConfigVariable<string> interest_permissions("add_interest", "visible", astronclient_config);
+ static BooleanValueConstraint relocate_is_boolean(relocate_owned);
+@@ -48,6 +49,7 @@ class AstronClient : public Client, public NetworkHandler
+   private:
+     std::shared_ptr<NetworkClient> m_client;
+     ConfigNode m_config;
++    uint32_t m_extagent_id;
+     bool m_clean_disconnect;
+     bool m_relocate_owned;
+     bool m_send_hash;
+@@ -63,7 +65,8 @@ class AstronClient : public Client, public NetworkHandler
+                  const uvw::Addr &remote, const uvw::Addr &local, const bool haproxy_mode) :
+         Client(config, client_agent), m_client(std::make_shared<NetworkClient>(this)),
+         m_config(config),
+-        m_clean_disconnect(false), m_relocate_owned(relocate_owned.get_rval(config)),
++        m_extagent_id(extagent_id_config.get_rval(config)), m_clean_disconnect(false),
++        m_relocate_owned(relocate_owned.get_rval(config)),
+         m_send_hash(send_hash_to_client.get_rval(config)),
+         m_send_version(send_version_to_client.get_rval(config)),
+         m_heartbeat_timeout(heartbeat_timeout_config.get_rval(config))
+@@ -150,7 +153,7 @@ class AstronClient : public Client, public NetworkHandler
+             resp->add_uint16(CLIENT_EJECT);
+             resp->add_uint16(reason);
+             resp->add_string(error_string);
+-            m_client->send_datagram(resp);
++            forward_datagram(resp, false);
+ 
+             m_clean_disconnect = true;
+             m_client->disconnect();
+@@ -162,6 +165,16 @@ class AstronClient : public Client, public NetworkHandler
+     {
+         lock_guard<recursive_mutex> lock(m_client_lock);
+         DatagramIterator dgi(dg);
++        // If we have an extension client agent, offload this datagram to it instead.
++        if(m_extagent_id > 0) {
++            // We have an extension CA for delegating this message.
++            DatagramPtr ext_dg = Datagram::create();
++            ext_dg->add_server_header(m_extagent_id, m_channel, CLIENTAGENT_EXTAGENT_MESSAGE);
++            ext_dg->add_uint64(m_channel);
++            ext_dg->add_data(dg);
++            route_datagram(ext_dg);
++            return;
++        }
+         try {
+             switch(m_state) {
+             // Client has just connected and should only send "CLIENT_HELLO".
+@@ -235,12 +248,40 @@ class AstronClient : public Client, public NetworkHandler
+ 
+     // forward_datagram should foward the datagram to the client, or where appopriate parse
+     // the packet and send the appropriate equivalent data.
+-    // Handler for CLIENTAGENT_SEND_DATAGRAM.
+-    virtual void forward_datagram(DatagramHandle dg)
+-    {
++    // Also a handler for CLIENTAGENT_SEND_DATAGRAM.
++    virtual void forward_datagram(DatagramHandle dg, bool send_datagram)
++    {
++        // If we have an ext agent (and this isn't from CLIENTAGENT_SEND_DATAGRAM),
++        // send it to the ext agent channel instead.
++        if(m_extagent_id > 0 && !send_datagram) {
++            DatagramPtr ext_dg = Datagram::create();
++            ext_dg->add_server_header(m_extagent_id, m_channel, CLIENTAGENT_EXTAGENT_RESPONSE);
++            ext_dg->add_uint64(m_channel);
++            ext_dg->add_data(dg);
++            route_datagram(ext_dg);
++            return;
++        }
++
++        // Send the datagram straight to the client.
+         m_client->send_datagram(dg);
+     }
+ 
++    // handle_cluster_datagram is only used by us for extension client agents.
++    virtual bool handle_cluster_datagram(DatagramHandle in_dg, DatagramIterator &dgi,
++                                         channel_t sender, uint16_t msgtype)
++    {
++        // If we have an ext agent, go ahead and process it.
++        if(m_extagent_id > 0) {
++            dgi.seek_payload();
++            dgi.skip(sizeof(channel_t)); // skip sender
++            handle_authenticated(dgi);
++            return true;
++        }
++
++        // Otherwise, this is unknown to us.
++        return false;
++    }
++
+     // handle_drop should immediately disconnect the client without sending any more data.
+     // Handler for CLIENTAGENT_DROP.
+     virtual void handle_drop()
+@@ -265,7 +306,7 @@ class AstronClient : public Client, public NetworkHandler
+         for(auto it = i.zones.begin(); it != i.zones.end(); ++it) {
+             resp->add_zone(*it);
+         }
+-        m_client->send_datagram(resp);
++        forward_datagram(resp, false);
+     }
+ 
+     // handle_remove_interest should inform the client an interest was removed by the server.
+@@ -275,7 +316,7 @@ class AstronClient : public Client, public NetworkHandler
+         resp->add_uint16(CLIENT_REMOVE_INTEREST);
+         resp->add_uint32(context);
+         resp->add_uint16(interest_id);
+-        m_client->send_datagram(resp);
++        forward_datagram(resp, false);
+     }
+ 
+     // handle_add_object should inform the client of a new object. The datagram iterator
+@@ -290,7 +331,7 @@ class AstronClient : public Client, public NetworkHandler
+         resp->add_location(parent_id, zone_id);
+         resp->add_uint16(dc_id);
+         resp->add_data(dgi.read_remainder());
+-        m_client->send_datagram(resp);
++        forward_datagram(resp, false);
+     }
+ 
+     // handle_add_ownership should inform the client it has control of a new object. The datagram
+@@ -306,7 +347,7 @@ class AstronClient : public Client, public NetworkHandler
+         resp->add_location(parent_id, zone_id);
+         resp->add_uint16(dc_id);
+         resp->add_data(dgi.read_remainder());
+-        m_client->send_datagram(resp);
++        forward_datagram(resp, false);
+     }
+ 
+     // handle_set_field should inform the client that the field has been updated.
+@@ -317,7 +358,7 @@ class AstronClient : public Client, public NetworkHandler
+         resp->add_doid(do_id);
+         resp->add_uint16(field_id);
+         resp->add_data(dgi.read_remainder());
+-        m_client->send_datagram(resp);
++        forward_datagram(resp, false);
+     }
+ 
+     // handle_set_fields should inform the client that a group of fields has been updated.
+@@ -328,7 +369,7 @@ class AstronClient : public Client, public NetworkHandler
+         resp->add_doid(do_id);
+         resp->add_uint16(num_fields);
+         resp->add_data(dgi.read_remainder());
+-        m_client->send_datagram(resp);
++        forward_datagram(resp, false);
+     }
+ 
+     // handle_change_location should inform the client that the objects location has changed.
+@@ -338,7 +379,7 @@ class AstronClient : public Client, public NetworkHandler
+         resp->add_uint16(CLIENT_OBJECT_LOCATION);
+         resp->add_doid(do_id);
+         resp->add_location(new_parent, new_zone);
+-        m_client->send_datagram(resp);
++        forward_datagram(resp, false);
+     }
+ 
+     // handle_remove_object should send a mesage to remove the object from the connected client.
+@@ -349,7 +390,7 @@ class AstronClient : public Client, public NetworkHandler
+         DatagramPtr resp = Datagram::create();
+         resp->add_uint16(CLIENT_OBJECT_LEAVING);
+         resp->add_doid(do_id);
+-        m_client->send_datagram(resp);
++        forward_datagram(resp, false);
+     }
+ 
+     // handle_remove_ownership should notify the client it no has control of the object.
+@@ -359,7 +400,7 @@ class AstronClient : public Client, public NetworkHandler
+         DatagramPtr resp = Datagram::create();
+         resp->add_uint16(CLIENT_OBJECT_LEAVING_OWNER);
+         resp->add_doid(do_id);
+-        m_client->send_datagram(resp);
++        forward_datagram(resp, false);
+     }
+ 
+     // handle_interest_done is called when all of the objects from an opened interest have been
+@@ -370,7 +411,7 @@ class AstronClient : public Client, public NetworkHandler
+         resp->add_uint16(CLIENT_DONE_INTEREST_RESP);
+         resp->add_uint32(context);
+         resp->add_uint16(interest_id);
+-        m_client->send_datagram(resp);
++        forward_datagram(resp, false);
+     }
+ 
+     // Client has just connected and should only send "CLIENT_HELLO"
+@@ -414,7 +455,7 @@ class AstronClient : public Client, public NetworkHandler
+ 
+         DatagramPtr resp = Datagram::create();
+         resp->add_uint16(CLIENT_HELLO_RESP);
+-        m_client->send_datagram(resp);
++        forward_datagram(resp, false);
+ 
+         m_state = CLIENT_STATE_ANONYMOUS;
+     }
+diff --git a/src/clientagent/Client.cpp b/src/clientagent/Client.cpp
+index 790bb66..029d4c8 100644
+--- a/src/clientagent/Client.cpp
++++ b/src/clientagent/Client.cpp
+@@ -416,7 +416,7 @@ void Client::handle_datagram(DatagramHandle in_dg, DatagramIterator &dgi)
+     case CLIENTAGENT_SEND_DATAGRAM: {
+         DatagramPtr forward = Datagram::create();
+         forward->add_data(dgi.read_datagram());
+-        forward_datagram(forward);
++        forward_datagram(forward, true);
+     }
+     break;
+     case CLIENTAGENT_OPEN_CHANNEL: {
+@@ -782,11 +782,13 @@ void Client::handle_datagram(DatagramHandle in_dg, DatagramIterator &dgi)
+         // N.B.: This object visible might be still visible through an interest.
+         // We don't have to touch it, just remove the ownership
+         handle_remove_ownership(do_id);
+-        m_owned_objects.erase(do_id);        
++        m_owned_objects.erase(do_id);
+     }
+     break;
+     default:
+-        m_log->error() << "Recv'd unknown server msgtype " << msgtype << "\n.";
++        if(!handle_cluster_datagram(in_dg, dgi, sender, msgtype)) {
++            m_log->error() << "Recv'd unknown server msgtype " << msgtype << "\n.";
++        }
+     }
+ }
+ 
+@@ -877,7 +879,7 @@ InterestOperation::InterestOperation(
+     m_timeout_interval(timeout)
+ {
+     m_callers.insert(m_callers.end(), caller);
+-    m_client->generate_timeout(bind(&InterestOperation::on_timeout_generate, this, 
++    m_client->generate_timeout(bind(&InterestOperation::on_timeout_generate, this,
+                                std::placeholders::_1));
+ }
+ 
+diff --git a/src/clientagent/Client.h b/src/clientagent/Client.h
+index 0a2c8b4..d0379b9 100644
+--- a/src/clientagent/Client.h
++++ b/src/clientagent/Client.h
+@@ -203,13 +203,18 @@ class Client : public MDParticipantInterface
+ 
+     // forward_datagram should foward the datagram to the client, or where appopriate parse
+     // the packet and send the appropriate equivalent data.
+-    // Handler for CLIENTAGENT_SEND_DATAGRAM.
+-    virtual void forward_datagram(DatagramHandle dg) = 0;
++    // Also a handler for CLIENTAGENT_SEND_DATAGRAM.
++    virtual void forward_datagram(DatagramHandle dg, bool send_datagram = false) = 0;
+ 
+     // handle_drop should immediately disconnect the client without sending any more data.
+     // Handler for CLIENTAGENT_DROP.
+     virtual void handle_drop() = 0;
+ 
++    // handle_cluster_datagram should be used by custom client handlers
++    // if they want to handle other cluster datagrams.
++    virtual bool handle_cluster_datagram(DatagramHandle in_dg, DatagramIterator &dgi,
++                                         channel_t sender, uint16_t msgtype) = 0;
++
+     // handle_add_interest should inform the client of an interest added by the server.
+     virtual void handle_add_interest(const Interest &i, uint32_t context) = 0;
+ 
+diff --git a/src/core/msgtypes.h b/src/core/msgtypes.h
+index ae62c5a..32bff53 100644
+--- a/src/core/msgtypes.h
++++ b/src/core/msgtypes.h
+@@ -63,6 +63,8 @@ enum MessageTypes {
+     CLIENTAGENT_ADD_INTEREST_MULTIPLE      = 1201,
+     CLIENTAGENT_REMOVE_INTEREST            = 1203,
+     CLIENTAGENT_DONE_INTEREST_RESP         = 1204,
++    CLIENTAGENT_EXTAGENT_MESSAGE           = 1205,
++    CLIENTAGENT_EXTAGENT_RESPONSE          = 1206,
+ 
+     // StateServer control messages
+     STATESERVER_CREATE_OBJECT_WITH_REQUIRED       = 2000,

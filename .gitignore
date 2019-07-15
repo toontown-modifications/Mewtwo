@@ -1,0 +1,9 @@
+etc/
+
+*.pyc
+*.exe
+*.bat
+*.yaml
+*.json
+*.log
+*.dll
