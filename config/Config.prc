@@ -1,6 +1,7 @@
 dc-file astron/dclass/toon.dc
-client-dc-hash 3005460305
-server-version sv1.0.6.9
+dc-file astron/dclass/otp.dc
+client-dc-hash 2308474396
+server-version sv1.0.47.38
 server-base-channel 1000000
 air-stateserver 4002
 air-base-channel 401000000

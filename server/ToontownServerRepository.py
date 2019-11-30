@@ -2,9 +2,12 @@ from direct.directnotify.DirectNotifyGlobal import directNotify
 from direct.distributed.AstronInternalRepository import AstronInternalRepository
 from direct.distributed.DistributedObjectUD import DistributedObjectUD
 from ExtAgent import ExtAgent
+from DistributedDirectoryAI import DistributedDirectoryAI
+import OtpDoGlobals
 
 class ToontownServerRepository(AstronInternalRepository):
     dbId = 4003
+    GameGlobalsId = OtpDoGlobals.OTP_DO_ID_TOONTOWN
 
     def __init__(self):
         AstronInternalRepository.__init__(self,
@@ -21,9 +24,8 @@ class ToontownServerRepository(AstronInternalRepository):
     def handleConnected(self):
         AstronInternalRepository.handleConnected(self)
 
-        # Generate a DistributedObjectUD to act as a "root object".
-        self.rootObject = DistributedObjectUD(self)
-        self.rootObject.generateWithRequiredAndId(2, 0, 0)
+        rootObj = DistributedDirectoryAI(self)
+        rootObj.generateWithRequiredAndId(self.getGameDoId(), 0, 0)
 
         self.extAgent = ExtAgent(self)
 

@@ -76,16 +76,16 @@ class ExtAgent:
     def registerShard(self, shardId, shardName):
         self.shardInfo[shardId] = (shardName, 0)
 
-    def loginAccount(self, fields, clientChannel, accountId):
+    def loginAccount(self, fields, clientChannel, accountId, playToken):
         # If somebody is logged into this account, disconnect them.
         self.sendEject(self.air.GetAccountConnectionChannel(accountId), 100, 'This account has been logged into elsewhere.')
 
         # Wait half a second before continuing to avoid a race condition.
         taskMgr.doMethodLater(0.5,
-                              lambda x: self.finishLoginAccount(fields, clientChannel, accountId),
+                              lambda x: self.finishLoginAccount(fields, clientChannel, accountId, playToken),
                               self.air.uniqueName('wait-acc-%s' % accountId), appendTask=False)
 
-    def finishLoginAccount(self, fields, clientChannel, accountId):
+    def finishLoginAccount(self, fields, clientChannel, accountId, playToken):
         # Add the connection to the account channel.
         dg = PyDatagram()
         dg.addServerHeader(clientChannel, self.air.ourChannel, CLIENTAGENT_OPEN_CHANNEL)
@@ -103,14 +103,23 @@ class ExtAgent:
 
         # Prepare the login response.
         resp = PyDatagram()
-        resp.addUint16(17) # CLIENT_LOGIN_2_RESP
+        resp.addUint16(126) # CLIENT_LOGIN_TOONTOWN_RESP
         resp.addUint8(0)
-        resp.addString("")
-        resp.addString("")
+        resp.addString('All Ok')
+        resp.addUint32(1)
+        resp.addString(playToken)
         resp.addUint8(1)
+        resp.addString('YES')
+        resp.addString('YES')
+        resp.addString('YES')
         resp.addUint32(int(time.time()))
         resp.addUint32(int(time.clock()))
-        resp.addUint8(1)
+        resp.addString('unpaid')
+        resp.addString('YES')
+        resp.addString(time.strftime('%Y-%m-%d %I:%M:%S'))
+        resp.addInt32(1000 * 60 * 60)
+        resp.addString('NO_PARENT_ACCOUNT')
+        resp.addString(playToken)
 
         # Dispatch the response to the client.
         dg = PyDatagram()
@@ -120,7 +129,7 @@ class ExtAgent:
 
     def handleDatagram(self, dgi):
         """
-        This handles datagrams coming directly from the Toontown 2003 client.
+        This handles datagrams coming directly from the Toontown 2013 client.
         These datagrams may be reformatted in a way that can appease Astron,
         or are totally game-specific and will have their own handling.
         """
@@ -309,7 +318,7 @@ class ExtAgent:
             self.air.send(dg)
         elif msgType == 10: # CLIENT_GET_FRIEND_LIST
             pass
-        elif msgType == 16: # CLIENT_LOGIN_2
+        elif msgType == 125: # CLIENT_LOGIN_TOONTOWN
             playToken = dgi.getString()
             serverVersion = dgi.getString()
             hashVal = dgi.getUint32()
@@ -346,7 +355,7 @@ class ExtAgent:
                         return
 
                     # Log in the account.
-                    self.loginAccount(fields, clientChannel, accountId)
+                    self.loginAccount(fields, clientChannel, accountId, playToken)
 
                 # Query the Account object.
                 self.air.dbInterface.queryObject(self.air.dbId, accountId, queryLoginResponse)
@@ -354,8 +363,10 @@ class ExtAgent:
 
             # Create a new Account object.
             account = {'ACCOUNT_AV_SET': [0] * 6,
+                       'pirateAvatars': [0],
                        'HOUSE_ID_SET': [0] * 6,
                        'ESTATE_ID': 0,
+                       'ACCOUNT_AV_SET_DEL': [],
                        'CREATED': time.ctime(),
                        'LAST_LOGIN': time.ctime()}
 
@@ -368,7 +379,7 @@ class ExtAgent:
                 self.bridge.put(playToken, accountId)
 
                 # Log in the account.
-                self.loginAccount(account, clientChannel, accountId)
+                self.loginAccount(account, clientChannel, accountId, playToken)
 
             # Create the Account in the database.
             self.air.dbInterface.createObject(self.air.dbId,
@@ -421,7 +432,7 @@ class ExtAgent:
             # This is the Toontown server equivalent of setting interest on a zone.
             # We'll transform it into a set interest request.
             resp = PyDatagram()
-            resp.addServerHeader(clientChannel, self.air.ourChannel, CLIENT_ADD_INTEREST)
+            resp.addServerHeader(clientChannel, self.air.ourChannel, 97)
             resp.addUint32(context)
             resp.addUint16(context)
             resp.addUint32(shardId)
@@ -606,6 +617,8 @@ class ExtAgent:
 
             # Query the avatar.
             self.air.dbInterface.queryObject(self.air.dbId, avId, handleRetrieve)
+        elif msgType == 97: # CLIENT_ADD_INTEREST:
+            pass
         else:
             self.notify.warning('Received unknown message type %s from Client' % msgType)
 
@@ -646,8 +659,6 @@ class ExtAgent:
 
             # Delete the data.
             del self.clientChannel2contextZone[clientChannel][contextId]
-        elif msgType == CLIENT_ADD_INTEREST:
-            pass
         elif msgType == CLIENT_OBJECT_SET_FIELD:
             doId = dgi.getUint32()
             dcData = dgi.getRemainingBytes()

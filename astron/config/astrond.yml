@@ -1,6 +1,7 @@
 general:
     eventlogger: 127.0.0.1:7197
     dc_files:
+        - ../dclass/otp.dc
         - ../dclass/toon.dc
 
 messagedirector:
@@ -10,7 +11,7 @@ messagedirector:
 roles:
     - type: clientagent
       bind: 0.0.0.0:6667
-      version: "sv1.0.6.9"
+      version: "sv1.0.47.38"
       client:
           relocate: true
           add_interest: enabled

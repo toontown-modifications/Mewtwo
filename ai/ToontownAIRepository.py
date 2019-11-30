@@ -3,6 +3,8 @@ from direct.distributed.AstronInternalRepository import AstronInternalRepository
 from direct.distributed.DistributedObjectAI import DistributedObjectAI
 from direct.distributed.PyDatagram import *
 from TimeManagerAI import TimeManagerAI
+from ToontownDistrictAI import ToontownDistrictAI
+from server import OtpDoGlobals
 
 class ToontownAIRepository(AstronInternalRepository):
     dbId = 4003
@@ -41,18 +43,14 @@ class ToontownAIRepository(AstronInternalRepository):
         self.createObjects()
 
     def createObjects(self):
-        # Generate an object to act as a District.
         self.districtId = self.allocateChannel()
-        self.district = DistributedObjectAI(self)
-        self.district.generateWithRequiredAndId(self.districtId,
-                                                self.getGameDoId(),
-                                                3)
 
-        # Claim ownership of the District.
-        dg = PyDatagram()
-        dg.addServerHeader(self.districtId, self.ourChannel, STATESERVER_OBJECT_SET_AI)
-        dg.addChannel(self.ourChannel)
-        self.send(dg)
+        # Generate our district.
+        self.district = ToontownDistrictAI(self)
+        self.district.setName('Sillyville')
+        self.district.generateWithRequiredAndId(self.districtId, self.getGameDoId(), OtpDoGlobals.OTP_ZONE_ID_MANAGEMENT)
+        self.setAI(self.districtId, self.ourChannel)
+        self.district.b_setAvailable(1)
 
         # Generate our TimeManagerAI.
         self.timeManager = TimeManagerAI(self)
