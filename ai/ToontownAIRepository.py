@@ -8,7 +8,7 @@ from server import OtpDoGlobals
 
 class ToontownAIRepository(AstronInternalRepository):
     dbId = 4003
-    GameGlobalsId = 2
+    GameGlobalsId = 4618
     QuietZone = 1
 
     def __init__(self):

@@ -38,6 +38,7 @@ class ToontownServerRepository(AstronInternalRepository):
             self.extAgent.handleDatagram(dgi)
             return
         elif msgType == 1206:
+            print(dgi)
             self.extAgent.handleResp(dgi)
             return
 

@@ -3,8 +3,27 @@ from direct.distributed.MsgTypes import *
 from direct.directnotify.DirectNotifyGlobal import directNotify
 from NameGenerator import NameGenerator
 from ToonDNA import ToonDNA
-import json, time, os
-import random
+from OtpDoGlobals import *
+import json, time, os, random
+
+ESSENTIAL_COMPLETE_ZONES = [
+    OTP_ZONE_ID_OLD_QUIET_ZONE, 
+    OTP_ZONE_ID_MANAGEMENT, 
+    OTP_ZONE_ID_DISTRICTS,
+    OTP_ZONE_ID_DISTRICTS_STATS,
+    OTP_ZONE_ID_ELEMENTS
+]
+
+PERMA_ZONES = [
+    OTP_ZONE_ID_OLD_QUIET_ZONE,
+    OTP_ZONE_ID_DISTRICTS,
+    OTP_ZONE_ID_DISTRICTS_STATS,
+    OTP_ZONE_ID_MANAGEMENT
+]
+
+STATESERVER_OBJECT_GET_ZONES_OBJECTS_2 = 2066
+STATESERVER_OBJECT_GET_ZONES_OBJECTS_2_RESP = 2067
+STATESERVER_OBJECT_CLEAR_WATCH = 2068
 
 class JSONBridge:
 
@@ -44,6 +63,203 @@ class JSONBridge:
         else:
             return False
 
+class InterestManager(object):
+
+    def __init__(self):
+        self._interest_zones = []
+        self._interest_objects = []
+
+    @property
+    def interest_zones(self):
+        return self._interest_zones
+
+    def has_interest_zone(self, zone_id):
+        return zone_id in self._interest_zones
+
+    def add_interest_zone(self, zone_id):
+        if zone_id in self._interest_zones:
+            return
+
+        self._interest_zones.append(zone_id)
+
+    def remove_interest_zone(self, zone_id):
+        if zone_id not in self._interest_zones:
+            return
+
+        self._interest_zones.remove(zone_id)
+
+    def clear(self):
+        self._interest_zones = []
+        
+    def add_interest_object(self, i):
+        self._interest_objects.append(i)
+        
+    def has_interest_object(self, i):
+        return i in self._interest_objects
+        
+    def has_interest_object_id(self, _id, _obj = False):
+        for interest in self._interest_objects:
+            if interest.getId() == _id:
+                if _obj:
+                    return interest
+                    
+                return True
+                
+        return False
+        
+    def has_interest_object_parent(self, parentId):
+        for interest in self._interest_objects:
+            if interest.getParent() == parentId:
+                return True
+                
+        return False
+        
+    def has_interest_object_zone(self, zoneId):
+        for interest in self._interest_objects:
+            if interest.hasZone(zoneId):
+                return True
+                
+        return False
+        
+    def has_interest_object_parent_and_zone(self, parentId, zoneId, getObj = False):
+        for interest in self._interest_objects:
+            if interest.getParent() == parentId and interest.hasZone(zoneId):
+                if getObj:
+                    return interest
+                return True
+                
+        return False
+        
+    def get_interest_object_by_id(self, _id):
+        return self.has_interest_object_id(_id, True)
+        
+    def remove_interest_object(self, i):
+        self._interest_objects.remove(i)
+        
+    def get_interest_objects(self):
+        return self._interest_objects
+        
+class InterestOperation:
+    def __init__(self, client, timeout, Id, context,  parent, zones, caller):
+
+        self.client = client
+        self.timeout = timeout
+        self.id = Id
+        self.context = context
+        self.parent = parent
+        self.zones = zones
+        self.caller = caller
+        
+class ZoneList:
+    
+    def __init__(self):
+        self.zones = []
+    
+    def addZone(self, zoneId):
+        self.zones.append(zoneId)
+        
+    def removeZone(self, zoneId):
+        self.zones.remove(zoneId)
+        
+    def getZones(self):
+        return self.zones
+        
+    def hasZone(self, zoneId):
+        return zoneId in self.zones
+        
+class Interest:
+    
+    def __init__(self):
+        self.zones = ZoneList()
+        self.id = -1
+        self.context = -1
+        self.parent = -1
+    
+    def setId(self, _id):
+        self.id = _id
+        
+    def getId(self):
+        return self.id
+        
+    def setContext(self, _context):
+        self.context = _context
+        
+    def getContext(self):
+        return self.context
+        
+    def setParent(self, _parent):
+        self.parent = _parent
+        
+    def getParent(self):
+        return self.parent
+        
+    def addZone(self, zone):
+        self.zones.addZone(zone)
+        
+    def removeZone(self, zone):
+        self.zones.removeZone(zone)
+        
+    def getZones(self):
+        return self.zones.getZones()
+        
+    def hasZone(self, zone):
+        return self.zones.hasZone(zone)
+
+class VisibleObject:
+    def __init__(self):
+        self.parent = -1
+        self.zone = -1
+        self.id = -1
+
+    def setParent(self, parent):
+        self.parent = parent
+
+    def getParent(self):
+        return self.parent
+
+    def setZone(self, zone):
+        self.zone = zone
+
+    def getZone(self):
+        return self.zone
+
+    def setId(self, _id):
+        self.id = id
+
+    def getId(self):
+        return self.id
+
+class DeferredCallback(object):
+    """
+    A class that represents a pending callback event when called
+    it initiates the callback event with the specified arguments
+    """
+
+    def __init__(self, function, *args, **kwargs):
+        assert(callable(function))
+        self._function = function
+        self._args = args
+        self._kwargs = kwargs
+
+    def callback(self, *args, **kwargs):
+        cb_args = []
+        cb_args.extend(args)
+        cb_args.extend(self._args)
+
+        cb_kwargs = dict(kwargs.items() + self._kwargs.items())
+
+        result = self._function(*cb_args, **cb_kwargs)
+
+        del cb_args
+        del cb_kwargs
+
+        return result
+
+    def destroy(self):
+        self._function = None
+        self._args = None
+        self._kwargs = None
+
 class ExtAgent:
     notify = directNotify.newCategory('ExtAgent')
 
@@ -65,6 +281,10 @@ class ExtAgent:
         self.clientChannel2shardId = {}
         self.clientChannel2context = {}
         self.clientChannel2contextZone = {}
+
+        self.interestManager = InterestManager()
+        self.pendingInterests = {}
+        self.deferredCallback = None
 
     def sendEject(self, clientChannel, errorCode, errorStr):
         dg = PyDatagram()
@@ -126,6 +346,55 @@ class ExtAgent:
         dg.addServerHeader(clientChannel, self.air.ourChannel, CLIENTAGENT_SEND_DATAGRAM)
         dg.addString(resp.getMessage())
         self.air.send(dg)
+    
+    def lookupInterest(self, parent, zone):
+        interests = []
+        for interest in self.interestManager.get_interest_objects():
+            if interest.getParent() == parent and interest.hasZone(zone):
+                interests.append(interest)
+                
+        return interests
+
+    def buildInterest(self, dgi):
+        interestId = dgi.getUint16()
+        contextId = dgi.getUint32()
+        parentId = dgi.getUint32()
+
+        interest = Interest()
+        interest.setId(interestId)
+        interest.setParent(parentId)
+        interest.setContext(contextId)
+
+        while dgi.getRemainingSize() > 0:
+            interest.addZone(dgi.getUint32())
+
+        return interest
+
+    def handleInterestDone(self, clientChannel, interestId, context):
+        resp = PyDatagram()
+
+        resp.addUint16(48) # CLIENT_DONE_INTEREST_RESP
+
+        resp.addUint16(interestId)
+        resp.addUint32(context)
+
+        dg = PyDatagram()
+        dg.addServerHeader(clientChannel, self.air.ourChannel, CLIENTAGENT_SEND_DATAGRAM)
+        dg.addString(resp.getMessage())
+        self.air.send(dg)
+
+    def handleInterestCompleteCallback(self, clientChannel, complete, contextId):
+        if complete:
+            if self.pendingInterests.has_key(contextId):
+                interest = self.pendingInterests[contextId]
+                self.handleInterestDone(clientChannel, interest.id, contextId)
+                del self.pendingInterests[contextId]
+        else:
+            if self.pendingInterests.has_key(contextId):
+                interest = self.pendingInterests[contextId]
+                zone = interest.getZones()[-1]
+                if zone in self.seenObjects.keys():
+                    self.handleInterestDone(clientChannel, interest.id, contextId)
 
     def handleDatagram(self, dgi):
         """
@@ -336,7 +605,7 @@ class ExtAgent:
             # Unfortunately, the expected hash has to differ from
             # the hash that we use, since we need an Astronized
             # DC file. The expected hash should be the same one
-            # that the original 2003 client uses.
+            # that the original 2013 client uses.
             expectedHash = int(config.GetString('client-dc-hash', '0'))
             if hashVal != expectedHash:
                 # DC hash mismatch.
@@ -431,6 +700,7 @@ class ExtAgent:
 
             # This is the Toontown server equivalent of setting interest on a zone.
             # We'll transform it into a set interest request.
+
             resp = PyDatagram()
             resp.addServerHeader(clientChannel, self.air.ourChannel, 97)
             resp.addUint32(context)
@@ -618,7 +888,61 @@ class ExtAgent:
             # Query the avatar.
             self.air.dbInterface.queryObject(self.air.dbId, avId, handleRetrieve)
         elif msgType == 97: # CLIENT_ADD_INTEREST:
-            pass
+            try:
+                interest = self.buildInterest(dgi)
+            except:
+                self.notify.warning('Malformed request for CLIENT_ADD_INTEREST!')
+                return
+
+            newZones = []
+
+            for zone in interest.getZones():
+                if not self.interestManager.has_interest_object_parent_and_zone(interest.getParent(), zone):
+                    newZones.append(zone)
+
+            if self.interestManager.has_interest_object_id(interest.getId()):
+                previousInterest = self.interestManager.get_interest_object_by_id(interest.getId())
+                killedZones = []
+
+                for zone in previousInterest.getZones():
+                    if len(self.lookupInterest(previousInterest.getParent(), zone)) > 1:
+                        continue
+
+                if interest.getParent() != previousInterest.getParent() or not interest.hasZone(zone):
+                    killedZones.append(zone)
+
+                self.close_zones(killedZones, interest.getParent())
+                self.interestManager.remove_interest_object(self.interestManager.has_interest_object_id(interest.getId(), True))
+
+            self.interestManager.add_interest_object(interest)
+            
+            op = InterestOperation(self, 500, interest.getId(), interest.getContext(), interest.getParent(), newZones, clientChannel)
+            self.pendingInterests[interest.getContext()] = interest
+
+            self.handleInterestCompleteCallback(clientChannel, True, interest.getContext())
+
+            self.deferredCallback = DeferredCallback(self.handleInterestCompleteCallback, clientChannel, interest.getContext())
+
+            resp = PyDatagram()
+    
+            resp.addUint8(1)
+            resp.addUint64(interest.getParent())
+            resp.addUint64(clientChannel)
+
+            resp.addUint16(STATESERVER_OBJECT_GET_ZONES_OBJECTS_2)
+
+            resp.addUint32(interest.getContext())
+            resp.addUint16(len(newZones))
+
+            for zone in newZones:
+                print('Zone interest {0}'.format(zone))
+                resp.addUint32(zone)
+
+            dg = PyDatagram()
+            dg.addServerHeader(clientChannel, self.air.ourChannel, CLIENTAGENT_SEND_DATAGRAM)
+            dg.addString(resp.getMessage())
+            self.air.send(dg)
+
         else:
             self.notify.warning('Received unknown message type %s from Client' % msgType)
 
@@ -637,28 +961,24 @@ class ExtAgent:
             resp.addUint16(4) # CLIENT_GO_GET_LOST
             resp.addUint16(dgi.getUint16())
             resp.addString(dgi.getString())
-        elif msgType == CLIENT_DONE_INTEREST_RESP:
+        elif msgType == 48:
             contextId = dgi.getUint32()
+            print(contextId)
             handle = dgi.getUint16()
-
-            # Check the context for the zone.
-            if clientChannel not in self.clientChannel2contextZone:
-                # This is invalid.
-                return
-
-            if contextId not in self.clientChannel2contextZone[clientChannel]:
-                # This is invalid.
-                self.notify.warning('Context %s not stored for client %s' % (contextId, clientChannel))
-                return
-
-            zoneId = self.clientChannel2contextZone[clientChannel][contextId]
+            print(handle)
 
             resp = PyDatagram()
-            resp.addUint16(48) # CLIENT_DONE_SET_ZONE_RESP
-            resp.addInt16(zoneId)
+            
+            resp.addUint16(48)
 
-            # Delete the data.
-            del self.clientChannel2contextZone[clientChannel][contextId]
+            resp.addUint32(contextId)
+            resp.addUint16(handle)
+
+            # Send it.
+            dg = PyDatagram()
+            dg.addServerHeader(clientChannel, self.air.ourChannel, CLIENTAGENT_SEND_DATAGRAM)
+            dg.addString(resp.getMessage())
+            self.air.send(dg)
         elif msgType == CLIENT_OBJECT_SET_FIELD:
             doId = dgi.getUint32()
             dcData = dgi.getRemainingBytes()
