@@ -396,6 +396,29 @@ class ExtAgent:
                 if zone in self.seenObjects.keys():
                     self.handleInterestDone(clientChannel, interest.id, contextId)
 
+    def closeZones(self, kill_zones, parent):
+        # send delete for all objects we've seen that were in the zone
+        # that we've just left...
+        for zone in kill_zones:
+            if zone not in PERMA_ZONES and self._seen_objects.has_key(zone):
+                seen_objects = self._seen_objects[zone]
+                for do_id in seen_objects:
+                    # we do not want to delete our owned objects...
+                    if do_id not in self._owned_objects:
+                        self.send_client_object_delete_resp(do_id)
+
+                del self._seen_objects[zone]
+
+                # Tell the State object to stop watching this zone
+                resp = PyDatagram()
+                resp.add_header(parent, self.channel, MsgTypes.CLIENT_OBJECT_DISABLE)
+                resp.add_uint32(zone)
+
+                dg = PyDatagram()
+                dg.addServerHeader(clientChannel, self.air.ourChannel, CLIENTAGENT_SEND_DATAGRAM)
+                dg.addString(resp.getMessage())
+                self.air.send(dg)
+
     def handleDatagram(self, dgi):
         """
         This handles datagrams coming directly from the Toontown 2013 client.
@@ -908,28 +931,21 @@ class ExtAgent:
                     if len(self.lookupInterest(previousInterest.getParent(), zone)) > 1:
                         continue
 
-                if interest.getParent() != previousInterest.getParent() or not interest.hasZone(zone):
-                    killedZones.append(zone)
+                    if interest.getParent() != previousInterest.getParent() or not interest.hasZone(zone):
+                        killedZones.append(zone)
 
-                self.close_zones(killedZones, interest.getParent())
+                self.closeZones(killedZones, interest.getParent())
                 self.interestManager.remove_interest_object(self.interestManager.has_interest_object_id(interest.getId(), True))
 
             self.interestManager.add_interest_object(interest)
-            
+
             op = InterestOperation(self, 500, interest.getId(), interest.getContext(), interest.getParent(), newZones, clientChannel)
             self.pendingInterests[interest.getContext()] = interest
-
-            self.handleInterestCompleteCallback(clientChannel, True, interest.getContext())
 
             self.deferredCallback = DeferredCallback(self.handleInterestCompleteCallback, clientChannel, interest.getContext())
 
             resp = PyDatagram()
-    
-            resp.addUint8(1)
-            resp.addUint64(interest.getParent())
-            resp.addUint64(clientChannel)
-
-            resp.addUint16(STATESERVER_OBJECT_GET_ZONES_OBJECTS_2)
+            resp.addServerHeader(interest.getParent(), clientChannel, STATESERVER_OBJECT_GET_ZONES_OBJECTS)
 
             resp.addUint32(interest.getContext())
             resp.addUint16(len(newZones))
@@ -938,10 +954,7 @@ class ExtAgent:
                 print('Zone interest {0}'.format(zone))
                 resp.addUint32(zone)
 
-            dg = PyDatagram()
-            dg.addServerHeader(clientChannel, self.air.ourChannel, CLIENTAGENT_SEND_DATAGRAM)
-            dg.addString(resp.getMessage())
-            self.air.send(dg)
+            self.air.send(resp)
 
         else:
             self.notify.warning('Received unknown message type %s from Client' % msgType)
