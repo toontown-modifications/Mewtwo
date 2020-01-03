@@ -48,13 +48,13 @@ class ToontownAIRepository(AstronInternalRepository):
         # Generate our district.
         self.district = ToontownDistrictAI(self)
         self.district.setName('Sillyville')
-        self.district.generateWithRequiredAndId(self.districtId, self.getGameDoId(), OtpDoGlobals.OTP_ZONE_ID_MANAGEMENT)
-        self.setAI(self.districtId, self.ourChannel)
+        self.district.generateWithRequiredAndId(self.districtId, self.getGameDoId(), OtpDoGlobals.OTP_ZONE_ID_DISTRICTS)
+        self.district.setAI(self.ourChannel)
         self.district.b_setAvailable(1)
 
         # Generate our TimeManagerAI.
         self.timeManager = TimeManagerAI(self)
-        self.timeManager.generateWithRequired(self.QuietZone)
+        self.timeManager.generateWithRequired(OtpDoGlobals.OTP_ZONE_ID_MANAGEMENT)
 
         # Inform the ExtAgent of us.
         self.netMessenger.send('registerShard', [self.districtId, config.GetString('air-shardname', 'District')])

@@ -284,6 +284,7 @@ class ExtAgent:
 
         self.interestManager = InterestManager()
         self.pendingInterests = {}
+        self.seenObjects = {}
         self.deferredCallback = None
 
     def sendEject(self, clientChannel, errorCode, errorStr):
@@ -393,6 +394,7 @@ class ExtAgent:
             if self.pendingInterests.has_key(contextId):
                 interest = self.pendingInterests[contextId]
                 zone = interest.getZones()[-1]
+                print(zone)
                 if zone in self.seenObjects.keys():
                     self.handleInterestDone(clientChannel, interest.id, contextId)
 
@@ -400,14 +402,14 @@ class ExtAgent:
         # send delete for all objects we've seen that were in the zone
         # that we've just left...
         for zone in kill_zones:
-            if zone not in PERMA_ZONES and self._seen_objects.has_key(zone):
-                seen_objects = self._seen_objects[zone]
+            if zone not in PERMA_ZONES and self.seenObjects.has_key(zone):
+                seen_objects = self.seenObjects[zone]
                 for do_id in seen_objects:
                     # we do not want to delete our owned objects...
                     if do_id not in self._owned_objects:
                         self.send_client_object_delete_resp(do_id)
 
-                del self._seen_objects[zone]
+                del self.seenObjects[zone]
 
                 # Tell the State object to stop watching this zone
                 resp = PyDatagram()
@@ -942,10 +944,12 @@ class ExtAgent:
             op = InterestOperation(self, 500, interest.getId(), interest.getContext(), interest.getParent(), newZones, clientChannel)
             self.pendingInterests[interest.getContext()] = interest
 
+            taskMgr.doMethodLater(15, self.handleInterestCompleteCallback, 'Interest completion.', extraArgs = [clientChannel, True, interest.getContext()])
+
             self.deferredCallback = DeferredCallback(self.handleInterestCompleteCallback, clientChannel, interest.getContext())
 
             resp = PyDatagram()
-            resp.addServerHeader(interest.getParent(), clientChannel, STATESERVER_OBJECT_GET_ZONES_OBJECTS)
+            resp.addServerHeader(interest.getParent(), clientChannel, STATESERVER_OBJECT_GET_ZONES_OBJECTS_2)
 
             resp.addUint32(interest.getContext())
             resp.addUint16(len(newZones))
