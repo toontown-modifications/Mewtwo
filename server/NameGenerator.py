@@ -10,6 +10,7 @@ class NameGenerator:
 
         searchPath = DSearchPath()
         searchPath.appendDirectory(Filename('etc'))
+        searchPath.appendDirectory(Filename('../new-otp/src/etc'))
         filename = Filename('NameMasterEnglish.txt')
         if vfs:
             found = vfs.resolveFilename(filename, searchPath)

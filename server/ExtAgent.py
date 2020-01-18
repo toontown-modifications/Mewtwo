@@ -944,22 +944,9 @@ class ExtAgent:
             op = InterestOperation(self, 500, interest.getId(), interest.getContext(), interest.getParent(), newZones, clientChannel)
             self.pendingInterests[interest.getContext()] = interest
 
-            taskMgr.doMethodLater(15, self.handleInterestCompleteCallback, 'Interest completion.', extraArgs = [clientChannel, True, interest.getContext()])
-
             self.deferredCallback = DeferredCallback(self.handleInterestCompleteCallback, clientChannel, interest.getContext())
 
-            resp = PyDatagram()
-            resp.addServerHeader(interest.getParent(), clientChannel, STATESERVER_OBJECT_GET_ZONES_OBJECTS_2)
-
-            resp.addUint32(interest.getContext())
-            resp.addUint16(len(newZones))
-
-            for zone in newZones:
-                print('Zone interest {0}'.format(zone))
-                resp.addUint32(zone)
-
-            self.air.send(resp)
-
+            self.air.clientAddInterest(clientChannel, interest.getId(), interest.getParent(), len(newZones))
         else:
             self.notify.warning('Received unknown message type %s from Client' % msgType)
 
