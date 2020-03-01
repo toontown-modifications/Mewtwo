@@ -946,7 +946,17 @@ class ExtAgent:
 
             self.deferredCallback = DeferredCallback(self.handleInterestCompleteCallback, clientChannel, interest.getContext())
 
-            self.air.clientAddInterest(clientChannel, interest.getId(), interest.getParent(), len(newZones))
+            resp = PyDatagram()
+            resp.addServerHeader(interest.getParent(), clientChannel, STATESERVER_OBJECT_GET_ZONES_OBJECTS)
+
+            resp.addUint32(interest.getContext())
+            resp.addUint16(len(newZones))
+
+            for zone in newZones:
+                print('Zone interest {0}'.format(zone))
+                resp.addUint32(zone)
+
+            self.air.send(resp)
         else:
             self.notify.warning('Received unknown message type %s from Client' % msgType)
 
