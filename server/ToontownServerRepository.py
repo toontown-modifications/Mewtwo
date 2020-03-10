@@ -27,10 +27,13 @@ class ToontownServerRepository(AstronInternalRepository):
         rootObj = DistributedDirectoryAI(self)
         rootObj.generateWithRequiredAndId(self.getGameDoId(), 0, 0)
 
+        self.centralLogger = self.generateGlobalObject(OtpDoGlobals.OTP_DO_ID_CENTRAL_LOGGER, 'CentralLogger')
+
         self.extAgent = ExtAgent(self)
 
     def handleDatagram(self, dgi):
         msgType = self.getMsgType()
+
         if not msgType:
             return
 

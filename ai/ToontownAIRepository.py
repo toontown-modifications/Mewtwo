@@ -60,6 +60,8 @@ class ToontownAIRepository(AstronInternalRepository):
         self.timeManager = TimeManagerAI(self)
         self.timeManager.generateWithRequired(OtpDoGlobals.OTP_ZONE_ID_MANAGEMENT)
 
+        self.centralLogger = self.generateGlobalObject(OtpDoGlobals.OTP_DO_ID_CENTRAL_LOGGER, 'CentralLogger')
+
         self.district.b_setAvailable(1)
 
         # Inform the ExtAgent of us.

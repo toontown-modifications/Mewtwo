@@ -8,6 +8,7 @@ from server import Account/AI/UD
 from ai import TimeManager/AI
 from server import DistributedDistrict/AI/UD
 from server import DistributedDirectory/AI
+from server import CentralLogger/AI/UD
 
 typedef uint8 bool;
 
