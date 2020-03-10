@@ -4,6 +4,7 @@ from direct.distributed.DistributedObjectAI import DistributedObjectAI
 from direct.distributed.PyDatagram import *
 from TimeManagerAI import TimeManagerAI
 from ToontownDistrictAI import ToontownDistrictAI
+from ToontownDistrictStatsAI import ToontownDistrictStatsAI
 from server import OtpDoGlobals
 
 class ToontownAIRepository(AstronInternalRepository):
@@ -50,11 +51,16 @@ class ToontownAIRepository(AstronInternalRepository):
         self.district.setName('Sillyville')
         self.district.generateWithRequiredAndId(self.districtId, self.getGameDoId(), OtpDoGlobals.OTP_ZONE_ID_DISTRICTS)
         self.district.setAI(self.ourChannel)
-        self.district.b_setAvailable(1)
+
+        self.districtStats = ToontownDistrictStatsAI(self)
+        self.districtStats.settoontownDistrictId(self.districtId)
+        self.districtStats.generateWithRequiredAndId(self.allocateChannel(), self.getGameDoId(), OtpDoGlobals.OTP_ZONE_ID_DISTRICTS_STATS)
 
         # Generate our TimeManagerAI.
         self.timeManager = TimeManagerAI(self)
         self.timeManager.generateWithRequired(OtpDoGlobals.OTP_ZONE_ID_MANAGEMENT)
+
+        self.district.b_setAvailable(1)
 
         # Inform the ExtAgent of us.
         self.netMessenger.send('registerShard', [self.districtId, config.GetString('air-shardname', 'District')])

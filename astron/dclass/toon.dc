@@ -1,6 +1,7 @@
 from direct.distributed import DistributedObjectGlobal
 
 from ai import ToontownDistrict/AI
+from ai import ToontownDistrictStats/AI
 
 struct GiftItem {
   blob Item;

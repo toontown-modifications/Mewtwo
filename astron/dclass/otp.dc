@@ -4,9 +4,9 @@ from direct.distributed import DistributedSmoothNode/AI
 from direct.distributed import DistributedCartesianGrid/AI
 from direct.distributed import DistributedCamera/AI/OV
 
+from server import Account/AI/UD
 from ai import TimeManager/AI
-from ai import DistributedToon/AI/UD
-
+from server import DistributedDistrict/AI/UD
 from server import DistributedDirectory/AI
 
 typedef uint8 bool;

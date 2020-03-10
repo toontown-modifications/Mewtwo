@@ -468,7 +468,7 @@ class ExtAgent:
                 self.air.send(dg)
 
             def handleRetrieve(dclass, fields):
-                if dclass != self.air.dclassesByName['Account']:
+                if dclass != self.air.dclassesByName['AccountUD']:
                     # The Account object could not be located.
                     self.sendEject(clientChannel, 122, 'Failed to locate your Account object.')
                     return
@@ -547,13 +547,13 @@ class ExtAgent:
                 # Store the Avatar in the Account's avatar set.
                 self.air.dbInterface.updateObject(self.air.dbId,
                                                   clientChannel >> 32,
-                                                  self.air.dclassesByName['Account'],
+                                                  self.air.dclassesByName['AccountUD'],
                                                   {'ACCOUNT_AV_SET': newAvList},
                                                   {'ACCOUNT_AV_SET': oldAvList},
                                                   lambda fields: handleAvatarResp(avId, fields))
 
             def handleRetrieve(dclass, fields):
-                if dclass != self.air.dclassesByName['Account']:
+                if dclass != self.air.dclassesByName['AccountUD']:
                     # The Account object could not be located.
                     self.sendEject(clientChannel, 122, 'Failed to locate your Account object.')
                     return
@@ -643,7 +643,7 @@ class ExtAgent:
             if accountId:
 
                 def queryLoginResponse(dclass, fields):
-                    if dclass != self.air.dclassesByName['Account']:
+                    if dclass != self.air.dclassesByName['AccountUD']:
                         # This isn't an Account object.
                         self.sendEject(clientChannel, 122, 'The Account object was unable to be queried.')
                         return
@@ -677,7 +677,7 @@ class ExtAgent:
 
             # Create the Account in the database.
             self.air.dbInterface.createObject(self.air.dbId,
-                                              self.air.dclassesByName['Account'],
+                                              self.air.dclassesByName['AccountUD'],
                                               account,
                                               createLoginResponse)
         elif msgType == 24: # CLIENT_OBJECT_UPDATE_FIELD
@@ -796,7 +796,7 @@ class ExtAgent:
                 self.air.setOwner(avId, channel)
 
             def handleAccountRetrieve(dclass, fields):
-                if dclass != self.air.dclassesByName['Account']:
+                if dclass != self.air.dclassesByName['AccountUD']:
                     # This is not an Account object.
                     self.sendEject(clientChannel, 122, 'An Account object was not retrieved.')
                     return
@@ -947,10 +947,11 @@ class ExtAgent:
             self.deferredCallback = DeferredCallback(self.handleInterestCompleteCallback, clientChannel, interest.getContext())
 
             resp = PyDatagram()
-            resp.addServerHeader(interest.getParent(), clientChannel, STATESERVER_OBJECT_GET_ZONES_OBJECTS)
+            resp.addServerHeader(clientChannel, interest.getParent(), CLIENT_ADD_INTEREST)
 
             resp.addUint32(interest.getContext())
-            resp.addUint16(len(newZones))
+            resp.addUint16(interest.getId())
+            resp.addUint32(interest.getParent())
 
             for zone in newZones:
                 print('Zone interest {0}'.format(zone))
@@ -969,24 +970,23 @@ class ExtAgent:
 
         clientChannel = dgi.getUint64()
         msgType = dgi.getUint16()
+        print(msgType)
         resp = None
         if msgType == CLIENT_EJECT:
             resp = PyDatagram()
             resp.addUint16(4) # CLIENT_GO_GET_LOST
             resp.addUint16(dgi.getUint16())
             resp.addString(dgi.getString())
-        elif msgType == 48:
+        elif msgType == CLIENT_DONE_INTEREST_RESP:
             contextId = dgi.getUint32()
-            print(contextId)
             handle = dgi.getUint16()
-            print(handle)
 
             resp = PyDatagram()
-            
+
             resp.addUint16(48)
 
-            resp.addUint32(contextId)
             resp.addUint16(handle)
+            resp.addUint32(contextId)
 
             # Send it.
             dg = PyDatagram()
@@ -1002,7 +1002,15 @@ class ExtAgent:
             resp.addUint32(doId)
             resp.appendData(dcData)
         elif msgType == CLIENT_OBJECT_LOCATION:
-            pass
+            doId = dgi.getUint32()
+            parent = dgi.getUint32()
+            zone = dgi.getUint32()
+
+            resp = PyDatagram()
+            resp.addServerHeader(doId, clientChannel, STATESERVER_OBJECT_SET_LOCATION)
+            resp.addUint32(parent)
+            resp.addUint32(zone)
+            self.air.send(resp)
         elif msgType == CLIENT_OBJECT_LEAVING:
             doId = dgi.getUint32()
 
@@ -1016,8 +1024,15 @@ class ExtAgent:
             classId = dgi.getUint16()
             dcData = dgi.getRemainingBytes()
 
+            print(doId)
+            print(parentId)
+            print(zoneId)
+            print(classId)
+
             resp = PyDatagram()
             resp.addUint16(34) # CLIENT_CREATE_OBJECT_REQUIRED
+            resp.addUint32(parentId)
+            resp.addUint32(zoneId)
             resp.addUint16(classId)
             resp.addUint32(doId)
             resp.appendData(dcData)
