@@ -8,6 +8,11 @@ messagedirector:
     bind: 127.0.0.1:7100
     threaded: false
 
+uberdogs:
+    - class: CentralLogger
+      id: 4688
+      anonymous: false
+
 roles:
     - type: clientagent
       bind: 0.0.0.0:6667

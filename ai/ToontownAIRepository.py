@@ -3,7 +3,7 @@ from direct.distributed.AstronInternalRepository import AstronInternalRepository
 from direct.distributed.DistributedObjectAI import DistributedObjectAI
 from direct.distributed.PyDatagram import *
 from TimeManagerAI import TimeManagerAI
-from ToontownDistrictAI import ToontownDistrictAI
+from DistributedDistrictAI import DistributedDistrictAI
 from ToontownDistrictStatsAI import ToontownDistrictStatsAI
 from server import OtpDoGlobals
 
@@ -47,7 +47,7 @@ class ToontownAIRepository(AstronInternalRepository):
         self.districtId = self.allocateChannel()
 
         # Generate our district.
-        self.district = ToontownDistrictAI(self)
+        self.district = DistributedDistrictAI(self)
         self.district.setName('Sillyville')
         self.district.generateWithRequiredAndId(self.districtId, self.getGameDoId(), OtpDoGlobals.OTP_ZONE_ID_DISTRICTS)
         self.district.setAI(self.ourChannel)

@@ -1024,11 +1024,6 @@ class ExtAgent:
             classId = dgi.getUint16()
             dcData = dgi.getRemainingBytes()
 
-            print(doId)
-            print(parentId)
-            print(zoneId)
-            print(classId)
-
             resp = PyDatagram()
             resp.addUint16(34) # CLIENT_CREATE_OBJECT_REQUIRED
             resp.addUint32(parentId)
