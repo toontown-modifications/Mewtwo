@@ -1,9 +1,13 @@
 from direct.directnotify.DirectNotifyGlobal import directNotify
 from direct.distributed.AstronInternalRepository import AstronInternalRepository
 from direct.distributed.DistributedObjectUD import DistributedObjectUD
+from direct.showbase import PythonUtil
 from ExtAgent import ExtAgent
 from DistributedDirectoryAI import DistributedDirectoryAI
 import OtpDoGlobals
+import __builtin__
+
+__builtin__.isClient = lambda: PythonUtil.isClient()
 
 class ToontownServerRepository(AstronInternalRepository):
     dbId = 4003

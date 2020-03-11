@@ -1,5 +1,8 @@
 from panda3d.core import *
+from direct.showbase import PythonUtil
 import __builtin__, sys
+
+__builtin__.isClient = lambda: PythonUtil.isClient()
 
 loadPrcFile(''.join(sys.argv[1:]))
 
