@@ -19,7 +19,7 @@ from ToontownAIRepository import ToontownAIRepository
 
 simbase.air = ToontownAIRepository()
 
-host = config.GetString('air-connect', '162.246.19.251')
+host = config.GetString('air-connect', '127.0.0.1')
 port = 7100
 if ':' in host:
     host, port = host.split(':', 1)
