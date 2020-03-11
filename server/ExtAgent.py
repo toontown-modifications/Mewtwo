@@ -516,7 +516,7 @@ class ExtAgent:
             if not result:
                 # Bad DNA string.
                 self.sendEject(clientChannel, 122, 'Invalid Avatar DNA sent.')
-                return
+                #return
 
             if index > 6:
                 # Bad index.
@@ -1043,6 +1043,8 @@ class ExtAgent:
 
             resp = PyDatagram()
             resp.addUint16(35) # CLIENT_CREATE_OBJECT_REQUIRED_OTHER
+            resp.addUint32(parentId)
+            resp.addUint32(zoneId)
             resp.addUint16(classId)
             resp.addUint32(doId)
             resp.appendData(dcData)
