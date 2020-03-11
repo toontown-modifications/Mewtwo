@@ -1,8 +1,10 @@
 from panda3d.core import *
+from panda3d.toontown import DNAStorage
 from direct.showbase import PythonUtil
 import __builtin__, sys
 
 __builtin__.isClient = lambda: PythonUtil.isClient()
+__builtin__.DNAStorage = DNAStorage
 
 loadPrcFile(''.join(sys.argv[1:]))
 
