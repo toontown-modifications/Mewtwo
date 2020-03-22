@@ -419,12 +419,12 @@ class ExtAgent:
 
     def handleInterestCompleteCallback(self, clientChannel, complete, contextId):
         if complete:
-            if self.pendingInterests.has_key(contextId):
+            if contextId in self.pendingInterests:
                 interest = self.pendingInterests[contextId]
                 self.handleInterestDone(clientChannel, interest.id, contextId)
                 del self.pendingInterests[contextId]
         else:
-            if self.pendingInterests.has_key(contextId):
+            if contextId in self.pendingInterests:
                 interest = self.pendingInterests[contextId]
                 zone = interest.getZones()[-1]
                 self.notify.info(zone)
@@ -435,7 +435,7 @@ class ExtAgent:
         # send delete for all objects we've seen that were in the zone
         # that we've just left...
         for zone in killZones:
-            if zone not in PERMA_ZONES and self.seenObjects.has_key(zone):
+            if zone not in PERMA_ZONES and zone in self.seenObjects:
                 seenObjects = self.seenObjects[zone]
                 for doId in seenObjects:
                     # we do not want to delete our owned objects...
@@ -1378,7 +1378,7 @@ class ExtAgent:
                 if doId in self.deletedObjectHistory:
                     self.deletedObjectHistory.remove(doId)
 
-                if not self.seenObjects.has_key(zoneId):
+                if not zoneId in self.seenObjects:
                     self.seenObjects[zoneId] = []
                 if doId not in self.seenObjects[zoneId]:
                     self.seenObjects[zoneId].append(doId)
