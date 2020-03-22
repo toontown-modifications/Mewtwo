@@ -4,8 +4,10 @@ from direct.distributed.DistributedObjectUD import DistributedObjectUD
 from direct.showbase import PythonUtil
 from ExtAgent import ExtAgent
 from DistributedDirectoryAI import DistributedDirectoryAI
+from game.otp.uberdog.DistributedChatManagerUD import DistributedChatManagerUD
+from game.toontown.parties.ToontownTimeManager import ToontownTimeManager
 import OtpDoGlobals
-import __builtin__
+import __builtin__, time
 
 __builtin__.isClient = lambda: PythonUtil.isClient()
 
@@ -32,6 +34,13 @@ class ToontownServerRepository(AstronInternalRepository):
         rootObj.generateWithRequiredAndId(self.getGameDoId(), 0, 0)
 
         self.centralLogger = self.generateGlobalObject(OtpDoGlobals.OTP_DO_ID_CENTRAL_LOGGER, 'CentralLogger')
+
+        self.chatManager = DistributedChatManagerUD(self)
+        self.chatManager.generateWithRequiredAndId(OtpDoGlobals.OTP_DO_ID_CHAT_MANAGER, 0, 0)
+
+        self.toontownTimeManager = ToontownTimeManager(serverTimeUponLogin = int(time.time()), globalClockRealTimeUponLogin = globalClock.getRealTime())
+
+        self.partyManager = self.generateGlobalObject(OtpDoGlobals.OTP_DO_ID_TOONTOWN_PARTY_MANAGER, 'DistributedPartyManager')
 
         self.extAgent = ExtAgent(self)
 

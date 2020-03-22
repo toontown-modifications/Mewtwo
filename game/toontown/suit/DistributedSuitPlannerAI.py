@@ -174,6 +174,7 @@ class DistributedSuitPlannerAI(DistributedObjectAI.DistributedObjectAI, SuitPlan
     def delete(self):
         self.cleanup()
         DistributedObjectAI.DistributedObjectAI.delete(self)
+        SuitPlannerBase.SuitPlannerBase.delete(self)
 
     def initBuildingsAndPoints(self):
         if not self.buildingMgr:
@@ -403,6 +404,7 @@ class DistributedSuitPlannerAI(DistributedObjectAI.DistributedObjectAI, SuitPlan
         if revives:
             newSuit.setSkeleRevives(revives)
         newSuit.generateWithRequired(newSuit.zoneId)
+        newSuit.d_setSPDoId(self.doId)
         newSuit.moveToNextLeg(None)
         self.suitList.append(newSuit)
         if newSuit.flyInSuit:

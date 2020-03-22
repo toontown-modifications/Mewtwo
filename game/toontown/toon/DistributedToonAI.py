@@ -248,10 +248,11 @@ class DistributedToonAI(DistributedPlayerAI.DistributedPlayerAI, DistributedSmoo
                 self.b_setShoes(0, 0, 0)
         self.startPing()
 
-        from game.toontown.toon.DistributedNPCToonBaseAI import DistributedNPCToonBaseAI
+        if config.GetBool('want-randomized-hats', False):
+            from game.toontown.toon.DistributedNPCToonBaseAI import DistributedNPCToonBaseAI
 
-        if not isinstance(self, DistributedNPCToonBaseAI):
-            self.b_setHat(random.randint(0, 56), 0, 0)
+            if not isinstance(self, DistributedNPCToonBaseAI):
+                self.b_setHat(random.randint(0, 56), 0, 0)
 
     def setLocation(self, parentId, zoneId):
         DistributedPlayerAI.DistributedPlayerAI.setLocation(self, parentId, zoneId)

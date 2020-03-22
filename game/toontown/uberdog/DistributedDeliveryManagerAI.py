@@ -3,7 +3,6 @@ from direct.distributed.DistributedObjectGlobalAI import DistributedObjectGlobal
 
 from game.toontown.catalog import CatalogItem
 
-
 class DistributedDeliveryManagerAI(DistributedObjectGlobalAI):
     notify = DirectNotifyGlobal.directNotify.newCategory('DistributedDeliveryManagerAI')
 

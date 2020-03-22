@@ -1,34 +1,46 @@
 from direct.directnotify import DirectNotifyGlobal
 from direct.distributed.DistributedNodeAI import DistributedNodeAI
 
-
 class DistributedLawnDecorAI(DistributedNodeAI):
-    notify = DirectNotifyGlobal.directNotify.newCategory(
-        "DistributedLawnDecorAI")
+    notify = DirectNotifyGlobal.directNotify.newCategory('DistributedLawnDecorAI')
 
-    def setPlot(self, todo0):
-        pass
+    def __init__(self, mgr):
+        DistributedNodeAI.__init__(self, mgr.air)
+        self.mgr = mgr
+        self.plot = 0
+        self.ownerIndex = 0
+        self.ownerDoId = 0
+        self.owner = None
 
-    def setHeading(self, todo0):
-        pass
+    def setPlot(self, plot):
+        self.plot = plot
 
-    def setPosition(self, todo0, todo1, todo2):
-        pass
+    def getPlot(self):
+        return self.plot
 
-    def setOwnerIndex(self, todo0):
-        pass
+    def getHeading(self):
+        return self.getH()
 
-    def plotEntered(self):
-        pass
+    def getPosition(self):
+        return self.getPos()
 
-    def removeItem(self):
-        pass
+    def setOwnerIndex(self, ownerIndex):
+        self.ownerIndex = ownerIndex
+        self.ownerDoId = self.mgr.gardenMgr.estate.activeToons[ownerIndex]
+        self.owner = self.air.doId2do.get(self.ownerDoId)
 
-    def setMovie(self, todo0, todo1):
-        pass
+    def getOwnerIndex(self):
+        return self.ownerIndex
 
-    def movieDone(self):
-        pass
+    def d_setMovie(self, mode, avId=None):
+        if avId is None:
+            avId = self.air.getAvatarIdFromSender()
 
-    def interactionDenied(self, todo0):
-        pass
+        self.sendUpdate('setMovie', [mode, avId])
+
+    def d_interactionDenied(self):
+        avId = self.air.getAvatarIdFromSender()
+        if not avId:
+            return
+
+        self.sendUpdate('interactionDenied', [avId])

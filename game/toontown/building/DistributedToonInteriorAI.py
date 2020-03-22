@@ -15,17 +15,13 @@ class DistributedToonInteriorAI(DistributedObjectAI.DistributedObjectAI):
         self.block = block
         self.zoneId = zoneId
         self.building = building
+        self.npcs = NPCToons.createNpcsInZone(air, zoneId)
         self.fsm = ClassicFSM.ClassicFSM('DistributedToonInteriorAI', [
          State.State('toon', self.enterToon, self.exitToon, [
           'beingTakenOver']),
          State.State('beingTakenOver', self.enterBeingTakenOver, self.exitBeingTakenOver, []),
          State.State('off', self.enterOff, self.exitOff, [])], 'toon', 'off')
         self.fsm.enterInitialState()
-
-    def announceGenerate(self):
-        DistributedObjectAI.DistributedObjectAI.announceGenerate(self)
-
-        self.npcs = NPCToons.createNpcsInZone(self.air, self.zoneId)
 
     def delete(self):
         self.ignoreAll()
@@ -35,6 +31,7 @@ class DistributedToonInteriorAI(DistributedObjectAI.DistributedObjectAI):
         del self.npcs
         del self.fsm
         del self.building
+        del self.block
         DistributedObjectAI.DistributedObjectAI.delete(self)
 
     def getZoneIdAndBlock(self):

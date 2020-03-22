@@ -487,6 +487,14 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
         battle._DistributedBattleBaseAI__movieDone()
 
         self.sendResponseMessage(avId, 'Battle movie skipped.')
+    
+    def d_skipFriendToonTask(self, av):
+        # otherToon is not used. Sad!
+        otherToon = 0
+
+        self.air.questManager.toonMadeFriend(av, otherToon)
+
+        self.sendResponseMessage(self.air.getAvatarIdFromSender(), 'Skipped the Friend ToonTask!')
 
     def setMagicWord(self, magicWord, avId, zoneId, signature):
         avId = self.air.getAvatarIdFromSender()
@@ -581,6 +589,8 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
             self.d_skipPhoneToonTask(av)
         elif magicWord in ('skipmovie', 'movieskip'):
             self.d_skipMovie(av)
+        elif magicWord in ('friend-task-skip', 'friend-skip'):
+            self.d_skipFriendToonTask(av)
         else:
             if magicWord not in disneyCmds:
                 self.sendResponseMessage(avId, '{0} is not an valid Magic Word.'.format(magicWord))

@@ -2,3 +2,5 @@
 *.yaml
 *.json
 *.log
+*.buildings
+*.pets

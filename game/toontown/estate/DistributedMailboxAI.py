@@ -16,7 +16,7 @@ class DistributedMailboxAI(DistributedObjectAI):
         self.name = self.house.name
         self.busy = False
         self.user = None
-        self.fullIndicator = 1
+        self.fullIndicator = 0
 
     def generate(self):
         DistributedObjectAI.generate(self)
@@ -47,8 +47,7 @@ class DistributedMailboxAI(DistributedObjectAI):
 
     def avatarEnter(self):
         if self.busy:
-            print('a')
-            #return
+            return
 
         avId = self.air.getAvatarIdFromSender()
         if avId != self.house.avatarId:

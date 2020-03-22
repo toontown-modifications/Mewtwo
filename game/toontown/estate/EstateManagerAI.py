@@ -4,14 +4,9 @@ from direct.distributed.DistributedObjectAI import DistributedObjectAI
 from direct.fsm.FSM import FSM
 
 from game.toontown.estate import HouseGlobals
-from game.toontown.estate.DistributedEstateAI import DistributedEstateAI
 from game.toontown.estate.DistributedHouseAI import DistributedHouseAI
 
 from game.toontown.toon import ToonDNA
-
-from game.toontown.toonbase import ToontownGlobals
-
-from game.toontown.pets.DistributedPetAI import DistributedPetAI
 
 import functools
 
@@ -69,7 +64,6 @@ class LoadHouseOperation(FSM):
 
         # Update the avatar's houseId:
         av = self.mgr.air.doId2do.get(self.avatar['avId'])
-        print(av)
         if av:
             av.b_setHouseId(houseId)
         else:
@@ -81,17 +75,15 @@ class LoadHouseOperation(FSM):
         self.demand('LoadHouse')
 
     def enterLoadHouse(self):
-        # Activate the house:
-        house = DistributedHouseAI(self.mgr.air)
+        self.mgr.air.sendActivate(self.houseId, self.mgr.air.districtId, self.estate.zoneId,
+                                  self.mgr.air.dclassesByName['DistributedHouseAI'],
+                                  {'setHousePos': [self.index],
+                                   'setColor': [self.index],
+                                   'setName': [self.avatar['setName'][0]],
+                                   'setAvatarId': [self.avatar['avId']]})
 
-        house.setHousePos(self.index)
-        house.setColor(self.index)
-        house.setName(self.avatar['setName'][0])
-        house.setAvatarId(self.avatar['avId'])
-
-        house.generateWithRequired(self.estate.zoneId)
-
-        self.__handleHouseGenerated(house)
+        # Wait for the house to generate:
+        self.acceptOnce('generate-%d' % self.houseId, self.__handleHouseGenerated)
 
     def __handleHouseGenerated(self, house):
         # The house will need to be able to reference
@@ -213,11 +205,12 @@ class LoadEstateOperation(FSM):
             'setSlot%dToonId' % i: (avId,) for i, avId in enumerate(self.avIds)
             }
 
-        estate = DistributedEstateAI(self.mgr.air)
-        estate.generateWithRequired(self.zoneId)
+        # Activate the estate:
+        self.mgr.air.sendActivate(self.estateId, self.mgr.air.districtId, self.zoneId,
+                                  self.mgr.air.dclassesByName['DistributedEstateAI'], fields)
 
         # Wait for the estate to generate:
-        self.__handleEstateGenerated(estate)
+        self.acceptOnce('generate-{0}'.format(self.estateId), self.__handleEstateGenerated)
 
     def __handleEstateGenerated(self, estate):
         # Get the estate:
@@ -315,9 +308,8 @@ class LoadPetOperation(FSM):
             self.petId = self.toon.getPetId()
 
         if self.petId not in self.mgr.air.doId2do:
-            pet = DistributedPetAI(self.mgr.air)
-            pet.generateWithRequired(self.estate.zoneId)
-            self.__generated(pet)
+            self.mgr.air.sendActivate(self.petId, self.mgr.air.districtId, self.estate.zoneId)
+            self.acceptOnce('generate-{0}'.format(self.petId), self.__generated)
         else:
             self.__generated(self.mgr.air.doId2do[self.petId])
 

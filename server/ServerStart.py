@@ -8,7 +8,7 @@ class game:
     process = 'server'
 __builtin__.game = game
 
-from AIBaseGlobal import *
+from game.otp.ai.AIBaseGlobal import *
 
 from ToontownServerRepository import ToontownServerRepository
 

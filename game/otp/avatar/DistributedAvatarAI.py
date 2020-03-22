@@ -120,7 +120,6 @@ class DistributedAvatarAI(DistributedNodeAI.DistributedNodeAI):
         words = message.split(' ')
         offset = 0
 
-
         for word in words:
             if word and not self.whiteList.isWord(word):
                 modifications.append((offset, offset + len(word) - 1))

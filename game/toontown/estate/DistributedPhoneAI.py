@@ -74,12 +74,9 @@ class DistributedPhoneAI(DistributedFurnitureItemAI):
     def avatarEnter(self):
         avId = self.air.getAvatarIdFromSender()
 
-        # TODO: For whatever reason this is broken.
-        '''
         if self.avId:
             self.sendUpdateToAvatarId(avId, 'freeAvatar', [])
             return
-        '''
 
         av = self.air.doId2do.get(avId)
         if not av:

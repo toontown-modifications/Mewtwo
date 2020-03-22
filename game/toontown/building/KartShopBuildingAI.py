@@ -36,8 +36,8 @@ class KartShopBuildingAI:
 
     def setup(self, blockNumber):
         self.kartShopInterior = DistributedKartShopInteriorAI(blockNumber, self.air, self.interiorZone)
-        self.kartShopInterior.generateWithRequired(self.interiorZone)
         self.npcs = NPCToons.createNpcsInZone(self.air, self.interiorZone)
+        self.kartShopInterior.generateWithRequired(self.interiorZone)
         self.outsideDoor0 = DistributedDoorAI(self.air, blockNumber, DoorTypes.EXT_KS, doorIndex=1)
         self.outsideDoor1 = DistributedDoorAI(self.air, blockNumber, DoorTypes.EXT_KS, doorIndex=2)
         self.insideDoor0 = DistributedDoorAI(self.air, blockNumber, DoorTypes.INT_KS, doorIndex=1)

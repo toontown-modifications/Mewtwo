@@ -14,6 +14,7 @@ class WelcomeValleyManagerAI(DistributedObjectAI):
 
     def requestZoneIdMessage(self, zoneId, context):
         avId = self.air.getAvatarIdFromSender()
+
         if zoneId == 0:
             zoneId = ToontownGlobals.WelcomeValleyBegin
 
