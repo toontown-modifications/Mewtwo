@@ -443,9 +443,6 @@ class ToontownAIRepository(AstronInternalRepository):
                 return 'phase_{0}/dna/{1}'.format(_, dnaFileName)
 
     def findFishingPonds(self, dnaData, zoneId, area):
-        # TODO: Figure out why the client doesn't like the generation of Fishing Ponds.
-        #return ([], [])
-
         fishingPonds = []
         fishingPondGroups = []
 
