@@ -379,7 +379,7 @@ class ExtAgent:
         dg.addServerHeader(clientChannel, self.air.ourChannel, CLIENTAGENT_SEND_DATAGRAM)
         dg.addString(resp.getMessage())
         self.air.send(dg)
-    
+
     def lookupInterest(self, parent, zone):
         interests = []
 
@@ -555,6 +555,8 @@ class ExtAgent:
 
         clientChannel = dgi.getUint64()
         msgType = dgi.getUint16()
+
+        print('handleDatagram: {0}:{1}'.format(clientChannel, msgType))
 
         if msgType == 3: # CLIENT_GET_AVATARS
 

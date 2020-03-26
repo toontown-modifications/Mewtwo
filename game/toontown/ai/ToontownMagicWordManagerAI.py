@@ -17,6 +17,11 @@ from game.toontown.racing.KartDNA import KartDict
 from game.toontown.golf import GolfGlobals
 from game.toontown.estate import GardenGlobals
 from game.toontown.toon.ToonDNA import ToonDNA
+from game.toontown.parties import PartyGlobals
+from game.toontown.effects import FireworkShows
+from game.toontown.effects.DistributedFireworkShowAI import DistributedFireworkShowAI
+
+import random
 
 class ToontownMagicWordManagerAI(MagicWordManagerAI):
     notify = directNotify.newCategory('ToontownMagicWordManagerAI')
@@ -234,27 +239,46 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
 
         av.b_setTickets(num)
 
-    def d_startHoliday(self, holidayIds):
-        for holidayId in holidayIds.split(','):
-            cleanedId = holidayId.strip()
+    def d_startHoliday(self, avId, holidayId):
+        if holidayId == '':
+            msg = 'Holiday Id is a integer, not a string!'
+            self.sendResponseMessage(avId, msg)
+            return
 
-            if cleanedId.isdigit():
-                if simbase.air.holidayManager.appendHoliday(int(cleanedId)) is False:
-                    print(simbase.air.holidayManager.currentHolidays)
-                    return # This holiday is already running!
-                else:
-                    return  # Holiday Id specified is not a valid holiday!
+        holidayId = int(holidayId)
 
-    def d_endHoliday(self, holidayIds):
-        for holidayId in holidayIds.split(','):
-            cleanedId = holidayId.strip()
+        if not hasattr(self.air, 'holidayManager'):
+            msg = "Holiday manager isn't generated in this AI. Holiday not started."
+            self.sendResponseMessage(avId, msg)
+            return
 
-            if cleanedId.isdigit():
-                if simbase.air.holidayManager.removeHoliday(int(cleanedId)) is False:
-                    print(simbase.air.holidayManager.currentHolidays)
-                    return # This holiday has already ended!
-                else:
-                    return # Holiday Id specified is not a valid holiday!
+        if self.air.holidayManager.isHolidayRunning(holidayId):
+            msg = 'Holiday {} is already running!'.format(holidayId)
+            self.sendResponseMessage(avId, msg)
+            return
+
+        self.air.holidayManager.startHoliday(holidayId)
+
+        msg = 'Holiday {} has started!'.format(holidayId)
+        self.sendResponseMessage(avId, msg)
+
+    def d_endHoliday(self, avId, holidayId):
+        holidayId = int(holidayId)
+
+        if not hasattr(self.air, 'holidayManager'):
+            msg = "Holiday manager isn't generated in this AI. Holiday not ended."
+            self.sendResponseMessage(avId, msg)
+            return
+
+        if not self.air.holidayManager.isHolidayRunning(holidayId):
+            msg = "Holiday {} isn't currently active!".format(holidayId)
+            self.sendResponseMessage(avId, msg)
+            return
+
+        self.air.holidayManager.endHoliday(holidayId)
+
+        msg = 'Holiday {} has been ended.'.format(holidayId)
+        self.sendResponseMessage(avId, msg)
 
     def d_sendSystemMessage(self, message):
         if message is '':
@@ -496,6 +520,39 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
 
         self.sendResponseMessage(self.air.getAvatarIdFromSender(), 'Skipped the Friend ToonTask!')
 
+    def d_setFireworks(self, avId, showName = 'july4'):
+        av = self.air.doId2do.get(avId)
+
+        if not av:
+            return
+
+        showName = showName.lower()
+
+        if showName == 'july4':
+            showType = ToontownGlobals.JULY4_FIREWORKS
+        elif showName == 'newyears':
+            showType = ToontownGlobals.NEWYEARS_FIREWORKS
+        elif showName == 'summer':
+            showType = PartyGlobals.FireworkShows.Summer
+        else:
+            msg = 'Invalid fireworks show name!'
+            self.sendResponseMessage(avId, msg)
+            return
+
+        numShows = len(FireworkShows.shows.get(showType, []))
+        showIndex = random.randint(0, numShows - 1)
+
+        for hood in simbase.air.hoods:
+            if hood.zoneId in (ToontownGlobals.SellbotHQ, ToontownGlobals.CashbotHQ, ToontownGlobals.LawbotHQ, ToontownGlobals.BossbotHQ):
+                return
+
+            fireworkShow = DistributedFireworkShowAI(self.air, None) # self?
+            fireworkShow.generateWithRequired(hood.zoneId)
+            fireworkShow.d_startShow(showType, showIndex)
+
+        msg = 'Firework show of type {0} has been started!'.format(showName)
+        self.sendResponseMessage(avId, msg)
+
     def setMagicWord(self, magicWord, avId, zoneId, signature):
         avId = self.air.getAvatarIdFromSender()
         av = self.air.doId2do.get(avId)
@@ -522,13 +579,13 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
         elif magicWord == 'enabletpall':
             self.d_setTeleportAcess(avId, zoneId)
         elif magicWord == 'startholiday':
-            if not validate:
-                return
-            self.d_startHoliday(holidayIds = args[0])
-        elif magicWord == 'endholiday':
             if not validation:
                 return
-            self.d_endHoliday(holidayIds = args[0])
+            self.d_startHoliday(avId, holidayId = args[0])
+        elif magicWord in ('stopholiday', 'endholiday'):
+            if not validation:
+                return
+            self.d_endHoliday(avId, holidayId = args[0])
         elif magicWord == 'smsg':
             if not validation:
                 return
@@ -591,6 +648,10 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
             self.d_skipMovie(av)
         elif magicWord in ('friend-task-skip', 'friend-skip'):
             self.d_skipFriendToonTask(av)
+        elif magicWord == 'fireworks':
+            if not validation:
+                return
+            self.d_setFireworks(avId, showName = args[0])
         else:
             if magicWord not in disneyCmds:
                 self.sendResponseMessage(avId, '{0} is not an valid Magic Word.'.format(magicWord))
