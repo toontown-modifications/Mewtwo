@@ -2,6 +2,7 @@ from direct.directnotify.DirectNotifyGlobal import directNotify
 from direct.distributed.AstronInternalRepository import AstronInternalRepository
 from direct.distributed.DistributedObjectUD import DistributedObjectUD
 from direct.showbase import PythonUtil
+from ExtAgent import ExtAgent
 from DistributedDirectoryAI import DistributedDirectoryAI
 from game.otp.uberdog.DistributedChatManagerUD import DistributedChatManagerUD
 from game.toontown.parties.ToontownTimeManager import ToontownTimeManager
@@ -10,7 +11,7 @@ import __builtin__, time
 
 __builtin__.isClient = lambda: PythonUtil.isClient()
 
-class ToontownServerRepository(AstronInternalRepository):
+class ToontownServerRepositoryAgent(AstronInternalRepository):
     dbId = 4003
     GameGlobalsId = OtpDoGlobals.OTP_DO_ID_TOONTOWN
 
@@ -40,3 +41,20 @@ class ToontownServerRepository(AstronInternalRepository):
         self.toontownTimeManager = ToontownTimeManager(serverTimeUponLogin = int(time.time()), globalClockRealTimeUponLogin = globalClock.getRealTime())
 
         self.partyManager = self.generateGlobalObject(OtpDoGlobals.OTP_DO_ID_TOONTOWN_PARTY_MANAGER, 'DistributedPartyManager')
+
+        self.extAgent = ExtAgent(self)
+
+    def handleDatagram(self, dgi):
+        msgType = self.getMsgType()
+
+        if not msgType:
+            return
+
+        if msgType == 1205:
+            self.extAgent.handleDatagram(dgi)
+            return
+        elif msgType == 1206:
+            self.extAgent.handleResp(dgi)
+            return
+
+        AstronInternalRepository.handleDatagram(self, dgi)

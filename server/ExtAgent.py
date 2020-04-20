@@ -749,6 +749,7 @@ class ExtAgent:
             serverVersion = dgi.getString()
             hashVal = dgi.getUint32()
             tokenType = dgi.getInt32()
+            wantMagicWords = dgi.getString()
 
             # Check the server version against the real one.
             ourVersion = config.GetString('server-version', '')
@@ -1080,7 +1081,7 @@ class ExtAgent:
 
             # Query the avatar.
             self.air.dbInterface.queryObject(self.air.dbId, avId, handleRetrieve)
-        elif msgType == 97: # CLIENT_ADD_INTEREST:
+        elif msgType == 97: # CLIENT_ADD_INTEREST
             try:
                 interest = self.buildInterest(dgi)
             except:
@@ -1090,6 +1091,7 @@ class ExtAgent:
             newZones = []
 
             for zone in interest.getZones():
+
                 if not self.interestManager.has_interest_object_parent_and_zone(interest.getParent(), zone):
                     newZones.append(zone)
                 else:
@@ -1143,21 +1145,19 @@ class ExtAgent:
                     if k in interest.getVisZones() or k in newZones:
                         killedZones.remove(k)
 
-                '''
                 resp = PyDatagram()
-                resp.addUint16(CLIENT_OBJECT_DISABLE)
+                resp.addUint16(CLIENT_REMOVE_INTEREST)
 
-                for zone in killedZones:
-                    resp.addUint32(zone)
+                resp.addUint32(interest.getContext())
+                resp.addUint16(interest.getId())
 
                 # Send it.
                 dg = PyDatagram()
                 dg.addServerHeader(clientChannel, self.air.ourChannel, CLIENTAGENT_SEND_DATAGRAM)
                 dg.addString(resp.getMessage())
                 self.air.send(dg)
-                '''
 
-                self.closeZones(clientChannel, killedZones, interest.getParent())
+                #self.closeZones(clientChannel, killedZones, interest.getParent())
                 self.interestManager.remove_interest_object(self.interestManager.has_interest_object_id(interest.getId(), True))
             else:
                 newZones.extend(list(interest.getVisZones()))
@@ -1225,24 +1225,21 @@ class ExtAgent:
                                     killZones.append(zoneId)
 
                             del self.dnaStores[oldBranchZoneId]
-                '''
+
                 resp = PyDatagram()
-                resp.addUint16(CLIENT_OBJECT_DISABLE)
+                resp.addUint16(CLIENT_REMOVE_INTEREST)
 
-                killZones = [4681, 401000001]
-
-                for zone in killZones:
-                    resp.addUint32(zone)
+                resp.addUint32(interest.getContext())
+                resp.addUint16(interest.getId())
 
                 # Send it.
                 dg = PyDatagram()
                 dg.addServerHeader(clientChannel, self.air.ourChannel, CLIENTAGENT_SEND_DATAGRAM)
                 dg.addString(resp.getMessage())
                 self.air.send(dg)
-                '''
 
-                self.closeZones(clientChannel, killZones, interest.getParent())
-                self.handleInterestDone(clientChannel, interest.getId(), interest.getContext())
+                #self.closeZones(clientChannel, killZones, interest.getParent())
+                #self.handleInterestDone(clientChannel, interest.getId(), interest.getContext())
                 self.interestManager.remove_interest_object(interest)
             else:
                 self.notify.info('Delete for unknown interest id {0}'.format(interestId))
@@ -1252,8 +1249,9 @@ class ExtAgent:
             zoneId = dgi.getUint32()
 
             resp = PyDatagram()
-            resp.addServerHeader(doId, clientChannel, STATESERVER_OBJECT_SET_LOCATION)
+            resp.addServerHeader(clientChannel, self.air.ourChannel, CLIENT_OBJECT_LOCATION)
 
+            resp.addUint32(doId)
             resp.addUint32(parentId)
             resp.addUint32(zoneId)
 

@@ -15,7 +15,7 @@ dc-sort-inheritance-by-file #t
 
 want-gardening #t
 want-randomized-hats #f
-want-av-membership #t
+want-av-membership #f
 want-cogdominiums #t
 
 vfs-mount phase_3 .
