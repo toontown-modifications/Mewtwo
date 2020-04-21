@@ -99,6 +99,7 @@ class ToontownAIRepository(AstronInternalRepository):
         # What we want to have on the server:
         self.wantCogdominiums = config.GetBool('want-cogdominiums', False)
         self.useAllMinigames = config.GetBool('use-all-minigames', False)
+        self.wantCodeRedemption = config.GetBool('want-coderedemption', False)
 
         self.cogSuitMessageSent = False
 

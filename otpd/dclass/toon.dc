@@ -453,7 +453,7 @@ dclass DistributedToon : DistributedPlayer {
   takeDamage(uint16) broadcast ownrecv;
   setBattleId(uint32 = 0) required broadcast ram;
   setExperience(blob = {0*14}) required ownrecv db;
-  setMaxCarry(uint8 = 30) required ownrecv db;
+  setMaxCarry(uint8 = 20) required ownrecv db;
   setTrackAccess(uint16array = {0,0,0,0,1,1,0}) required broadcast ownrecv db;
   setTrackProgress(int8 = -1, uint32 = 0) required ownrecv db;
   setTrackBonusLevel(int8array = {-1,-1,-1,-1,-1,-1,-1}) required broadcast ownrecv db;

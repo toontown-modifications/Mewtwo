@@ -1,10 +1,8 @@
-from direct.directnotify import DirectNotifyGlobal
+from direct.directnotify.DirectNotifyGlobal import directNotify
 from direct.distributed.DistributedObjectUD import DistributedObjectUD
 
-
 class TTCodeRedemptionMgrUD(DistributedObjectUD):
-    notify = DirectNotifyGlobal.directNotify.newCategory(
-        "TTCodeRedemptionMgrUD")
+    notify = directNotify.newCategory('TTCodeRedemptionMgrUD')
 
     def giveAwardToToonResult(self, todo0, todo1):
         pass

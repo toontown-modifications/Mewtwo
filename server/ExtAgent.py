@@ -8,24 +8,24 @@ from game.otp.otpbase import OTPGlobals
 from game.toontown.toonbase import TTLocalizer
 from game.toontown.hood import ZoneUtil
 from game.toontown.toonbase import ToontownGlobals
+from game.toontown.chat.TTWhiteList import TTWhiteList
 from panda3d.toontown import DNAStorage, loadDNAFileAI
-from game import genDNAFileName, extractGroupName
-import json, time, os, random
+import json, time, os, random, string, collections
 
-ESSENTIAL_COMPLETE_ZONES = [
-    OTP_ZONE_ID_OLD_QUIET_ZONE, 
-    OTP_ZONE_ID_MANAGEMENT, 
-    OTP_ZONE_ID_DISTRICTS,
-    OTP_ZONE_ID_DISTRICTS_STATS,
-    OTP_ZONE_ID_ELEMENTS
-]
+def genDNAFileName(zoneId):
+    zoneId = ZoneUtil.getCanonicalZoneId(zoneId)
+    hoodId = ZoneUtil.getCanonicalHoodId(zoneId)
+    hood = ToontownGlobals.dnaMap[hoodId]
+    if hoodId == zoneId:
+        zoneId = 'sz'
+        phase = ToontownGlobals.phaseMap[hoodId]
+    else:
+        phase = ToontownGlobals.streetPhaseMap[hoodId]
 
-PERMA_ZONES = [
-    OTP_ZONE_ID_OLD_QUIET_ZONE,
-    OTP_ZONE_ID_DISTRICTS,
-    OTP_ZONE_ID_DISTRICTS_STATS,
-    OTP_ZONE_ID_MANAGEMENT
-]
+    if 'outdoor_zone' in hood or 'golf_zone' in hood:
+        phase = '6'
+
+    return 'phase_%s/dna/%s_%s.dna' % (phase, hood, zoneId)
 
 class JSONBridge:
 
@@ -65,245 +65,29 @@ class JSONBridge:
         else:
             return False
 
-class InterestManager(object):
-
-    def __init__(self):
-        self._interest_zones = []
-        self._interest_objects = []
-
-    @property
-    def interest_zones(self):
-        return self._interest_zones
-
-    def has_interest_zone(self, zone_id):
-        return zone_id in self._interest_zones
-
-    def add_interest_zone(self, zone_id):
-        if zone_id in self._interest_zones:
-            return
-
-        self._interest_zones.append(zone_id)
-
-    def remove_interest_zone(self, zone_id):
-        if zone_id not in self._interest_zones:
-            return
-
-        self._interest_zones.remove(zone_id)
-
-    def clear(self):
-        self._interest_zones = []
-
-    def add_interest_object(self, i):
-        self._interest_objects.append(i)
-
-    def has_interest_object(self, i):
-        return i in self._interest_objects
-
-    def has_interest_object_id(self, _id, _obj = False):
-        for interest in self._interest_objects:
-            if interest.getId() == _id:
-                if _obj:
-                    return interest
-                    
-                return True
-                
-        return False
-
-    def has_interest_object_parent(self, parentId):
-        for interest in self._interest_objects:
-            if interest.getParent() == parentId:
-                return True
-                
-        return False
-
-    def hasInterestObjectZone(self, zoneId):
-        for interest in self._interest_objects:
-            if interest.hasZone(zoneId) or interest.hasView(zoneId):
-                return True
-
-        return False
-
-    def has_interest_object_parent_and_zone(self, parentId, zoneId, getObj = False, includeViews = False):
-        for interest in self._interest_objects:
-            if interest.getParent() == parentId and (interest.hasZone(zoneId) or (includeViews and interest.hasView(zoneId))):
-                if getObj:
-                    return interest
-                return True
-
-        return False
-
-    def get_interest_object_by_id(self, _id):
-        return self.has_interest_object_id(_id, True)
-
-    def remove_interest_object(self, i):
-        self._interest_objects.remove(i)
-
-    def get_interest_objects(self):
-        return self._interest_objects
-
-class InterestOperation:
-    def __init__(self, client, timeout, Id, context,  parent, zones, caller):
-
-        self.client = client
-        self.timeout = timeout
-        self.id = Id
-        self.context = context
-        self.parent = parent
-        self.zones = zones
-        self.caller = caller
-
-class ZoneList:
-
-    def __init__(self):
-        self.zones = []
-
-    def addZone(self, zoneId):
-        self.zones.append(zoneId)
-
-    def removeZone(self, zoneId):
-        self.zones.remove(zoneId)
-
-    def getZones(self):
-        return self.zones
-
-    def hasZone(self, zoneId):
-        return zoneId in self.zones
-
-class Interest:
-
-    def __init__(self):
-        self.zones = ZoneList()
-        self.visZones = set()
-        self.id = -1
-        self.context = -1
-        self.parent = -1
-
-    def setId(self, _id):
-        self.id = _id
-
-    def getId(self):
-        return self.id
-
-    def setContext(self, _context):
-        self.context = _context
-
-    def getContext(self):
-        return self.context
-
-    def setParent(self, _parent):
-        self.parent = _parent
-
-    def getParent(self):
-        return self.parent
-
-    def addZone(self, zone):
-        self.zones.addZone(zone)
-
-    def removeZone(self, zone):
-        self.zones.removeZone(zone)
-
-    def getZones(self):
-        return self.zones.getZones()
-
-    def hasZone(self, zone):
-        return self.zones.hasZone(zone)
-
-    def setVisZones(self, zones):
-        self.visZones = zones
-
-    def getVisZones(self):
-        return self.visZones
-
-    def hasView(self, zone):
-        return zone in self.visZones
-
-class VisibleObject:
-    def __init__(self):
-        self.parent = -1
-        self.zone = -1
-        self.id = -1
-
-    def setParent(self, parent):
-        self.parent = parent
-
-    def getParent(self):
-        return self.parent
-
-    def setZone(self, zone):
-        self.zone = zone
-
-    def getZone(self):
-        return self.zone
-
-    def setId(self, _id):
-        self.id = id
-
-    def getId(self):
-        return self.id
-
-class DeferredCallback(object):
-    """
-    A class that represents a pending callback event when called
-    it initiates the callback event with the specified arguments
-    """
-
-    def __init__(self, function, *args, **kwargs):
-        assert(callable(function))
-        self._function = function
-        self._args = args
-        self._kwargs = kwargs
-
-    def callback(self, *args, **kwargs):
-        cb_args = []
-        cb_args.extend(args)
-        cb_args.extend(self._args)
-
-        cb_kwargs = dict(kwargs.items() + self._kwargs.items())
-
-        result = self._function(*cb_args, **cb_kwargs)
-
-        del cb_args
-        del cb_kwargs
-
-        return result
-
-    def destroy(self):
-        self._function = None
-        self._args = None
-        self._kwargs = None
-
 class ExtAgent:
     notify = directNotify.newCategory('ExtAgent')
 
     def __init__(self, air):
         self.air = air
+
         self.air.registerForChannel(5536)
 
         self.air.netMessenger.register(0, 'registerShard')
+        self.air.netMessenger.register(1, 'magicWord')
+
         self.air.netMessenger.accept('registerShard', self, self.registerShard)
 
         self.shardInfo = {}
 
         self.nameGenerator = NameGenerator()
         self.bridge = JSONBridge()
+        self.whiteList = TTWhiteList()
 
         self.loadAvProgress = set()
 
         self.clientChannel2avId = {}
-        self.clientChannel2shardId = {}
-        self.clientChannel2context = {}
-        self.clientChannel2contextZone = {}
-
-        self.interestManager = InterestManager()
-
-        self.pendingInterests = {}
-        self.seenObjects = {}
-        self.ownedObjects = []
-        self.dnaStores = {}
-
-        self.deletedObjectHistory = []
-
-        self.deferredCallback = None
+        self.clientChannel2handle = {}
 
     def sendEject(self, clientChannel, errorCode, errorStr):
         dg = PyDatagram()
@@ -379,172 +163,6 @@ class ExtAgent:
         dg.addServerHeader(clientChannel, self.air.ourChannel, CLIENTAGENT_SEND_DATAGRAM)
         dg.addString(resp.getMessage())
         self.air.send(dg)
-
-    def lookupInterest(self, parent, zone):
-        interests = []
-
-        for interest in self.interestManager.get_interest_objects():
-            if interest.getParent() == parent and interest.hasZone(zone):
-                interests.append(interest)
-
-        return interests
-
-    def buildInterest(self, dgi):
-        interestId = dgi.getUint16()
-        contextId = dgi.getUint32()
-        parentId = dgi.getUint32()
-
-        interest = Interest()
-        interest.setId(interestId)
-        interest.setParent(parentId)
-        interest.setContext(contextId)
-
-        while dgi.getRemainingSize() > 0:
-            interest.addZone(dgi.getUint32())
-
-        return interest
-
-    def handleInterestDone(self, clientChannel, interestId, context):
-        resp = PyDatagram()
-
-        resp.addUint16(48) # CLIENT_DONE_INTEREST_RESP
-
-        resp.addUint16(interestId)
-        resp.addUint32(context)
-
-        dg = PyDatagram()
-        dg.addServerHeader(clientChannel, self.air.ourChannel, CLIENTAGENT_SEND_DATAGRAM)
-        dg.addString(resp.getMessage())
-        self.air.send(dg)
-
-    def handleInterestCompleteCallback(self, clientChannel, complete, contextId):
-        if complete:
-            if contextId in self.pendingInterests:
-                interest = self.pendingInterests[contextId]
-                self.handleInterestDone(clientChannel, interest.id, contextId)
-                del self.pendingInterests[contextId]
-        else:
-            if contextId in self.pendingInterests:
-                interest = self.pendingInterests[contextId]
-                zone = interest.getZones()[-1]
-                self.notify.info(zone)
-                if zone in self.seenObjects.keys():
-                    self.handleInterestDone(clientChannel, interest.id, contextId)
-
-    def closeZones(self, clientChannel, killZones, parent):
-        # send delete for all objects we've seen that were in the zone
-        # that we've just left...
-        for zone in killZones:
-            if zone not in PERMA_ZONES and zone in self.seenObjects:
-                seenObjects = self.seenObjects[zone]
-                for doId in seenObjects:
-                    # we do not want to delete our owned objects...
-                    if doId not in self.ownedObjects:
-                        self.sendClientObjectDeleteResp(clientChannel, doId)
-
-                del self.seenObjects[zone]
-
-                # Tell the Client to disable the object.
-                resp = PyDatagram()
-                resp.addServerHeader(parent, clientChannel, CLIENT_OBJECT_DISABLE)
-
-                resp.addUint32(zone)
-
-                dg = PyDatagram()
-                dg.addServerHeader(clientChannel, self.air.ourChannel, CLIENTAGENT_SEND_DATAGRAM)
-
-                dg.addString(resp.getMessage())
-
-                self.air.send(dg)
-
-    def getInStreetBranch(self, zoneId):
-        if not ZoneUtil.isPlayground(zoneId):
-            where = ZoneUtil.getWhereName(zoneId, True)
-            return where == 'street'
-
-        return False
-
-    def getInCogHQ(self, zoneId):
-        if ZoneUtil.isCogHQZone(zoneId):
-            return True
-
-        return False
-
-    def getVisBranchZones(self, zoneId, isCogHQ = False):
-        branchZoneId = ZoneUtil.getBranchZone(zoneId)
-        dnaStore = self.dnaStores.get(branchZoneId)
-
-        if zoneId in (6100, 6101, 19000, 19001):
-            # This is ToonLand.
-            return []
-
-        if zoneId in (ToontownGlobals.SellbotLobby, ToontownGlobals.LawbotOfficeExt, ToontownGlobals.LawbotLobby, ToontownGlobals.BossbotHQ, ToontownGlobals.CashbotLobby):
-            return []
-
-        if not dnaStore:
-            dnaStore = DNAStorage()
-            dnaFileName = genDNAFileName(branchZoneId)
-            loadDNAFileAI(dnaStore, dnaFileName)
-            self.dnaStores[branchZoneId] = dnaStore
-
-        zoneVisDict = {}
-
-        for i in xrange(dnaStore.getNumDNAVisGroupsAI()):
-            groupFullName = dnaStore.getDNAVisGroupName(i)
-            visGroup = dnaStore.getDNAVisGroupAI(i)
-            visZoneId = int(extractGroupName(groupFullName))
-            visZoneId = ZoneUtil.getTrueZoneId(visZoneId, zoneId)
-            visibles = []
-
-            for i in xrange(visGroup.getNumVisibles()):
-                visibles.append(int(visGroup.getVisibleName(i)))
-
-            visibles.append(ZoneUtil.getBranchZone(visZoneId))
-            zoneVisDict[visZoneId] = visibles
-
-        if not isCogHQ:
-            return zoneVisDict[zoneId]
-        else:
-            return zoneVisDict.values()[0]
-
-    def sendClientObjectDeleteResp(self, clientChannel, doId):
-        # if the object is in the list of owned objects, we do not want to
-        # delete this object, as it was already generated elsewhere...
-        if doId in self.ownedObjects:
-            return
-
-        # only delete the object if we've previously seen the objects
-        # generate request sent by the StateServer...
-        if not self.hasSeenObject(doId, True):
-            return
-
-        # double check to prevent sending this more than one time
-        if doId in self.deletedObjectHistory:
-            return
-
-        self.deletedObjectHistory.append(doId)
-
-        resp = PyDatagram()
-
-        resp.addUint16(CLIENT_OBJECT_DELETE_RESP)
-
-        resp.addUint32(doId)
-
-        dg = PyDatagram()
-        dg.addServerHeader(clientChannel, self.air.ourChannel, CLIENTAGENT_SEND_DATAGRAM)
-
-        dg.addString(resp.getMessage())
-
-        self.air.send(dg)
-
-    def hasSeenObject(self, doId, erase = False):
-        for zoneId, seenObjects in list(self.seenObjects.items()):
-            if doId in seenObjects:
-                if erase:
-                    self.seenObjects[zoneId].remove(doId)
-                return True
-
-        return False
 
     def handleDatagram(self, dgi):
         """
@@ -743,7 +361,82 @@ class ExtAgent:
             dg.addString(resp.getMessage())
             self.air.send(dg)
         elif msgType == 10: # CLIENT_GET_FRIEND_LIST
-            pass
+            accId = self.air.GetAccountIDFromChannelCode(clientChannel)
+            avId = self.air.GetAvatarIDFromChannelCode(clientChannel)
+
+            friendsDetails = []
+            onlineFriends = []
+            friendsList = []
+
+            def gotActivatedResp(avId, activated):
+                iterated += 1
+
+                if activated:
+                    onlineFriends.append(avId)
+
+                datagram = PyDatagram()
+
+                datagram.addUint16(53) # CLIENT_FRIEND_ONLINE
+
+                for friend in onlineFriends:
+                    datagram.addUint32(friend)
+
+                # Send it.
+                dg = PyDatagram()
+                dg.addServerHeader(clientChannel, self.air.ourChannel, CLIENTAGENT_SEND_DATAGRAM)
+                dg.addString(datagram.getMessage())
+                self.air.send(dg)
+
+                resp = PyDatagram()
+
+                resp.addUint16(11) # CLIENT_GET_FRIEND_LIST_RESP
+                resp.addUint8(0)
+                print(len(onlineFriends))
+                resp.addUint16(len(onlineFriends))
+
+                for avId in friendsList:
+                    dclass, fields = friendsList[avId]
+                    print(fields)
+
+                    resp.addUint32(avId)
+                    resp.addString(fields['setName'][0])
+                    resp.addString(fields['setDNAString'][0])
+
+                # Send it.
+                dg = PyDatagram()
+                dg.addServerHeader(clientChannel, self.air.ourChannel, CLIENTAGENT_SEND_DATAGRAM)
+                dg.addString(resp.getMessage())
+                self.air.send(dg)
+
+            def gotAvatarInfo(dclass, fields):
+                if dclass not in (self.air.dclassesByName['DistributedToonUD'], self.air.dclassesByName['DistributedPetAI']):
+                    self.sendEject(clientChannel, 122, 'Invalid dclass for avatarId: {0}.'.format(avatarId))
+                    return
+
+                isPet = dclass == self.air.dclassesByName['DistributedPetAI']
+                fields['avId'] = avId
+
+                iterated = 0
+
+                if not isPet:
+                    friendsDetails.append([fields['avId'], fields['setName'][0], fields['setDNAString'][0], fields['setPetId'][0]])
+
+                    if iterated >= len(friendsList):
+                        for friendId, trueFriend in friendsList:
+                            self.air.getActivated(friendId, gotActivatedResp)
+
+            def handleRetrieve(dclass, fields):
+                if dclass != self.air.dclassesByName['DistributedToonUD']:
+                    self.sendEject(clientChannel, 122, 'Invalid dclass for avatarId: {0}.'.format(avatarId))
+                    return
+
+                friendsList = fields['setFriendsList'][0]
+
+                for friendId, trueFriend in friendsList:
+                    self.air.dbInterface.queryObject(self.air.dbId, friendId, gotAvatarInfo)
+
+            # Query the avatar.
+            self.air.dbInterface.queryObject(self.air.dbId, avId, handleRetrieve)
         elif msgType == 125: # CLIENT_LOGIN_TOONTOWN
             playToken = dgi.getString()
             serverVersion = dgi.getString()
@@ -814,26 +507,58 @@ class ExtAgent:
                                               account,
                                               createLoginResponse)
         elif msgType == 24: # CLIENT_OBJECT_UPDATE_FIELD
-            # Certain fields need to be handled specially...
-            # The only example of this right now is setChat.
+            # Certain fields need to be handled specifically...
+            # The only example of this right now is setTalk.
             doId = dgi.getUint32()
             fieldNumber = dgi.getUint16()
             dcData = dgi.getRemainingBytes()
 
+            if fieldNumber == 103: # setTalk field
+                # We'll have to unpack the data and send our own datagrams.
+                toon = self.air.dclassesByName['DistributedToonUD']
+                talkField = toon.getFieldByName('setTalk')
+                unpacker = DCPacker()
+                unpacker.setUnpackData(dcData)
+                unpacker.beginUnpack(talkField)
+                fieldArgs = talkField.unpackArgs(unpacker)
+                unpacker.endUnpack()
+
+                if len(fieldArgs) != 6:
+                    # Bad field data.
+                    return
+
+                message = fieldArgs[3]
+
+                if message[0] == '~':
+                    # Route this to the Magic Word manager.
+                    self.air.netMessenger.send('magicWord', [message, doId])
+                    return
+
+                modifications = []
+                words = message.split(' ')
+                offset = 0
+                for word in words:
+                    if word and not self.whiteList.isWord(word):
+                        modifications.append((offset, offset + len(word) - 1))
+                    offset += len(word) + 1
+
+                cleanMessage = message
+                for modStart, modStop in modifications:
+                    cleanMessage = cleanMessage[:modStart] + '*'*(modStop-modStart+1) + cleanMessage[modStop+1:]
+
+                # Construct a new aiFormatUpdate.
+                resp = toon.aiFormatUpdate('setTalk', doId, doId,
+                                           self.air.ourChannel,
+                                           [0, 0, '', cleanMessage, modifications, 0])
+                self.air.send(resp)
+                return
+
             resp = PyDatagram()
-            #resp.addUint16(CLIENT_OBJECT_SET_FIELD)
             resp.addServerHeader(clientChannel, self.air.ourChannel, CLIENT_OBJECT_SET_FIELD)
             resp.addUint32(doId)
             resp.addUint16(fieldNumber)
             resp.appendData(dcData)
             self.air.send(resp)
-
-            '''
-            dg = PyDatagram()
-            dg.addServerHeader(clientChannel, self.air.ourChannel, CLIENTAGENT_SEND_DATAGRAM)
-            dg.addString(resp.getMessage())
-            self.air.send(dg)
-            '''
         elif msgType == 29: # CLIENT_SET_ZONE
             zoneId = dgi.getUint16()
 
@@ -1044,8 +769,13 @@ class ExtAgent:
             # Query the avatar.
             self.air.dbInterface.queryObject(self.air.dbId, avId, handleRetrieve)
         elif msgType == 70: # CLIENT_SET_WISHNAME
+            print(dgi)
             avId = dgi.getUint32()
             name = dgi.getString()
+            pendingName = dgi.getString()
+            print(pendingName)
+            print(name)
+            print(avId)
 
             def handleRetrieve(dclass, fields):
                 if dclass != self.air.dclassesByName['DistributedToonUD']:
@@ -1082,155 +812,150 @@ class ExtAgent:
             # Query the avatar.
             self.air.dbInterface.queryObject(self.air.dbId, avId, handleRetrieve)
         elif msgType == 97: # CLIENT_ADD_INTEREST
-            try:
-                interest = self.buildInterest(dgi)
-            except:
-                self.notify.warning('Malformed request for CLIENT_ADD_INTEREST!')
-                return
+            # Reformat the packets for the CA.
+            handle = dgi.getUint16()
+            context = dgi.getUint32()
+            parentId = dgi.getUint32()
+            zones = []
+            while dgi.getRemainingSize() != 0:
+                zones.append(dgi.getUint32())
 
-            newZones = []
+            if len(zones) == 1:
+                zoneId = zones[0]
+                branchId = zoneId - zoneId % 100
+                if not zoneId >= 10000 and zoneId < 15000:
+                    if zoneId % 1000 >= 500:
+                        branchId -= 500
+                if branchId:
+                    if (zoneId != branchId or zoneId >= 10000 and zoneId != 11200) and ZoneUtil.getLoaderName(zoneId) != 'safeZoneLoader':
+                        dnaStore = DNAStorage()
+                        dnaFileName = genDNAFileName(branchId)
+                        loadDNAFileAI(dnaStore, dnaFileName)
 
-            for zone in interest.getZones():
+                        zoneVisDict = {}
+                        for i in xrange(dnaStore.getNumDNAVisGroupsAI()):
+                            groupFullName = dnaStore.getDNAVisGroupName(i)
+                            visGroup = dnaStore.getDNAVisGroupAI(i)
+                            visZoneId = int(string.split(groupFullName, ':', 1)[0])
+                            visZoneId = ZoneUtil.getTrueZoneId(visZoneId, branchId)
+                            visibles = []
+                            for i in xrange(visGroup.getNumVisibles()):
+                                visibles.append(int(visGroup.getVisibleName(i)))
 
-                if not self.interestManager.has_interest_object_parent_and_zone(interest.getParent(), zone):
-                    newZones.append(zone)
-                else:
-                    if len(interest.getZones()) == 1:
-                        # This interest was already created and letting it go through empty would erase previous interest zones.
-                        self.handleInterestDone(clientChannel, interest.getId(), interest.getContext())
-                        return
+                            visibles.append(ZoneUtil.getBranchZone(visZoneId))
+                            zoneVisDict[visZoneId] = visibles
 
-            newVisZones = set()
+                        # Set interest on the VisZones.
+                        for zoneList in zoneVisDict.values():
+                            for zone in zoneList:
+                                zones.append(zone)
 
-            for newZoneId in newZones:
-                newZoneInStreetBranch = self.getInStreetBranch(newZoneId)
-                newZoneInCogHQ = self.getInCogHQ(newZoneId)
+                        # Set object location.
+                        dg = PyDatagram()
+                        dg.addServerHeader(clientChannel, self.air.ourChannel, CLIENT_OBJECT_LOCATION)
+                        dg.addUint32(self.clientChannel2avId[clientChannel])
+                        dg.addUint32(parentId)
+                        dg.addUint32(zoneId)
+                        self.air.send(dg)
 
-                if newZoneInStreetBranch:
-                    newBranchZoneId = ZoneUtil.getBranchZone(newZoneId)
+                        # Set interest on the branch ID.
+                        zones.append(branchId)
 
-                    if newZoneId % 100 != 0:
-                        newVisZones.update(self.getVisBranchZones(newZoneId))
-
-                if newZoneInCogHQ:
-                    newVisZones.update(self.getVisBranchZones(newZoneId))
-
-            interest.setVisZones(newVisZones)
-
-            killedZones = []
-            oldVisZones = set()
-
-            if self.interestManager.has_interest_object_id(interest.getId()):
-                previousInterest = self.interestManager.get_interest_object_by_id(interest.getId())
-
-                for zone in previousInterest.getZones():
-                    if len(self.lookupInterest(previousInterest.getParent(), zone)) > 1:
-                        continue
-
-                    if interest.getParent() != previousInterest.getParent() or not interest.hasZone(zone):
-                        killedZones.append(zone)
-
-                oldInterestVisZones = previousInterest.getVisZones()
-
-                interestVisZones = interest.getVisZones()
-
-                for zoneId in oldInterestVisZones.difference(interestVisZones):
-                    killedZones.append(zoneId)
-
-                for zoneId in interestVisZones.difference(oldInterestVisZones):
-                    if zoneId not in newZones and not self.interestManager.has_interest_object_parent_and_zone(interest.getParent(), zoneId):
-                        newZones.append(zoneId)
-
-                for k in killedZones:
-                    if k in interest.getVisZones() or k in newZones:
-                        killedZones.remove(k)
-
-                resp = PyDatagram()
-                resp.addUint16(CLIENT_REMOVE_INTEREST)
-
-                resp.addUint32(interest.getContext())
-                resp.addUint16(interest.getId())
-
-                # Send it.
-                dg = PyDatagram()
-                dg.addServerHeader(clientChannel, self.air.ourChannel, CLIENTAGENT_SEND_DATAGRAM)
-                dg.addString(resp.getMessage())
-                self.air.send(dg)
-
-                #self.closeZones(clientChannel, killedZones, interest.getParent())
-                self.interestManager.remove_interest_object(self.interestManager.has_interest_object_id(interest.getId(), True))
-            else:
-                newZones.extend(list(interest.getVisZones()))
-
-            finalZones = []
-
-            for zone in newZones:
-                if not self.interestManager.has_interest_object_parent_and_zone(interest.getParent(), zone, False, True):
-                    finalZones.append(zone)
-
-            print('{0}:{1}'.format(finalZones, interest.getVisZones()))
-            self.interestManager.add_interest_object(interest)
-
-            op = InterestOperation(self, 500, interest.getId(), interest.getContext(), interest.getParent(), finalZones, clientChannel)
-            self.pendingInterests[interest.getContext()] = interest
-
-            self.deferredCallback = DeferredCallback(self.handleInterestCompleteCallback, clientChannel, interest.getContext())
+                        if clientChannel in self.clientChannel2handle:
+                            # Use the same handle to alter the interest.
+                            handle = self.clientChannel2handle[clientChannel]
+                        else:
+                            # Save the handle for later.
+                            self.clientChannel2handle[clientChannel] = handle
 
             resp = PyDatagram()
-            resp.addServerHeader(clientChannel, interest.getParent(), CLIENT_ADD_INTEREST_MULTIPLE)
-
-            resp.addUint32(interest.getContext())
-            resp.addUint16(interest.getId())
-            resp.addUint32(interest.getParent())
-            resp.addUint16(len(finalZones))
-
-            for zone in finalZones:
-                print('Zone interest {0}'.format(zone))
+            resp.addServerHeader(clientChannel, self.air.ourChannel, CLIENT_ADD_INTEREST_MULTIPLE)
+            resp.addUint32(context)
+            resp.addUint16(handle)
+            resp.addUint32(parentId)
+            resp.addUint16(len(zones))
+            for zone in zones:
                 resp.addUint32(zone)
-
             self.air.send(resp)
         elif msgType == 99: # CLIENT_REMOVE_INTEREST
-            try:
-                interestId = dgi.getUint16()
-            except:
-                self.notify.warning('Malformed request for CLIENT_REMOVE_INTEREST!')
-                return
+            handle = dgi.getUint16()
+            context = 0
+            if dgi.getRemainingSize() > 0:
+                context = dgi.getUint32()
 
-            print('Interest ID: {0}'.format(interestId))
+            resp = PyDatagram()
+            resp.addServerHeader(clientChannel, self.air.ourChannel, CLIENT_REMOVE_INTEREST)
+            resp.addUint32(context)
+            resp.addUint16(handle)
+            self.air.send(resp)
+        elif msgType == 102: # CLIENT_OBJECT_LOCATION
+            resp = PyDatagram()
+            resp.addServerHeader(clientChannel, self.air.ourChannel, CLIENT_OBJECT_LOCATION)
+            resp.addUint32(dgi.getUint32())
+            resp.addUint32(dgi.getUint32())
+            resp.addUint32(dgi.getUint32())
+            self.air.send(resp)
+        elif msgType == 14: # CLIENT_GET_AVATAR_DETAILS
+            avatarId = dgi.getUint32()
 
-            oldVisZones = set()
-            killZones = []
+            def handleAvatar(dclass, fields):
+                if dclass != self.air.dclassesByName['DistributedToonUD']:
+                    return
+                
+                name = fields['setName'][0]
+                inventory = fields['setInventory'][0]
+                trackAccess = fields['setTrackAccess'][0]
+                hp = fields['setHp'][0]
+                maxHp = fields['setMaxHp'][0]
+                defaultShard = fields['setDefaultShard'][0]
+                lastHood = fields['setLastHood'][0]
+                dnaString = fields['setDNAString'][0]
+                experience = fields['setExperience'][0]
+                trackBonusLevel = fields['setTrackBonusLevel'][0]
 
-            if self.interestManager.has_interest_object_id(interestId):
-                interest = self.interestManager.get_interest_object_by_id(interestId)
+                fields = [
+                    name,
+                    inventory,
+                    trackAccess,
+                    hp,
+                    maxHp,
+                    defaultShard,
+                    lastHood,
+                    dnaString,
+                    experience,
+                    trackBonusLevel
+                ]
 
-                for zone in interest.getZones():
-                    if len(self.lookupInterest(interest.getParent(), zone)) == 1:
-                        killZones.append(zone)
+                # Avatar information.
+                dataCluster = PyDatagram()
 
-                        oldZoneId = zone
-                        oldZoneInInterestBranch = self.getInStreetBranch(oldZoneId)
-                        oldZoneInCogHQ = self.getInCogHQ(oldZoneId)
+                dataCluster.addString(name)
+                dataCluster.addString(inventory)
 
-                        if oldZoneInInterestBranch:
-                            oldBranchZoneId = ZoneUtil.getBranchZone(oldZoneId)
+                for track in trackAccess:
+                    dataCluster.addInt16(int(track))
 
-                            if oldZoneId % 100 != 0:
-                                oldVisZones.update(self.getVisBranchZones(oldZoneId))
+                dataCluster.addInt16(hp)
+                dataCluster.addInt16(maxHp)
+                dataCluster.addUint32(defaultShard)
+                dataCluster.addUint32(lastHood)
+                dataCluster.addString(dnaString)
+                dataCluster.addBlob(experience)
 
-                            if oldZoneInCogHQ:
-                                oldVisZones.update(self.getVisBranchZones(oldZoneId))
+                print(trackBonusLevel)
+                print(type(inventory))
+                print(type(trackAccess))
 
-                                for zoneId in oldVisZones:
-                                    killZones.append(zoneId)
+                data = PyDatagramIterator(dataCluster).getMessage()
 
-                            del self.dnaStores[oldBranchZoneId]
-
+                # Our avatar details response.
                 resp = PyDatagram()
-                resp.addUint16(CLIENT_REMOVE_INTEREST)
 
-                resp.addUint32(interest.getContext())
-                resp.addUint16(interest.getId())
+                resp.addUint16(15) # CLIENT_GET_AVATAR_DETAILS_RESP
+
+                resp.addUint32(avatarId)
+                resp.addUint8(0)
+                resp.appendData(data)
 
                 # Send it.
                 dg = PyDatagram()
@@ -1238,26 +963,7 @@ class ExtAgent:
                 dg.addString(resp.getMessage())
                 self.air.send(dg)
 
-                #self.closeZones(clientChannel, killZones, interest.getParent())
-                #self.handleInterestDone(clientChannel, interest.getId(), interest.getContext())
-                self.interestManager.remove_interest_object(interest)
-            else:
-                self.notify.info('Delete for unknown interest id {0}'.format(interestId))
-        elif msgType == 102: # CLIENT_OBJECT_LOCATION
-            doId = dgi.getUint32()
-            parentId = dgi.getUint32()
-            zoneId = dgi.getUint32()
-
-            resp = PyDatagram()
-            resp.addServerHeader(clientChannel, self.air.ourChannel, CLIENT_OBJECT_LOCATION)
-
-            resp.addUint32(doId)
-            resp.addUint32(parentId)
-            resp.addUint32(zoneId)
-
-            self.air.send(resp)
-        elif msgType == 14: # CLIENT_GET_AVATAR_DETAILS
-            pass
+            self.air.dbInterface.queryObject(self.air.dbId, avatarId, handleAvatar)
         elif msgType == 81: # CLIENT_GET_PET_DETAILS
             pass
         else:
@@ -1280,77 +986,35 @@ class ExtAgent:
             resp = PyDatagram()
             resp.addUint16(4) # CLIENT_GO_GET_LOST
             resp.addUint16(dgi.getUint16())
-            ret = dgi.getString()
-            print(ret)
-            resp.addString(ret)
-
-            # Send it.
-            dg = PyDatagram()
-            dg.addServerHeader(clientChannel, self.air.ourChannel, CLIENTAGENT_SEND_DATAGRAM)
-            dg.addString(resp.getMessage())
-            self.air.send(dg)
+            resp.addString(dgi.getString())
         elif msgType == CLIENT_DONE_INTEREST_RESP:
             contextId = dgi.getUint32()
             handle = dgi.getUint16()
 
             resp = PyDatagram()
-
-            resp.addUint16(48)
-
+            resp.addUint16(48) # CLIENT_DONE_INTEREST_RESP
             resp.addUint16(handle)
             resp.addUint32(contextId)
-
-            # Send it.
-            dg = PyDatagram()
-            dg.addServerHeader(clientChannel, self.air.ourChannel, CLIENTAGENT_SEND_DATAGRAM)
-            dg.addString(resp.getMessage())
-            self.air.send(dg)
+        elif msgType == CLIENT_ADD_INTEREST:
+            pass
         elif msgType == CLIENT_OBJECT_SET_FIELD:
             doId = dgi.getUint32()
-            fieldId = dgi.getUint16()
             dcData = dgi.getRemainingBytes()
 
             resp = PyDatagram()
             resp.addUint16(24) # CLIENT_OBJECT_UPDATE_FIELD
             resp.addUint32(doId)
-            resp.addUint16(fieldId)
             resp.appendData(dcData)
         elif msgType == CLIENT_OBJECT_LOCATION:
-            doId = dgi.getUint32()
-            parentId = dgi.getUint32()
-            zoneId = dgi.getUint32()
-
             resp = PyDatagram()
-
             resp.addUint16(102) # CLIENT_OBJECT_LOCATION
-
-            resp.addUint32(doId)
-            resp.addUint32(parentId)
-            resp.addUint32(zoneId)
+            resp.addUint32(dgi.getUint32())
+            resp.addUint32(dgi.getUint32())
+            resp.addUint32(dgi.getUint32())
         elif msgType == CLIENT_OBJECT_DISABLE:
-            doId = dgi.getUint32()
-
-            print('Client is deleting {0}'.format(doId))
-
-            # if the object is in the list of owned objects, we do not want to
-            # delete this object, as it was already generated elsewhere...
-            if doId in self.ownedObjects:
-                return
-
-            # only delete the object if we've previously seen the objects
-            # generate request sent by the StateServer...
-            if not self.hasSeenObject(doId, True):
-                return
-            
-            # double check to prevent sending this more than one time
-            if doId in self.deletedObjectHistory:
-                return
-
-            self.deletedObjectHistory.append(doId)
-
             resp = PyDatagram()
-            resp.addUint16(25) # CLIENT_OBJECT_DISABLE_RESP
-            resp.addUint32(doId)
+            resp.addUint16(25) # CLIENT_OBJECT_DISABLE
+            resp.appendData(dgi.getRemainingBytes())
         elif msgType == CLIENT_ENTER_OBJECT_REQUIRED:
             doId = dgi.getUint32()
             parentId = dgi.getUint32()
@@ -1358,40 +1022,19 @@ class ExtAgent:
             classId = dgi.getUint16()
             dcData = dgi.getRemainingBytes()
 
-            # if the object is in the list of owned objects, we do not want to
-            # generate this object, as it was already generated elsewhere...
-            if doId in self.ownedObjects:
-                return
-            
-            if self.hasSeenObject(doId):
-                return
-
-            if self.interestManager.hasInterestObjectZone(zoneId):
-                resp = PyDatagram()
-                resp.addUint16(34) # CLIENT_CREATE_OBJECT_REQUIRED
-                resp.addUint32(parentId)
-                resp.addUint32(zoneId)
-                resp.addUint16(classId)
-                resp.addUint32(doId)
-                resp.appendData(dcData)
-
-                if doId in self.deletedObjectHistory:
-                    self.deletedObjectHistory.remove(doId)
-
-                if not zoneId in self.seenObjects:
-                    self.seenObjects[zoneId] = []
-                if doId not in self.seenObjects[zoneId]:
-                    self.seenObjects[zoneId].append(doId)
-
+            resp = PyDatagram()
+            resp.addUint16(34) # CLIENT_CREATE_OBJECT_REQUIRED
+            resp.addUint32(parentId)
+            resp.addUint32(zoneId)
+            resp.addUint16(classId)
+            resp.addUint32(doId)
+            resp.appendData(dcData)
         elif msgType == CLIENT_ENTER_OBJECT_REQUIRED_OTHER:
             doId = dgi.getUint32()
             parentId = dgi.getUint32()
             zoneId = dgi.getUint32()
             classId = dgi.getUint16()
             dcData = dgi.getRemainingBytes()
-
-            if zoneId == 1:
-                return
 
             resp = PyDatagram()
             resp.addUint16(35) # CLIENT_CREATE_OBJECT_REQUIRED_OTHER
@@ -1419,8 +1062,6 @@ class ExtAgent:
             self.clientChannel2avId[clientChannel] = doId
 
             self.loadAvProgress.remove(clientChannel >> 32)
-
-            self.ownedObjects.append(doId)
         else:
             self.notify.warning('Received unknown message type %s from Astron' % msgType)
 

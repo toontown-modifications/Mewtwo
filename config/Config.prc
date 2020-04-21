@@ -13,10 +13,11 @@ dc-multiple-inheritance #t
 dc-sort-virtual-inheritance #t
 dc-sort-inheritance-by-file #t
 
-want-gardening #t
-want-randomized-hats #f
-want-av-membership #f
-want-cogdominiums #t
+want-gardening true
+want-randomized-hats false
+want-av-membership true
+want-cogdominiums true
+want-coderedemption true
 
 vfs-mount phase_3 .
 vfs-mount phase_3.5 .

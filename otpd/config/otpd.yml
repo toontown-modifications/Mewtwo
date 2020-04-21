@@ -22,8 +22,11 @@ roles:
       bind: 0.0.0.0:6665
       version: "sv1.0.47.38"
       client:
-          type: libdisney
-          game_name: toon
+          relocate: true
+          add_interest: enabled
+          extagent_id: 5536
+          send_hash: false
+          send_version: false
       channels:
           min: 1000000000
           max: 1009999999

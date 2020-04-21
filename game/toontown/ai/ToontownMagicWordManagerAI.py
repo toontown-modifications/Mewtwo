@@ -39,6 +39,9 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
     def announceGenerate(self):
         MagicWordManagerAI.announceGenerate(self)
 
+        self.air.netMessenger.register(1, 'magicWord')
+        self.air.netMessenger.accept('magicWord', self, self.setMagicWordExt)
+
     def disable(self):
         MagicWordManagerAI.disable(self)
 
@@ -552,9 +555,14 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
 
         msg = 'Firework show of type {0} has been started!'.format(showName)
         self.sendResponseMessage(avId, msg)
+    
+    def setMagicWordExt(self, magicWord, avId):
+        self.setMagicWord(magicWord, avId, self.air.doId2do.get(avId).zoneId, '', sentFromExt = True)
 
-    def setMagicWord(self, magicWord, avId, zoneId, signature):
-        avId = self.air.getAvatarIdFromSender()
+    def setMagicWord(self, magicWord, avId, zoneId, signature, sentFromExt = False):
+        if not sentFromExt:
+            avId = self.air.getAvatarIdFromSender()
+
         av = self.air.doId2do.get(avId)
 
         # Chop off the ~ at the start as its not needed, split the Magic Word and make the Magic Word case insensitive.
