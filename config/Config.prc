@@ -20,6 +20,8 @@ want-cogdominiums true
 want-coderedemption true
 want-server-debugging false
 
+max-code-redemption-attempts 5
+
 vfs-mount phase_3 .
 vfs-mount phase_3.5 .
 vfs-mount phase_4 .

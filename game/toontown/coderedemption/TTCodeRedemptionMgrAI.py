@@ -26,6 +26,9 @@ class TTCodeRedemptionMgrAI(DistributedObjectAI):
 
         self.air = air
 
+        self.failedAttempts = 0
+        self.maxCodeAttempts = config.GetInt('max-code-redemption-attempts', 5)
+
     def announceGenerate(self):
         DistributedObjectAI.announceGenerate(self)
 
@@ -47,17 +50,28 @@ class TTCodeRedemptionMgrAI(DistributedObjectAI):
         if not av:
             self.air.writeServerEvent('suspicious', avId = avId, issue = 'Invalid avatar tried to redeem a code')
             return
-        
+
         # Do we want coderedemption?
         if not self.air.wantCodeRedemption:
             self.sendUpdateToAvatarId(avId, 'redeemCodeResult', [context, TTCodeRedemptionConsts.RedeemErrors.SystemUnavailable, 0])
             return
-        
+
+        if self.failedAttempts > self.maxCodeAttempts:
+            self.sendUpdateToAvatarId(avId, 'redeemCodeResult', [context, TTCodeRedemptionConsts.RedeemErrors.TooManyAttempts, 0])
+            self.failedAttempts = 0
+            return
+
         # Constants
         delivered = False
 
         # Iterate over these items and deliver item to player.
         items = self.getItemsForCode(code)
+
+        if items == []:
+            # This code is not valid.
+            self.sendUpdateToAvatarId(avId, 'redeemCodeResult', [context, TTCodeRedemptionConsts.RedeemErrors.CodeDoesntExist, 0])
+            self.failedAttempts += 1
+            return
 
         for item in items:
             if isinstance(item, CatalogInvalidItem): # Invalid item.
