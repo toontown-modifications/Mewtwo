@@ -2,10 +2,10 @@ from direct.directnotify.DirectNotifyGlobal import directNotify
 from direct.distributed.AstronInternalRepository import AstronInternalRepository
 from direct.distributed.DistributedObjectUD import DistributedObjectUD
 from direct.showbase import PythonUtil
-from DistributedDirectoryAI import DistributedDirectoryAI
+from game.otp.distributed.DistributedDirectoryAI import DistributedDirectoryAI
 from game.otp.uberdog.DistributedChatManagerUD import DistributedChatManagerUD
 from game.toontown.parties.ToontownTimeManager import ToontownTimeManager
-import OtpDoGlobals
+from game.otp.distributed import OtpDoGlobals
 import __builtin__, time
 
 __builtin__.isClient = lambda: PythonUtil.isClient()

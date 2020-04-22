@@ -3,7 +3,7 @@ from direct.distributed.MsgTypes import *
 from direct.directnotify.DirectNotifyGlobal import directNotify
 from game.toontown.makeatoon.NameGenerator import NameGenerator
 from game.toontown.toon.ToonDNA import ToonDNA
-from OtpDoGlobals import *
+from game.otp.distributed.OtpDoGlobals import *
 from game.otp.otpbase import OTPGlobals
 from game.toontown.toonbase import TTLocalizer
 from game.toontown.hood import ZoneUtil
