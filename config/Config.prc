@@ -19,6 +19,7 @@ want-av-membership true
 want-cogdominiums true
 want-coderedemption true
 want-server-debugging false
+want-do-live-updates true
 
 max-code-redemption-attempts 5
 

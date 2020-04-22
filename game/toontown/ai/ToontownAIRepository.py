@@ -1,26 +1,23 @@
 from panda3d.core import UniqueIdAllocator
+from panda3d.toontown import DNAStorage, loadDNAFileAI, DNAGroup, DNAVisGroup
 
 from direct.directnotify.DirectNotifyGlobal import directNotify
+from direct.distributed.AstronInternalRepository import AstronInternalRepository
+from direct.distributed.DistributedObjectAI import DistributedObjectAI
 from direct.distributed.PyDatagram import PyDatagram
-from direct.distributed import MsgTypes
-from direct.distributed.ClockDelta import globalClockDelta
-from direct.task import Task
 
-from game.otp.distributed import OtpDoGlobals, MessageTypes
-from game.otp.ai.AIZoneData import AIZoneDataStore
 from game.otp.ai.TimeManagerAI import TimeManagerAI
-from game.otp.ai.BanManagerAI import BanManagerAI
-from game.otp.friends.FriendManagerAI import FriendManagerAI
-
-from game.toontown.distributed.ToontownInternalRepository import ToontownInternalRepository
 from game.toontown.distributed.ToontownDistrictAI import ToontownDistrictAI
 from game.toontown.distributed.ToontownDistrictStatsAI import ToontownDistrictStatsAI
 from game.toontown.ai.HolidayManagerAI import HolidayManagerAI
-from game.toontown.catalog.CatalogManagerAI import CatalogManagerAI
-from game.toontown.ai.WelcomeValleyManagerAI import WelcomeValleyManagerAI
 from game.toontown.toonbase import ToontownGlobals
+from game.toontown.catalog.CatalogManagerAI import CatalogManagerAI
+from direct.showbase import PythonUtil
+from game.otp.distributed import OtpDoGlobals
+from game.otp.ai.AIZoneData import AIZoneDataStore
+from game.toontown.ai.WelcomeValleyManagerAI import WelcomeValleyManagerAI
+from game.toontown.uberdog.DistributedInGameNewsMgrAI import DistributedInGameNewsMgrAI
 from game.toontown.toon import NPCToons
-
 from game.toontown.hood.TTHoodDataAI import TTHoodDataAI
 from game.toontown.hood.DDHoodDataAI import DDHoodDataAI
 from game.toontown.hood.OZHoodDataAI import OZHoodDataAI
@@ -36,21 +33,15 @@ from game.toontown.hood.BossbotHQDataAI import BossbotHQDataAI
 from game.toontown.hood.GSHoodDataAI import GSHoodDataAI
 from game.toontown.hood.OZHoodDataAI import OZHoodDataAI
 from game.toontown.hood.GZHoodDataAI import GZHoodDataAI
-
 from game.toontown.hood import ZoneUtil
 from game.toontown.building.DistributedTrophyMgrAI import DistributedTrophyMgrAI
 from game.toontown.pets.PetManagerAI import PetManagerAI
 from game.toontown.suit.SuitInvasionManagerAI import SuitInvasionManagerAI
 from game.toontown.ai.NewsManagerAI import NewsManagerAI
 from game.toontown.estate.EstateManagerAI import EstateManagerAI
-
 from game.toontown.safezone.SafeZoneManagerAI import SafeZoneManagerAI
-from game.toontown.safezone.DistributedPartyGateAI import DistributedPartyGateAI
-
-from game.toontown.uberdog.DistributedInGameNewsMgrAI import DistributedInGameNewsMgrAI
 from game.toontown.fishing.FishManagerAI import FishManagerAI
 from game.toontown.fishing.FishBingoManagerAI import FishBingoManagerAI
-
 from game.toontown.coghq.FactoryManagerAI import FactoryManagerAI
 from game.toontown.coghq.MintManagerAI import MintManagerAI
 from game.toontown.coghq.LawOfficeManagerAI import LawOfficeManagerAI
@@ -64,46 +55,35 @@ from game.toontown.racing.DistributedViewPadAI import DistributedViewPadAI
 from game.toontown.racing.DistributedStartingBlockAI import DistributedStartingBlockAI, DistributedViewingBlockAI
 from game.toontown.racing.DistributedLeaderBoardAI import DistributedLeaderBoardAI
 from game.toontown.racing.RaceManagerAI import RaceManagerAI
-
 from game.toontown.ai.ToontownMagicWordManagerAI import ToontownMagicWordManagerAI
-
 from game.toontown.parties.ToontownTimeManager import ToontownTimeManager
-
 from game.toontown.ai.QuestManagerAI import QuestManagerAI
-
 from game.toontown.tutorial.TutorialManagerAI import TutorialManagerAI
-
-from panda3d.toontown import DNAStorage, loadDNAFileAI, DNAGroup, DNAVisGroup
-
-from game.toontown.ai.CogPageManagerAI import CogPageManagerAI
-
-from game.toontown.coderedemption.TTCodeRedemptionMgrAI import TTCodeRedemptionMgrAI
-
-from game.toontown.uberdog.DistributedPartyManagerAI import DistributedPartyManagerAI
-
-from game.toontown.pets.PetManagerAI import PetManagerAI
-
+from game.toontown.safezone.DistributedPartyGateAI import DistributedPartyGateAI
 from game.toontown.effects.DistributedFireworkShowAI import DistributedFireworkShowAI
 from game.toontown.effects import FireworkShows
-
+from game.otp.ai.BanManagerAI import BanManagerAI
+from game.toontown.ai.CogPageManagerAI import CogPageManagerAI
+from game.otp.friends.FriendManagerAI import FriendManagerAI
+from game.toontown.coderedemption.TTCodeRedemptionMgrAI import TTCodeRedemptionMgrAI
+from game.toontown.uberdog.DistributedPartyManagerAI import DistributedPartyManagerAI
 from game.toontown.ai.DistributedPolarPlaceEffectMgrAI import DistributedPolarPlaceEffectMgrAI
 from game.toontown.ai.DistributedResistanceEmoteMgrAI import DistributedResistanceEmoteMgrAI
 
-import os, time, random
+import __builtin__, time, os
 
-class ToontownAIRepository(ToontownInternalRepository):
-    notify = directNotify.newCategory('ToontownAIRepository')
+__builtin__.isClient = lambda: PythonUtil.isClient()
 
+class ToontownAIRepository(AstronInternalRepository):
+    dbId = 4003
     GameGlobalsId = OtpDoGlobals.OTP_DO_ID_TOONTOWN
 
-    def __init__(self, baseChannel, stateServerChannel, districtName):
-        ToontownInternalRepository.__init__(self, baseChannel, stateServerChannel, dcSuffix = 'AI')
+    def __init__(self):
+        AstronInternalRepository.__init__(self, config.GetInt('air-base-channel', 0), config.GetInt('air-stateserver', 0), dcSuffix = 'AI')
 
-        self.districtName = districtName
         self.districtPopulation = 0
 
         self.zoneAllocator = UniqueIdAllocator(ToontownGlobals.DynamicZonesBegin, ToontownGlobals.DynamicZonesEnd)
-
         self.zoneDataStore = AIZoneDataStore()
 
         # Dictionaries:
@@ -118,49 +98,196 @@ class ToontownAIRepository(ToontownInternalRepository):
         # What we want to have on the server:
         self.wantCogdominiums = config.GetBool('want-cogdominiums', False)
         self.useAllMinigames = config.GetBool('use-all-minigames', False)
+        self.wantCodeRedemption = config.GetBool('want-coderedemption', False)
 
         self.cogSuitMessageSent = False
 
-        self.minChannel = 400000000
-        self.maxChannel = 499999999
+    def getAvatarIdFromSender(self):
+        return self.getMsgSender() & 0xFFFFFFFF
 
-        self.notify.setInfo(True)
+    def getAccountIdFromSender(self):
+        return (self.getMsgSender() >> 32) & 0xFFFFFFFF
 
-        # Let them know the AI is starting up: 
-        self.notify.info('District {0} is now starting up.'.format(districtName))
+    def GetPuppetConnectionChannel(self, doId):
+        return doId + (1001 << 32)
+
+    def GetAccountConnectionChannel(self, doId):
+        return doId + (1003 << 32)
+
+    def GetAccountIDFromChannelCode(self, channel):
+        return channel >> 32
+
+    def GetAvatarIDFromChannelCode(self, channel):
+        return channel & 0xffffffff
+
+    def getTrackClsends(self):
+        if config.GetBool('want-track-clsends', False):
+            return True
+
+        return False
+
+    def doLiveUpdates(self):
+        if config.GetBool('want-do-live-updates', False):
+            return True
+
+        return False
+
+    def incrementPopulation(self):
+        self.districtPopulation += 1
+        self.districtStats.b_setAvatarCount(self.districtStats.getAvatarCount() + 1)
+
+    def decrementPopulation(self):
+        self.districtPopulation -= 1
+        self.districtStats.b_setAvatarCount(self.districtStats.getAvatarCount() - 1)
+
+    def sendQueryToonMaxHp(self, doId, checkResult):
+        self.notify.info('sendQueryToonMaxHp ({0}, {1})'.format(doId, checkResult))
+
+    def _isValidPlayerLocation(self, parentId, zoneId):
+        if not parentId or zoneId > ToontownGlobals.DynamicZonesEnd or zoneId is 0:
+            return False
+
+        return True
+
+    def getAvatarExitEvent(self, doId):
+        return 'distObjDelete-{0}'.format(doId)
+
+    def getZoneDataStore(self):
+        return self.zoneDataStore
+
+    def sendSetZone(self, obj, zoneId):
+        obj.b_setLocation(obj.parentId, zoneId)
+
+    def allocateZone(self):
+        return self.zoneAllocator.allocate()
+
+    def deallocateZone(self, zone):
+        self.zoneAllocator.free(zone)
+
+    def getAvatarDisconnectReason(self, avId):
+        return self.timeManager.avId2disconnectcode.get(avId, ToontownGlobals.DisconnectUnknown)
+
+    def trueUniqueName(self, idString):
+        return self.uniqueName(idString)
 
     def handleConnected(self):
-        ToontownInternalRepository.handleConnected(self)
+        AstronInternalRepository.handleConnected(self)
 
+        self.netMessenger.register(0, 'registerShard')
+
+        self.createObjects()
+
+    def createObjects(self):
         self.districtId = self.allocateChannel()
 
-        self.distributedDistrict = ToontownDistrictAI(self)
-        self.distributedDistrict.setName(self.districtName)
-        self.distributedDistrict.generateWithRequiredAndId(self.districtId, self.getGameDoId(), OtpDoGlobals.OTP_ZONE_ID_MANAGEMENT)
-        self.distributedDistrict.setAI(self.ourChannel)
+        # Generate our district.
+        self.district = ToontownDistrictAI(self)
+        self.district.setName('Sillyville')
+        self.district.generateWithRequiredAndId(self.districtId, self.getGameDoId(), OtpDoGlobals.OTP_ZONE_ID_DISTRICTS)
+        self.district.setAI(self.ourChannel)
 
         self.districtStats = ToontownDistrictStatsAI(self)
         self.districtStats.settoontownDistrictId(self.districtId)
         self.districtStats.generateWithRequiredAndId(self.allocateChannel(), self.getGameDoId(), OtpDoGlobals.OTP_ZONE_ID_DISTRICTS_STATS)
 
-        self.notify.info('Generating managers...')
-        self.generateManagers()
+        self.notify.info('Creating managers...')
+        self.createManagers()
 
         self.notify.info('Creating zones...')
         self.createZones()
 
-        self.distributedDistrict.b_setAvailable(1)
+        self.district.b_setAvailable(1)
 
         # Inform the ExtAgent of us.
-        self.netMessenger.send('registerShard', [self.districtId, self.districtName])
+        self.netMessenger.send('registerShard', [self.districtId, config.GetString('air-shardname', 'District')])
 
-        self.notify.info('District (AI) {0} is now ready.'.format(self.districtName))
+    def createManagers(self):
+        # Generate our TimeManagerAI.
+        self.timeManager = TimeManagerAI(self)
+        self.timeManager.generateWithRequired(OtpDoGlobals.OTP_ZONE_ID_MANAGEMENT)
+
+        self.holidayManager = HolidayManagerAI(self)
+        self.catalogManager = CatalogManagerAI(self)
+
+        self.welcomeValleyManager = WelcomeValleyManagerAI(self)
+        self.welcomeValleyManager.generateWithRequired(OtpDoGlobals.OTP_ZONE_ID_MANAGEMENT)
+
+        self.inGameNewsMgr = DistributedInGameNewsMgrAI(self)
+        self.inGameNewsMgr.generateWithRequired(OtpDoGlobals.OTP_ZONE_ID_MANAGEMENT)
+
+        self.trophyMgr = DistributedTrophyMgrAI(self)
+        self.trophyMgr.generateWithRequired(OtpDoGlobals.OTP_ZONE_ID_MANAGEMENT)
+
+        self.petMgr = PetManagerAI(self)
+        self.suitInvasionManager = SuitInvasionManagerAI(self)
+
+        self.newsManager = NewsManagerAI(self)
+        self.newsManager.generateWithRequired(OtpDoGlobals.OTP_ZONE_ID_MANAGEMENT)
+
+        self.estateMgr = EstateManagerAI(self)
+        self.estateMgr.generateWithRequired(OtpDoGlobals.OTP_ZONE_ID_MANAGEMENT)
+
+        self.safeZoneManager = SafeZoneManagerAI(self)
+        self.safeZoneManager.generateWithRequired(OtpDoGlobals.OTP_ZONE_ID_MANAGEMENT)
+
+        self.fishManager = FishManagerAI(self)
+        self.fishBingoManager = FishBingoManagerAI(self)
+
+        self.factoryMgr = FactoryManagerAI(self)
+
+        self.mintMgr = MintManagerAI(self)
+
+        self.lawMgr = LawOfficeManagerAI(self)
+
+        self.countryClubMgr = CountryClubManagerAI(self)
+
+        self.raceMgr = RaceManagerAI(self)
+
+        self.magicWordMgr = ToontownMagicWordManagerAI(self)
+        self.magicWordMgr.generateWithRequired(OtpDoGlobals.OTP_ZONE_ID_MANAGEMENT)
+
+        self.toontownTimeManager = ToontownTimeManager(serverTimeUponLogin = int(time.time()), globalClockRealTimeUponLogin = globalClock.getRealTime())
+
+        self.banManager = BanManagerAI() # Disney's BanManager
+
+        self.questManager = QuestManagerAI(self)
+
+        self.tutorialManager = TutorialManagerAI(self)
+        self.tutorialManager.generateWithRequired(OtpDoGlobals.OTP_ZONE_ID_MANAGEMENT)
+
+        self.promotionMgr = PromotionManagerAI(self)
+
+        self.cogPageManager = CogPageManagerAI(self)
+
+        self.friendManager = FriendManagerAI(self)
+        self.friendManager.generateWithRequired(OtpDoGlobals.OTP_ZONE_ID_MANAGEMENT)
+
+        self.deliveryManager = self.generateGlobalObject(OtpDoGlobals.OTP_DO_ID_TOONTOWN_DELIVERY_MANAGER, 'DistributedDeliveryManager')
+
+        self.codeRedemptionMgr = TTCodeRedemptionMgrAI(self)
+        self.codeRedemptionMgr.generateWithRequired(OtpDoGlobals.OTP_ZONE_ID_MANAGEMENT)
+
+        self.centralLogger = self.generateGlobalObject(OtpDoGlobals.OTP_DO_ID_CENTRAL_LOGGER, 'CentralLogger')
+
+        self.partyManager = DistributedPartyManagerAI(self)
+        self.partyManager.generateWithRequired(OtpDoGlobals.OTP_ZONE_ID_MANAGEMENT)
+
+        self.cogSuitMgr = CogSuitManagerAI(self)
+
+        self.dataStoreManager = self.generateGlobalObject(OtpDoGlobals.OTP_DO_ID_TOONTOWN_TEMP_STORE_MANAGER, 'DistributedDataStoreManager')
+
+        self.polarPlaceEffectMgr = DistributedPolarPlaceEffectMgrAI(self)
+        self.polarPlaceEffectMgr.generateWithRequired(3821)
+
+        self.resistanceEmoteMgr = DistributedResistanceEmoteMgrAI(self)
+        self.resistanceEmoteMgr.generateWithRequired(9720)
 
     def createHood(self, hoodCtr, zoneId):
         # Bossbot HQ doesn't use DNA, so we skip over that.
         if zoneId != ToontownGlobals.BossbotHQ:
             self.dnaStoreMap[zoneId] = DNAStorage()
             self.dnaDataMap[zoneId] = self.loadDNAFileAI(self.dnaStoreMap[zoneId], self.genDNAFileName(zoneId))
+
             if zoneId in ToontownGlobals.HoodHierarchy:
                 for streetId in ToontownGlobals.HoodHierarchy[zoneId]:
                     self.dnaStoreMap[streetId] = DNAStorage()
@@ -279,11 +406,13 @@ class ToontownAIRepository(ToontownInternalRepository):
 
         # Assign the initial suit buildings.
         self.notify.info('Assigning initial Cog buildings and Field Offices...')
+
         for suitPlanner in self.suitPlanners.values():
             suitPlanner.assignInitialSuitBuildings()
-        
+
         # Fireworks task.
         thetime = time.time() % 3600
+
         if thetime < 60: 
             taskMgr.doMethodLater(1, self.startFireworks, 'fireworks-taskmgr-hourly')
         else:
@@ -296,6 +425,7 @@ class ToontownAIRepository(ToontownInternalRepository):
         zoneId = ZoneUtil.getCanonicalZoneId(zoneId)
         hoodId = ZoneUtil.getCanonicalHoodId(zoneId)
         hood = ToontownGlobals.dnaMap[hoodId]
+
         if hoodId == zoneId:
             zoneId = 'sz'
             phase = ToontownGlobals.phaseMap[hoodId]
@@ -315,6 +445,7 @@ class ToontownAIRepository(ToontownInternalRepository):
     def findFishingPonds(self, dnaData, zoneId, area):
         fishingPonds = []
         fishingPondGroups = []
+
         if isinstance(dnaData, DNAGroup) and 'fishing_pond' in dnaData.getName():
             fishingPondGroups.append(dnaData)
             pond = self.fishManager.generatePond(area, zoneId)
@@ -322,6 +453,7 @@ class ToontownAIRepository(ToontownInternalRepository):
         else:
             if isinstance(dnaData, DNAVisGroup):
                 zoneId = ZoneUtil.getTrueZoneId(int(dnaData.getName().split(':')[0]), zoneId)
+
         for i in xrange(dnaData.getNumChildren()):
             foundFishingPonds, foundFishingPondGroups = self.findFishingPonds(dnaData.at(i), zoneId, area)
             fishingPonds.extend(foundFishingPonds)
@@ -331,9 +463,11 @@ class ToontownAIRepository(ToontownInternalRepository):
 
     def findFishingSpots(self, dnaData, fishingPond):
         fishingSpots = []
+
         if isinstance(dnaData, DNAGroup) and dnaData.getName()[:13] == 'fishing_spot_':
             spot = self.fishManager.generateSpots(dnaData, fishingPond)
             fishingSpots.append(spot)
+
         for i in xrange(dnaData.getNumChildren()):
             foundFishingSpots = self.findFishingSpots(dnaData.at(i), fishingPond)
             fishingSpots.extend(foundFishingSpots)
@@ -342,6 +476,7 @@ class ToontownAIRepository(ToontownInternalRepository):
 
     def findRacingPads(self, dnaData, zoneId, area, type = 'racing_pad', overrideDNAZone = False):
         racingPads, racingPadGroups = [], []
+
         if type in dnaData.getName():
             if type == 'racing_pad':
                 nameSplit = dnaData.getName().split('_')
@@ -355,12 +490,14 @@ class ToontownAIRepository(ToontownInternalRepository):
                 racePad.generateWithRequired(zoneId)
                 racingPads.append(racePad)
                 racingPadGroups.append(dnaData)
+
             elif type == 'viewing_pad':
                 viewPad = DistributedViewPadAI(self)
                 viewPad.setArea(area)
                 viewPad.generateWithRequired(zoneId)
                 racingPads.append(viewPad)
                 racingPadGroups.append(dnaData)
+
         for i in xrange(dnaData.getNumChildren()):
             foundRacingPads, foundRacingPadGroups = self.findRacingPads(dnaData.at(i), zoneId, area, type, overrideDNAZone)
             racingPads.extend(foundRacingPads)
@@ -370,9 +507,11 @@ class ToontownAIRepository(ToontownInternalRepository):
 
     def findStartingBlocks(self, dnaData, pad):
         startingBlocks = []
+
         for i in xrange(dnaData.getNumChildren()):
             groupName = dnaData.getName()
             blockName = dnaData.at(i).getName()
+
             if 'starting_block' in blockName:
                 cls = DistributedStartingBlockAI if 'racing_pad' in groupName else DistributedViewingBlockAI
                 x, y, z = dnaData.at(i).getPos()
@@ -400,6 +539,7 @@ class ToontownAIRepository(ToontownInternalRepository):
 
     def findPartyHats(self, dnaData, zoneId):
         partyHats = []
+
         if 'prop_party_gate' in dnaData.getName():
             partyHat = DistributedPartyGateAI(self)
             partyHat.generateWithRequired(zoneId)
@@ -410,139 +550,6 @@ class ToontownAIRepository(ToontownInternalRepository):
             partyHats.extend(foundPartyHats)
 
         return partyHats
-
-    def generateManagers(self):
-        self.timeManager = TimeManagerAI(self)
-        self.timeManager.generateWithRequired(OtpDoGlobals.OTP_ZONE_ID_MANAGEMENT)
-
-        self.holidayManager = HolidayManagerAI(self)
-        self.catalogManager = CatalogManagerAI(self)
-
-        self.welcomeValleyManager = WelcomeValleyManagerAI(self)
-        self.welcomeValleyManager.generateWithRequired(OtpDoGlobals.OTP_ZONE_ID_MANAGEMENT)
-
-        self.trophyMgr = DistributedTrophyMgrAI(self)
-        self.trophyMgr.generateWithRequired(OtpDoGlobals.OTP_ZONE_ID_MANAGEMENT)
-
-        self.petMgr = PetManagerAI(self)
-        self.suitInvasionManager = SuitInvasionManagerAI(self)
-
-        self.newsManager = NewsManagerAI(self)
-        self.newsManager.generateWithRequired(OtpDoGlobals.OTP_ZONE_ID_MANAGEMENT)
-        self.estateMgr = EstateManagerAI(self)
-        self.estateMgr.generateWithRequired(OtpDoGlobals.OTP_ZONE_ID_MANAGEMENT)
-        self.safeZoneManager = SafeZoneManagerAI(self)
-        self.safeZoneManager.generateWithRequired(OtpDoGlobals.OTP_ZONE_ID_MANAGEMENT)
-
-        self.inGameNewsMgr = DistributedInGameNewsMgrAI(self)
-        self.inGameNewsMgr.generateWithRequired(OtpDoGlobals.OTP_ZONE_ID_MANAGEMENT)
-
-        self.fishManager = FishManagerAI(self)
-        self.fishBingoManager = FishBingoManagerAI(self)
-
-        self.factoryMgr = FactoryManagerAI(self)
-        self.mintMgr = MintManagerAI(self)
-        self.lawMgr = LawOfficeManagerAI(self)
-        self.countryClubMgr = CountryClubManagerAI(self)
-        self.raceMgr = RaceManagerAI(self)
-
-        self.magicWordMgr = ToontownMagicWordManagerAI(self)
-        self.magicWordMgr.generateWithRequired(OtpDoGlobals.OTP_ZONE_ID_MANAGEMENT)
-
-        self.toontownTimeManager = ToontownTimeManager(serverTimeUponLogin = int(time.time()), globalClockRealTimeUponLogin = globalClock.getRealTime())
-
-        self.banManager = BanManagerAI() # Disney's BanManager
-
-        self.questManager = QuestManagerAI(self)
-
-        self.tutorialManager = TutorialManagerAI(self)
-        self.tutorialManager.generateWithRequired(OtpDoGlobals.OTP_ZONE_ID_MANAGEMENT)
-
-        self.promotionMgr = PromotionManagerAI(self)
-
-        self.cogPageManager = CogPageManagerAI(self)
-
-        self.friendManager = FriendManagerAI(self)
-        self.friendManager.generateWithRequired(OtpDoGlobals.OTP_ZONE_ID_MANAGEMENT)
-
-        self.deliveryManager = self.generateGlobalObject(OtpDoGlobals.OTP_DO_ID_TOONTOWN_DELIVERY_MANAGER, 'DistributedDeliveryManager')
-
-        self.codeRedemptionMgr = TTCodeRedemptionMgrAI(self)
-        self.codeRedemptionMgr.generateWithRequired(OtpDoGlobals.OTP_ZONE_ID_MANAGEMENT)
-
-        self.centralLogger = self.generateGlobalObject(OtpDoGlobals.OTP_DO_ID_CENTRAL_LOGGER, 'CentralLogger')
-
-        self.partyManager = DistributedPartyManagerAI(self)
-        self.partyManager.generateWithRequired(OtpDoGlobals.OTP_ZONE_ID_MANAGEMENT)
-
-        self.cogSuitMgr = CogSuitManagerAI(self)
-
-        self.dataStoreManager = self.generateGlobalObject(OtpDoGlobals.OTP_DO_ID_TOONTOWN_TEMP_STORE_MANAGER, 'DistributedDataStoreManager')
-
-        self.polarPlaceEffectMgr = DistributedPolarPlaceEffectMgrAI(self)
-        self.polarPlaceEffectMgr.generateWithRequired(3821)
-
-        self.resistanceEmoteMgr = DistributedResistanceEmoteMgrAI(self)
-        self.resistanceEmoteMgr.generateWithRequired(9720)
-
-    def getTrackClsends(self):
-        if config.GetBool('want-track-clsends', False):
-            return True
-
-        return False
-
-    def doLiveUpdates(self):
-        if config.GetBool('want-do-live-updates', False):
-            return True
-
-        return False
-
-    def sendShardInfo(self):
-        dg = PyDatagram()
-        dg.addServerHeader(self.serverId, self.ourChannel, MessageTypes.STATESERVER_UPDATE_SHARD)
-        dg.addString(self.districtName)
-        dg.addUint32(self.districtPopulation)
-        self.send(dg)
-
-    def incrementPopulation(self):
-        self.districtPopulation += 1
-        self.districtStats.b_setAvatarCount(self.districtStats.getAvatarCount() + 1)
-        self.sendShardInfo()
-
-    def decrementPopulation(self):
-        self.districtPopulation -= 1
-        self.districtStats.b_setAvatarCount(self.districtStats.getAvatarCount() - 1)
-        self.sendShardInfo()
-
-    def sendQueryToonMaxHp(self, doId, checkResult):
-        self.notify.info('sendQueryToonMaxHp ({0}, {1})'.format(doId, checkResult))
-
-    def _isValidPlayerLocation(self, parentId, zoneId):
-        if not parentId or zoneId > ToontownGlobals.DynamicZonesEnd or zoneId is 0:
-            return False
-
-        return True
-
-    def getZoneDataStore(self):
-        return self.zoneDataStore
-
-    def getAvatarExitEvent(self, doId):
-        return 'distObjDelete-{0}'.format(doId)
-
-    def sendSetZone(self, obj, zoneId):
-        obj.b_setLocation(obj.parentId, zoneId)
-
-    def allocateZone(self):
-        return self.zoneAllocator.allocate()
-
-    def deallocateZone(self, zone):
-        self.zoneAllocator.free(zone)
-
-    def getAvatarDisconnectReason(self, avId):
-        return self.timeManager.avId2disconnectcode.get(avId, ToontownGlobals.DisconnectUnknown)
-
-    def trueUniqueName(self, idString):
-        return self.uniqueName(idString)
 
     def startFireworks(self, task):
         if simbase.air.holidayManager.isHolidayRunning(ToontownGlobals.COMBO_FIREWORKS):
