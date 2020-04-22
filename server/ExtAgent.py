@@ -11,7 +11,7 @@ from game.toontown.toonbase import ToontownGlobals
 from game.toontown.chat.TTWhiteList import TTWhiteList
 from panda3d.toontown import DNAStorage, loadDNAFileAI
 from game import genDNAFileName, extractGroupName
-import json, time, os, random, string, collections
+import json, time, os, random
 
 class JSONBridge:
 
@@ -963,43 +963,6 @@ class ExtAgent:
                     experience,
                     trackBonusLevel
                 ]
-
-                # Avatar information.
-                dataCluster = PyDatagram()
-
-                dataCluster.addString(name)
-                dataCluster.addString(inventory)
-
-                for track in trackAccess:
-                    dataCluster.addInt16(int(track))
-
-                dataCluster.addInt16(hp)
-                dataCluster.addInt16(maxHp)
-                dataCluster.addUint32(defaultShard)
-                dataCluster.addUint32(lastHood)
-                dataCluster.addString(dnaString)
-                dataCluster.addBlob(experience)
-
-                print(trackBonusLevel)
-                print(type(inventory))
-                print(type(trackAccess))
-
-                data = PyDatagramIterator(dataCluster).getMessage()
-
-                # Our avatar details response.
-                resp = PyDatagram()
-
-                resp.addUint16(15) # CLIENT_GET_AVATAR_DETAILS_RESP
-
-                resp.addUint32(avatarId)
-                resp.addUint8(0)
-                resp.appendData(data)
-
-                # Send it.
-                dg = PyDatagram()
-                dg.addServerHeader(clientChannel, self.air.ourChannel, CLIENTAGENT_SEND_DATAGRAM)
-                dg.addString(resp.getMessage())
-                self.air.send(dg)
 
             self.air.dbInterface.queryObject(self.air.dbId, avatarId, handleAvatar)
         elif msgType == 81: # CLIENT_GET_PET_DETAILS
