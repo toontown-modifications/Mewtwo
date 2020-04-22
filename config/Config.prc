@@ -18,6 +18,7 @@ want-randomized-hats false
 want-av-membership true
 want-cogdominiums true
 want-coderedemption true
+want-server-debugging false
 
 vfs-mount phase_3 .
 vfs-mount phase_3.5 .

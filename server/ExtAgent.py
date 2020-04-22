@@ -10,22 +10,8 @@ from game.toontown.hood import ZoneUtil
 from game.toontown.toonbase import ToontownGlobals
 from game.toontown.chat.TTWhiteList import TTWhiteList
 from panda3d.toontown import DNAStorage, loadDNAFileAI
+from game import genDNAFileName, extractGroupName
 import json, time, os, random, string, collections
-
-def genDNAFileName(zoneId):
-    zoneId = ZoneUtil.getCanonicalZoneId(zoneId)
-    hoodId = ZoneUtil.getCanonicalHoodId(zoneId)
-    hood = ToontownGlobals.dnaMap[hoodId]
-    if hoodId == zoneId:
-        zoneId = 'sz'
-        phase = ToontownGlobals.phaseMap[hoodId]
-    else:
-        phase = ToontownGlobals.streetPhaseMap[hoodId]
-
-    if 'outdoor_zone' in hood or 'golf_zone' in hood:
-        phase = '6'
-
-    return 'phase_%s/dna/%s_%s.dna' % (phase, hood, zoneId)
 
 class JSONBridge:
 
@@ -88,6 +74,9 @@ class ExtAgent:
 
         self.clientChannel2avId = {}
         self.clientChannel2handle = {}
+        self.dnaStores = {}
+
+        self.wantServerDebug = config.GetBool('want-server-debugging', False)
 
     def sendEject(self, clientChannel, errorCode, errorStr):
         dg = PyDatagram()
@@ -164,6 +153,56 @@ class ExtAgent:
         dg.addString(resp.getMessage())
         self.air.send(dg)
 
+    def getInStreetBranch(self, zoneId):
+        if not ZoneUtil.isPlayground(zoneId):
+            where = ZoneUtil.getWhereName(zoneId, True)
+            return where == 'street'
+
+        return False
+
+    def getInCogHQ(self, zoneId):
+        if ZoneUtil.isCogHQZone(zoneId):
+            return True
+
+        return False
+
+    def getVisBranchZones(self, zoneId, isCogHQ = False):
+        branchZoneId = ZoneUtil.getBranchZone(zoneId)
+        dnaStore = self.dnaStores.get(branchZoneId)
+
+        if zoneId in (6100, 6101, 19000, 19001):
+            # This is ToonLand.
+            return []
+
+        if zoneId in (ToontownGlobals.SellbotLobby, ToontownGlobals.LawbotOfficeExt, ToontownGlobals.LawbotLobby, ToontownGlobals.BossbotHQ, ToontownGlobals.CashbotLobby):
+            return []
+
+        if not dnaStore:
+            dnaStore = DNAStorage()
+            dnaFileName = genDNAFileName(branchZoneId)
+            loadDNAFileAI(dnaStore, dnaFileName)
+            self.dnaStores[branchZoneId] = dnaStore
+
+        zoneVisDict = {}
+
+        for i in xrange(dnaStore.getNumDNAVisGroupsAI()):
+            groupFullName = dnaStore.getDNAVisGroupName(i)
+            visGroup = dnaStore.getDNAVisGroupAI(i)
+            visZoneId = int(extractGroupName(groupFullName))
+            visZoneId = ZoneUtil.getTrueZoneId(visZoneId, zoneId)
+            visibles = []
+
+            for i in xrange(visGroup.getNumVisibles()):
+                visibles.append(int(visGroup.getVisibleName(i)))
+
+            visibles.append(ZoneUtil.getBranchZone(visZoneId))
+            zoneVisDict[visZoneId] = visibles
+
+        if not isCogHQ:
+            return zoneVisDict[zoneId]
+        else:
+            return zoneVisDict.values()[0]
+
     def handleDatagram(self, dgi):
         """
         This handles datagrams coming directly from the Toontown 2013 client.
@@ -174,7 +213,8 @@ class ExtAgent:
         clientChannel = dgi.getUint64()
         msgType = dgi.getUint16()
 
-        print('handleDatagram: {0}:{1}'.format(clientChannel, msgType))
+        if self.wantServerDebug:
+            print('handleDatagram: {0}:{1}'.format(clientChannel, msgType))
 
         if msgType == 3: # CLIENT_GET_AVATARS
 
@@ -817,56 +857,53 @@ class ExtAgent:
             context = dgi.getUint32()
             parentId = dgi.getUint32()
             zones = []
+
             while dgi.getRemainingSize() != 0:
                 zones.append(dgi.getUint32())
 
             if len(zones) == 1:
                 zoneId = zones[0]
-                branchId = zoneId - zoneId % 100
-                if not zoneId >= 10000 and zoneId < 15000:
-                    if zoneId % 1000 >= 500:
-                        branchId -= 500
-                if branchId:
-                    if (zoneId != branchId or zoneId >= 10000 and zoneId != 11200) and ZoneUtil.getLoaderName(zoneId) != 'safeZoneLoader':
-                        dnaStore = DNAStorage()
-                        dnaFileName = genDNAFileName(branchId)
-                        loadDNAFileAI(dnaStore, dnaFileName)
 
-                        zoneVisDict = {}
-                        for i in xrange(dnaStore.getNumDNAVisGroupsAI()):
-                            groupFullName = dnaStore.getDNAVisGroupName(i)
-                            visGroup = dnaStore.getDNAVisGroupAI(i)
-                            visZoneId = int(string.split(groupFullName, ':', 1)[0])
-                            visZoneId = ZoneUtil.getTrueZoneId(visZoneId, branchId)
-                            visibles = []
-                            for i in xrange(visGroup.getNumVisibles()):
-                                visibles.append(int(visGroup.getVisibleName(i)))
+                visZones = set()
 
-                            visibles.append(ZoneUtil.getBranchZone(visZoneId))
-                            zoneVisDict[visZoneId] = visibles
+                isStreetBranch = self.getInStreetBranch(zoneId)
+                isCogHQ = self.getInCogHQ(zoneId)
+                isPlayground = ZoneUtil.isPlayground(zoneId)
+                branchId = ZoneUtil.getBranchZone(zoneId)
 
-                        # Set interest on the VisZones.
-                        for zoneList in zoneVisDict.values():
-                            for zone in zoneList:
-                                zones.append(zone)
+                if isStreetBranch:
+                    branchId = ZoneUtil.getBranchZone(zoneId)
 
-                        # Set object location.
-                        dg = PyDatagram()
-                        dg.addServerHeader(clientChannel, self.air.ourChannel, CLIENT_OBJECT_LOCATION)
-                        dg.addUint32(self.clientChannel2avId[clientChannel])
-                        dg.addUint32(parentId)
-                        dg.addUint32(zoneId)
-                        self.air.send(dg)
+                    if zoneId % 100 != 0:
+                        visZones.update(self.getVisBranchZones(zoneId))
 
-                        # Set interest on the branch ID.
-                        zones.append(branchId)
+                if isCogHQ:
+                    visZones.update(self.getVisBranchZones(zoneId))
 
-                        if clientChannel in self.clientChannel2handle:
-                            # Use the same handle to alter the interest.
-                            handle = self.clientChannel2handle[clientChannel]
-                        else:
-                            # Save the handle for later.
-                            self.clientChannel2handle[clientChannel] = handle
+                # Set interest on the VisZones.
+                for zone in visZones:
+                    zones.append(zone)
+
+                loaderName = ZoneUtil.getLoaderName(zoneId)
+
+                if branchId and isPlayground and loaderName != 'safeZoneLoader':
+                    # Set object location.
+                    dg = PyDatagram()
+                    dg.addServerHeader(clientChannel, self.air.ourChannel, CLIENT_OBJECT_LOCATION)
+                    dg.addUint32(self.clientChannel2avId[clientChannel])
+                    dg.addUint32(parentId)
+                    dg.addUint32(zoneId)
+                    self.air.send(dg)
+
+                    # Set interest on the branch ID.
+                    zones.append(branchId)
+
+                    if clientChannel in self.clientChannel2handle:
+                        # Use the same handle to alter the interest.
+                        handle = self.clientChannel2handle[clientChannel]
+                    else:
+                        # Save the handle for later.
+                        self.clientChannel2handle[clientChannel] = handle
 
             resp = PyDatagram()
             resp.addServerHeader(clientChannel, self.air.ourChannel, CLIENT_ADD_INTEREST_MULTIPLE)
@@ -880,6 +917,7 @@ class ExtAgent:
         elif msgType == 99: # CLIENT_REMOVE_INTEREST
             handle = dgi.getUint16()
             context = 0
+
             if dgi.getRemainingSize() > 0:
                 context = dgi.getUint32()
 
@@ -901,7 +939,7 @@ class ExtAgent:
             def handleAvatar(dclass, fields):
                 if dclass != self.air.dclassesByName['DistributedToonUD']:
                     return
-                
+
                 name = fields['setName'][0]
                 inventory = fields['setInventory'][0]
                 trackAccess = fields['setTrackAccess'][0]
@@ -980,7 +1018,8 @@ class ExtAgent:
         msgType = dgi.getUint16()
         resp = None
 
-        print('Client: {0} requested msgType: {1}.'.format(clientChannel, msgType))
+        if self.wantServerDebug:
+            print('Client: {0} requested msgType: {1}.'.format(clientChannel, msgType))
 
         if msgType == CLIENT_EJECT:
             resp = PyDatagram()
