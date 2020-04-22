@@ -13,7 +13,7 @@ from game.toontown.ai.HolidayManagerAI import HolidayManagerAI
 from game.toontown.toonbase import ToontownGlobals
 from game.toontown.catalog.CatalogManagerAI import CatalogManagerAI
 from direct.showbase import PythonUtil
-from server import OtpDoGlobals
+from game.otp.distributed import OtpDoGlobals
 from game.otp.ai.AIZoneData import AIZoneDataStore
 from game.toontown.ai.WelcomeValleyManagerAI import WelcomeValleyManagerAI
 from game.toontown.uberdog.DistributedInGameNewsMgrAI import DistributedInGameNewsMgrAI
@@ -77,7 +77,6 @@ __builtin__.isClient = lambda: PythonUtil.isClient()
 class ToontownAIRepository(AstronInternalRepository):
     dbId = 4003
     GameGlobalsId = OtpDoGlobals.OTP_DO_ID_TOONTOWN
-    QuietZone = 1
 
     def __init__(self):
         AstronInternalRepository.__init__(self, config.GetInt('air-base-channel', 0), config.GetInt('air-stateserver', 0), dcSuffix = 'AI')
