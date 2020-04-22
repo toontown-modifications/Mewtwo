@@ -85,7 +85,7 @@ class TTCodeRedemptionMgrAI(DistributedObjectAI):
             # 9 is AlreadyBeingWorn
             # 12, 13, & 14 is AlreadyReceived
             self.air.writeServerEvent('code-redeemed', avId = avId, issue = 'Could not deliver items for code: %s' % code)
-            self.sendUpdateToAvatarId(avId, 'redeemCodeResult', [context, TTCodeRedemptionConstants.RedeemErrors.AwardCouldntBeGiven, 0])
+            self.sendUpdateToAvatarId(avId, 'redeemCodeResult', [context, TTCodeRedemptionConsts.RedeemErrors.AwardCouldntBeGiven, 0])
             return
 
         # Send the item and tell the user its A-Okay
