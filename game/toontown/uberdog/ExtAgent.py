@@ -170,7 +170,7 @@ class ExtAgent:
         branchZoneId = ZoneUtil.getBranchZone(zoneId)
         dnaStore = self.dnaStores.get(branchZoneId)
 
-        if zoneId in (6100, 6101, 19000, 19001):
+        if zoneId in (6100, 6101, 19000, 19001, 19101):
             # This is ToonLand.
             return []
 
