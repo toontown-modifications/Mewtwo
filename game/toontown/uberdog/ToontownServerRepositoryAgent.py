@@ -1,5 +1,4 @@
 from direct.directnotify.DirectNotifyGlobal import directNotify
-from direct.distributed.AstronInternalRepository import AstronInternalRepository
 from direct.distributed.DistributedObjectUD import DistributedObjectUD
 from direct.showbase import PythonUtil
 from ExtAgent import ExtAgent
@@ -7,34 +6,21 @@ from game.otp.distributed.DistributedDirectoryAI import DistributedDirectoryAI
 from game.otp.uberdog.DistributedChatManagerUD import DistributedChatManagerUD
 from game.toontown.parties.ToontownTimeManager import ToontownTimeManager
 from game.otp.distributed import OtpDoGlobals
+from game.toontown.distributed.ToontownInternalRepository import ToontownInternalRepository
 import __builtin__, time
 
 __builtin__.isClient = lambda: PythonUtil.isClient()
 
-class ToontownServerRepositoryAgent(AstronInternalRepository):
-    dbId = 4003
-    GameGlobalsId = OtpDoGlobals.OTP_DO_ID_TOONTOWN
+class ToontownServerRepositoryAgent(ToontownInternalRepository):
 
     def __init__(self):
-        AstronInternalRepository.__init__(self,
+        ToontownInternalRepository.__init__(self,
                                           config.GetInt('server-base-channel', 0),
                                           config.GetInt('air-stateserver', 0),
                                           dcSuffix='UD')
 
-    def GetPuppetConnectionChannel(self, doId):
-        return doId + (1001 << 32)
-
-    def GetAccountConnectionChannel(self, doId):
-        return doId + (1003 << 32)
-
-    def GetAccountIDFromChannelCode(self, channel):
-        return channel >> 32
-
-    def GetAvatarIDFromChannelCode(self, channel):
-        return channel & 0xffffffff
-
     def handleConnected(self):
-        AstronInternalRepository.handleConnected(self)
+        ToontownInternalRepository.handleConnected(self)
 
         rootObj = DistributedDirectoryAI(self)
         rootObj.generateWithRequiredAndId(self.getGameDoId(), 0, 0)
@@ -47,20 +33,3 @@ class ToontownServerRepositoryAgent(AstronInternalRepository):
         self.toontownTimeManager = ToontownTimeManager(serverTimeUponLogin = int(time.time()), globalClockRealTimeUponLogin = globalClock.getRealTime())
 
         self.partyManager = self.generateGlobalObject(OtpDoGlobals.OTP_DO_ID_TOONTOWN_PARTY_MANAGER, 'DistributedPartyManager')
-
-        self.extAgent = ExtAgent(self)
-
-    def handleDatagram(self, dgi):
-        msgType = self.getMsgType()
-
-        if not msgType:
-            return
-
-        if msgType == 1205:
-            self.extAgent.handleDatagram(dgi)
-            return
-        elif msgType == 1206:
-            self.extAgent.handleResp(dgi)
-            return
-
-        AstronInternalRepository.handleDatagram(self, dgi)

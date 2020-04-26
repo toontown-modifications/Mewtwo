@@ -2,7 +2,6 @@ from panda3d.core import UniqueIdAllocator
 from panda3d.toontown import DNAStorage, loadDNAFileAI, DNAGroup, DNAVisGroup
 
 from direct.directnotify.DirectNotifyGlobal import directNotify
-from direct.distributed.AstronInternalRepository import AstronInternalRepository
 from direct.distributed.DistributedObjectAI import DistributedObjectAI
 from direct.distributed.PyDatagram import PyDatagram
 
@@ -69,17 +68,16 @@ from game.toontown.coderedemption.TTCodeRedemptionMgrAI import TTCodeRedemptionM
 from game.toontown.uberdog.DistributedPartyManagerAI import DistributedPartyManagerAI
 from game.toontown.ai.DistributedPolarPlaceEffectMgrAI import DistributedPolarPlaceEffectMgrAI
 from game.toontown.ai.DistributedResistanceEmoteMgrAI import DistributedResistanceEmoteMgrAI
+from game.toontown.distributed.ToontownInternalRepository import ToontownInternalRepository
 
 import __builtin__, time, os
 
 __builtin__.isClient = lambda: PythonUtil.isClient()
 
-class ToontownAIRepository(AstronInternalRepository):
-    dbId = 4003
-    GameGlobalsId = OtpDoGlobals.OTP_DO_ID_TOONTOWN
+class ToontownAIRepository(ToontownInternalRepository):
 
     def __init__(self):
-        AstronInternalRepository.__init__(self, config.GetInt('air-base-channel', 0), config.GetInt('air-stateserver', 0), dcSuffix = 'AI')
+        ToontownInternalRepository.__init__(self, config.GetInt('air-base-channel', 0), config.GetInt('air-stateserver', 0), dcSuffix = 'AI')
 
         self.districtPopulation = 0
 
@@ -101,24 +99,6 @@ class ToontownAIRepository(AstronInternalRepository):
         self.wantCodeRedemption = config.GetBool('want-coderedemption', False)
 
         self.cogSuitMessageSent = False
-
-    def getAvatarIdFromSender(self):
-        return self.getMsgSender() & 0xFFFFFFFF
-
-    def getAccountIdFromSender(self):
-        return (self.getMsgSender() >> 32) & 0xFFFFFFFF
-
-    def GetPuppetConnectionChannel(self, doId):
-        return doId + (1001 << 32)
-
-    def GetAccountConnectionChannel(self, doId):
-        return doId + (1003 << 32)
-
-    def GetAccountIDFromChannelCode(self, channel):
-        return channel >> 32
-
-    def GetAvatarIDFromChannelCode(self, channel):
-        return channel & 0xffffffff
 
     def getTrackClsends(self):
         if config.GetBool('want-track-clsends', False):
@@ -171,7 +151,7 @@ class ToontownAIRepository(AstronInternalRepository):
         return self.uniqueName(idString)
 
     def handleConnected(self):
-        AstronInternalRepository.handleConnected(self)
+        ToontownInternalRepository.handleConnected(self)
 
         self.netMessenger.register(0, 'registerShard')
 

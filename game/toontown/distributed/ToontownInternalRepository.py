@@ -2,11 +2,6 @@ from direct.distributed.AstronInternalRepository import AstronInternalRepository
 from game.otp.distributed import OtpDoGlobals
 from direct.distributed import MsgTypes
 from direct.distributed.PyDatagram import PyDatagram
-import sys
-
-sys.path.append('../new-otp/server')
-
-from ExtAgent import ExtAgent
 
 class ToontownInternalRepository(AstronInternalRepository):
     GameGlobalsId = OtpDoGlobals.OTP_DO_ID_TOONTOWN
@@ -14,11 +9,19 @@ class ToontownInternalRepository(AstronInternalRepository):
 
     def __init__(self, baseChannel, serverId = None, dcFileNames = None, dcSuffix = 'AI', connectMethod = None, threadedNet = None):
         AstronInternalRepository.__init__(self, baseChannel, serverId = serverId, dcFileNames = dcFileNames, dcSuffix = dcSuffix, connectMethod = connectMethod, threadedNet = threadedNet)
- 
+        
+        if dcSuffix == 'UD':
+            self.isUber = True
+        else:
+            self.isUber = False
+
     def handleConnected(self):
         AstronInternalRepository.handleConnected(self)
+        
+        if self.isUber:
+            from game.toontown.uberdog.ExtAgent import ExtAgent
 
-        self.extAgent = ExtAgent(self)
+            self.extAgent = ExtAgent(self)
 
     def handleDatagram(self, dgi):
         msgType = self.getMsgType()
@@ -47,6 +50,12 @@ class ToontownInternalRepository(AstronInternalRepository):
 
     def GetAccountConnectionChannel(self, doId):
         return doId + (1003 << 32)
+
+    def GetAccountIDFromChannelCode(self, channel):
+        return channel >> 32
+
+    def GetAvatarIDFromChannelCode(self, channel):
+        return channel & 0xffffffff
 
     def _isValidPlayerLocation(self, parentId, zoneId):
         if zoneId < 1000 and zoneId != 1:
