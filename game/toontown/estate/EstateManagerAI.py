@@ -325,7 +325,6 @@ class LoadPetOperation(FSM):
 
 class EstateManagerAI(DistributedObjectAI):
     notify = directNotify.newCategory('EstateManagerAI')
-    notify.setDebug(True)
 
     def __init__(self, air):
         DistributedObjectAI.__init__(self, air)
