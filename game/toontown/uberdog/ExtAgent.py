@@ -236,6 +236,7 @@ class ExtAgent:
                         allowedName = 1
                     elif wishNameState == 'APPROVED':
                         name = fields['WishName'][0]
+                        self.air.dbInterface.updateObject(self.air.dbId, avId, self.air.dclassesByName['DistributedToonUD'], {'setName': (name,)})
                     elif wishNameState == 'REJECTED':
                         allowedName = 1
 
@@ -809,48 +810,33 @@ class ExtAgent:
             # Query the avatar.
             self.air.dbInterface.queryObject(self.air.dbId, avId, handleRetrieve)
         elif msgType == 70: # CLIENT_SET_WISHNAME
-            print(dgi)
             avId = dgi.getUint32()
             name = dgi.getString()
-            pendingName = dgi.getString()
-            print(pendingName)
-            print(name)
-            print(avId)
 
-            def handleRetrieve(dclass, fields):
-                if dclass != self.air.dclassesByName['DistributedToonUD']:
-                    # This is not an Avatar object.
-                    self.sendEject(clientChannel, 122, 'An Avatar object was not retrieved.')
-                    return
+            # If we have a avId, update the Avatar object with the new wish name.
+            fields = {
+                'WishNameState': ('APPROVED',),
+                'WishName': (name,),
+                }
 
-                if fields['WishNameState'][0] != 'OPEN':
-                    # This avatar is not nameable.
-                    self.sendEject(clientChannel, 122, 'This Avatar is not nameable.')
-                    return
+            if avId:
+                self.air.dbInterface.updateObject(self.air.dbId, avId, self.air.dclassesByName['DistributedToonUD'], fields)
 
-                # Update the Avatar object with the new wish name.
-                self.air.dbInterface.updateObject(self.air.dbId, avId,
-                                                  self.air.dclassesByName['DistributedToonUD'],
-                                                  {'WishNameState': ('PENDING',),
-                                                   'WishName': (name,)})
+            # Prepare the wish name response.
+            resp = PyDatagram()
+            resp.addUint16(71) # CLIENT_SET_WISHNAME_RESP
+            resp.addUint32(avId)
+            resp.addUint16(0)
+            resp.addString('')
+            resp.addString(name)
+            resp.addString('')
 
-                # Prepare the wish name response.
-                resp = PyDatagram()
-                resp.addUint16(71) # CLIENT_SET_WISHNAME_RESP
-                resp.addUint32(avId)
-                resp.addUint16(0)
-                resp.addString(name)
-                resp.addString('')
-                resp.addString('')
+            # Send it.
+            dg = PyDatagram()
+            dg.addServerHeader(clientChannel, self.air.ourChannel, CLIENTAGENT_SEND_DATAGRAM)
+            dg.addString(resp.getMessage())
+            self.air.send(dg)
 
-                # Send it.
-                dg = PyDatagram()
-                dg.addServerHeader(clientChannel, self.air.ourChannel, CLIENTAGENT_SEND_DATAGRAM)
-                dg.addString(resp.getMessage())
-                self.air.send(dg)
-
-            # Query the avatar.
-            self.air.dbInterface.queryObject(self.air.dbId, avId, handleRetrieve)
         elif msgType == 97: # CLIENT_ADD_INTEREST
             # Reformat the packets for the CA.
             handle = dgi.getUint16()
