@@ -666,6 +666,46 @@ class ExtAgent:
         elif msgType == 32: # CLIENT_SET_AVATAR
             avId = dgi.getUint32()
 
+            if avId == 0:
+                # We assume the avatar has logged out to the Pick A Toon.
+                # Lets unload.
+
+                # Grab the legitimate avId.
+                currentAvId = self.air.getAvatarIdFromSender()
+
+                target = clientChannel >> 32
+                channel = self.air.GetAccountConnectionChannel(target)
+
+                # Remove our POST_REMOVES.
+                dg = PyDatagram()
+                dg.addServerHeader(channel, self.air.ourChannel, CLIENTAGENT_CLEAR_POST_REMOVES)
+                self.air.send(dg)
+
+                # Remove avatar channel:
+                dg = PyDatagram()
+                dg.addServerHeader(channel, self.air.ourChannel, CLIENTAGENT_CLOSE_CHANNEL)
+                dg.addChannel(self.air.GetPuppetConnectionChannel(currentAvId))
+                self.air.send(dg)
+
+                # Reset sender channel:
+                dg = PyDatagram()
+                dg.addServerHeader(channel, self.air.ourChannel, CLIENTAGENT_SET_CLIENT_ID)
+                dg.addChannel(target << 32) # accountId in high 32 bits, no avatar in low
+                self.air.send(dg)
+
+                # Reset the session object.
+                dg = PyDatagram()
+                dg.addServerHeader(channel, self.air.ourChannel, CLIENTAGENT_REMOVE_SESSION_OBJECT)
+                dg.addUint32(currentAvId)
+                self.air.send(dg)
+
+                # Unload avatar object:
+                dg = PyDatagram()
+                dg.addServerHeader(currentAvId, channel, STATESERVER_OBJECT_DELETE_RAM)
+                dg.addUint32(currentAvId)
+                self.air.send(dg)
+                return
+
             def handleAvatarRetrieve(dclass, fields):
                 if dclass != self.air.dclassesByName['DistributedToonUD']:
                     # This is not an Avatar object.
@@ -1050,6 +1090,12 @@ class ExtAgent:
             self.clientChannel2avId[clientChannel] = doId
 
             self.loadAvProgress.remove(clientChannel >> 32)
+        elif msgType == CLIENT_OBJECT_DISABLE_OWNER:
+            doId = dgi.getUint32()
+
+            resp = PyDatagram()
+            resp.addUint16(CLIENT_OBJECT_DISABLE_OWNER)
+            resp.addUint32(doId)
         else:
             self.notify.warning('Received unknown message type %s from Astron' % msgType)
 
