@@ -236,7 +236,6 @@ class ExtAgent:
                         allowedName = 1
                     elif wishNameState == 'APPROVED':
                         name = fields['WishName'][0]
-                        self.air.dbInterface.updateObject(self.air.dbId, avId, self.air.dclassesByName['DistributedToonUD'], {'setName': (name,)})
                     elif wishNameState == 'REJECTED':
                         allowedName = 1
 
@@ -817,6 +816,7 @@ class ExtAgent:
             fields = {
                 'WishNameState': ('APPROVED',),
                 'WishName': (name,),
+                'setName': (name,),
                 }
 
             if avId:
