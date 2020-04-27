@@ -4,6 +4,7 @@
 *.log
 *.buildings
 *.pets
+whitelist/*
 
 .idea/*
 venv/*

@@ -13,8 +13,6 @@ class DistributedAvatarAI(DistributedNodeAI.DistributedNodeAI):
         self.hp = 0
         self.maxHp = 0
 
-        self.whiteList = TTWhiteList()
-        
     def b_setName(self, name):
         self.setName(name)
         self.d_setName(name)
@@ -121,7 +119,7 @@ class DistributedAvatarAI(DistributedNodeAI.DistributedNodeAI):
         offset = 0
 
         for word in words:
-            if word and not self.whiteList.isWord(word):
+            if word and not TTWhiteList().isWord(word):
                 modifications.append((offset, offset + len(word) - 1))
 
             offset += len(word) + 1
