@@ -243,11 +243,6 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
         av.b_setTickets(num)
 
     def d_startHoliday(self, avId, holidayId):
-        if holidayId == '':
-            msg = 'Holiday Id is a integer, not a string!'
-            self.sendResponseMessage(avId, msg)
-            return
-
         holidayId = int(holidayId)
 
         if not hasattr(self.air, 'holidayManager'):
@@ -589,7 +584,7 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
         elif magicWord == 'startholiday':
             if not validation:
                 return
-            self.d_startHoliday(avId, holidayId = args[0])
+            self.d_startHoliday(avId, holidayId = int(args[0]))
         elif magicWord in ('stopholiday', 'endholiday'):
             if not validation:
                 return
