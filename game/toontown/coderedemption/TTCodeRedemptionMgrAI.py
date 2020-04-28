@@ -110,12 +110,13 @@ class TTCodeRedemptionMgrAI(DistributedObjectAI):
         avId = self.air.getAvatarIdFromSender()
 
         if not avId:
-            self.air.writeServerEvent('suspicious', avId = avId, issue='Could not parse the gender of an invalid avId')
+            self.air.writeServerEvent('suspicious', avId = avId, issue = 'Could not parse the gender of an invalid avId')
             return
 
         av = self.air.doId2do.get(avId)
+
         if not av:
-            self.air.writeServerEvent('suspicious', avId = avId, issue='Could not parse the gender of an invalid avatar')
+            self.air.writeServerEvent('suspicious', avId = avId, issue = 'Could not parse the gender of an invalid avatar')
             return
 
         '''
@@ -181,6 +182,10 @@ class TTCodeRedemptionMgrAI(DistributedObjectAI):
         if code == 'winter' or code == 'cannons':
             rent = CatalogRentalItem(ToontownGlobals.RentalCannon, 48 * 60, 0)
             return [rent]
+        
+        if code == 'gadzooks':
+            shirt = CatalogClothingItem(1807, 0)
+            return [shirt]
 
         return []
 
