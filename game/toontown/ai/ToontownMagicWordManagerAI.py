@@ -590,7 +590,7 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
             if not isinstance(args[0], int):
                 self.sendResponseMessage(avId, 'Uh oh! It appears you specified invalid parameters for this command.')
                 return
-            self.d_endHoliday(avId, holidayId = int(args[0]))
+            self.d_endHoliday(avId, holidayId = args[0])
         elif magicWord == 'smsg':
             if not validation:
                 return
