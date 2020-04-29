@@ -1,11 +1,7 @@
 from direct.directnotify.DirectNotifyGlobal import directNotify
 from direct.distributed.DistributedObjectAI import DistributedObjectAI
 from direct.distributed.PyDatagram import PyDatagram
-
-try:
-    from direct.distributed.MsgTypes import CLIENTAGENT_DECLARE_OBJECT
-except:
-    CLIENTAGENT_DECLARE_OBJECT = 1010
+from direct.distributed.MsgTypes import CLIENTAGENT_DECLARE_OBJECT
 
 from game.otp.otpbase import OTPGlobals
 
