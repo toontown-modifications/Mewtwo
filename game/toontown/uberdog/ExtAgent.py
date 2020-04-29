@@ -971,33 +971,93 @@ class ExtAgent:
                 if dclass != self.air.dclassesByName['DistributedToonUD']:
                     return
 
-                name = fields['setName'][0]
-                inventory = fields['setInventory'][0]
-                trackAccess = fields['setTrackAccess'][0]
-                hp = fields['setHp'][0]
-                maxHp = fields['setMaxHp'][0]
-                defaultShard = fields['setDefaultShard'][0]
-                lastHood = fields['setLastHood'][0]
-                dnaString = fields['setDNAString'][0]
-                experience = fields['setExperience'][0]
-                trackBonusLevel = fields['setTrackBonusLevel'][0]
+                requiredPacker = DCPacker()
+                otherCount = 0
+                otherPacker = DCPacker()
 
-                fields = [
-                    name,
-                    inventory,
-                    trackAccess,
-                    hp,
-                    maxHp,
-                    defaultShard,
-                    lastHood,
-                    dnaString,
-                    experience,
-                    trackBonusLevel
-                ]
+                for f in range(dclass.getNumInheritedFields()):
+                    field = dclass.getInheritedField(f)
+
+                    if field.isRequired():
+                        requiredPacker.beginPack(field)
+                        if field.getName() in fields:
+                            field.packArgs(requiredPacker, fields[field.getName()])
+                        else:
+                            requiredPacker.packDefaultValue()
+
+                        requiredPacker.endPack()
+
+                    elif field.isRam() and field.getName() in fields:
+                        otherPacker.rawPackUint16(field.getNumber())
+                        otherPacker.beginPack(field)
+                        field.packArgs(otherPacker, fields[field.getName()])
+                        otherPacker.endPack()
+                        otherCount += 1
+
+                # Our avatar details response.
+                resp = PyDatagram()
+
+                resp.addUint16(15) # CLIENT_GET_AVATAR_DETAILS_RESP
+
+                resp.addUint32(avatarId)
+                resp.addUint8(0)
+                resp.appendData(requiredPacker.getString())
+                resp.appendData(otherPacker.getString())
+
+                # Send it.
+                dg = PyDatagram()
+                dg.addServerHeader(clientChannel, self.air.ourChannel, CLIENTAGENT_SEND_DATAGRAM)
+                dg.addString(resp.getMessage())
+                self.air.send(dg)
 
             self.air.dbInterface.queryObject(self.air.dbId, avatarId, handleAvatar)
         elif msgType == 81: # CLIENT_GET_PET_DETAILS
-            pass
+            petId = dgi.getUint32()
+
+            def handlePet(dclass, fields):
+                if dclass != self.air.dclassesByName['DistributedPetAI']:
+                    return
+
+                requiredPacker = DCPacker()
+                otherCount = 0
+                otherPacker = DCPacker()
+
+                for f in range(dclass.getNumInheritedFields()):
+                    field = dclass.getInheritedField(f)
+
+                    if field.isRequired():
+                        requiredPacker.beginPack(field)
+                        if field.getName() in fields:
+                            field.packArgs(requiredPacker, fields[field.getName()])
+                        else:
+                            requiredPacker.packDefaultValue()
+
+                        requiredPacker.endPack()
+
+                    elif field.isRam() and field.getName() in fields:
+                        otherPacker.rawPackUint16(field.getNumber())
+                        otherPacker.beginPack(field)
+                        field.packArgs(otherPacker, fields[field.getName()])
+                        otherPacker.endPack()
+                        otherCount += 1
+
+                # Our pet details response.
+                resp = PyDatagram()
+
+                resp.addUint16(82) # CLIENT_GET_PET_DETAILS_RESP
+
+                resp.addUint32(petId)
+                resp.addUint8(0)
+                resp.appendData(requiredPacker.getString())
+                resp.appendData(otherPacker.getString())
+
+                # Send it.
+                dg = PyDatagram()
+                dg.addServerHeader(clientChannel, self.air.ourChannel, CLIENTAGENT_SEND_DATAGRAM)
+                dg.addString(resp.getMessage())
+                self.air.send(dg)
+
+            self.air.dbInterface.queryObject(self.air.dbId, petId, handlePet)
         elif msgType == 56: # CLIENT_REMOVE_FRIEND
             pass
         else:
