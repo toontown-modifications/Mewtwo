@@ -17,6 +17,7 @@ from game.toontown.toon import InventoryBase
 from game.toontown.toonbase import ToontownGlobals
 import random
 from game.toontown.toon import NPCToons
+from game.toontown.pets import DistributedPetProxyAI
 
 class DistributedBattleBaseAI(DistributedObjectAI.DistributedObjectAI, BattleBase):
     notify = DirectNotifyGlobal.directNotify.newCategory('DistributedBattleBaseAI')
@@ -1099,14 +1100,12 @@ class DistributedBattleBaseAI(DistributedObjectAI.DistributedObjectAI, BattleBas
         if self.ignoreResponses == 1:
             self.notify.debug('requestPetProxy() - ignoring toon: %d' % toonId)
             return
-        else:
-            if self.fsm.getCurrentState().getName() != 'WaitForInput':
-                self.notify.warning('requestPetProxy() - in state: %s' % self.fsm.getCurrentState().getName())
-                return
-            else:
-                if self.activeToons.count(toonId) == 0:
-                    self.notify.warning('requestPetProxy() - toon: %d not in toon list' % toonId)
-                    return
+        elif self.fsm.getCurrentState().getName() != 'WaitForInput':
+            self.notify.warning('requestPetProxy() - in state: %s' % self.fsm.getCurrentState().getName())
+            return
+        elif self.activeToons.count(toonId) == 0:
+            self.notify.warning('requestPetProxy() - toon: %d not in toon list' % toonId)
+            return
         self.notify.debug('requestPetProxy(%s, %s)' % (toonId, av))
         toon = self.getToon(toonId)
         if toon == None:
@@ -1117,18 +1116,61 @@ class DistributedBattleBaseAI(DistributedObjectAI.DistributedObjectAI, BattleBas
         if petId == av:
             if not self.pets.has_key(toonId):
 
-                def handleGetPetProxy(success, petProxy, petId=petId, zoneId=zoneId, toonId=toonId):
+                def handleGetPetProxy(success, pet, petId = petId, zoneId = zoneId, toonId = toonId):
                     if success:
-                        if petId not in simbase.air.doId2do:
-                            simbase.air.requestDeleteDoId(petId)
-                        else:
-                            petDO = simbase.air.doId2do[petId]
-                            petDO.requestDelete()
-                            simbase.air.deleteDistObject(petDO)
-                        petProxy.dbObject = 1
-                        petProxy.generateWithRequiredAndId(petId, self.air.districtId, zoneId)
-                        petProxy.broadcastDominantMood()
-                        self.pets[toonId] = petProxy
+                        petProxy = DistributedPetProxyAI.DistributedPetProxyAI(self.air)
+                        petProxy.setOwnerId(pet.getOwnerId())
+                        petProxy.setPetName(pet.getPetName())
+                        petProxy.setTraitSeed(pet.getTraitSeed())
+                        petProxy.setSafeZone(pet.getSafeZone())
+                        petProxy.setForgetfulness(pet.getForgetfulness())
+                        petProxy.setBoredomThreshold(pet.getBoredomThreshold())
+                        petProxy.setRestlessnessThreshold(pet.getRestlessnessThreshold())
+                        petProxy.setPlayfulnessThreshold(pet.getPlayfulnessThreshold())
+                        petProxy.setLonelinessThreshold(pet.getLonelinessThreshold())
+                        petProxy.setSadnessThreshold(pet.getSadnessThreshold())
+                        petProxy.setFatigueThreshold(pet.getFatigueThreshold())
+                        petProxy.setHungerThreshold(pet.getHungerThreshold())
+                        petProxy.setConfusionThreshold(pet.getConfusionThreshold())
+                        petProxy.setExcitementThreshold(pet.getExcitementThreshold())
+                        petProxy.setAngerThreshold(pet.getAngerThreshold())
+                        petProxy.setSurpriseThreshold(pet.getSurpriseThreshold())
+                        petProxy.setAffectionThreshold(pet.getAffectionThreshold())
+                        petProxy.setHead(pet.getHead())
+                        petProxy.setEars(pet.getEars())
+                        petProxy.setNose(pet.getNose())
+                        petProxy.setTail(pet.getTail())
+                        petProxy.setBodyTexture(pet.getBodyTexture())
+                        petProxy.setColor(pet.getColor())
+                        petProxy.setColorScale(pet.getColorScale())
+                        petProxy.setEyeColor(pet.getEyeColor())
+                        petProxy.setGender(pet.getGender())
+                        petProxy.setLastSeenTimestamp(pet.getLastSeenTimestamp())
+                        petProxy.setBoredom(pet.getBoredom())
+                        petProxy.setRestlessness(pet.getRestlessness())
+                        petProxy.setPlayfulness(pet.getPlayfulness())
+                        petProxy.setLoneliness(pet.getLoneliness())
+                        petProxy.setSadness(pet.getSadness())
+                        petProxy.setAffection(pet.getAffection())
+                        petProxy.setHunger(pet.getHunger())
+                        petProxy.setConfusion(pet.getConfusion())
+                        petProxy.setExcitement(pet.getExcitement())
+                        petProxy.setFatigue(pet.getFatigue())
+                        petProxy.setAnger(pet.getAnger())
+                        petProxy.setSurprise(pet.getSurprise())
+                        petProxy.setTrickAptitudes(pet.getTrickAptitudes())
+                        pet.requestDelete()
+
+                        def handlePetDeleted(task):
+                            petProxy.doNotDeallocateChannel = True
+                            petProxy.generateWithRequiredAndId(petId, self.air.districtId, self.zoneId)
+                            petProxy.broadcastDominantMood()
+                            self.pets[toonId] = petProxy
+                            return task.done
+
+                        self.acceptOnce(self.air.getAvatarExitEvent(petId),
+                                        lambda: taskMgr.doMethodLater(0, handlePetDeleted,
+                                                                      self.uniqueName('pet-%s-deleted' % petId)))
                     else:
                         self.notify.warning('error generating petProxy: %s' % petId)
 
@@ -1820,18 +1862,12 @@ class DistributedBattleBaseAI(DistributedObjectAI.DistributedObjectAI, BattleBas
         return None
 
     def getPetProxyObject(self, petId, callback):
-        doneEvent = 'readPet-%s' % self._getNextSerialNum()
-        dbo = DatabaseObject.DatabaseObject(self.air, petId, doneEvent=doneEvent)
-        pet = dbo.readPetProxy()
+        doneEvent = 'generate-%d' % petId
 
-        def handlePetProxyRead(dbo, retCode, callback=callback, pet=pet):
-            success = retCode == 0
-            if not success:
-                self.notify.warning('pet DB read failed')
-                pet = None
-            callback(success, pet)
-            return
+        def handlePetProxyRead(pet):
+            callback(1, pet)
 
+        self.air.sendActivate(petId, self.air.districtId, 0)
         self.acceptOnce(doneEvent, handlePetProxyRead)
 
     def _getNextSerialNum(self):
