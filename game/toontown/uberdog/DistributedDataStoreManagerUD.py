@@ -1,22 +1,60 @@
-from direct.directnotify import DirectNotifyGlobal
-from direct.distributed.DistributedObjectUD import DistributedObjectUD
+from datetime import datetime
 
+from direct.directnotify.DirectNotifyGlobal import directNotify
+from direct.distributed.DistributedObjectGlobalUD import DistributedObjectGlobalUD
 
-class DistributedDataStoreManagerUD(DistributedObjectUD):
-    notify = DirectNotifyGlobal.directNotify.newCategory(
-        "DistributedDataStoreManagerUD")
+from ScavengerHuntDataStore import ScavengerHuntDataStore
 
-    def startStore(self, todo0):
-        pass
+import os
 
-    def stopStore(self, todo0):
-        pass
+type2Filename = {
+    1: 'trickOrTreat',
+    2: 'winterCaroling'
+}
 
-    def queryStore(self, todo0, todo1):
-        pass
+class DistributedDataStoreManagerUD(DistributedObjectGlobalUD):
+    notify = directNotify.newCategory('DistributedDataStoreManagerUD')
+    serverDataFolder = simbase.config.GetString('server-data-folder', '')
 
-    def receiveResults(self, todo0, todo1):
-        pass
+    def __init__(self, air):
+        DistributedObjectGlobalUD.__init__(self, air)
+
+        self.dataStore = None
+        self.activeType = 0
+
+    def startStore(self, typeId):
+        if self.dataStore:
+            return
+
+        filename = type2Filename.get(typeId)
+
+        if not filename:
+            self.notify.warning('Got unknown type: {}'.format(typeId))
+
+        self.dataStore = ScavengerHuntDataStore(self.serverDataFolder + filename)
+        self.typeId = typeId
+
+    def stopStore(self, typeId):
+        if not self.dataStore and typeId != self.typeId:
+            return
+
+        self.dataStore.destroy()
+        self.dataStore = None
+
+    def queryStore(self, context, query):
+        sender = self.air.getMsgSender()
+
+        if not self.dataStore:
+            self.notify.warning('Got queryStore from {} while dataStore is None!'.format(sender))
+            return
+
+        results = self.dataStore.query(query)
+
+        self.sendUpdateToAI(sender, 'receiveResults', [context, results])
+
+    def sendUpdateToAI(self, doId, field, args = []):
+        dg = self.dclass.aiFormatUpdate(field, doId, doId, self.doId, args)
+        self.air.send(dg)
 
     def deleteBackupStores(self):
         pass

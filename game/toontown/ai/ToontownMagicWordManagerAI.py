@@ -1,4 +1,5 @@
 from direct.directnotify.DirectNotifyGlobal import directNotify
+from direct.task import Task
 
 from game.otp.ai.MagicWordManagerAI import MagicWordManagerAI
 from game.otp.otpbase import OTPLocalizer
@@ -20,6 +21,7 @@ from game.toontown.toon.ToonDNA import ToonDNA
 from game.toontown.parties import PartyGlobals
 from game.toontown.effects import FireworkShows
 from game.toontown.effects.DistributedFireworkShowAI import DistributedFireworkShowAI
+from game.toontown.pets.DistributedPetAI import DistributedPetAI
 
 import random
 
@@ -187,14 +189,14 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
 
         av.b_setHp(av.getMaxHp())
 
-    def d_setCogIndex(self, avId, zoneId, num):
-        if avId not in self.air.doId2do:
+    def d_setCogIndex(self, avId, num):
+        av = self.air.doId2do.get(avId)
+
+        if not av:
             return
 
         if not -1 <= num <= 3:
             return
-
-        av = self.air.doId2do.get(avId)
 
         av.b_setCogIndex(num)
 
@@ -326,7 +328,7 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
 
         building.cogdoTakeOver(foType, 2, 5)
 
-    def d_setGM(self, avId, zoneId, gmType):
+    def d_setGM(self, avId, gmType):
         av = self.air.doId2do.get(avId)
 
         if av.isGM():
@@ -547,6 +549,96 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
         msg = 'Firework show of type {0} has been started!'.format(showName)
         self.sendResponseMessage(avId, msg)
     
+    def d_doodleTest(self, avId, av, stress = False):
+        if not av:
+            return
+
+        petId = av.getPetId()
+        pet = simbase.air.doId2do.get(petId)
+
+        if petId == 0:
+            response = 'You do not own a doodle!'
+            self.sendResponseMessage(avId, response)
+            return
+
+        petSpawn = DistributedPetAI(self.air)
+
+        def handleGenerate(pet):
+            petSpawn.setOwnerId(pet.getOwnerId())
+            petSpawn.setPetName(pet.getPetName())
+            petSpawn.setTraitSeed(pet.getTraitSeed())
+            petSpawn.setSafeZone(pet.getSafeZone())
+            petSpawn.setForgetfulness(pet.getForgetfulness())
+            petSpawn.setBoredomThreshold(pet.getBoredomThreshold())
+            petSpawn.setRestlessnessThreshold(pet.getRestlessnessThreshold())
+            petSpawn.setPlayfulnessThreshold(pet.getPlayfulnessThreshold())
+            petSpawn.setLonelinessThreshold(pet.getLonelinessThreshold())
+            petSpawn.setSadnessThreshold(pet.getSadnessThreshold())
+            petSpawn.setFatigueThreshold(pet.getFatigueThreshold())
+            petSpawn.setHungerThreshold(pet.getHungerThreshold())
+            petSpawn.setConfusionThreshold(pet.getConfusionThreshold())
+            petSpawn.setExcitementThreshold(pet.getExcitementThreshold())
+            petSpawn.setAngerThreshold(pet.getAngerThreshold())
+            petSpawn.setSurpriseThreshold(pet.getSurpriseThreshold())
+            petSpawn.setAffectionThreshold(pet.getAffectionThreshold())
+            petSpawn.setHead(pet.getHead())
+            petSpawn.setEars(pet.getEars())
+            petSpawn.setNose(pet.getNose())
+            petSpawn.setTail(pet.getTail())
+            petSpawn.setBodyTexture(pet.getBodyTexture())
+            petSpawn.setColor(pet.getColor())
+            petSpawn.setColorScale(pet.getColorScale())
+            petSpawn.setEyeColor(pet.getEyeColor())
+            petSpawn.setGender(pet.getGender())
+            petSpawn.setLastSeenTimestamp(pet.getLastSeenTimestamp())
+            petSpawn.setBoredom(pet.getBoredom())
+            petSpawn.setRestlessness(pet.getRestlessness())
+            petSpawn.setPlayfulness(pet.getPlayfulness())
+            petSpawn.setLoneliness(pet.getLoneliness())
+            petSpawn.setSadness(pet.getSadness())
+            petSpawn.setAffection(pet.getAffection())
+            petSpawn.setHunger(pet.getHunger())
+            petSpawn.setConfusion(pet.getConfusion())
+            petSpawn.setExcitement(pet.getExcitement())
+            petSpawn.setFatigue(pet.getFatigue())
+            petSpawn.setAnger(pet.getAnger())
+            petSpawn.setSurprise(pet.getSurprise())
+            petSpawn.setTrickAptitudes(pet.getTrickAptitudes())
+            pet.requestDelete()
+
+            def activatePet(self):
+                if stress:
+                    for i in range(50):
+                        petSpawn.generateWithRequired(av.zoneId)
+                else:
+                    petSpawn.generateWithRequired(av.zoneId)
+
+                return Task.done
+
+            self.acceptOnce(self.air.getAvatarExitEvent(petId), lambda: taskMgr.doMethodLater(0, activatePet, self.uniqueName('petdel-{0}'.format(petId))))
+
+        self.air.sendActivate(petId, av.air.districtId, 0)
+        self.acceptOnce('generate-{0}'.format(petId), handleGenerate)
+
+        response = 'Spawned your doodle!'
+        self.sendResponseMessage(avId, response)
+
+    def d_setMaxDoodle(self, avId, av):
+        if not av:
+            return
+
+        petId = av.getPetId()
+        pet = simbase.air.doId2do.get(petId)
+
+        if not pet:
+            response = 'You must be at your estate and own a doodle to use this Magic Word!'
+            self.sendResponseMessage(avId, response)
+            return
+
+        pet.b_setTrickAptitudes([1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0])
+
+        self.sendResponseMessage(avId, 'Maxed your doodle!')
+
     def setMagicWordExt(self, magicWord, avId):
         self.setMagicWord(magicWord, avId, self.air.doId2do.get(avId).zoneId, '', sentFromExt = True)
 
@@ -576,7 +668,7 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
         elif magicWord == 'toonup':
             self.d_setAvatarToonUp(avId, zoneId)
         elif magicWord == 'enabletpall':
-            self.d_setTeleportAcess(avId, zoneId)
+            self.d_setTeleportAccess(avId, zoneId)
         elif magicWord == 'startholiday':
             if not validation:
                 return
@@ -589,10 +681,10 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
             if not validation:
                 return
             self.d_sendSystemMessage(message = string)
-        elif magicWord == 'cogindex':
+        elif magicWord in ('cogindex', 'setcogindex'):
             if not validation:
                 return
-            self.d_setCogIndex(avId, zoneId, num = args[0])
+            self.d_setCogIndex(avId, num = int(args[0]))
         elif magicWord == 'unites':
             if not validation:
                 return
@@ -624,7 +716,7 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
         elif magicWord == 'setgm':
             if not validation:
                 return
-            self.d_setGM(avId, zoneId, gmType = args[0])
+            self.d_setGM(avId, gmType = args[0])
         elif magicWord == 'skipvp':
             if not validation:
                 return
@@ -651,6 +743,12 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
             if not validation:
                 return
             self.d_setFireworks(avId, showName = args[0])
+        elif magicWord == 'doodletest':
+            self.d_doodleTest(avId, av)
+        elif magicWord == 'stresstestdoodles':
+            self.d_doodleTest(avId, av, stress = True)
+        elif magicWord == 'maxdoodle':
+            self.d_setMaxDoodle(avId, av)
         else:
             if magicWord not in disneyCmds:
                 self.sendResponseMessage(avId, '{0} is not an valid Magic Word.'.format(magicWord))

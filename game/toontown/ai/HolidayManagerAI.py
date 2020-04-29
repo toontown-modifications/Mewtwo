@@ -11,6 +11,7 @@ from game.toontown.minigame.TrolleyHolidayMgrAI import TrolleyHolidayMgrAI
 from game.toontown.minigame.TrolleyWeekendMgrAI import TrolleyWeekendMgrAI
 from game.toontown.ai.CharacterSwitchHolidayAI import CharacterSwitchHolidayAI
 from game.toontown.ai.DistributedGreenToonEffectMgrAI import GreenToonHolidayAI
+from game.toontown.ai.SillyMeterHolidayAI import SillyMeterHolidayAI
 
 holidayToMgr = {
     ToontownGlobals.JULY4_FIREWORKS: FireworkHolidayAI, # 1
@@ -32,6 +33,7 @@ holidayToMgr = {
     ToontownGlobals.IDES_OF_MARCH: GreenToonHolidayAI, # 105
     ToontownGlobals.SPOOKY_BLACK_CAT: BlackCatDayHolidayAI, # 117
     ToontownGlobals.SPOOKY_COSTUMES: CharacterSwitchHolidayAI, # 120
+    ToontownGlobals.SILLYMETER_HOLIDAY: SillyMeterHolidayAI
 }
 
 class HolidayManagerAI:

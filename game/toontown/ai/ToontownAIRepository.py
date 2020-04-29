@@ -262,6 +262,8 @@ class ToontownAIRepository(ToontownInternalRepository):
         self.resistanceEmoteMgr = DistributedResistanceEmoteMgrAI(self)
         self.resistanceEmoteMgr.generateWithRequired(9720)
 
+        self.dataStoreManager = self.generateGlobalObject(OtpDoGlobals.OTP_DO_ID_TOONTOWN_TEMP_STORE_MANAGER, 'DistributedDataStoreManagerAI')
+
     def createHood(self, hoodCtr, zoneId):
         # Bossbot HQ doesn't use DNA, so we skip over that.
         if zoneId != ToontownGlobals.BossbotHQ:

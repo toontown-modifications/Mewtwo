@@ -1,6 +1,10 @@
-from direct.directnotify import DirectNotifyGlobal
-from direct.distributed.DistributedObjectAI import DistributedObjectAI
+from direct.directnotify.DirectNotifyGlobal import directNotify
+from game.toontown.ai.DistributedPhaseEventMgrAI import DistributedPhaseEventMgrAI
 
-class DistributedSillyMeterMgrAI(DistributedObjectAI):
-    notify = DirectNotifyGlobal.directNotify.newCategory(
-        "DistributedSillyMeterMgrAI")
+class DistributedSillyMeterMgrAI(DistributedPhaseEventMgrAI):
+    notify = directNotify.newCategory('DistributedSillyMeterMgrAI')
+
+    def __init__(self, air, curPhase, holidayDates, isRunning, numPhases):
+        DistributedPhaseEventMgrAI.__init__(self, air, curPhase, holidayDates, isRunning, numPhases)
+ 
+        air.SillyMeterMgr = self

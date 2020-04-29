@@ -1,22 +1,41 @@
-from direct.directnotify import DirectNotifyGlobal
-from direct.distributed.DistributedObjectAI import DistributedObjectAI
+from direct.directnotify.DirectNotifyGlobal import directNotify
+from direct.distributed.DistributedObjectGlobalAI import DistributedObjectGlobalAI
 
+from game.otp.distributed import OtpDoGlobals
 
-class DistributedDataStoreManagerAI(DistributedObjectAI):
-    notify = DirectNotifyGlobal.directNotify.newCategory(
-        "DistributedDataStoreManagerAI")
+import cPickle
 
-    def startStore(self, todo0):
-        pass
+class DistributedDataStoreManagerAI(DistributedObjectGlobalAI):
+    notify = directNotify.newCategory('DistributedDataStoreManagerAI')
 
-    def stopStore(self, todo0):
-        pass
+    context = 0
+    ctx2Callback = {}
 
-    def queryStore(self, todo0, todo1):
-        pass
+    def startStore(self, typeId):
+        self.sendUpdateToUD('startStore', [typeId])
 
-    def receiveResults(self, todo0, todo1):
-        pass
+    def stopStore(self, typeId):
+        self.sendUpdateToUD('stopStore', [typeId])
+
+    def queryStore(self, query, callback):
+        self.context += 1
+        self.ctx2Callback[self.context] = callback
+        self.sendUpdateToUD('queryStore', [self.context, query])
+
+    def receiveResults(self, context, results):
+        callback = self.ctx2Callback.get(context)
+
+        if not callback:
+            self.notify.warning('Got receiveResults with unknown context: {}'.format(context))
+            return
+
+        results = cPickle.loads(results)
+        callback(results)
+        del self.ctx2Callback[context]
 
     def deleteBackupStores(self):
-        pass
+        self.sendUpdateToUD('deleteBackupStores')
+
+    def sendUpdateToUD(self, field, args = []):
+        dg = self.dclass.aiFormatUpdate(field, OTP_DO_ID_TOONTOWN_TEMP_STORE_MANAGER, OTP_DO_ID_TOONTOWN_TEMP_STORE_MANAGER, self.doId, args)
+        self.air.send(dg)

@@ -896,12 +896,17 @@ class ExtAgent:
                 isCogHQ = self.getInCogHQ(zoneId)
                 isPlayground = ZoneUtil.isPlayground(zoneId)
                 branchId = ZoneUtil.getBranchZone(zoneId)
+                isWelcomeValley = ZoneUtil.isWelcomeValley(zoneId)
 
                 if isStreetBranch:
+                    zoneId = ZoneUtil.getCanonicalZoneId(zoneId)
                     branchId = ZoneUtil.getBranchZone(zoneId)
 
-                    if zoneId % 100 != 0:
-                        visZones.update(self.getVisBranchZones(zoneId))
+                    if isWelcomeValley:
+                        visZones.update(self.getVisBranchZones(zoneId, False, True))
+                    else:
+                        if zoneId % 100 != 0:
+                            visZones.update(self.getVisBranchZones(zoneId))
 
                 if isCogHQ:
                     visZones.update(self.getVisBranchZones(zoneId))
@@ -992,6 +997,8 @@ class ExtAgent:
 
             self.air.dbInterface.queryObject(self.air.dbId, avatarId, handleAvatar)
         elif msgType == 81: # CLIENT_GET_PET_DETAILS
+            pass
+        elif msgType == 56: # CLIENT_REMOVE_FRIEND
             pass
         else:
             self.notify.warning('Received unknown message type %s from Client' % msgType)
