@@ -23,7 +23,7 @@ from game.toontown.effects import FireworkShows
 from game.toontown.effects.DistributedFireworkShowAI import DistributedFireworkShowAI
 from game.toontown.pets.DistributedPetAI import DistributedPetAI
 
-import random
+import random, time
 
 class ToontownMagicWordManagerAI(MagicWordManagerAI):
     notify = directNotify.newCategory('ToontownMagicWordManagerAI')
@@ -638,6 +638,79 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
         pet.b_setTrickAptitudes([1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0])
 
         self.sendResponseMessage(avId, 'Maxed your doodle!')
+    
+    def d_restockInv(self, avId):
+        av = self.air.doId2do.get(avId)
+
+        if not av:
+            return
+
+        av.inventory.NPCMaxOutInv(-1)
+        av.b_setInventory(av.inventory.makeNetString())
+
+        self.sendResponseMessage(avId, 'Restocked inventory!')
+    
+    def d_clearInv(self, avId):
+        av = self.air.doId2do.get(avId)
+
+        if not av:
+            return
+
+        av.inventory.zeroInv()
+        av.b_setInventory(av.inventory.makeNetString())
+
+        self.sendResponseMessage(avId, 'Cleared inventory!')
+    
+    def d_endMaze(self, avId):
+        av = self.air.doId2do.get(avId)
+
+        if not av:
+            return
+
+        mazeGame = None
+
+        from game.toontown.cogdominium.DistCogdoMazeGameAI import DistCogdoMazeGameAI
+
+        for do in simbase.air.doId2do.values():
+            if isinstance(do, DistCogdoMazeGameAI):
+                if invoker.doId in do.getToonIds():
+                    mazeGame = do
+                    break
+
+        if mazeGame:
+            mazeGame.openDoor()
+            response = 'Completed Maze Game'
+            self.sendResponseMessage(avId, response)
+            return
+
+        response = 'You are not in a Maze Game!'
+
+        self.sendResponseMessage(avId, response)
+    
+    def d_setCE(self, avId, index, zoneId, duration):
+        av = self.air.doId2do.get(avId)
+
+        if not avId:
+            return
+
+        if not 0 <= index <= 17:
+            response = 'Invalid value {0} specified for Cheesy Effect.'.format(index)
+            self.sendResponseMessage(avId, response)
+            return
+
+        if index == 17 and (not hasattr(self.air, 'holidayManager') or not self.air.holidayManager.isHolidayRunning(ToontownGlobals.APRIL_FOOLS)):
+            response = 'Invalid value {0} specified for Cheesy Effect.'.format(index)
+            self.sendResponseMessage(avId, response)
+
+        if zoneId != 0 and not 100 < zoneId < ToontownGlobals.DynamicZonesBegin:
+            response = 'Invalid zoneId specified.'
+            self.sendResponseMessage(avId, response)
+            return
+
+        av.b_setCheesyEffect(index, zoneId, time.time() + duration)
+
+        response = 'Set cheesy effect to {0}.'.format(index)
+        self.sendResponseMessage(avId, response)
 
     def setMagicWordExt(self, magicWord, avId):
         self.setMagicWord(magicWord, avId, self.air.doId2do.get(avId).zoneId, '', sentFromExt = True)
@@ -749,6 +822,16 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
             self.d_doodleTest(avId, av, stress = True)
         elif magicWord == 'maxdoodle':
             self.d_setMaxDoodle(avId, av)
+        elif magicWord in ('restockinv', 'inventoryrestock'):
+            self.d_restockInv(avId)
+        elif magicWord in ('clearinv', 'clearinventory'):
+            self.d_clearInv(avId)
+        elif magicWord == 'endmaze':
+            self.d_endMaze(avId)
+        elif magicWord in ('setce', 'cheesyeffect'):
+            if not validation:
+                return
+            self.d_setCE(avId, index = int(args[0]), zoneId = int(args[1]), duration = int(args[2]))
         else:
             if magicWord not in disneyCmds:
                 self.sendResponseMessage(avId, '{0} is not an valid Magic Word.'.format(magicWord))
