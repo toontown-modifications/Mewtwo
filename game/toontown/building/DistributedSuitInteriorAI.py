@@ -199,7 +199,7 @@ class DistributedSuitInteriorAI(DistributedObjectAI.DistributedObjectAI):
         avatar = self.air.doId2do.get(avId)
         if avatar != None:
             self.savedByMap[avId] = (
-             avatar.getName(), avatar.dna.asTuple())
+             avatar.getName(), avatar.dna.asTuple(), avatar.isGM())
         self.responses[avId] += 1
         if self.__allToonsResponded():
             self.fsm.request('Elevator')
