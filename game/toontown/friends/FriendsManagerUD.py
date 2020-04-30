@@ -250,6 +250,9 @@ class FriendsManagerUD:
 
         for friendId in onlineFriends:
             datagram.addUint32(friendId)
+        
+        datagram.addUint8(1)
+        datagram.addUint8(1)
 
          # Send it.
         dgTwo = PyDatagram()
@@ -400,6 +403,9 @@ class FriendsManagerUD:
         datagram.addUint16(53) # CLIENT_FRIEND_ONLINE
         datagram.addUint32(otherId)
  
+        datagram.addUint8(1)
+        datagram.addUint8(1)
+
          # Send it.
         dgTwo = PyDatagram()
         dgTwo.addServerHeader(clientChannel, self.air.air.ourChannel, CLIENTAGENT_SEND_DATAGRAM)
