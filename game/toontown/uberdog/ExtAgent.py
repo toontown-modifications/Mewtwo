@@ -11,6 +11,7 @@ from game.toontown.toonbase import ToontownGlobals
 from game.toontown.chat.TTWhiteList import TTWhiteList
 from panda3d.toontown import DNAStorage, loadDNAFileAI
 from game import genDNAFileName, extractGroupName
+from game.toontown.friends.FriendsManagerUD import FriendsManagerUD
 import json, time, os, random
 
 class JSONBridge:
@@ -75,6 +76,8 @@ class ExtAgent:
         self.clientChannel2avId = {}
         self.clientChannel2handle = {}
         self.dnaStores = {}
+
+        self.friendsManager = FriendsManagerUD(self)
 
         self.wantServerDebug = config.GetBool('want-server-debugging', False)
 
@@ -345,6 +348,8 @@ class ExtAgent:
                     self.sendEject(clientChannel, 122, 'Failed to locate your Account object.')
                     return
 
+                target = clientChannel >> 32
+
                 oldAvList = fields['ACCOUNT_AV_SET']
                 avList = oldAvList[:6]
                 avList += [0] * (6 - len(avList))
@@ -377,6 +382,7 @@ class ExtAgent:
                               'WishName': ('',),
                               'setDNAString': (dnaString,),
                               'setFriendsList': ([],),
+                              'setDISLid': (channel,),
                               'setDefaultShard': (defaultShard,),}
 
                 # Create the Toon object.
@@ -401,82 +407,9 @@ class ExtAgent:
             dg.addString(resp.getMessage())
             self.air.send(dg)
         elif msgType == 10: # CLIENT_GET_FRIEND_LIST
-            accId = self.air.GetAccountIDFromChannelCode(clientChannel)
-            avId = self.air.GetAvatarIDFromChannelCode(clientChannel)
+            avId = self.air.getAvatarIdFromSender()
 
-            friendsDetails = []
-            onlineFriends = []
-            friendsList = []
-
-            def gotActivatedResp(avId, activated):
-                iterated += 1
-
-                if activated:
-                    onlineFriends.append(avId)
-
-                datagram = PyDatagram()
-
-                datagram.addUint16(53) # CLIENT_FRIEND_ONLINE
-
-                for friend in onlineFriends:
-                    datagram.addUint32(friend)
-
-                # Send it.
-                dg = PyDatagram()
-                dg.addServerHeader(clientChannel, self.air.ourChannel, CLIENTAGENT_SEND_DATAGRAM)
-                dg.addString(datagram.getMessage())
-                self.air.send(dg)
-
-                resp = PyDatagram()
-
-                resp.addUint16(11) # CLIENT_GET_FRIEND_LIST_RESP
-                resp.addUint8(0)
-                print(len(onlineFriends))
-                resp.addUint16(len(onlineFriends))
-
-                for avId in friendsList:
-                    dclass, fields = friendsList[avId]
-                    print(fields)
-
-                    resp.addUint32(avId)
-                    resp.addString(fields['setName'][0])
-                    resp.addString(fields['setDNAString'][0])
-
-                # Send it.
-                dg = PyDatagram()
-                dg.addServerHeader(clientChannel, self.air.ourChannel, CLIENTAGENT_SEND_DATAGRAM)
-                dg.addString(resp.getMessage())
-                self.air.send(dg)
-
-            def gotAvatarInfo(dclass, fields):
-                if dclass not in (self.air.dclassesByName['DistributedToonUD'], self.air.dclassesByName['DistributedPetAI']):
-                    self.sendEject(clientChannel, 122, 'Invalid dclass for avatarId: {0}.'.format(avatarId))
-                    return
-
-                isPet = dclass == self.air.dclassesByName['DistributedPetAI']
-                fields['avId'] = avId
-
-                iterated = 0
-
-                if not isPet:
-                    friendsDetails.append([fields['avId'], fields['setName'][0], fields['setDNAString'][0], fields['setPetId'][0]])
-
-                    if iterated >= len(friendsList):
-                        for friendId, trueFriend in friendsList:
-                            self.air.getActivated(friendId, gotActivatedResp)
-
-            def handleRetrieve(dclass, fields):
-                if dclass != self.air.dclassesByName['DistributedToonUD']:
-                    self.sendEject(clientChannel, 122, 'Invalid dclass for avatarId: {0}.'.format(avatarId))
-                    return
-
-                friendsList = fields['setFriendsList'][0]
-
-                for friendId, trueFriend in friendsList:
-                    self.air.dbInterface.queryObject(self.air.dbId, friendId, gotAvatarInfo)
-
-            # Query the avatar.
-            self.air.dbInterface.queryObject(self.air.dbId, avId, handleRetrieve)
+            self.friendsManager.getFriendsListRequest(avId)
         elif msgType == 125: # CLIENT_LOGIN_TOONTOWN
             playToken = dgi.getString()
             serverVersion = dgi.getString()
@@ -673,6 +606,9 @@ class ExtAgent:
                 # Grab the legitimate avId.
                 currentAvId = self.air.getAvatarIdFromSender()
 
+                # Tell everybody were going offline.
+                self.friendsManager.goingOffline(currentAvId)
+
                 target = clientChannel >> 32
                 channel = self.air.GetAccountConnectionChannel(target)
 
@@ -752,6 +688,17 @@ class ExtAgent:
                 # Make the client own the avatar.
                 self.air.setOwner(avId, channel)
 
+                # Tell the friends manager that an avatar is coming online.
+                for x, y in fields['setFriendsList'][0]:
+                    self.friendsManager.comingOnline(avId, x)
+                
+                # If we dont have a setDISLId field, set it:
+                try:
+                   fields['setDISLid']
+                except KeyError:
+                    fields['setDISLid'] = target,
+                    self.air.dbInterface.updateObject(self.air.dbId, avId, self.air.dclassesByName['DistributedToonUD'], fields)
+
             def handleAccountRetrieve(dclass, fields):
                 if dclass != self.air.dclassesByName['AccountUD']:
                     # This is not an Account object.
@@ -774,6 +721,12 @@ class ExtAgent:
             # Query the account.
             self.air.dbInterface.queryObject(self.air.dbId, clientChannel >> 32, handleAccountRetrieve)
         elif msgType == 37: # CLIENT_DISCONNECT
+            avId = self.air.getAvatarIdFromSender()
+
+            if avId:
+                # If we have a avId, tell everybody were going offline.
+                self.friendsManager.goingOffline(avId)
+
             resp = PyDatagram()
             resp.addServerHeader(clientChannel, self.air.ourChannel, CLIENT_DISCONNECT)
             self.air.send(resp)
@@ -1059,7 +1012,11 @@ class ExtAgent:
 
             self.air.dbInterface.queryObject(self.air.dbId, petId, handlePet)
         elif msgType == 56: # CLIENT_REMOVE_FRIEND
-            pass
+            avId = self.air.getAvatarIdFromSender()
+
+            friendId = dgi.getUint32()
+
+            self.friendsManager.removeFriend(avId, friendId)
         else:
             self.notify.warning('Received unknown message type %s from Client' % msgType)
 
