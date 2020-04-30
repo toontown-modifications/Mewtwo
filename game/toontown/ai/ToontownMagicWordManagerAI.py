@@ -716,7 +716,7 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
         elif magicWord == 'setgm':
             if not validation:
                 return
-            self.d_setGM(avId, gmType = args[0])
+            self.d_setGM(avId, gmType = int(args[0]))
         elif magicWord == 'skipvp':
             if not validation:
                 return
