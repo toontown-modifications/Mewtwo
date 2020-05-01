@@ -1,7 +1,7 @@
 from panda3d.core import *
 from panda3d.toontown import DNAStorage, SuitLeg, SuitLegList
 from direct.showbase import PythonUtil
-import __builtin__, sys
+import __builtin__, sys, os
 
 __builtin__.isClient = lambda: PythonUtil.isClient()
 __builtin__.DNAStorage = DNAStorage
@@ -20,7 +20,7 @@ from game.otp.ai.AIBaseGlobal import *
 
 from ToontownAIRepository import ToontownAIRepository
 
-simbase.air = ToontownAIRepository()
+simbase.air = ToontownAIRepository(int(os.getenv('BASE_CHANNEL')), os.getenv('DISTRICT_NAME'))
 
 host = config.GetString('air-connect', '127.0.0.1')
 port = 7100

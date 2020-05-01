@@ -76,9 +76,10 @@ __builtin__.isClient = lambda: PythonUtil.isClient()
 
 class ToontownAIRepository(ToontownInternalRepository):
 
-    def __init__(self):
-        ToontownInternalRepository.__init__(self, config.GetInt('air-base-channel', 0), config.GetInt('air-stateserver', 0), dcSuffix = 'AI')
+    def __init__(self, baseChannel, districtName):
+        ToontownInternalRepository.__init__(self, baseChannel, config.GetInt('air-stateserver', 0), dcSuffix = 'AI')
 
+        self.districtName = districtName
         self.districtPopulation = 0
 
         self.zoneAllocator = UniqueIdAllocator(ToontownGlobals.DynamicZonesBegin, ToontownGlobals.DynamicZonesEnd)
@@ -162,7 +163,7 @@ class ToontownAIRepository(ToontownInternalRepository):
 
         # Generate our district.
         self.district = ToontownDistrictAI(self)
-        self.district.setName('Sillyville')
+        self.district.setName(self.districtName)
         self.district.generateWithRequiredAndId(self.districtId, self.getGameDoId(), OtpDoGlobals.OTP_ZONE_ID_DISTRICTS)
         self.district.setAI(self.ourChannel)
 
