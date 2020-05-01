@@ -711,6 +711,37 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
 
         response = 'Set cheesy effect to {0}.'.format(index)
         self.sendResponseMessage(avId, response)
+    
+    def d_growFlowers(self, avId):
+        av = self.air.doId2do.get(avId)
+
+        if not avId:
+            return
+
+        estate = self.air.estateMgr._lookupEstate(av)
+
+        if not estate:
+            response = 'Estate not found!'
+            self.sendResponseMessage(avId, response)
+
+        house = estate.getAvHouse(avId)
+        garden = house.gardenManager.gardens.get(avId)
+
+        if not garden:
+            response = 'Garden not found!'
+            self.sendResponseMessage(avId, response)
+
+        now = int(time.time())
+        i = 0
+
+        for flower in garden.flowers:
+            flower.b_setWaterLevel(5)
+            flower.b_setGrowthLevel(2)
+            flower.update()
+            i += 1
+
+        response = '{0} flowers grown.'.format(i)
+        self.sendResponseMessage(avId, response)
 
     def setMagicWordExt(self, magicWord, avId):
         self.setMagicWord(magicWord, avId, self.air.doId2do.get(avId).zoneId, '', sentFromExt = True)
@@ -835,6 +866,8 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
                 self.sendResponseMessage(avId, 'You specified not enough arguments for this command!')
                 return
             self.d_setCE(avId, index = int(args[0]), zoneId = int(args[1]), duration = int(args[2]))
+        elif magicWord == 'growflowers':
+            self.d_growFlowers(avId)
         else:
             if magicWord not in disneyCmds:
                 self.sendResponseMessage(avId, '{0} is not an valid Magic Word.'.format(magicWord))
