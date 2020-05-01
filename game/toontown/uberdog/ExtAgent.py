@@ -382,7 +382,7 @@ class ExtAgent:
                               'WishName': ('',),
                               'setDNAString': (dnaString,),
                               'setFriendsList': ([],),
-                              'setDISLid': (channel,),
+                              'setDISLid': (target,),
                               'setDefaultShard': (defaultShard,),}
 
                 # Create the Toon object.
