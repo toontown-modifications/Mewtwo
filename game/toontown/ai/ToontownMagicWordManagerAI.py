@@ -831,6 +831,9 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
         elif magicWord in ('setce', 'cheesyeffect'):
             if not validation:
                 return
+            if not len(args) == 3:
+                self.sendResponseMessage(avId, 'You specified not enough arguments for this command!')
+                return
             self.d_setCE(avId, index = int(args[0]), zoneId = int(args[1]), duration = int(args[2]))
         else:
             if magicWord not in disneyCmds:
