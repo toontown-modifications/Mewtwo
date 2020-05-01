@@ -463,7 +463,7 @@ class DistributedSuitInteriorAI(DistributedObjectAI.DistributedObjectAI):
         for v in victors:
             tuple = self.savedByMap.get(v)
             if tuple:
-                savedBy.append([v, tuple[0], tuple[1]])
+                savedBy.append([v, tuple[0], tuple[1], tuple[2]])
 
         self.bldg.fsm.request('waitForVictors', [victors, savedBy])
         self.d_setState('Reward')

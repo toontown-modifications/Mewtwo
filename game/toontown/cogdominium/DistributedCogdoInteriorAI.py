@@ -898,7 +898,8 @@ class DistributedCogdoInteriorAI(DistributedObjectAI.DistributedObjectAI):
                 savedBy.append([
                     v,
                     tuple[0],
-                    tuple[1]])
+                    tuple[1],
+                    tuple[2]])
                 toon = self.air.doId2do.get(v)
                 if toon:
                     self.notify.info('Reward State: toonId:%d laff:%d/%d get ready for the victors to come outside' % (toon.doId, toon.hp, toon.maxHp))
