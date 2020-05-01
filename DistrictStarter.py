@@ -1,11 +1,9 @@
 import os, subprocess
 
 districtNames = [
-    'Boingy Acres'
+    'Boingy Acres',
     'Boingy Bay',
     'Boingy Summit',
-    'Boingyboro',
-    'Bouncy Summit'
     'Boingyboro',
     'Bouncy Summit',
     'Crazy Grove',
