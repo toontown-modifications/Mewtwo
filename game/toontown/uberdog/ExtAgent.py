@@ -502,6 +502,9 @@ class ExtAgent:
 
                 message = fieldArgs[3]
 
+                if not message:
+                    return
+
                 if message[0] == '~':
                     # Route this to the Magic Word manager.
                     self.air.netMessenger.send('magicWord', [message, doId])
