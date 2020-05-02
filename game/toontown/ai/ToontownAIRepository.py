@@ -69,6 +69,7 @@ from game.toontown.uberdog.DistributedPartyManagerAI import DistributedPartyMana
 from game.toontown.ai.DistributedPolarPlaceEffectMgrAI import DistributedPolarPlaceEffectMgrAI
 from game.toontown.ai.DistributedResistanceEmoteMgrAI import DistributedResistanceEmoteMgrAI
 from game.toontown.distributed.ToontownInternalRepository import ToontownInternalRepository
+from game.toontown.estate.DistributedBankMgrAI import DistributedBankMgrAI
 
 import __builtin__, time, os
 
@@ -262,6 +263,9 @@ class ToontownAIRepository(ToontownInternalRepository):
 
         self.resistanceEmoteMgr = DistributedResistanceEmoteMgrAI(self)
         self.resistanceEmoteMgr.generateWithRequired(9720)
+
+        self.bankManager = DistributedBankMgrAI(self)
+        self.bankManager.generateWithRequired(OtpDoGlobals.OTP_ZONE_ID_MANAGEMENT)
 
     def createHood(self, hoodCtr, zoneId):
         # Bossbot HQ doesn't use DNA, so we skip over that.
