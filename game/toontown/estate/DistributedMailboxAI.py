@@ -2,6 +2,7 @@ from direct.directnotify.DirectNotifyGlobal import directNotify
 from direct.distributed.DistributedObjectAI import DistributedObjectAI
 
 from game.toontown.estate import MailboxGlobals
+from game.toontown.parties import PartyGlobals
 from game.toontown.toonbase import ToontownGlobals
 
 class DistributedMailboxAI(DistributedObjectAI):
@@ -59,7 +60,7 @@ class DistributedMailboxAI(DistributedObjectAI):
         if not av:
             return
 
-        if len(av.mailboxContents):
+        if len(av.mailboxContents) + av.getNumInvitesToShowInMailbox():
             self.d_setMovie(MailboxGlobals.MAILBOX_MOVIE_READY, avId)
             self.user = avId
             self.busy = True
@@ -123,19 +124,31 @@ class DistributedMailboxAI(DistributedObjectAI):
         av.b_setMailboxContents(av.mailboxContents)
         self.sendUpdateToAvatarId(avId, 'discardItemResponse', [context, ToontownGlobals.P_ItemAvailable])
 
-    def acceptInviteMessage(self, todo0, todo1):
-        pass  # TODO
+    def acceptInviteMessage(self, context, inviteKey):
+        avId = self.air.getAvatarIdFromSender()
+        if not avId:
+            return
 
-    def rejectInviteMessage(self, todo0, todo1):
-        pass  # TODO
+        self.air.partyManager.d_respondToInvite(avId, PartyGlobals.InviteStatus.Accepted, context, inviteKey)
 
-    def markInviteReadButNotReplied(self, todo0):
-        pass  # TODO
+    def rejectInviteMessage(self, context, inviteKey):
+        avId = self.air.getAvatarIdFromSender()
+        if not avId:
+            return
+
+        self.air.partyManager.d_respondToInvite(avId, PartyGlobals.InviteStatus.Rejected, context, inviteKey)
+
+    def markInviteReadButNotReplied(self, inviteKey):
+        avId = self.air.getAvatarIdFromSender()
+        if not avId:
+            return
+
+        self.air.partyManager.d_respondToInvite(avId, PartyGlobals.InviteStatus.ReadButNotReplied, 0, inviteKey)
 
     def updateIndicatorFlag(self):
         av = self.air.doId2do.get(self.house.avatarId)
         if av:
-            self.b_setFullIndicator(len(av.mailboxContents))
+            self.b_setFullIndicator(len(av.mailboxContents) + av.getNumInvitesToShowInMailbox())
         else:
             self.b_setFullIndicator(0)
 
