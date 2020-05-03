@@ -180,6 +180,9 @@ class ExtAgent:
         if zoneId in (ToontownGlobals.SellbotLobby, ToontownGlobals.LawbotOfficeExt, ToontownGlobals.LawbotLobby, ToontownGlobals.BossbotHQ, ToontownGlobals.CashbotLobby, ToontownGlobals.BossbotLobby):
             return []
 
+        if zoneId == ToontownGlobals.WelcomeValleyEnd:
+            return []
+
         if not dnaStore:
             dnaStore = DNAStorage()
             dnaFileName = genDNAFileName(branchZoneId)
