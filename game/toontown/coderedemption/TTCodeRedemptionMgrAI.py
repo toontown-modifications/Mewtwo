@@ -187,6 +187,10 @@ class TTCodeRedemptionMgrAI(DistributedObjectAI):
             shirt = CatalogClothingItem(1807, 0)
             return [shirt]
 
+        if code == 'spooky':
+            shirt = CatalogClothingItem(1799, 0)
+            return [shirt]
+
         return []
 
     def requestCodeRedeem(self, todo0, todo1):

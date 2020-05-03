@@ -54,19 +54,18 @@ class DistributedEstateAI(DistributedObjectAI):
         self.pond.generateWithRequired(self.zoneId)
         self.pond.generateTargets()
 
-        if config.GetBool('want-estate-fishing', False):
-            # Generate our fishing spots:
-            for i in xrange(len(self.spotPosHpr)):
-                spot = DistributedFishingSpotAI(self.air)
-                spot.setPondDoId(self.pond.doId)
-                spot.setPosHpr(*self.spotPosHpr[i])
+        # Generate our fishing spots:
+        for i in xrange(len(self.spotPosHpr)):
+            spot = DistributedFishingSpotAI(self.air)
+            spot.setPondDoId(self.pond.doId)
+            spot.setPosHpr(*self.spotPosHpr[i])
 
-                if not isinstance(spot, DistributedFishingSpotAI):
-                    self.notify.warning('Failed to generate spot for pond %d!' % self.pond.doId)
-                    continue
+            if not isinstance(spot, DistributedFishingSpotAI):
+                self.notify.warning('Failed to generate spot for pond %d!' % self.pond.doId)
+                continue
 
-                spot.generateWithRequired(self.zoneId)
-                self.pond.addSpot(spot)
+            spot.generateWithRequired(self.zoneId)
+            self.pond.addSpot(spot)
 
         # Start the collision loop:
         taskMgr.add(self.__collisionLoop, self.uniqueName('collisionLoop'), sort=30)
