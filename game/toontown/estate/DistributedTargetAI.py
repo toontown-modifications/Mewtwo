@@ -1,7 +1,7 @@
 from direct.directnotify.DirectNotifyGlobal import directNotify
 from direct.distributed.DistributedObjectAI import DistributedObjectAI
 
-from toontown.estate import CannonGlobals
+from game.toontown.estate import CannonGlobals
 
 class DistributedTargetAI(DistributedObjectAI):
     notify = directNotify.newCategory('DistributedTargetAI')
