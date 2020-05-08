@@ -48,7 +48,7 @@ class NewsManagerAI(DistributedObjectAI):
         if self.air.suitInvasionManager.getInvading():
             self.sendUpdateToAvatarId(av.getDoId(), 'setInvasionStatus', [ToontownGlobals.SuitInvasionBulletin,
                                                                           self.air.suitInvasionManager.invadingCog[0],
-                                                                          self.air.suitInvasionManager.numSuits,
+                                                                          self.air.suitInvasionManager.numCogs,
                                                                           self.air.suitInvasionManager.invadingCog[1]])
 
         if self.air.holidayManager.isHolidayRunning(ToontownGlobals.SILLY_SATURDAY_BINGO) or \

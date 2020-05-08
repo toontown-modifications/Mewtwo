@@ -1,10 +1,5 @@
-from direct.directnotify import DirectNotifyGlobal
+from direct.directnotify.DirectNotifyGlobal import directNotify
 from game.toontown.estate.DistributedStatuaryAI import DistributedStatuaryAI
 
-
 class DistributedChangingStatuaryAI(DistributedStatuaryAI):
-    notify = DirectNotifyGlobal.directNotify.newCategory(
-        "DistributedChangingStatuaryAI")
-
-    def setGrowthLevel(self, todo0):
-        pass
+    notify = directNotify.newCategory('DistributedChangingStatuaryAI')

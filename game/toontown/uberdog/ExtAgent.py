@@ -62,8 +62,10 @@ class ExtAgent:
 
         self.air.netMessenger.register(0, 'registerShard')
         self.air.netMessenger.register(1, 'magicWord')
+        self.air.netMessenger.register(2, 'postAddFriend')
 
         self.air.netMessenger.accept('registerShard', self, self.registerShard)
+        self.air.netMessenger.accept('postAddFriend', self, self.postAddFriend)
 
         self.shardInfo = {}
 
@@ -80,12 +82,29 @@ class ExtAgent:
         self.friendsManager = FriendsManagerUD(self)
 
         self.wantServerDebug = config.GetBool('want-server-debugging', False)
+        self.wantServerMaintenance = config.GetBool('want-server-maintenance', False)
+    
+    def postAddFriend(self, avId, friendId):
+        self.friendsManager.postAddFriend(avId, friendId)
 
     def sendEject(self, clientChannel, errorCode, errorStr):
         dg = PyDatagram()
         dg.addServerHeader(clientChannel, self.air.ourChannel, CLIENTAGENT_EJECT)
         dg.addUint16(errorCode)
         dg.addString(errorStr)
+        self.air.send(dg)
+    
+    def sendBoot(self, clientChannel, errorCode, errorStr):
+        # Prepare the eject response.
+        resp = PyDatagram()
+        resp.addUint16(4) # CLIENT_GO_GET_LOST
+        resp.addUint16(errorCode)
+        resp.addString(errorStr)
+
+        # Send it.
+        dg = PyDatagram()
+        dg.addServerHeader(clientChannel, self.air.ourChannel, CLIENTAGENT_SEND_DATAGRAM)
+        dg.addString(resp.getMessage())
         self.air.send(dg)
 
     def registerShard(self, shardId, shardName):
@@ -169,18 +188,40 @@ class ExtAgent:
 
         return False
 
+    def isValidZone(self, zoneId):
+        validZones = [
+            ToontownGlobals.SillyStreet,
+            ToontownGlobals.LoopyLane,
+            ToontownGlobals.PunchlinePlace,
+            ToontownGlobals.BarnacleBoulevard,
+            ToontownGlobals.SeaweedStreet,
+            ToontownGlobals.LighthouseLane,
+            ToontownGlobals.WalrusWay,
+            ToontownGlobals.SleetStreet,
+            ToontownGlobals.PolarPlace,
+            ToontownGlobals.AltoAvenue,
+            ToontownGlobals.BaritoneBoulevard,
+            ToontownGlobals.TenorTerrace,
+            ToontownGlobals.LullabyLane,
+            ToontownGlobals.PajamaPlace,
+            ToontownGlobals.SellbotHQ,
+            ToontownGlobals.SellbotFactoryExt,
+            ToontownGlobals.CashbotHQ,
+            ToontownGlobals.LawbotHQ
+        ]
+
+        if ZoneUtil.getBranchZone(zoneId) or zoneId in validZones:
+            return True
+
+        return False
+
     def getVisBranchZones(self, zoneId, isCogHQ = False):
         branchZoneId = ZoneUtil.getBranchZone(zoneId)
         dnaStore = self.dnaStores.get(branchZoneId)
 
-        if zoneId in (6100, 6101, 19000, 19001, 19101):
-            # This is ToonLand.
-            return []
+        blacklistZones = [ToontownGlobals.SellbotLobby, ToontownGlobals.LawbotOfficeExt, ToontownGlobals.LawbotLobby, ToontownGlobals.BossbotHQ, ToontownGlobals.CashbotLobby, ToontownGlobals.BossbotLobby]
 
-        if zoneId in (ToontownGlobals.SellbotLobby, ToontownGlobals.LawbotOfficeExt, ToontownGlobals.LawbotLobby, ToontownGlobals.BossbotHQ, ToontownGlobals.CashbotLobby, ToontownGlobals.BossbotLobby):
-            return []
-
-        if zoneId == ToontownGlobals.WelcomeValleyEnd:
+        if zoneId in blacklistZones or not self.isValidZone(zoneId):
             return []
 
         if not dnaStore:
@@ -414,11 +455,40 @@ class ExtAgent:
 
             self.friendsManager.getFriendsListRequest(avId)
         elif msgType == 125: # CLIENT_LOGIN_TOONTOWN
-            playToken = dgi.getString()
-            serverVersion = dgi.getString()
-            hashVal = dgi.getUint32()
-            tokenType = dgi.getInt32()
-            wantMagicWords = dgi.getString()
+            try:
+                playToken = dgi.getString()
+                serverVersion = dgi.getString()
+                hashVal = dgi.getUint32()
+                tokenType = dgi.getInt32()
+                wantMagicWords = dgi.getString()
+            except:
+                message = 'You have been ejected for attempting to send a incorrectly formatted datagram.'
+                self.sendBootMessage(clientChannel, 122, message)
+                self.sendEject(clientChannel, 122, message)
+
+            if playToken in ['Rocket', 'developer']:
+                # We got ourselves a skid!
+                errorCode = 288
+                message = 'Sorry, you have used up all of your available minutes this month.'
+
+                self.sendBoot(clientChannel, errorCode, message)
+                self.sendEject(clientChannel, errorCode, message)
+                return
+
+            print('{0} is trying to login!'.format(playToken))
+
+            def callback(remoteIp, remotePort, localIp, localPort):
+                print(remoteIp)
+
+            self.air.getNetworkAddress(self.air.getMsgSender(), callback)
+
+            if self.wantServerMaintenance and playToken not in ['Rocket', 'Rocket2', 'chaoskitty', 'kona', 'a9fc8fe540fce7856c90b7f590e3c2a97e065dadbfb55b0ee686ba26166fa18d']:
+                errorCode = 151
+                message = 'You have been logged out by an administrator working on the servers.'
+
+                self.sendBoot(clientChannel, errorCode, message)
+                self.sendEject(clientChannel, errorCode, message)
+                return
 
             # Check the server version against the real one.
             ourVersion = config.GetString('server-version', '')
@@ -697,12 +767,17 @@ class ExtAgent:
                 # Tell the friends manager that an avatar is coming online.
                 for x, y in fields['setFriendsList'][0]:
                     self.friendsManager.comingOnline(avId, x)
-                
+
                 # If we dont have a setDISLId field, set it:
                 try:
                    fields['setDISLid']
                 except KeyError:
                     fields['setDISLid'] = target,
+                    self.air.dbInterface.updateObject(self.air.dbId, avId, self.air.dclassesByName['DistributedToonUD'], fields)
+
+                # Update the avatar with the proper max bank amount.
+                if fields['setMaxBankMoney'][0] == 1200:
+                    fields['setMaxBankMoney'] = 12000,
                     self.air.dbInterface.updateObject(self.air.dbId, avId, self.air.dclassesByName['DistributedToonUD'], fields)
 
             def handleAccountRetrieve(dclass, fields):
@@ -861,11 +936,8 @@ class ExtAgent:
                     zoneId = ZoneUtil.getCanonicalZoneId(zoneId)
                     branchId = ZoneUtil.getBranchZone(zoneId)
 
-                    if isWelcomeValley:
-                        visZones.update(self.getVisBranchZones(zoneId, False, True))
-                    else:
-                        if zoneId % 100 != 0:
-                            visZones.update(self.getVisBranchZones(zoneId))
+                    if zoneId % 100 != 0:
+                        visZones.update(self.getVisBranchZones(zoneId))
 
                 if isCogHQ:
                     visZones.update(self.getVisBranchZones(zoneId))
@@ -1023,6 +1095,8 @@ class ExtAgent:
             friendId = dgi.getUint32()
 
             self.friendsManager.removeFriend(avId, friendId)
+        elif msgType == 49: # CLIENT_DELETE_AVATAR
+            avId = dgi.getUint32()
         else:
             self.notify.warning('Received unknown message type %s from Client' % msgType)
 

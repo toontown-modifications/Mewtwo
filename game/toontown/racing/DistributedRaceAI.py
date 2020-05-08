@@ -354,11 +354,15 @@ class DistributedRaceAI(DistributedObjectAI.DistributedObjectAI):
         if avId in self.racers:
             if self.racers[avId].hasGag:
                 return
-            if self.gagList[slot] == index:
-                self.gagList[slot] = None
-                taskMgr.doMethodLater(5, self.d_genGag, 'remakeGag-' + str(slot), extraArgs=[slot])
-                self.racers[avId].hasGag = True
-                self.racers[avId].gagType = type
+            if slot in self.gagList:
+                if self.gagList[slot] == index:
+                    self.gagList[slot] = None
+                    taskMgr.doMethodLater(5, self.d_genGag, 'remakeGag-' + str(slot), extraArgs=[slot])
+                    self.racers[avId].hasGag = True
+                    self.racers[avId].gagType = type
+                else:
+                    self.air.writeServerEvent('suspicious', avId, 'Slot was not in the Gag list!')
+                    return
             else:
                 return
         return

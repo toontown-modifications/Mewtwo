@@ -130,7 +130,7 @@ class DistributedAvatarAI(DistributedNodeAI.DistributedNodeAI):
             filteredMessage = filteredMessage[:modStart] + '*' * (modStop - modStart + 1) + filteredMessage[modStop + 1:]
 
         return filteredMessage, modifications
-    
+
     def setTalkWhisper(self, receiverAvId, todo2, todo3, message, modifications, todo4):
         sender = self.air.getAvatarIdFromSender()
 
@@ -147,7 +147,7 @@ class DistributedAvatarAI(DistributedNodeAI.DistributedNodeAI):
             datagram = dclass.aiFormatUpdate('setTalkWhisper', receiverAvId, receiverAvId, self.air.ourChannel, [sender, sender, '', cleanMessage, modifications, 0])
 
         self.air.send(datagram)
-    
+
     def setTalkAccount(self, receiverAvId, todo2, todo3, message, modifications, todo4):
         sender = self.air.getAvatarIdFromSender()
         print(sender)

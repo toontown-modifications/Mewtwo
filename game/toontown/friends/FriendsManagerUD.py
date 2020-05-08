@@ -375,6 +375,23 @@ class FriendsManagerUD:
             newOperation.start()
             self.operations[avId] = newOperation
 
+    def postAddFriend(self, avId, friendId):
+        clientChannel = self.air.air.GetPuppetConnectionChannel(avId)
+
+        # Tell the client that their friend is online.
+        datagram = PyDatagram()
+        datagram.addUint16(53) # CLIENT_FRIEND_ONLINE
+        datagram.addUint32(friendId)
+ 
+        datagram.addUint8(1)
+        datagram.addUint8(1)
+
+         # Send it.
+        dgTwo = PyDatagram()
+        dgTwo.addServerHeader(clientChannel, self.air.air.ourChannel, CLIENTAGENT_SEND_DATAGRAM)
+        dgTwo.addString(datagram.getMessage())
+        self.air.air.send(dgTwo)
+
     def comingOnline(self, avId, friendId):
         self.air.air.getActivated(friendId, functools.partial(self.__comingOnlineFriendOnline, otherId = avId))
 

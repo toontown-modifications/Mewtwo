@@ -19,6 +19,7 @@ class DistributedBattleBldgAI(DistributedBattleBaseAI.DistributedBattleBaseAI):
     def __init__(self, air, zoneId, roundCallback=None, finishCallback=None, maxSuits=4, bossBattle=0):
         DistributedBattleBaseAI.DistributedBattleBaseAI.__init__(self, air, zoneId, finishCallback, maxSuits, bossBattle)
         self.streetBattle = 0
+        self.buildingBattle = 1
         self.roundCallback = roundCallback
         self.fsm.addState(State.State('BuildingReward', self.enterBuildingReward, self.exitBuildingReward, [
          'Resume']))

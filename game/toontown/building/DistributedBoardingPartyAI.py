@@ -10,6 +10,7 @@ from direct.task import Task
 from direct.directnotify import DirectNotifyGlobal
 from game.toontown.building import BoardingPartyBase
 from game.toontown.toonbase import ToontownAccessAI
+from game.toontown.toon.DistributedToonAI import DistributedToonAI
 GROUPMEMBER = 0
 GROUPINVITE = 1
 
@@ -90,6 +91,11 @@ class DistributedBoardingPartyAI(DistributedObjectAI.DistributedObjectAI, Boardi
         invitee = simbase.air.doId2do.get(inviteeId)
         inviter = simbase.air.doId2do.get(inviterId)
         inviterOkay = self.checkBoard(inviterId, self.elevatorIdList[0])
+
+        if not isinstance(invitee, DistributedToonAI):
+            self.air.writeServerEvent('suspicious', inviterId, 'Tried to request invite to a non-toon object!')
+            return
+
         if inviterOkay == REJECT_NOTPAID:
             reason = BoardingPartyBase.BOARDCODE_NOT_PAID
             self.sendUpdateToAvatarId(inviterId, 'postInviteNotQualify', [inviteeId, reason, 0])

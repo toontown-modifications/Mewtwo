@@ -40,6 +40,7 @@ class DistributedBattleBaseAI(DistributedObjectAI.DistributedObjectAI, BattleBas
         self.numSuitsEver = 0
         BattleBase.__init__(self)
         self.streetBattle = 1
+        self.buildingBattle = 0
         self.pos = Point3(0, 0, 0)
         self.initialSuitPos = Point3(0, 0, 0)
         self.toonExp = {}
@@ -649,6 +650,12 @@ class DistributedBattleBaseAI(DistributedObjectAI.DistributedObjectAI, BattleBas
             self.luredSuits.remove(suit)
         self.suitGone = 1
         del suit.battleTrap
+        self.adjustInvasionCogs(suit.dna.name)
+
+    def adjustInvasionCogs(self, suitName):
+        if (self.streetBattle or self.buildingBattle) and simbase.air.suitInvasionManager.getInvading():
+            if simbase.air.suitInvasionManager.getInvadingCog()[0] == suitName:
+                simbase.air.suitInvasionManager.decrementNumCogs()
 
     def __removeToon(self, toonId, userAborted=0):
         self.notify.debug('__removeToon(%d)' % toonId)

@@ -450,6 +450,8 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
             return
 
         self.air.SillyMeterMgr.b_setCurPhase(phase)
+        self.air.SillyMeterMgr.b_setIsRunning(True)
+        messenger.send('SillyMeterPhase', [phase])
 
         self.sendResponseMessage(avId, 'Set the Silly Meter phase to {0}.'.format(phase))
     
@@ -788,7 +790,10 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
         elif magicWord in ('cogindex', 'setcogindex'):
             if not validation:
                 return
-            self.d_setCogIndex(avId, num = int(args[0]))
+            try:
+                self.d_setCogIndex(avId, num = int(args[0]))
+            except ValueError:
+                self.sendResponseMessage(avId, 'Invalid parameters.')
         elif magicWord == 'unites':
             if not validation:
                 return

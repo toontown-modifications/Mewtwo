@@ -9,16 +9,13 @@ class SuitInvasionManagerAI:
         self.air = air
 
         self.invadingCog = (None, 0)
-        self.numSuits = 0
-        self.suits = 0
+        self.numCogs = 0
         self.invading = False
 
     def setInvadingCog(self, suitName, skeleton):
         self.invadingCog = (suitName, skeleton)
 
     def getInvadingCog(self):
-        self.suits += 1
-        self._checkInvasionStatus()
         return self.invadingCog
 
     def getInvading(self):
@@ -28,23 +25,23 @@ class SuitInvasionManagerAI:
         for suitPlanner in self.air.suitPlanners.values():
             suitPlanner.flySuits()
 
-    def _checkInvasionStatus(self):
-        if self.suits >= self.numSuits:
+    def decrementNumCogs(self):
+        self.numCogs -= 1
+        if self.numCogs <= 0:
             self.stopInvasion()
 
     def stopInvasion(self, task = None):
         if not self.getInvading():
             return
 
-        self.air.newsManager.d_setInvasionStatus(ToontownGlobals.SuitInvasionEnd, self.invadingCog[0], self.numSuits, self.invadingCog[1])
+        self.air.newsManager.d_setInvasionStatus(ToontownGlobals.SuitInvasionEnd, self.invadingCog[0], self.numCogs, self.invadingCog[1])
         if task:
             task.remove()
         else:
             taskMgr.remove('invasion-timeout')
 
+        self.numCogs = 0
         self.setInvadingCog(None, 0)
-        self.numSuits = 0
-        self.suits = 0
         self.invading = False
         self._spGetOut()
 
@@ -52,11 +49,11 @@ class SuitInvasionManagerAI:
         if self.getInvading():
             return False
 
-        self.numSuits = numCogs
+        self.numCogs = numCogs
         self.setInvadingCog(cogType, skeleton)
         self.invading = True
-        self.air.newsManager.d_setInvasionStatus(ToontownGlobals.SuitInvasionBegin, self.invadingCog[0], self.numSuits, self.invadingCog[1])
+        self.air.newsManager.d_setInvasionStatus(ToontownGlobals.SuitInvasionBegin, self.invadingCog[0], self.numCogs, self.invadingCog[1])
         self._spGetOut()
         timePerSuit = config.GetFloat('invasion-time-per-suit', 1.2)
-        taskMgr.doMethodLater(self.numSuits * timePerSuit, self.stopInvasion, 'invasion-timeout')
+        taskMgr.doMethodLater(self.numCogs * timePerSuit, self.stopInvasion, 'invasion-timeout')
         return True
