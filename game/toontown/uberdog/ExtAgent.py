@@ -219,7 +219,7 @@ class ExtAgent:
         branchZoneId = ZoneUtil.getBranchZone(zoneId)
         dnaStore = self.dnaStores.get(branchZoneId)
 
-        blacklistZones = [ToontownGlobals.SellbotLobby, ToontownGlobals.LawbotOfficeExt, ToontownGlobals.LawbotLobby, ToontownGlobals.BossbotHQ, ToontownGlobals.CashbotLobby, ToontownGlobals.BossbotLobby]
+        blacklistZones = [ToontownGlobals.SellbotLobby, ToontownGlobals.LawbotOfficeExt, ToontownGlobals.LawbotLobby, ToontownGlobals.BossbotHQ, ToontownGlobals.CashbotLobby, ToontownGlobals.BossbotLobby, ToontownGlobals.WelcomeValleyEnd]
 
         if zoneId in blacklistZones or not self.isValidZone(zoneId):
             return []
