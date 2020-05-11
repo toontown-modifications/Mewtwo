@@ -15,7 +15,7 @@ dc-sort-inheritance-by-file #t
 
 want-gardening true
 want-randomized-hats false
-want-av-membership true
+want-membership true
 want-cogdominiums true
 want-coderedemption true
 want-server-debugging false

@@ -83,7 +83,8 @@ class ExtAgent:
 
         self.wantServerDebug = config.GetBool('want-server-debugging', False)
         self.wantServerMaintenance = config.GetBool('want-server-maintenance', False)
-    
+        self.wantMembership = config.GetBool('want-membership', False)
+
     def postAddFriend(self, avId, friendId):
         self.friendsManager.postAddFriend(avId, friendId)
 
@@ -142,8 +143,6 @@ class ExtAgent:
         # Un-sandbox the client.
         self.air.setClientState(clientChannel, 2)
 
-        wantAvMembership = config.GetBool('want-av-membership', False)
-
         # Prepare the login response.
         resp = PyDatagram()
         resp.addUint16(126) # CLIENT_LOGIN_TOONTOWN_RESP
@@ -158,7 +157,7 @@ class ExtAgent:
         resp.addUint32(int(time.time()))
         resp.addUint32(int(time.clock()))
 
-        if wantAvMembership:
+        if self.wantMembership:
             resp.addString('FULL')
         else:
             resp.addString('unpaid')
@@ -741,10 +740,19 @@ class ExtAgent:
                 # Save the account ID.
                 self.loadAvProgress.add(target)
 
+                if self.wantMembership:
+                    access = OTPGlobals.AccessFull
+                else:
+                    access = OTPGlobals.AccessVelvetRope
+
+                activateFields = {
+                    'setCommonChatFlags': [1],
+                    'setAccess': [access]
+                }
+
                 # Activate the avatar on the DBSS.
                 self.air.sendActivate(avId, fields['setDefaultShard'][0], 1,
-                    self.air.dclassesByName['DistributedToonUD'],
-                    {'setCommonChatFlags': [0], 'setAccess': [OTPGlobals.AccessFull]})
+                    self.air.dclassesByName['DistributedToonUD'], activateFields)
 
                 # Add the client to the avatar channel.
                 dg = PyDatagram()
