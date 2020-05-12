@@ -746,7 +746,7 @@ class ExtAgent:
                     access = OTPGlobals.AccessVelvetRope
 
                 activateFields = {
-                    'setCommonChatFlags': [1],
+                    'setCommonChatFlags': [0],
                     'setAccess': [access]
                 }
 
