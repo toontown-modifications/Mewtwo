@@ -1,8 +1,6 @@
 from direct.directnotify.DirectNotifyGlobal import directNotify
 from direct.distributed.DistributedObjectAI import DistributedObjectAI
 
-import marshal
-
 class OtpAvatarManagerAI(DistributedObjectAI):
     notify = directNotify.newCategory('OtpAvatarManagerAI')
 

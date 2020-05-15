@@ -223,10 +223,6 @@ class ExtAgent:
 
         if ZoneUtil.getBranchZone(zoneId) or zoneId in validZones:
             return True
-        else:
-            print('e')
-            print(zoneId)
-            return False
 
         return False
 
