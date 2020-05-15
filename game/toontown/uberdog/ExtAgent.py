@@ -12,7 +12,7 @@ from game.toontown.chat.TTWhiteList import TTWhiteList
 from panda3d.toontown import DNAStorage, loadDNAFileAI
 from game import genDNAFileName, extractGroupName
 from game.toontown.friends.FriendsManagerUD import FriendsManagerUD
-import json, time, os, random
+import json, time, os, random, requests
 
 class JSONBridge:
 
@@ -84,6 +84,18 @@ class ExtAgent:
         self.wantServerDebug = config.GetBool('want-server-debugging', False)
         self.wantServerMaintenance = config.GetBool('want-server-maintenance', False)
         self.wantMembership = config.GetBool('want-membership', False)
+
+        self.sendAvailabilityToAPI()
+
+    def sendAvailabilityToAPI(self):
+        data = {
+            'setter': self.wantServerMaintenance
+        }
+
+        try:
+            req = requests.post('http://127.0.0.1:8080/api/setMaintenanceMode', json = data)
+        except:
+            self.notify.warning('Failed to send availability to API!')
 
     def postAddFriend(self, avId, friendId):
         self.friendsManager.postAddFriend(avId, friendId)

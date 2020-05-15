@@ -73,7 +73,7 @@ from game.toontown.estate.DistributedBankMgrAI import DistributedBankMgrAI
 from game.toontown.ai.DialogueManagerAI import DialogueManagerAI
 from game.otp.uberdog.OtpAvatarManagerAI import OtpAvatarManagerAI
 
-import __builtin__, time, os
+import __builtin__, time, os, requests
 
 __builtin__.isClient = lambda: PythonUtil.isClient()
 
@@ -116,13 +116,41 @@ class ToontownAIRepository(ToontownInternalRepository):
 
         return False
 
+    def sendToAPI(self, districtPopulation, decrease = False):
+        baseEndpoint = 'http://otp-gs.rocketprogrammer.me:8080/api/{0}'
+
+        if not decrease:
+            endpoint = baseEndpoint.format('setPopulation')
+
+            data = {
+                'districtPopulation': districtPopulation
+            }
+
+            try:
+                req = requests.post(endpoint, json = data)
+            except:
+                self.notify.warning('Failed to send district population to API!')
+        else:
+            endpoint = baseEndpoint.format('decreasePopulation')
+
+            data = {
+                'decreaseValue': districtPopulation
+            }
+
+            try:
+                req = requests.post(endpoint, json = data)
+            except:
+                self.notify.warning('Failed to send district population decrease to API!')
+
     def incrementPopulation(self):
         self.districtPopulation += 1
         self.districtStats.b_setAvatarCount(self.districtStats.getAvatarCount() + 1)
+        self.sendToAPI(self.districtPopulation, False)
 
     def decrementPopulation(self):
         self.districtPopulation -= 1
         self.districtStats.b_setAvatarCount(self.districtStats.getAvatarCount() - 1)
+        self.sendToAPI(self.districtPopulation, True)
 
     def sendQueryToonMaxHp(self, doId, checkResult):
         self.notify.info('sendQueryToonMaxHp ({0}, {1})'.format(doId, checkResult))
@@ -406,7 +434,7 @@ class ToontownAIRepository(ToontownInternalRepository):
         # Fireworks task.
         thetime = time.time() % 3600
 
-        if thetime < 60: 
+        if thetime < 60:
             taskMgr.doMethodLater(1, self.startFireworks, 'fireworks-taskmgr-hourly')
         else:
             taskMgr.doMethodLater(3600 - thetime, self.startFireworks, 'fireworks-taskmgr-hourly')
