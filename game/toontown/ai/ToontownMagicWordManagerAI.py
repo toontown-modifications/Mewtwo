@@ -77,7 +77,7 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
         av.b_setExperience(av.experience.makeNetString())
         av.inventory.zeroInv()
         av.inventory.maxOutInv(filterUberGags = 0, filterPaidGags = 0)
-        av.b_setInventory(av.inventory.makeNetString()) 
+        av.b_setInventory(av.inventory.makeNetString())
 
         emotes = list(av.getEmoteAccess())
 
@@ -176,8 +176,8 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
         if avId not in self.air.doId2do:
             return
 
-        av = self.air.doId2do.get(avId)   
- 
+        av = self.air.doId2do.get(avId)
+
         av.b_setTeleportAccess([1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000, 11000, 12000, 13000])
         av.b_setHoodsVisited([1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000, 11000, 12000, 13000])
         av.b_setZonesVisited([1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000, 11000, 12000, 13000])
@@ -285,7 +285,7 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
             if isinstance(do, DistributedPlayerAI):
                 if str(doId)[0] != str(simbase.air.districtId)[0]:
                     do.d_setSystemMessage(0, message)
-    
+
     def d_setCogPageFull(self, avId, zoneId, num):
         if avId not in self.air.doId2do:
             return
@@ -394,7 +394,7 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
         nametagList = list(TTLocalizer.NametagFontNames)
         for index, item in enumerate(nametagList):
             nametagList[index] = item.lower()
-    
+
         style == style.lower()
 
         if style in nametagList:
@@ -414,7 +414,7 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
 
         if not message or not invoker:
             return
-        
+
         if self.wantSystemResponses:
             invoker.d_setSystemMessage(0, message)
         else:
@@ -455,7 +455,7 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
         messenger.send('SillyMeterPhase', [phase])
 
         self.sendResponseMessage(avId, 'Set the Silly Meter phase to {0}.'.format(phase))
-    
+
     def d_setDauntless(self, av):
         dna = ToonDNA()
         dna.makeFromNetString(av.getDNAString())
@@ -486,7 +486,7 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
 
         # Send out our response message.
         self.sendResponseMessage(self.air.getAvatarIdFromSender(), 'You are now Dauntless from Toontown Planet!')
-    
+
     def d_skipPhoneToonTask(self, av):
         self.air.questManager.toonCalledClarabelle(av)
 
@@ -500,7 +500,7 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
         if not battleId:
             self.sendResponseMessage(avId, 'You are not currently in a battle!')
             return
-        
+
         battle = simbase.air.doId2do.get(battleId)
 
         if not battle:
@@ -510,7 +510,7 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
         battle._DistributedBattleBaseAI__movieDone()
 
         self.sendResponseMessage(avId, 'Battle movie skipped.')
-    
+
     def d_skipFriendToonTask(self, av):
         # otherToon is not used. Sad!
         otherToon = 0
@@ -551,7 +551,7 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
 
         msg = 'Firework show of type {0} has been started!'.format(showName)
         self.sendResponseMessage(avId, msg)
-    
+
     def d_doodleTest(self, avId, av, stress = False):
         if not av:
             return
@@ -641,7 +641,7 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
         pet.b_setTrickAptitudes([1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0])
 
         self.sendResponseMessage(avId, 'Maxed your doodle!')
-    
+
     def d_restockInv(self, avId):
         av = self.air.doId2do.get(avId)
 
@@ -652,7 +652,7 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
         av.b_setInventory(av.inventory.makeNetString())
 
         self.sendResponseMessage(avId, 'Restocked inventory!')
-    
+
     def d_clearInv(self, avId):
         av = self.air.doId2do.get(avId)
 
@@ -663,7 +663,7 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
         av.b_setInventory(av.inventory.makeNetString())
 
         self.sendResponseMessage(avId, 'Cleared inventory!')
-    
+
     def d_endMaze(self, avId):
         av = self.air.doId2do.get(avId)
 
@@ -689,7 +689,7 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
         response = 'You are not in a Maze Game!'
 
         self.sendResponseMessage(avId, response)
-    
+
     def d_setCE(self, avId, index, zoneId, duration):
         av = self.air.doId2do.get(avId)
 
@@ -714,7 +714,7 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
 
         response = 'Set cheesy effect to {0}.'.format(index)
         self.sendResponseMessage(avId, response)
-    
+
     def d_growFlowers(self, avId):
         av = self.air.doId2do.get(avId)
 
@@ -766,7 +766,7 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
             # Code had a error.
             import traceback
             traceback.print_exc()
- 
+
             response = 'Failed to use the backdoor. The code you injected had a error!'
             self.sendResponseMessage(avId, response)
             return
