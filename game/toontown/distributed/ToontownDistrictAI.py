@@ -1,7 +1,6 @@
 from direct.directnotify.DirectNotifyGlobal import directNotify
 from game.otp.distributed.DistributedDistrictAI import DistributedDistrictAI
 
-
 class ToontownDistrictAI(DistributedDistrictAI):
     notify = directNotify.newCategory('ToontownDistrictAI')
     ahnnLog = 0

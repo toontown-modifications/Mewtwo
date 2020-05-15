@@ -1,9 +1,10 @@
-from direct.directnotify import DirectNotifyGlobal
+from direct.directnotify.DirectNotifyGlobal import directNotify
 from direct.distributed.DistributedObjectAI import DistributedObjectAI
 
+import marshal
 
 class OtpAvatarManagerAI(DistributedObjectAI):
-    notify = DirectNotifyGlobal.directNotify.newCategory("OtpAvatarManagerAI")
+    notify = directNotify.newCategory('OtpAvatarManagerAI')
 
     def online(self):
         pass
@@ -14,8 +15,10 @@ class OtpAvatarManagerAI(DistributedObjectAI):
     def rejectAvatarList(self, todo0):
         pass
 
-    def avatarListResponse(self, todo0):
-        pass
+    def avatarListResponse(self, code):
+        avId = self.air.getAvatarIdFromSender()
+
+        self.sendUpdateToAvatarId(avId, 'avatarListResponse', [code])
 
     def requestAvatarSlot(self, todo0, todo1, todo2):
         pass

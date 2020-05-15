@@ -9,7 +9,7 @@ class ToontownInternalRepository(AstronInternalRepository):
 
     def __init__(self, baseChannel, serverId = None, dcFileNames = None, dcSuffix = 'AI', connectMethod = None, threadedNet = None):
         AstronInternalRepository.__init__(self, baseChannel, serverId = serverId, dcFileNames = dcFileNames, dcSuffix = dcSuffix, connectMethod = connectMethod, threadedNet = threadedNet)
-        
+
         if dcSuffix == 'UD':
             self.isUber = True
         else:
@@ -17,7 +17,7 @@ class ToontownInternalRepository(AstronInternalRepository):
 
     def handleConnected(self):
         AstronInternalRepository.handleConnected(self)
-        
+
         if self.isUber:
             from game.toontown.uberdog.ExtAgent import ExtAgent
 

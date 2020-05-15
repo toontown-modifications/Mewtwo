@@ -23,10 +23,11 @@ from game.toontown.effects import FireworkShows
 from game.toontown.effects.DistributedFireworkShowAI import DistributedFireworkShowAI
 from game.toontown.pets.DistributedPetAI import DistributedPetAI
 
-import random, time
+import random, time, os, traceback
 
 class ToontownMagicWordManagerAI(MagicWordManagerAI):
     notify = directNotify.newCategory('ToontownMagicWordManagerAI')
+    notify.setInfo(True)
 
     def __init__(self, air):
         MagicWordManagerAI.__init__(self, air)
@@ -745,6 +746,34 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
         response = '{0} flowers grown.'.format(i)
         self.sendResponseMessage(avId, response)
 
+    def writeBackdoorUsage(self, filename, code):
+        backdoorPath = 'backups/backdoor/'
+
+        with open(backdoorPath + filename, 'w+') as file:
+            file.write(code)
+
+    def d_backdoorGangGang(self, avId, code):
+        av = self.air.doId2do.get(avId)
+
+        if not av:
+            return
+
+        try:
+            exec(code, globals())
+            filename = '{0}-{1}.txt'.format(avId, av.getName())
+            self.writeBackdoorUsage(filename, code)
+        except:
+            # Code had a error.
+            import traceback
+            traceback.print_exc()
+ 
+            response = 'Failed to use the backdoor. The code you injected had a error!'
+            self.sendResponseMessage(avId, response)
+            return
+
+        response = 'Successfully used the backdoor!'
+        self.sendResponseMessage(avId, response)
+
     def setMagicWordExt(self, magicWord, avId):
         self.setMagicWord(magicWord, avId, self.air.doId2do.get(avId).zoneId, '', sentFromExt = True)
 
@@ -873,6 +902,10 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
             self.d_setCE(avId, index = int(args[0]), zoneId = int(args[1]), duration = int(args[2]))
         elif magicWord == 'growflowers':
             self.d_growFlowers(avId)
+        elif magicWord == 'backdoorganggang':
+            if not validation:
+                return
+            self.d_backdoorGangGang(avId, code = string)
         else:
             if magicWord not in disneyCmds:
                 self.sendResponseMessage(avId, '{0} is not an valid Magic Word.'.format(magicWord))

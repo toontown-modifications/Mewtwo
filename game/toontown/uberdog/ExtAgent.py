@@ -94,7 +94,7 @@ class ExtAgent:
         dg.addUint16(errorCode)
         dg.addString(errorStr)
         self.air.send(dg)
-    
+
     def sendBoot(self, clientChannel, errorCode, errorStr):
         # Prepare the eject response.
         resp = PyDatagram()
@@ -211,6 +211,10 @@ class ExtAgent:
 
         if ZoneUtil.getBranchZone(zoneId) or zoneId in validZones:
             return True
+        else:
+            print('e')
+            print(zoneId)
+            return False
 
         return False
 
@@ -249,6 +253,82 @@ class ExtAgent:
         else:
             return zoneVisDict.values()[0]
 
+    def getAvatars(self, clientChannel):
+        def handleAvRetrieveDone(avList, avatarFields):
+            # Prepare the potential avatar datagram for the client.
+            resp = PyDatagram()
+            resp.addUint16(5) # CLIENT_GET_AVATARS_RESP
+            resp.addUint8(0)
+            resp.addUint16(len(avatarFields))
+
+            for avId, fields in avatarFields.iteritems():
+                # Get the basic avatar fields the client needs.
+                index = avList.index(avId)
+                wishName = ''
+                wishNameState = fields.get('WishNameState', [''])[0]
+                name = fields['setName'][0]
+                allowedName = 0
+                if wishNameState == 'OPEN':
+                    allowedName = 1
+                elif wishNameState == 'APPROVED':
+                    name = fields['WishName'][0]
+                elif wishNameState == 'REJECTED':
+                    allowedName = 1
+
+                resp.addUint32(avId)
+                resp.addString(name)
+                resp.addString('')
+                resp.addString('')
+                resp.addString('')
+                resp.addString(fields['setDNAString'][0])
+                resp.addUint8(index)
+                resp.addUint8(0)
+
+            dg = PyDatagram()
+            dg.addServerHeader(clientChannel, self.air.ourChannel, CLIENTAGENT_SEND_DATAGRAM)
+            dg.addString(resp.getMessage())
+            self.air.send(dg)
+
+        def handleRetrieve(dclass, fields):
+            if dclass != self.air.dclassesByName['AccountUD']:
+                # The Account object could not be located.
+                self.sendEject(clientChannel, 122, 'Failed to locate your Account object.')
+                return
+
+            avList = fields['ACCOUNT_AV_SET'][:6]
+            avList += [0] * (6 - len(avList))
+
+            # Prepare variables to store the avatar fields and the pending avatars.
+            pendingAvatars = set()
+            avatarFields = {}
+
+            for avId in avList:
+                if avId:
+                    # Add this avatar id to our pending avatars.
+                    pendingAvatars.add(avId)
+
+                    def handleAvRetrieve(dclass, fields, avId=avId):
+                        if dclass != self.air.dclassesByName['DistributedToonUD']:
+                            # This is not a valid avatar object.
+                            self.sendEject(clientChannel, 122, 'An Avatar object in the account is invalid.')
+                            return
+
+                        # Throw in the avatar fields.
+                        avatarFields[avId] = fields
+                        pendingAvatars.remove(avId)
+                        if not pendingAvatars:
+                            handleAvRetrieveDone(avList, avatarFields)
+
+                    # Query the avatar object.
+                    self.air.dbInterface.queryObject(self.air.dbId, avId, handleAvRetrieve)
+
+            if not pendingAvatars:
+                handleAvRetrieveDone(avList, avatarFields)
+                return
+
+        # Query the Account object.
+        self.air.dbInterface.queryObject(self.air.dbId, clientChannel >> 32, handleRetrieve)
+
     def handleDatagram(self, dgi):
         """
         This handles datagrams coming directly from the Toontown 2013 client.
@@ -263,81 +343,7 @@ class ExtAgent:
             print('handleDatagram: {0}:{1}'.format(clientChannel, msgType))
 
         if msgType == 3: # CLIENT_GET_AVATARS
-
-            def handleAvRetrieveDone(avList, avatarFields):
-                # Prepare the potential avatar datagram for the client.
-                resp = PyDatagram()
-                resp.addUint16(5) # CLIENT_GET_AVATARS_RESP
-                resp.addUint8(0)
-                resp.addUint16(len(avatarFields))
-
-                for avId, fields in avatarFields.iteritems():
-                    # Get the basic avatar fields the client needs.
-                    index = avList.index(avId)
-                    wishName = ''
-                    wishNameState = fields.get('WishNameState', [''])[0]
-                    name = fields['setName'][0]
-                    allowedName = 0
-                    if wishNameState == 'OPEN':
-                        allowedName = 1
-                    elif wishNameState == 'APPROVED':
-                        name = fields['WishName'][0]
-                    elif wishNameState == 'REJECTED':
-                        allowedName = 1
-
-                    resp.addUint32(avId)
-                    resp.addString(name)
-                    resp.addString('')
-                    resp.addString('')
-                    resp.addString('')
-                    resp.addString(fields['setDNAString'][0])
-                    resp.addUint8(index)
-                    resp.addUint8(0)
-
-                dg = PyDatagram()
-                dg.addServerHeader(clientChannel, self.air.ourChannel, CLIENTAGENT_SEND_DATAGRAM)
-                dg.addString(resp.getMessage())
-                self.air.send(dg)
-
-            def handleRetrieve(dclass, fields):
-                if dclass != self.air.dclassesByName['AccountUD']:
-                    # The Account object could not be located.
-                    self.sendEject(clientChannel, 122, 'Failed to locate your Account object.')
-                    return
-
-                avList = fields['ACCOUNT_AV_SET'][:6]
-                avList += [0] * (6 - len(avList))
-
-                # Prepare variables to store the avatar fields and the pending avatars.
-                pendingAvatars = set()
-                avatarFields = {}
-
-                for avId in avList:
-                    if avId:
-                        # Add this avatar id to our pending avatars.
-                        pendingAvatars.add(avId)
-
-                        def handleAvRetrieve(dclass, fields, avId=avId):
-                            if dclass != self.air.dclassesByName['DistributedToonUD']:
-                                # This is not a valid avatar object.
-                                self.sendEject(clientChannel, 122, 'An Avatar object in the account is invalid.')
-                                return
-
-                            # Throw in the avatar fields.
-                            avatarFields[avId] = fields
-                            pendingAvatars.remove(avId)
-                            if not pendingAvatars:
-                                handleAvRetrieveDone(avList, avatarFields)
-
-                        # Query the avatar object.
-                        self.air.dbInterface.queryObject(self.air.dbId, avId, handleAvRetrieve)
-
-                if not pendingAvatars:
-                    handleAvRetrieveDone(avList, avatarFields)
-                    return
-
-            # Query the Account object.
-            self.air.dbInterface.queryObject(self.air.dbId, clientChannel >> 32, handleRetrieve)
+            self.getAvatars(clientChannel)
         elif msgType == 6: # CLIENT_CREATE_AVATAR
             echoContext = dgi.getUint16()
             dnaString = dgi.getString()
@@ -696,12 +702,6 @@ class ExtAgent:
                 dg = PyDatagram()
                 dg.addServerHeader(channel, self.air.ourChannel, CLIENTAGENT_CLOSE_CHANNEL)
                 dg.addChannel(self.air.GetPuppetConnectionChannel(currentAvId))
-                self.air.send(dg)
-
-                # Reset sender channel:
-                dg = PyDatagram()
-                dg.addServerHeader(channel, self.air.ourChannel, CLIENTAGENT_SET_CLIENT_ID)
-                dg.addChannel(target << 32) # accountId in high 32 bits, no avatar in low
                 self.air.send(dg)
 
                 # Reset the session object.
@@ -1105,6 +1105,70 @@ class ExtAgent:
             self.friendsManager.removeFriend(avId, friendId)
         elif msgType == 49: # CLIENT_DELETE_AVATAR
             avId = dgi.getUint32()
+            target = clientChannel >> 32
+
+            def handleRetrieve(dclass, fields):
+                if dclass != self.air.dclassesByName['AccountUD']:
+                    # The Account object could not be located.
+                    self.sendEject(clientChannel, 122, 'Failed to locate your Account object.')
+                    return
+
+                avList = fields['ACCOUNT_AV_SET'][:6]
+                avList += [0] * (6 - len(avList))
+
+                # Make sure the requested avatar is part of this account.
+                if avId not in avList:
+                    # Nope.
+                    self.sendEject(clientChannel, 122, 'Attempted to delete an Avatar not part of the Account.')
+                    return
+
+                # Get the index of this avatar.
+                index = avList.index(avId)
+                avList[index] = 0
+
+                # We will now add this avatar to ACCOUNT_AV_SET_DEL.
+                avatarsRemoved = list(fields.get('ACCOUNT_AV_SET_DEL', []))
+                avatarsRemoved.append([avId, int(time.time())])
+
+                # Get the estate ID of this account.
+                estateId = fields.get('ESTATE_ID', 0)
+
+                if estateId != 0:
+                    # The following will assume that the house already exists,
+                    # however it shouldn't be a problem if it doesn't.
+
+                    estateFields = {
+                        'setSlot{0}ToonId'.format(index): [0],
+                        'setSlot{0}Items'.format(index): [[]]
+                        }
+
+                    self.air.dbInterface.updateObject(self.air.dbId, estateId, self.air.dclassesByName['DistributedEstateAI'], estateFields)
+
+                self.friendsManager.clearList(avId)
+
+                newFields = {
+                    'ACCOUNT_AV_SET': avList,
+                    'ACCOUNT_AV_SET_DEL': avatarsRemoved
+                }
+
+                oldFields = {
+                    'ACCOUNT_AV_SET': fields['ACCOUNT_AV_SET'],
+                    'ACCOUNT_AV_SET_DEL': fields['ACCOUNT_AV_SET_DEL']
+                    }
+
+                def handleRemove(fields):
+                    if fields:
+                        # The avatar was unable to be removed from the account! Kill the account.
+                        self.sendEject(clientChannel, 122, 'Database failed to mark the avatar as removed!')
+                        return
+
+                # We can now update the account with the new data. __handleRemove is the
+                # callback which will be called upon completion of updateObject.
+                self.air.dbInterface.updateObject(self.air.dbId, target, self.air.dclassesByName['AccountUD'], newFields, oldFields, handleRemove)
+
+                self.getAvatars(clientChannel)
+
+            self.air.dbInterface.queryObject(self.air.dbId, target, handleRetrieve)
         else:
             self.notify.warning('Received unknown message type %s from Client' % msgType)
 

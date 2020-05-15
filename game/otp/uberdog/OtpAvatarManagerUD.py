@@ -1,9 +1,8 @@
-from direct.directnotify import DirectNotifyGlobal
+from direct.directnotify.DirectNotifyGlobal import directNotify
 from direct.distributed.DistributedObjectUD import DistributedObjectUD
 
-
 class OtpAvatarManagerUD(DistributedObjectUD):
-    notify = DirectNotifyGlobal.directNotify.newCategory("OtpAvatarManagerUD")
+    notify = directNotify.newCategory('OtpAvatarManagerUD')
 
     def online(self):
         pass

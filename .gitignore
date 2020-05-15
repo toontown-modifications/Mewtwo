@@ -8,3 +8,4 @@ whitelist/*
 
 .idea/*
 venv/*
+backups/*

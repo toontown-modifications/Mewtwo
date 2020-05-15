@@ -71,6 +71,7 @@ from game.toontown.ai.DistributedResistanceEmoteMgrAI import DistributedResistan
 from game.toontown.distributed.ToontownInternalRepository import ToontownInternalRepository
 from game.toontown.estate.DistributedBankMgrAI import DistributedBankMgrAI
 from game.toontown.ai.DialogueManagerAI import DialogueManagerAI
+from game.otp.uberdog.OtpAvatarManagerAI import OtpAvatarManagerAI
 
 import __builtin__, time, os
 
@@ -270,6 +271,9 @@ class ToontownAIRepository(ToontownInternalRepository):
         self.bankManager.generateWithRequired(OtpDoGlobals.OTP_ZONE_ID_MANAGEMENT)
 
         self.dialogueManager = DialogueManagerAI(self)
+
+        self.avatarManager = OtpAvatarManagerAI(self)
+        self.avatarManager.generateWithRequiredAndId(2, self.getGameDoId(), 2)
 
     def createHood(self, hoodCtr, zoneId):
         # Bossbot HQ doesn't use DNA, so we skip over that.
