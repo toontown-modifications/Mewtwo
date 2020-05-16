@@ -51,7 +51,7 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
     def delete(self):
         MagicWordManagerAI.delete(self)
 
-    def d_setAvatarRich(self, avId, zoneId):
+    def d_setAvatarRich(self, avId):
         if avId not in self.air.doId2do:
             return
 
@@ -62,7 +62,7 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
 
         av.b_setMoney(av.getMaxMoney())
 
-    def d_setToonMax(self, avId, zoneId):
+    def d_setToonMax(self, avId):
         if avId not in self.air.doId2do:
             return
 
@@ -164,7 +164,7 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
 
         self.sendResponseMessage(avId, 'Maxed your toon!')
 
-    def d_setMaxBankMoney(self, avId, zoneId):
+    def d_setMaxBankMoney(self, avId):
         if avId not in self.air.doId2do:
             return
 
@@ -182,7 +182,7 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
         av.b_setHoodsVisited([1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000, 11000, 12000, 13000])
         av.b_setZonesVisited([1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000, 11000, 12000, 13000])
 
-    def d_setAvatarToonUp(self, avId, zoneId):
+    def d_setAvatarToonUp(self, avId):
         if avId not in self.air.doId2do:
             return
 
@@ -201,7 +201,7 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
 
         av.b_setCogIndex(num)
 
-    def d_setPinkSlips(self, avId, zoneId, num):
+    def d_setPinkSlips(self, avId, num):
         if avId not in self.air.doId2do:
             return
 
@@ -209,7 +209,7 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
 
         av.b_setPinkSlips(num)
 
-    def d_setNewSummons(self, avId, zoneId, num):
+    def d_setNewSummons(self, avId, num):
         if avId not in self.air.doId2do:
             return
 
@@ -220,7 +220,7 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
         av.b_setCogSummonsEarned(suitIndex)
         av.addCogSummonsEarned(suitIndex, type)
 
-    def d_restockUnites(self, avId, zoneId, num):
+    def d_restockUnites(self, avId, num):
         if avId not in self.air.doId2do:
             return
 
@@ -229,7 +229,7 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
 
         av.restockAllResistanceMessages(num)
 
-    def d_setName(self, avId, zoneId, name):
+    def d_setName(self, avId, name):
         if avId not in self.air.doId2do:
             return
 
@@ -237,7 +237,7 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
 
         av.b_setName(name)
 
-    def d_setTickets(self, avId, zoneId, num):
+    def d_setTickets(self, avId, num):
         if avId not in self.air.doId2do:
             return
 
@@ -286,7 +286,7 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
                 if str(doId)[0] != str(simbase.air.districtId)[0]:
                     do.d_setSystemMessage(0, message)
 
-    def d_setCogPageFull(self, avId, zoneId, num):
+    def d_setCogPageFull(self, avId, num):
         if avId not in self.air.doId2do:
             return
 
@@ -295,7 +295,7 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
         av.b_setCogStatus([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1])
         av.b_setCogCount([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1])
 
-    def d_setGhost(self, avId, zoneId):
+    def d_setGhost(self, avId):
         av = self.air.doId2do.get(avId)
 
         if av.ghostMode == 1:
@@ -794,16 +794,16 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
         validation = self.checkArguments(args, avId)
         disneyCmds = ['run', 'fps', 'fanfare', 'walk', 'sbm', 'skipBattleMovie']
 
-        if magicWord == 'rich':
-            self.d_setMaxBankMoney(avId, zoneId)
-        elif magicWord == 'maxbankmoney':
-            self.d_setAvatarRich(avId, zoneId)
+        if magicWord == 'maxbankmoney':
+            self.d_setMaxBankMoney(avId)
+        elif magicWord == 'rich':
+            self.d_setAvatarRich(avId)
         elif magicWord == 'maxtoon':
-            self.d_setToonMax(avId, zoneId)
+            self.d_setToonMax(avId)
         elif magicWord == 'toonup':
-            self.d_setAvatarToonUp(avId, zoneId)
+            self.d_setAvatarToonUp(avId)
         elif magicWord == 'enabletpall':
-            self.d_setTeleportAccess(avId, zoneId)
+            self.d_setTeleportAccess(avId)
         elif magicWord == 'startholiday':
             if not validation:
                 return
@@ -826,27 +826,27 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
         elif magicWord == 'unites':
             if not validation:
                 return
-            self.d_restockUnites(avId, zoneId, num = args[0])
+            self.d_restockUnites(avId, num = args[0])
         elif magicWord == 'name':
-            self.d_setName(avId, zoneId, name = string)
+            self.d_setName(avId, name = string)
         elif magicWord == 'pinkslips':
             if not validation:
                 return
-            self.d_setPinkSlips(avId, zoneId, num = args[0])
+            self.d_setPinkSlips(avId, num = args[0])
         elif magicWord == 'tickets':
             if not validation:
                 return
-            self.d_setTickets(avId, zoneId, num = args[0])
+            self.d_setTickets(avId, num = args[0])
         elif magicWord == 'newsummons':
             if not validation:
                 return
-            self.d_setNewSummons(avId, zoneId, num = args[0])
+            self.d_setNewSummons(avId, num = args[0])
         elif magicWord == 'cogpagefull':
             if not validation:
                 return
-            self.d_setCogPageFull(avId, zoneId, num = args[0])
+            self.d_setCogPageFull(avId, num = args[0])
         elif magicWord == 'ghost':
-            self.d_setGhost(avId, zoneId)
+            self.d_setGhost(avId)
         elif magicWord == 'spawnfo':
             if not validation:
                 return

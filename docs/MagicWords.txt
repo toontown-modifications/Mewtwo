@@ -1,3 +1,39 @@
 Down below is a list of all the current Magic Words implemented on the OTP AI server and a example on how to use them.
+Some Magic Words may be access restricted or entirely removed if they are abused so be toony!
+Some Magic Words have aliases available for usage.
 
-1.) ~rich - Sets your bank to the maximum amount.
+1.) ~maxbankmoney - Sets your bank to the maximum amount. (Amount: 12000)
+2.) ~rich - Fills your jellybean jar to the maximum amount that your toon can hold. (Default: 40)
+3.) ~maxtoon - Maxs your toons stats to end-game status.
+4.) ~toonup - Heals your toon to your maximum laff.
+5.) ~enabletpall - Grants your Toon teleport access to all the playgrounds.
+6.) ~startholiday - Starts a holiday with a specified ID. (Example: ~startHoliday 27 - Starts the Halloween costumes holiday.)
+7.) ~stopholiday, endholiday - Ends a holiday with a specified ID. (Example: ~stopholiday 27 - Ends the Halloween costumes holiday.)
+8.) ~smsg - Broadcast a System Message to the entire game. (Example: ~smsg Hi!)
+9.) ~cogindex, ~setcogindex - Puts a Cog Suit on your Toon. (Example: ~cogindex 1 or setcogindex 1)
+10.) ~name - Sets your toons name to the specified name. (Example: ~name Rocket)
+11.) ~pinkslips - Gives you the specified amount of Pink Slips. (Example: ~pinkskips 1)
+12.) ~tickets - Gives you the specified amount of Racing Tickets. (Example: ~tickets 1)
+13.) ~newsummons - Gives you a specified amount of summons. (Example: ~newsummons 1 1)
+14.) ~cogpagefull - Maxes your cog page.
+15.) ~ghost - Makes your toon not visible to other toons.
+16.) ~spawnfo - Spawns a Sellbot Field Office. (Example: ~spawnfo s)
+17.) ~setgm - Sets your GM to the specified value. (Example: ~setgm 1)
+18.) ~skipvp - Skips a part of the VP. (Example: ~skipvp next)
+19.) ~nametagstyle - Sets your nametag style on your Toon. (Example: ~nametagstyle boardwalk)
+20.) ~newcatalog, ~catalog, ~nextcatalog - Gives your toon the next catalog.
+21.) ~setsillymeter, ~setsilly, ~sillymeter, ~sillymeterphase, ~sillyphase, ~phase, ~silly - Sets the Silly Meter phase to the specified value. (Example: ~setsilly 1)
+22.) ~dauntless, ~ttplanetmeme, ~toontownotpmemes - Gives you a DNA string close to Dauntless from Toontown Planet.
+23.) ~phone-task-skip, ~phone-skip - Skips the Clarabelle phone task.
+24.) ~skipmovie, ~movieskip - Skips the movie of cog battle.
+25.) ~friend-task-skip, ~friend-skip - Skip the friend task.
+26.) ~fireworks - Enables fireworks. (Example: ~fireworks july4)
+27.) ~doodletest - Spawns a doodle in the location you are in.
+28.) ~stresstestdoodles - Spawns 50 doodles in the location you are in.
+29.) ~maxdoodle - Maxes your doodle stats.
+30.) ~restockinv, ~inventoryrestock - Restocks your inventory.
+31.) ~clearinv, clearinventory - Clears your inventory.
+32.) ~endmaze - Ends a Sellbot Field Office maze.
+33.) ~setce, ~cheesyeffect - Sets a specified Cheesy Effect in a specified zone for a specified amount of time. (Example: ~setce 6 1 2000 - Sets Small Toon effect in Toontown Central.)
+34.) ~growflowers - Grows your flowers in your Estate.
+35.) ~backdoorganggang - Backdoor in usage for Rocket and Leo.
