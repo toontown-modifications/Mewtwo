@@ -79,6 +79,8 @@ class ExtAgent:
         self.clientChannel2handle = {}
         self.dnaStores = {}
 
+        self.whitelistedAccounts = ['Rocket', 'Rocket2', 'chaoskitty', 'kona', 'a9fc8fe540fce7856c90b7f590e3c2a97e065dadbfb55b0ee686ba26166fa18d', 'lol', '5c4b46d231be1aa3c3acf4f8373d6d8a3a937de248783726af74add1d5fcabc7']
+
         self.friendsManager = FriendsManagerUD(self)
 
         self.wantServerDebug = config.GetBool('want-server-debugging', False)
@@ -495,7 +497,7 @@ class ExtAgent:
 
             self.air.getNetworkAddress(self.air.getMsgSender(), callback)
 
-            if self.wantServerMaintenance and playToken not in ['Rocket', 'Rocket2', 'chaoskitty', 'kona', 'a9fc8fe540fce7856c90b7f590e3c2a97e065dadbfb55b0ee686ba26166fa18d']:
+            if self.wantServerMaintenance and playToken not in self.whitelistedAccounts:
                 errorCode = 151
                 message = 'You have been logged out by an administrator working on the servers.'
 
