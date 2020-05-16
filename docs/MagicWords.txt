@@ -1,0 +1,3 @@
+Down below is a list of all the current Magic Words implemented on the OTP AI server and a example on how to use them.
+
+1.) ~rich - Sets your bank to the maximum amount.
