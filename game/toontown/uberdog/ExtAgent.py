@@ -95,7 +95,7 @@ class ExtAgent:
         }
 
         try:
-            req = requests.post('http://otp-gs.rocketprogrammer.me:8080/api/setMaintenanceMode', json = data)
+            req = requests.post('http://otp-gs.rocketprogrammer.me:19135/api/setMaintenanceMode', json = data)
         except:
             self.notify.warning('Failed to send availability to API!')
 

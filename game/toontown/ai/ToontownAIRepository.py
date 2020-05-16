@@ -117,7 +117,7 @@ class ToontownAIRepository(ToontownInternalRepository):
         return False
 
     def sendToAPI(self, districtPopulation, decrease = False):
-        baseEndpoint = 'http://otp-gs.rocketprogrammer.me:8080/api/{0}'
+        baseEndpoint = 'http://otp-gs.rocketprogrammer.me:19135/api/{0}'
 
         if not decrease:
             endpoint = baseEndpoint.format('setPopulation')
