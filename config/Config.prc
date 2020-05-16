@@ -21,7 +21,7 @@ want-coderedemption true
 want-server-debugging false
 want-do-live-updates true
 want-delivery-manager false
-want-server-maintenance true
+want-server-maintenance false
 active-holidays 60, 61, 62, 63, 64, 65, 66
 
 max-code-redemption-attempts 5

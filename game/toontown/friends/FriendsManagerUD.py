@@ -250,7 +250,7 @@ class FriendsManagerUD:
 
         for friendId in onlineFriends:
             datagram.addUint32(friendId)
-        
+
         datagram.addUint8(1)
         datagram.addUint8(1)
 
@@ -382,7 +382,7 @@ class FriendsManagerUD:
         datagram = PyDatagram()
         datagram.addUint16(53) # CLIENT_FRIEND_ONLINE
         datagram.addUint32(friendId)
- 
+
         datagram.addUint8(1)
         datagram.addUint8(1)
 
@@ -419,7 +419,7 @@ class FriendsManagerUD:
         datagram = PyDatagram()
         datagram.addUint16(53) # CLIENT_FRIEND_ONLINE
         datagram.addUint32(otherId)
- 
+
         datagram.addUint8(1)
         datagram.addUint8(1)
 
