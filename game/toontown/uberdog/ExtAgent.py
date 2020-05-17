@@ -84,6 +84,19 @@ class ExtAgent:
 
         self.friendsManager = FriendsManagerUD(self)
 
+        self.validZones = [ToontownGlobals.ToontownCentral,
+                           ToontownGlobals.DonaldsDock,
+                           ToontownGlobals.DaisyGardens,
+                           ToontownGlobals.MinniesMelodyland,
+                           ToontownGlobals.TheBrrrgh,
+                           ToontownGlobals.DonaldsDreamland,
+                           ToontownGlobals.SellbotHQ,
+                           ToontownGlobals.CashbotHQ,
+                           ToontownGlobals.LawbotHQ,
+                           ToontownGlobals.WelcomeValleyBegin,
+                           23000]
+        self.blacklistZones = [ToontownGlobals.SellbotLobby, ToontownGlobals.LawbotOfficeExt, ToontownGlobals.LawbotLobby, ToontownGlobals.CashbotLobby, ToontownGlobals.WelcomeValleyEnd]
+
         self.wantServerDebug = config.GetBool('want-server-debugging', False)
         self.wantServerMaintenance = config.GetBool('want-server-maintenance', False)
         self.wantMembership = config.GetBool('want-membership', False)
@@ -219,40 +232,14 @@ class ExtAgent:
 
         return False
 
-    def isValidZone(self, zoneId):
-        validZones = [
-            ToontownGlobals.SillyStreet,
-            ToontownGlobals.LoopyLane,
-            ToontownGlobals.PunchlinePlace,
-            ToontownGlobals.BarnacleBoulevard,
-            ToontownGlobals.SeaweedStreet,
-            ToontownGlobals.LighthouseLane,
-            ToontownGlobals.WalrusWay,
-            ToontownGlobals.SleetStreet,
-            ToontownGlobals.PolarPlace,
-            ToontownGlobals.AltoAvenue,
-            ToontownGlobals.BaritoneBoulevard,
-            ToontownGlobals.TenorTerrace,
-            ToontownGlobals.LullabyLane,
-            ToontownGlobals.PajamaPlace,
-            ToontownGlobals.SellbotHQ,
-            ToontownGlobals.SellbotFactoryExt,
-            ToontownGlobals.CashbotHQ,
-            ToontownGlobals.LawbotHQ
-        ]
-
-        if ZoneUtil.getBranchZone(zoneId) or zoneId in validZones:
-            return True
-
-        return False
-
     def getVisBranchZones(self, zoneId, isCogHQ = False):
+        if zoneId in self.blacklistZones:
+            return []
         branchZoneId = ZoneUtil.getBranchZone(zoneId)
+        hoodId = ZoneUtil.getHoodId(branchZoneId)
         dnaStore = self.dnaStores.get(branchZoneId)
 
-        blacklistZones = [ToontownGlobals.SellbotLobby, ToontownGlobals.LawbotOfficeExt, ToontownGlobals.LawbotLobby, ToontownGlobals.BossbotHQ, ToontownGlobals.CashbotLobby, ToontownGlobals.BossbotLobby, ToontownGlobals.WelcomeValleyEnd]
-
-        if zoneId in blacklistZones or not self.isValidZone(zoneId):
+        if hoodId not in self.validZones:
             return []
 
         if not dnaStore:
