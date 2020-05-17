@@ -15,10 +15,14 @@ def getDayId():
 
 class PetManagerAI:
     notify = directNotify.newCategory('PetManagerAI')
+    cachePath = config.GetString('air-pet-cache', 'backups/pets/')
 
     def __init__(self, air):
         self.air = air
-        self.cacheFile = '{0}.pets'.format(self.air.districtId)
+        self.cacheFile = '{0}pets_{1}.pets'.format(self.cachePath, self.air.districtId)
+
+        if not os.path.exists(self.cachePath):
+            os.makedirs(self.cachePath)
 
         if os.path.isfile(self.cacheFile):
             with open(self.cacheFile, 'rb') as f:

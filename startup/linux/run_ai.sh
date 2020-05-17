@@ -1,4 +1,5 @@
 #!/bin/sh
+cd ../..
 
 # Get the user input:
 read -p "District name (DEFAULT: Sillyville): " DISTRICT_NAME

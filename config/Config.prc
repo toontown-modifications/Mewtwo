@@ -24,6 +24,7 @@ want-delivery-manager false
 want-server-maintenance true
 want-discord-integration true
 active-holidays 60, 61, 62, 63, 64, 65, 66
+buildings-server-data-folder backups/buildings
 
 max-code-redemption-attempts 5
 

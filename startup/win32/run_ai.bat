@@ -1,4 +1,5 @@
 @echo off
+cd ../..
 
 rem Get the user input:
 set /P DISTRICT_NAME="District name (DEFAULT: Sillyville): " || ^

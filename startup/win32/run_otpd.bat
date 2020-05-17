@@ -1,5 +1,5 @@
 @echo off
-cd otpd
+cd ../../otpd
 
 :main
 otp_server.exe --loglevel info config/otpd.yml

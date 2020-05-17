@@ -25,7 +25,6 @@ class AIZoneData:
     def __getattr__(self, attr):
         return getattr(self._data, attr)
 
-
 class AIZoneDataObj:
     notify = directNotify.newCategory('AIZoneDataObj')
     DefaultCTravName = 'default'
@@ -176,7 +175,6 @@ class AIZoneDataObj:
         if cTravName is None:
             cTravName = AIZoneDataObj.DefaultCTravName
         return self._collTravs[cTravName].getRespectPrevTransform()
-
 
 class AIZoneDataStore:
     notify = directNotify.newCategory('AIZoneDataStore')

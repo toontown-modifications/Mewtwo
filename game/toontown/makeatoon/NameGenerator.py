@@ -41,7 +41,7 @@ class NameGenerator:
             searchPath.appendDirectory(
                 Filename.expandFrom('$TT_3_ROOT/phase_3/etc'))
         else:
-            searchPath.appendDirectory(Filename('phase_3/etc'))
+            searchPath.appendDirectory(Filename('game/resources/phase_3/etc'))
             if not os.path.expandvars('$TOONTOWN'):
                 pass
             base = './toontown'

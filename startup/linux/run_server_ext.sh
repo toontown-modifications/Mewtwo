@@ -1,4 +1,5 @@
 #!/bin/sh
+cd ../..
 
 export NO_EXT_AGENT=0
 
