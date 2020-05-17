@@ -1,10 +1,11 @@
 *.pyc
 *.yaml
-*.json
 *.log
 *.buildings
 *.pets
 whitelist/*
+otpd/config/account-bridge.json
+otpd/databases/accounts.json
 
 .idea/*
 venv/*

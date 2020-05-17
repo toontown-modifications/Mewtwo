@@ -217,7 +217,7 @@ class NewsManagerAI(DistributedObjectAI):
             # Get the start month, day, hour, and minute of the holiday.
             startMonth, startDay, startHour, startMinute = yearlyCalendarHoliday[1]
             # Create a startDate for comparision.
-            startDate = datetime.datetime(year=currentTime.year, month=startMonth, day=startDay, 
+            startDate = datetime.datetime(year=currentTime.year, month=startMonth, day=startDay,
                                           hour=startHour, minute=startMinute,
                                           second=0, tzinfo=self.air.toontownTimeManager.serverTimeZone)
             # Check if the current time has past the start holiday date.
@@ -225,7 +225,7 @@ class NewsManagerAI(DistributedObjectAI):
                 # It has, now check if it's past the end holiday date.
                 endMonth, endDay, endHour, endMinute = yearlyCalendarHoliday[2]
                 # Create a endDate for comparision.
-                endDate = datetime.datetime(year=currentTime.year, month=endMonth, day=endDay, 
+                endDate = datetime.datetime(year=currentTime.year, month=endMonth, day=endDay,
                                             hour=endHour, minute=endMinute,
                                             second=0, tzinfo=self.air.toontownTimeManager.serverTimeZone)
                 # Before we compare the two dates, check if it's a winter holiday we're dealing with,
@@ -234,7 +234,7 @@ class NewsManagerAI(DistributedObjectAI):
                 [ToontownGlobals.WINTER_DECORATIONS, ToontownGlobals.WINTER_CAROLING, ToontownGlobals.NEWYEARS_FIREWORKS]:
                     # It is.  So we need to create a new endDate, because it is set to end after the new year,
                     # If we don't do this, the holiday would most likely never start at all.
-                    endDate = datetime.datetime(year=currentTime.year + 1, month=endMonth, day=endDay, 
+                    endDate = datetime.datetime(year=currentTime.year + 1, month=endMonth, day=endDay,
                                                 hour=endHour, minute=endMinute,
                                                 second=0, tzinfo=self.air.toontownTimeManager.serverTimeZone)
                 # Check if it current time has passed the endDate.

@@ -5,6 +5,7 @@ from game.toontown.makeatoon.NameGenerator import NameGenerator
 from game.toontown.toon.ToonDNA import ToonDNA
 from game.otp.distributed.OtpDoGlobals import *
 from game.otp.otpbase import OTPGlobals
+from game.otp.otpbase import OTPLocalizer
 from game.toontown.toonbase import TTLocalizer
 from game.toontown.hood import ZoneUtil
 from game.toontown.toonbase import ToontownGlobals
@@ -79,7 +80,7 @@ class ExtAgent:
         self.clientChannel2handle = {}
         self.dnaStores = {}
 
-        self.whitelistedAccounts = ['Rocket', 'Rocket2', 'chaoskitty', 'kona', 'a9fc8fe540fce7856c90b7f590e3c2a97e065dadbfb55b0ee686ba26166fa18d', 'lol', '5c4b46d231be1aa3c3acf4f8373d6d8a3a937de248783726af74add1d5fcabc7']
+        self.whitelistedAccounts = self.getWhitelistedAccounts()
 
         self.friendsManager = FriendsManagerUD(self)
 
@@ -88,6 +89,11 @@ class ExtAgent:
         self.wantMembership = config.GetBool('want-membership', False)
 
         self.sendAvailabilityToAPI()
+
+    def getWhitelistedAccounts(self):
+        with open('data/whitelistedAccounts.json') as data:
+            accounts = json.load(data)
+            return accounts
 
     def sendAvailabilityToAPI(self):
         data = {
@@ -101,6 +107,15 @@ class ExtAgent:
 
     def postAddFriend(self, avId, friendId):
         self.friendsManager.postAddFriend(avId, friendId)
+
+    def sendKick(self, avId, reason):
+        clientChannel = self.air.GetPuppetConnectionChannel(avId)
+
+        errorCode = 152
+        message = OTPLocalizer.CRBootedReasons.get(errorCode)
+
+        self.sendBoot(clientChannel, errorCode, message)
+        self.sendEject(clientChannel, errorCode, message)
 
     def sendEject(self, clientChannel, errorCode, errorStr):
         dg = PyDatagram()
@@ -127,7 +142,8 @@ class ExtAgent:
 
     def loginAccount(self, fields, clientChannel, accountId, playToken):
         # If somebody is logged into this account, disconnect them.
-        self.sendEject(self.air.GetAccountConnectionChannel(accountId), 100, 'This account has been logged into elsewhere.')
+        errorCode = 100
+        self.sendEject(self.air.GetAccountConnectionChannel(accountId), errorCode, OTPLocalizer.CRBootedReasons.get(errorCode))
 
         # Wait half a second before continuing to avoid a race condition.
         taskMgr.doMethodLater(0.5,
@@ -136,10 +152,12 @@ class ExtAgent:
 
     def finishLoginAccount(self, fields, clientChannel, accountId, playToken):
         # If there's anybody on the account, kill them for redundant login:
+        errorCode = 100
+
         datagram = PyDatagram()
         datagram.addServerHeader(self.air.GetAccountConnectionChannel(accountId), self.air.ourChannel, CLIENTAGENT_EJECT)
-        datagram.addUint16(100)
-        datagram.addString('This account has been logged in from elsewhere.')
+        datagram.addUint16(errorCode)
+        datagram.addString(OTPLocalizer.CRBootedReasons.get(errorCode))
         self.air.send(datagram)
 
         # Add the connection to the account channel.

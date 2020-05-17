@@ -7,6 +7,7 @@ from game.otp.uberdog.DistributedChatManagerUD import DistributedChatManagerUD
 from game.toontown.parties.ToontownTimeManager import ToontownTimeManager
 from game.otp.distributed import OtpDoGlobals
 from game.toontown.distributed.ToontownInternalRepository import ToontownInternalRepository
+from game.toontown.discord.DiscordIntegrationServer import DiscordIntegrationServer
 import __builtin__, time
 
 __builtin__.isClient = lambda: PythonUtil.isClient()
@@ -21,6 +22,9 @@ class ToontownServerRepositoryAgent(ToontownInternalRepository):
 
     def handleConnected(self):
         ToontownInternalRepository.handleConnected(self)
+
+        if config.GetBool('want-discord-integration', False):
+            self.discordIntegration = DiscordIntegrationServer(self)
 
         rootObj = DistributedDirectoryAI(self)
         rootObj.generateWithRequiredAndId(self.getGameDoId(), 0, 0)
