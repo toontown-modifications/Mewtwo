@@ -440,6 +440,11 @@ class ToontownAIRepository(ToontownInternalRepository):
             taskMgr.doMethodLater(3600 - thetime, self.startFireworks, 'fireworks-taskmgr-hourly')
 
     def loadDNAFileAI(self, dnaStore, dnaFileName):
+        resourcesPath = 'game/resources/'
+
+        if not dnaFileName.startswith(resourcesPath):
+            dnaFileName = resourcesPath + dnaFileName
+
         return loadDNAFileAI(dnaStore, dnaFileName)
 
     def genDNAFileName(self, zoneId):
