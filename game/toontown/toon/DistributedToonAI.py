@@ -4450,30 +4450,3 @@ class DistributedToonAI(DistributedPlayerAI.DistributedPlayerAI, DistributedSmoo
         print "hooked location"
         self.b_setLocation(self.parentId, zoneId)
         print self.zoneId
-
-    def friendsNotify(self, avId, status):
-        sender = self.air.getAvatarIdFromSender()
-
-        if not avId in self.air.doId2do:
-            self.air.writeServerEvent('suspicious', sender, 'Player tried to notify a friend that does not exist!')
-            return
-
-        self.sendUpdate('friendsNotify', [avId, status])
-
-    def teleportQuery(self, requesterId):
-        self.air.friendManager.teleportQuery(requesterId, self.doId)
-
-    def teleportResponse(self, fromAvId, available, shardId, hoodId, zoneId):
-        senderId = self.air.getAvatarIdFromSender()
-
-        if available != 1:
-            self.air.writeServerEvent('suspicious', self.doId, 'invalid availableValue={0}'.format(available))
-            return
-
-        if fromAvId == 0:
-            return
-
-        self.air.friendManager.teleportResponse(self.doId, fromAvId, available, shardId, hoodId, zoneId)
-
-        if senderId != fromAvId:
-            self.sendUpdate('teleportGreeting', [fromAvId])

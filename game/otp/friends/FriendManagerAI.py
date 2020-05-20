@@ -16,7 +16,6 @@ class FriendManagerAI(DistributedObjectAI):
         self.currentContext = 0
 
         self.requests = {}
-        self.teleportRequests = {}
 
         self.shard = str(air.districtId)
         self.filename = self.getFilename()
@@ -129,6 +128,7 @@ class FriendManagerAI(DistributedObjectAI):
 
             # Route this to the "UD" Friends manager.
             self.air.netMessenger.send('postAddFriend', [requesterAv.getDoId(), requestedAv.getDoId()])
+            self.air.netMessenger.send('postAddFriend', [requestedAv.getDoId(), requesterAv.getDoId()])
 
             requestedAv.extendFriendsList(requesterAv.getDoId(), 0)
             requesterAv.extendFriendsList(requestedAv.getDoId(), 0)
@@ -306,40 +306,3 @@ class FriendManagerAI(DistributedObjectAI):
                 self.removeSecret(tfCode)
 
         return task.again
-    
-    def teleportQuery(self, fromAvId, toAvId):
-        if fromAvId in self.teleportRequests:
-            return
-
-        dclass = self.air.dclassesByName['DistributedToonAI']
-        dg = dclass.aiFormatUpdate('teleportQuery', toAvId, self.GetPuppetConnectionChannel(toAvId), fromAvId, [fromAvId])
-        self.air.send(dg)
-
-        self.teleportRequests[fromAvId] = toAvId
-        taskMgr.doMethodLater(5, self.giveUpTeleportQuery, 'tp-query-timeout-{0}'.format(fromAvId), extraArgs = [fromAvId, toAvId])
-
-    def giveUpTeleportQuery(self, fromAvId, toAvId):
-        if fromAvId not in self.teleportRequests:
-            return
-
-        dclass = self.air.dclassesByName['DistributedToonAI']
-        dg = dclass.aiFormatUpdate('teleportResponse', fromAvId, self.GetPuppetConnectionChannel(fromAvId), toAvId, [toAvId, 0, 0, 0, 0])
-
-        self.air.send(dg)
-
-        del self.teleportRequests[fromAvId]
-        self.notify.warning('Teleport request that was sent by {0} to {1} timed out.'.format(fromAvId, toAvId))
-
-    def teleportResponse(self, fromAvId, toAvId, available, shardId, hoodId, zoneId):
-        if fromAvId not in self.teleportRequests:
-            return
-
-        if taskMgr.hasTaskNamed('tp-query-timeout-{0}'.format(fromAvId)):
-            taskMgr.remove('tp-query-timeout-{0}'.format(fromAvId))
-
-        dclass = self.air.dclassesByName['DistributedToonAI']
-        dg = dclass.aiFormatUpdate('teleportResponse', fromAvId, self.GetPuppetConnectionChannel(fromAvId), toAvId, [toAvId, available, shardId, hoodId, zoneId])
-
-        self.air.send(dg)
-
-        del self.teleportRequests[fromAvId]
