@@ -35,7 +35,7 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
         self.air = air
 
         self.wantSystemResponses = config.GetBool('want-system-responses', False)
-        self.overrideResponseType = False
+        self.sentFromExt = False
 
     def generate(self):
         MagicWordManagerAI.generate(self)
@@ -410,13 +410,17 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
         self.sendResponseMessage(avId, 'Successfully set nametag style: {0}!'.format(style))
 
     def sendResponseMessage(self, avId, message):
-        invokerId = self.air.getAvatarIdFromSender()
+        if not self.sentFromExt:
+            invokerId = self.air.getAvatarIdFromSender()
+        else:
+            invokerId = avId
+
         invoker = self.air.doId2do.get(invokerId)
 
         if not message or not invoker:
             return
 
-        if self.overrideResponseType or self.wantSystemResponses:
+        if self.wantSystemResponses:
             invoker.d_setSystemMessage(0, message)
         else:
             self.sendUpdateToAvatarId(invokerId, 'setMagicWordResponse', [message])
@@ -776,14 +780,13 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
         self.sendResponseMessage(avId, response)
 
     def setMagicWordExt(self, magicWord, avId):
-        self.setMagicWord(magicWord, avId, self.air.doId2do.get(avId).zoneId, '', sentFromExt = True)
+        self.sentFromExt = True
 
-    def setMagicWord(self, magicWord, avId, zoneId, signature, sentFromExt = False):
-        if not sentFromExt:
+        self.setMagicWord(magicWord, avId, self.air.doId2do.get(avId).zoneId, '')
+
+    def setMagicWord(self, magicWord, avId, zoneId, signature):
+        if not self.sentFromExt:
             avId = self.air.getAvatarIdFromSender()
-
-        if sentFromExt:
-            self.overrideResponseType = True
 
         av = self.air.doId2do.get(avId)
 
