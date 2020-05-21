@@ -35,7 +35,7 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
         self.air = air
 
         self.wantSystemResponses = config.GetBool('want-system-responses', False)
-        self.overrideViaExt = False
+        self.overrideResponseType = False
 
     def generate(self):
         MagicWordManagerAI.generate(self)
@@ -416,7 +416,7 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
         if not message or not invoker:
             return
 
-        if self.overrideViaExt or self.wantSystemResponses:
+        if self.overrideResponseType or self.wantSystemResponses:
             invoker.d_setSystemMessage(0, message)
         else:
             self.sendUpdateToAvatarId(invokerId, 'setMagicWordResponse', [message])
@@ -783,7 +783,7 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
             avId = self.air.getAvatarIdFromSender()
 
         if sentFromExt:
-            self.overrideViaExt = True
+            self.overrideResponseType = True
 
         av = self.air.doId2do.get(avId)
 
