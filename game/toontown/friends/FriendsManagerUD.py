@@ -245,8 +245,20 @@ class FriendsManagerUD:
         if not onlineFriends:
             return
 
+        datagram = PyDatagram()
+        datagram.addUint16(53) # CLIENT_FRIEND_ONLINE
+
         for friendId in onlineFriends:
-            self.comingOnline(avId, friendId)
+            datagram.addUint32(friendId)
+
+        datagram.addUint8(1)
+        datagram.addUint8(1)
+
+         # Send it.
+        dgTwo = PyDatagram()
+        dgTwo.addServerHeader(clientChannel, self.air.air.ourChannel, CLIENTAGENT_SEND_DATAGRAM)
+        dgTwo.addString(datagram.getMessage())
+        self.air.air.send(dgTwo)
 
     def getAvatarDetails(self, avId):
         senderId = self.air.getAvatarIdFromSender()
