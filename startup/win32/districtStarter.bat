@@ -1,8 +1,5 @@
+@echo off
 cd ../..
-
-set DISTRICT_NAME=%~1 %~2
-
-set BASE_CHANNEL=%~3
 
 title %DISTRICT_NAME%
 

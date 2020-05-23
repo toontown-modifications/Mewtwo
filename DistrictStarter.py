@@ -1,4 +1,4 @@
-import os, subprocess
+import os, subprocess, sys
 
 districtNames = [
     'Boingy Acres',
@@ -35,7 +35,12 @@ districtNames = [
 
 startingNum = 401000000
 
+if sys.platform == 'win32':
+    os.chdir('startup/win32')
+
 for index, elem in enumerate(districtNames):
     subprocess.shell = True
-    os.system('start cmd /c districtStarter.bat ' + str(districtNames[index]) + ' ' + str(startingNum))
+    os.environ['DISTRICT_NAME'] = str(districtNames[index])
+    os.environ['BASE_CHANNEL'] = str(startingNum)
+    os.system('start cmd /c districtStarter.bat')
     startingNum = startingNum + 1000000
