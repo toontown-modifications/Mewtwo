@@ -28,15 +28,4 @@ buildings-server-data-folder backups/buildings
 
 max-code-redemption-attempts 5
 
-vfs-mount phase_3 .
-vfs-mount phase_3.5 .
-vfs-mount phase_4 .
-vfs-mount phase_5 .
-vfs-mount phase_5.5 .
-vfs-mount phase_6 .
-vfs-mount phase_7 .
-vfs-mount phase_8 .
-vfs-mount phase_9 .
-vfs-mount phase_10 .
-vfs-mount phase_11 .
-model-path .
+model-path game/resources

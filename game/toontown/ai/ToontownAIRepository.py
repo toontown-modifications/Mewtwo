@@ -461,12 +461,12 @@ class ToontownAIRepository(ToontownInternalRepository):
         if 'outdoor_zone' in hood or 'golf_zone' in hood:
             phase = '6'
 
-        return 'game/resources/phase_{0}/dna/{1}_{2}.dna'.format(phase, hood, zoneId)
+        return 'phase_{0}/dna/{1}_{2}.dna'.format(phase, hood, zoneId)
 
     def lookupDNAFileName(self, dnaFileName):
         for _ in xrange(3, 13):
             if os.path.exists('game/resources/phase_{0}/dna/{1}'.format(_, dnaFileName)):
-                return 'game/resources/phase_{0}/dna/{1}'.format(_, dnaFileName)
+                return 'phase_{0}/dna/{1}'.format(_, dnaFileName)
 
     def findFishingPonds(self, dnaData, zoneId, area):
         fishingPonds = []

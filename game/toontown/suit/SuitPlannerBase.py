@@ -520,7 +520,7 @@ class SuitPlannerBase:
         phase = ToontownGlobals.streetPhaseMap[hoodId]
         if hoodId == zoneId:
             zoneId = 'sz'
-        return 'game/resources/phase_%s/dna/%s_%s.dna' % (phase, hood, zoneId)
+        return 'phase_%s/dna/%s_%s.dna' % (phase, hood, zoneId)
 
     def getZoneId(self):
         return self.zoneId
@@ -535,7 +535,7 @@ class SuitPlannerBase:
             a = string.split(groupFullName, ':', 1)[0]
         except:
             a = groupFullName
-        
+
         return a
 
     def initDNAInfo(self):
