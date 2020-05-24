@@ -518,15 +518,10 @@ class ExtAgent:
                 self.sendEject(clientChannel, 122, reason)
                 return
 
-            # Check the DC hash against the expected one.
-            # Unfortunately, the expected hash has to differ from
-            # the hash that we use, since we need an Astronized
-            # DC file. The expected hash should be the same one
-            # that the original 2013 client uses.
-            expectedHash = int(config.GetString('client-dc-hash', '0'))
-            if hashVal != expectedHash:
+            # Check the client DC hash against the server's DC hash.
+            if hashVal != self.air.hashVal:
                 # DC hash mismatch.
-                reason = 'Client DC hash mismatch: client=%s, server=%s' % (hashVal, expectedHash)
+                reason = 'Client DC hash mismatch: client=%s, server=%s' % (hashVal, self.air.hashVal)
                 self.sendEject(clientChannel, 122, reason)
                 return
 

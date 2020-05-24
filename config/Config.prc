@@ -1,6 +1,5 @@
 dc-file otpd/dclass/toon.dc
 dc-file otpd/dclass/otp.dc
-client-dc-hash 2308474396
 server-version sv1.0.47.38
 server-base-channel 1000000
 air-stateserver 4002
