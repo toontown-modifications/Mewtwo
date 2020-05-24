@@ -7,11 +7,6 @@ air-base-channel 401000000
 air-channel-allocation 999999
 account-bridge-file otpd/databases/accounts.json
 
-# DClass:
-dc-multiple-inheritance #t
-dc-sort-virtual-inheritance #t
-dc-sort-inheritance-by-file #t
-
 want-gardening true
 want-randomized-hats false
 want-membership true
