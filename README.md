@@ -1,4 +1,4 @@
 Rocket's OTP Server
 ============
 
-Rocket's OTP Server is a functional equivalent of _Disney's Toontown OTP server_.
+Rocket's OTP Server is a functional equivalent of _Disney's Toontown Online_ OTP server.
