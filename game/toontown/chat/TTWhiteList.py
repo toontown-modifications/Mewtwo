@@ -31,6 +31,7 @@ class TTWhiteList(WhiteList, DistributedObject.DistributedObject):
             searchPath.appendDirectory(Filename.fromOsSpecific(os.path.expandvars('$TOONTOWN/src/chat')))
             searchPath.appendDirectory(Filename.fromOsSpecific(os.path.expandvars('toontown/src/chat')))
             searchPath.appendDirectory(Filename.fromOsSpecific(os.path.expandvars('toontown/chat')))
+            searchPath.appendDirectory(Filename('game/whitelist'))
         found = vfs.resolveFilename(filename, searchPath)
         if not found:
             self.notify.info("Couldn't find whitelist data file!")
