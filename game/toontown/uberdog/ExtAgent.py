@@ -786,18 +786,6 @@ class ExtAgent:
                 for x, y in fields['setFriendsList'][0]:
                     self.friendsManager.comingOnline(avId, x)
 
-                # If we dont have a setDISLId field, set it:
-                try:
-                   fields['setDISLid']
-                except KeyError:
-                    fields['setDISLid'] = target,
-                    self.air.dbInterface.updateObject(self.air.dbId, avId, self.air.dclassesByName['DistributedToonUD'], fields)
-
-                # Update the avatar with the proper max bank amount.
-                if fields['setMaxBankMoney'][0] == 1200:
-                    fields['setMaxBankMoney'] = 12000,
-                    self.air.dbInterface.updateObject(self.air.dbId, avId, self.air.dclassesByName['DistributedToonUD'], fields)
-
             def handleAccountRetrieve(dclass, fields):
                 if dclass != self.air.dclassesByName['AccountUD']:
                     # This is not an Account object.
