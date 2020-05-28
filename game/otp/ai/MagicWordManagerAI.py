@@ -21,4 +21,10 @@ class MagicWordManagerAI(DistributedObjectAI):
         self.notify.info('{0} with avId of {1} succesfully executed Magic Word: {2}!'.format(invoker.getName(), invokerId, magicWord))
 
     def setWho(self, avIds = []):
-        pass
+        avId = self.air.getAvatarIdFromSender()
+        av = self.air.doId2do.get(avId)
+
+        if not avId:
+            return
+
+        self.sendUpdateToAvatarId(avId, 'setWho', [avIds])

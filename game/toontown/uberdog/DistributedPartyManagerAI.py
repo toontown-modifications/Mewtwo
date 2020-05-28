@@ -270,7 +270,7 @@ class DistributedPartyManagerAI(DistributedObjectAI):
                 continue
             guests = max(0, min(party.get('numGuests', 0), 255))
             publicPartiesList.append([party['shardId'], party['zoneId'], guests, party.get('hostName', ''),
-                                      party.get('activities', []), minLeft])
+                                      party.get('activityIds', []), minLeft])
 
         return publicPartiesList
 
