@@ -25,16 +25,23 @@ class TutorialBuildingAI:
 
     def __init__(self, air, street, interior, npcId):
         self.air = air
+
         self.interior = DistributedTutorialInteriorAI(self.air, interior, npcId)
         self.interior.generateWithRequired(interior)
-        self.door0 = DistributedDoorAI(self.air, 2, DoorTypes.EXT_STANDARD, doorIndex=0)
-        self.insideDoor0 = DistributedDoorAI(self.air, 0, DoorTypes.INT_STANDARD, doorIndex=0)
+
+        self.door0 = DistributedDoorAI(self.air, 2, DoorTypes.EXT_STANDARD, doorIndex = 0)
+        self.insideDoor0 = DistributedDoorAI(self.air, 0, DoorTypes.INT_STANDARD, doorIndex = 0)
+
         self.door0.setOtherDoor(self.insideDoor0)
+
         self.insideDoor0.setOtherDoor(self.door0)
+
         self.door0.zoneId = street
         self.insideDoor0.zoneId = interior
+
         self.door0.generateWithRequired(street)
         self.door0.sendUpdate('setDoorIndex', [self.door0.getDoorIndex()])
+
         self.insideDoor0.generateWithRequired(interior)
         self.insideDoor0.sendUpdate('setDoorIndex', [self.insideDoor0.getDoorIndex()])
 
@@ -48,9 +55,11 @@ class TutorialFSM(FSM):
 
     def __init__(self, air, zones, avId):
         FSM.__init__(self, 'TutorialFSM')
+
         self.air = air
         self.zones = zones
         self.avId = avId
+
         self.suit = None
         self.flippy = None
         self.blackCatMgr = None
@@ -59,9 +68,7 @@ class TutorialFSM(FSM):
         self.tutorialTom = NPCToons.createNPC(self.air, 20000, tutorialTomDesc, self.zones.SHOP, 0)
         self.tutorialTom.setTutorial(1)
 
-        hqHarryDesc = (
-            -1, TTLocalizer.TutorialHQOfficerName, ('dls', 'ms', 'm', 'm', 6, 0, 6, 6, 0, 10, 0, 10, 0, 9), 'm', 1,
-            NPCToons.NPC_HQ)
+        hqHarryDesc = (-1, TTLocalizer.TutorialHQOfficerName, ('dls', 'ms', 'm', 'm', 6, 0, 6, 6, 0, 10, 0, 10, 0, 9), 'm', 1, NPCToons.NPC_HQ)
         self.hqHarry = NPCToons.createNPC(self.air, 20002, hqHarryDesc, self.zones.HQ, 0)
         self.hqHarry.setTutorial(1)
 
@@ -113,13 +120,16 @@ class TutorialFSM(FSM):
     def enterCleanup(self):
         self.building.cleanup()
         self.hq.cleanup()
+
         self.tutorialTom.requestDelete()
         self.hqHarry.requestDelete()
+
         self.air.deallocateZone(self.zones.BRANCH)
         self.air.deallocateZone(self.zones.STREET)
         self.air.deallocateZone(self.zones.SHOP)
         self.air.deallocateZone(self.zones.HQ)
-        del self.air.tutorialManager.avId2fsm[self.avId]
+
+        del self.air.tutorialManager.playerDict[self.avId]
 
 class TutorialManagerAI(DistributedObjectAI):
     notify = directNotify.newCategory('TutorialManagerAI')
@@ -127,11 +137,18 @@ class TutorialManagerAI(DistributedObjectAI):
     def __init__(self, air):
         DistributedObjectAI.__init__(self, air)
 
-        self.avId2fsm = {}
+        self.playerDict = {}
 
     def requestTutorial(self):
         avId = self.air.getAvatarIdFromSender()
+
         if not avId:
+            accountId = self.air.getAccountIdFromSender()
+            self.air.writeServerEvent('suspicious', accountId, 'TutorialManagerAI.requestTutorial client did not have an avId.')
+            return
+
+        if avId in self.playerDict:
+            self.air.writeServerEvent('suspicious', avId, 'TutorialManagerAI.requestTutorial toon already in playerDict.')
             return
 
         zones = TutorialZones()
@@ -140,7 +157,7 @@ class TutorialManagerAI(DistributedObjectAI):
         zones.SHOP = self.air.allocateZone()
         zones.HQ = self.air.allocateZone()
 
-        self.avId2fsm[avId] = TutorialFSM(self.air, zones, avId)
+        self.playerDict[avId] = TutorialFSM(self.air, zones, avId)
 
         event = self.air.getAvatarExitEvent(avId)
         self.acceptOnce(event, self.__unexpectedExit, extraArgs=[avId])
@@ -148,7 +165,7 @@ class TutorialManagerAI(DistributedObjectAI):
         self.d_enterTutorial(avId, zones.STREET, zones.STREET, zones.SHOP, zones.HQ)
 
     def __unexpectedExit(self, avId):
-        fsm = self.avId2fsm.get(avId)
+        fsm = self.playerDict.get(avId)
         if fsm:
             fsm.demand('Cleanup')
 
@@ -163,8 +180,7 @@ class TutorialManagerAI(DistributedObjectAI):
             av.b_setTutorialAck(1)
             av.b_setQuestHistory([101])
             av.b_setRewardHistory(0, [100])
-            av.addQuest(
-                (110, Quests.getQuestFromNpcId(110), Quests.getQuestToNpcId(110), Quests.getQuestReward(110, av), 0), 0)
+            av.addQuest((110, Quests.getQuestFromNpcId(110), Quests.getQuestToNpcId(110), Quests.getQuestReward(110, av), 0), 0)
             self.air.questManager.toonRodeTrolleyFirstTime(av)
             self.d_skipTutorialResponse(avId, 1)
         else:
@@ -179,14 +195,14 @@ class TutorialManagerAI(DistributedObjectAI):
     def toonArrived(self):
         avId = self.air.getAvatarIdFromSender()
         av = self.air.doId2do.get(avId)
+
         if not av:
             return
 
         if av.getTutorialAck():
-            if avId in self.avId2fsm:
-                self.avId2fsm[avId].demand('Cleanup')
-            self.air.writeServerEvent('suspicious', avId,
-                                      'Attempted to request tutorial when it would be impossible to do so')
+            if avId in self.playerDict:
+                self.playerDict[avId].demand('Cleanup')
+            self.air.writeServerEvent('suspicious', avId, 'Attempted to request tutorial when it would be impossible to do so')
             return
 
         # Reset Toon so that their stats are appropriate for the tutorial.
@@ -208,14 +224,14 @@ class TutorialManagerAI(DistributedObjectAI):
         av.d_setExperience(av.experience.makeNetString())
 
     def blackCatStart(self):
-        for fsm in self.avId2fsm.values():
+        for fsm in self.playerDict.values():
             if fsm.getCurrentOrNextState() == 'Tunnel' and not fsm.blackCatMgr:
                 fsm.blackCatMgr = DistributedBlackCatMgrAI(self.air)
                 fsm.blackCatMgr.setAvId(fsm.avId)
                 fsm.blackCatMgr.generateWithRequired(fsm.zones.STREET)
 
     def blackCatEnd(self):
-        for fsm in self.avId2fsm.values():
+        for fsm in self.playerDict.values():
             if fsm.blackCatMgr:
                 fsm.blackCatMgr.requestDelete()
                 fsm.blackCatMgr = None
@@ -223,13 +239,15 @@ class TutorialManagerAI(DistributedObjectAI):
     def allDone(self):
         avId = self.air.getAvatarIdFromSender()
         av = self.air.doId2do.get(avId)
+
         if av:
             av.b_setTutorialAck(1)
 
         event = self.air.getAvatarExitEvent(avId)
         self.ignore(event)
 
-        fsm = self.avId2fsm.get(avId)
+        fsm = self.playerDict.get(avId)
+
         if fsm:
             fsm.demand('Cleanup')
         else:

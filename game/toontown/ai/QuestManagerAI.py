@@ -120,8 +120,8 @@ class QuestManagerAI:
             if isComplete != Quests.COMPLETE:
                 continue
 
-            if avId in self.air.tutorialManager.avId2fsm.keys():
-                self.air.tutorialManager.avId2fsm[avId].demand('Tunnel')
+            if avId in self.air.tutorialManager.playerDict.keys():
+                self.air.tutorialManager.playerDict[avId].demand('Tunnel')
 
             if isinstance(quest, Quests.DeliverGagQuest):
                 track, level = quest.getGagType()
@@ -151,11 +151,10 @@ class QuestManagerAI:
             npc.rejectAvatar(avId)
             return
 
-        if avId in self.air.tutorialManager.avId2fsm.keys():
+        if avId in self.air.tutorialManager.playerDict.keys():
             if av.getRewardHistory()[0] == 0:
-                self.npcGiveQuest(npc, av, 101, Quests.findFinalRewardId(101)[0], Quests.getQuestToNpcId(101),
-                                  storeReward=True)
-                self.air.tutorialManager.avId2fsm[avId].demand('Battle')
+                self.npcGiveQuest(npc, av, 101, Quests.findFinalRewardId(101)[0], Quests.getQuestToNpcId(101), storeReward = True)
+                self.air.tutorialManager.playerDict[avId].demand('Battle')
                 return
 
         tier = av.getRewardHistory()[0]
@@ -188,7 +187,7 @@ class QuestManagerAI:
         if not av:
             return
 
-        self.npcGiveQuest(npc, av, questId, rewardId, toNpcId, storeReward=True)
+        self.npcGiveQuest(npc, av, questId, rewardId, toNpcId, storeReward = True)
 
     def avatarChoseTrack(self, avId, npc, pendingTrackQuest, trackId):
         # Get the avatar.
