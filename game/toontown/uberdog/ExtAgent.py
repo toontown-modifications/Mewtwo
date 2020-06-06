@@ -100,6 +100,10 @@ class ExtAgent:
         self.wantServerDebug = config.GetBool('want-server-debugging', False)
         self.wantServerMaintenance = config.GetBool('want-server-maintenance', False)
         self.wantMembership = config.GetBool('want-membership', False)
+        self.databasePath = 'otpd/databases/otpdb'
+
+        if not os.path.exists(self.databasePath):
+            os.makedirs(self.databasePath)
 
         self.sendAvailabilityToAPI()
 
