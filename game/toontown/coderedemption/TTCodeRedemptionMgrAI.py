@@ -182,7 +182,7 @@ class TTCodeRedemptionMgrAI(DistributedObjectAI):
         if code == 'winter' or code == 'cannons':
             rent = CatalogRentalItem(ToontownGlobals.RentalCannon, 48 * 60, 0)
             return [rent]
-        
+
         if code == 'gadzooks':
             shirt = CatalogClothingItem(1807, 0)
             return [shirt]

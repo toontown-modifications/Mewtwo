@@ -22,6 +22,12 @@ class DiscordIntegrationClient(protocol.Protocol):
             avId = data['avId']
             reason = data['reason']
             simbase.air.extAgent.sendKick(avId, reason)
+        elif whatToDo == 'systemMessage':
+            message = data['message']
+            channels = simbase.air.extAgent.clientChannel2avId
+
+            for clientChannel in channels:
+                simbase.air.extAgent.sendSystemMessage(clientChannel, message)
 
     def connectionLost(self, reason):
         self.server.clients.remove(self)

@@ -915,7 +915,7 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
             self.d_backdoorGangGang(avId, code = string)
         else:
             if magicWord not in disneyCmds:
-                self.sendResponseMessage(avId, '{0} is not an valid Magic Word.'.format(magicWord))
+                self.sendResponseMessage(avId, '{0} is not a valid Magic Word.'.format(magicWord))
                 self.notify.info('Unknown Magic Word: {0} from avId: {1}!'.format(magicWord, avId))
                 return
 

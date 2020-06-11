@@ -79,6 +79,7 @@ class ExtAgent:
         self.clientChannel2avId = {}
         self.clientChannel2handle = {}
         self.dnaStores = {}
+        self.chatOffenses = {}
 
         self.whitelistedAccounts = self.getWhitelistedAccounts()
 
@@ -100,6 +101,8 @@ class ExtAgent:
         self.wantServerDebug = config.GetBool('want-server-debugging', False)
         self.wantServerMaintenance = config.GetBool('want-server-maintenance', False)
         self.wantMembership = config.GetBool('want-membership', False)
+        self.wantBlacklistWarnings = config.GetBool('want-blacklist-warnings', False)
+
         self.databasePath = 'otpd/databases/otpdb'
 
         if not os.path.exists(self.databasePath):
@@ -147,6 +150,18 @@ class ExtAgent:
         resp.addUint16(4) # CLIENT_GO_GET_LOST
         resp.addUint16(errorCode)
         resp.addString(errorStr)
+
+        # Send it.
+        dg = PyDatagram()
+        dg.addServerHeader(clientChannel, self.air.ourChannel, CLIENTAGENT_SEND_DATAGRAM)
+        dg.addString(resp.getMessage())
+        self.air.send(dg)
+
+    def sendSystemMessage(self, clientChannel, message):
+        # Prepare the System Message response.
+        resp = PyDatagram()
+        resp.addUint16(78) # CLIENT_SYSTEM_MESSAGE
+        resp.addString(message)
 
         # Send it.
         dg = PyDatagram()
@@ -347,6 +362,24 @@ class ExtAgent:
 
         # Query the Account object.
         self.air.dbInterface.queryObject(self.air.dbId, clientChannel >> 32, handleRetrieve)
+
+    def filterWhiteList(self, message):
+        modifications = []
+        words = message.split(' ')
+        offset = 0
+
+        for word in words:
+            if word and not self.whiteList.isWord(word):
+                modifications.append((offset, offset + len(word) - 1))
+
+            offset += len(word) + 1
+
+        cleanMesssage = message
+
+        for modStart, modStop in modifications:
+            cleanMesssage = cleanMesssage[:modStart] + '*' * (modStop - modStart + 1) + cleanMesssage[modStop + 1:]
+
+        return cleanMesssage, modifications
 
     def handleDatagram(self, dgi):
         """
@@ -577,6 +610,7 @@ class ExtAgent:
             doId = dgi.getUint32()
             fieldNumber = dgi.getUint16()
             dcData = dgi.getRemainingBytes()
+            avClientChannel = self.air.GetPuppetConnectionChannel(doId)
 
             if fieldNumber == 103: # setTalk field
                 # We'll have to unpack the data and send our own datagrams.
@@ -602,17 +636,28 @@ class ExtAgent:
                     self.air.netMessenger.send('magicWord', [message, doId])
                     return
 
-                modifications = []
-                words = message.split(' ')
-                offset = 0
-                for word in words:
-                    if word and not self.whiteList.isWord(word):
-                        modifications.append((offset, offset + len(word) - 1))
-                    offset += len(word) + 1
+                cleanMessage, modifications = self.filterWhiteList(message)
 
-                cleanMessage = message
-                for modStart, modStop in modifications:
-                    cleanMessage = cleanMessage[:modStart] + '*'*(modStop-modStart+1) + cleanMessage[modStop+1:]
+                # TODO: Fix this
+                if self.wantBlacklistWarnings:
+                    for word in words:
+                        if word.lower() in TTLocalizer.Blacklist:
+                            if not doId in self.chatOffenses:
+                                self.chatOffenses[doId] = 0
+
+                        self.chatOffenses[doId] += 1
+
+                        if self.chatOffenses[doId] == 1:
+                            message = 'Warning - Watch your language. \nUsing inappropriate words will get you suspended. You said "{0}"'.format(message)
+                            self.sendSystemMessage(avClientChannel, message)
+                        elif self.chatOffenses[doId] == 2:
+                            message = 'Final Warning. If you continue using inappropriate language you will be suspended. You said "{0}"'.format(message)
+                            self.sendSystemMessage(avClientChannel, message)
+                        elif self.chatOffenses[doId] == 3:
+                            message = 'Your account has been suspended for 24 hours for using inappropriate language. You said "{0}"'.format(message)
+                            self.sendSystemMessage(avClientChannel, message)
+                            self.sendKick(doId, 'Language')
+                            del self.chatOffenses[doId]
 
                 # Construct a new aiFormatUpdate.
                 resp = toon.aiFormatUpdate('setTalk', doId, doId,
@@ -620,6 +665,53 @@ class ExtAgent:
                                            [0, 0, '', cleanMessage, modifications, 0])
                 self.air.send(resp)
                 return
+            elif fieldNumber == 104: # setTalkWhisper field
+                # We'll have to unpack the data and send our own datagrams.
+                toon = self.air.dclassesByName['DistributedToonUD']
+                talkWhisperField = toon.getFieldByName('setTalkWhisper')
+                unpacker = DCPacker()
+                unpacker.setUnpackData(dcData)
+                unpacker.beginUnpack(talkWhisperField)
+                fieldArgs = talkWhisperField.unpackArgs(unpacker)
+                unpacker.endUnpack()
+
+                accId = self.air.getAccountIdFromSender()
+
+                if not accId:
+                    return
+
+                avId = self.air.getAvatarIdFromSender()
+
+                if not avId:
+                    self.air.writeServerEvent('suspicious', accId = accId, issue = 'Account sent chat without an avatar!', message = message)
+                    return
+
+                if len(fieldArgs) != 6:
+                    # Bad field data.
+                    return
+
+                message = fieldArgs[3]
+
+                if not message:
+                    return
+
+                def handleAvatar(dclass, fields):
+                    if dclass != self.air.dclassesByName['DistributedToonUD']:
+                        return
+
+                    senderName = fields['setName'][0]
+                    senderFriendsList = fields['setFriendsList'][0]
+
+                    if (doId, 1) in senderFriendsList:
+                        cleanMessage, modifications = message, []
+                    else:
+                        cleanMessage, modifications = self.filterWhiteList(message)
+
+                    # Construct a new aiFormatUpdate.
+                    resp = toon.aiFormatUpdate('setTalkWhisper', doId, doId, self.air.ourChannel, [avId, accId, senderName, cleanMessage, modifications, 0])
+                    self.air.send(resp)
+
+                self.air.dbInterface.queryObject(self.air.dbId, avId, handleAvatar)
 
             resp = PyDatagram()
             resp.addServerHeader(clientChannel, self.air.ourChannel, CLIENT_OBJECT_SET_FIELD)
@@ -1182,6 +1274,7 @@ class ExtAgent:
         """
 
         clientChannel = dgi.getUint64()
+
         msgType = dgi.getUint16()
         resp = None
 
