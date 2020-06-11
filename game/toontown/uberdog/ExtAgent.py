@@ -1274,7 +1274,6 @@ class ExtAgent:
         """
 
         clientChannel = dgi.getUint64()
-
         msgType = dgi.getUint16()
         resp = None
 
