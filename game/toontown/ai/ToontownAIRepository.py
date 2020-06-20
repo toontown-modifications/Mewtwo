@@ -73,7 +73,7 @@ from game.toontown.estate.DistributedBankMgrAI import DistributedBankMgrAI
 from game.toontown.ai.DialogueManagerAI import DialogueManagerAI
 from game.otp.uberdog.OtpAvatarManagerAI import OtpAvatarManagerAI
 
-import __builtin__, time, os, requests
+import __builtin__, time, os, requests, random
 
 __builtin__.isClient = lambda: PythonUtil.isClient()
 
