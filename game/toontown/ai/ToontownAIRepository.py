@@ -157,7 +157,8 @@ class ToontownAIRepository(ToontownInternalRepository):
         self.sendToAPI(self.districtPopulation, True)
 
     def sendQueryToonMaxHp(self, doId, checkResult):
-        self.notify.info('sendQueryToonMaxHp ({0}, {1})'.format(doId, checkResult))
+        if self.notify.getDebug():
+            self.notify.debug('sendQueryToonMaxHp ({0}, {1})'.format(doId, checkResult))
 
     def _isValidPlayerLocation(self, parentId, zoneId):
         if not parentId or zoneId > ToontownGlobals.DynamicZonesEnd or zoneId is 0:
