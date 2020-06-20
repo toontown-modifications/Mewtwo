@@ -72,6 +72,7 @@ from game.toontown.distributed.ToontownInternalRepository import ToontownInterna
 from game.toontown.estate.DistributedBankMgrAI import DistributedBankMgrAI
 from game.toontown.ai.DialogueManagerAI import DialogueManagerAI
 from game.otp.uberdog.OtpAvatarManagerAI import OtpAvatarManagerAI
+from game.toontown.uberdog.DistributedSecurityMgrAI import DistributedSecurityMgrAI
 
 import __builtin__, time, os, requests, random
 
@@ -156,8 +157,24 @@ class ToontownAIRepository(ToontownInternalRepository):
         self.districtStats.b_setAvatarCount(self.districtStats.getAvatarCount() - 1)
         self.sendToAPI(self.districtPopulation, True)
 
-    def sendQueryToonMaxHp(self, doId, checkResult):
-        self.notify.info('sendQueryToonMaxHp ({0}, {1})'.format(doId, checkResult))
+    def sendQueryToonMaxHp(self, avId, callback):
+        if self.notify.getDebug():
+            self.notify.debug('sendQueryToonMaxHp ({0}, {1})'.format(avId, callback))
+
+        result = 0
+
+        def handleQueryResponse(dclass, fields):
+            if dclass != simbase.air.dclassesByName['DistributedToonAI']:
+                # Not a valid toon.
+                self.notify.warning('DC object for avId {0} is not DistributedToon!'.format(avId))
+                return
+
+            # Woohoo, valid Toon.
+            result = 1
+
+        toon = simbase.air.dbInterface.queryObject(simbase.air.dbId, avId, handleQueryResponse)
+
+        return result
 
     def _isValidPlayerLocation(self, parentId, zoneId):
         if not parentId or zoneId > ToontownGlobals.DynamicZonesEnd or zoneId is 0:
@@ -310,6 +327,9 @@ class ToontownAIRepository(ToontownInternalRepository):
 
         self.avatarManager = OtpAvatarManagerAI(self)
         self.avatarManager.generateWithRequiredAndId(2, self.getGameDoId(), 2)
+
+        self.securityMgr = DistributedSecurityMgrAI(self)
+        self.securityMgr.generateWithRequired(OtpDoGlobals.OTP_ZONE_ID_MANAGEMENT)
 
     def createHood(self, hoodCtr, zoneId):
         # Bossbot HQ doesn't use DNA, so we skip over that.
