@@ -1,4 +1,4 @@
-Rocket's OTP Server
+Mewtwo
 ============
 
-Rocket's OTP Server is a fully functional equivalent of Disney's Toontown Online OTP server.
+Mewtwo is a fully functional equivalent of Disney's Toontown Online OTP server written by Rocket and other contributors.
