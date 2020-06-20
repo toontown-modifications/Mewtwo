@@ -33,7 +33,7 @@ holidayToMgr = {
     ToontownGlobals.IDES_OF_MARCH: GreenToonHolidayAI, # 105
     ToontownGlobals.SPOOKY_BLACK_CAT: BlackCatDayHolidayAI, # 117
     ToontownGlobals.SPOOKY_COSTUMES: CharacterSwitchHolidayAI, # 120
-    ToontownGlobals.SILLYMETER_HOLIDAY: SillyMeterHolidayAI
+    ToontownGlobals.SILLYMETER_HOLIDAY: SillyMeterHolidayAI # 60
 }
 
 class HolidayManagerAI:

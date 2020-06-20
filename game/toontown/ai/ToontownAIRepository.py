@@ -78,6 +78,7 @@ import __builtin__, time, os, requests
 __builtin__.isClient = lambda: PythonUtil.isClient()
 
 class ToontownAIRepository(ToontownInternalRepository):
+    notify = directNotify.newCategory('ToontownAIRepository')
 
     def __init__(self, baseChannel, districtName):
         ToontownInternalRepository.__init__(self, baseChannel, config.GetInt('air-stateserver', 0), dcSuffix = 'AI')
@@ -103,6 +104,9 @@ class ToontownAIRepository(ToontownInternalRepository):
         self.wantCodeRedemption = config.GetBool('want-coderedemption', False)
 
         self.cogSuitMessageSent = False
+
+        # Enable logging.
+        self.notify.setInfo(True)
 
     def getTrackClsends(self):
         if config.GetBool('want-track-clsends', False):
@@ -203,6 +207,9 @@ class ToontownAIRepository(ToontownInternalRepository):
         self.districtStats.settoontownDistrictId(self.districtId)
         self.districtStats.generateWithRequiredAndId(self.allocateChannel(), self.getGameDoId(), OtpDoGlobals.OTP_ZONE_ID_DISTRICTS_STATS)
 
+        self.notify.info('Creating local objects...')
+        self.createLocals()
+
         self.notify.info('Creating managers...')
         self.createManagers()
 
@@ -214,34 +221,12 @@ class ToontownAIRepository(ToontownInternalRepository):
         # Inform the ExtAgent of us.
         self.netMessenger.send('registerShard', [self.districtId, config.GetString('air-shardname', 'District')])
 
-    def createManagers(self):
-        # Generate our TimeManagerAI.
-        self.timeManager = TimeManagerAI(self)
-        self.timeManager.generateWithRequired(OtpDoGlobals.OTP_ZONE_ID_MANAGEMENT)
-
+    def createLocals(self):
         self.holidayManager = HolidayManagerAI(self)
         self.catalogManager = CatalogManagerAI(self)
 
-        self.welcomeValleyManager = WelcomeValleyManagerAI(self)
-        self.welcomeValleyManager.generateWithRequired(OtpDoGlobals.OTP_ZONE_ID_MANAGEMENT)
-
-        self.inGameNewsMgr = DistributedInGameNewsMgrAI(self)
-        self.inGameNewsMgr.generateWithRequired(OtpDoGlobals.OTP_ZONE_ID_MANAGEMENT)
-
-        self.trophyMgr = DistributedTrophyMgrAI(self)
-        self.trophyMgr.generateWithRequired(OtpDoGlobals.OTP_ZONE_ID_MANAGEMENT)
-
         self.petMgr = PetManagerAI(self)
         self.suitInvasionManager = SuitInvasionManagerAI(self)
-
-        self.newsManager = NewsManagerAI(self)
-        self.newsManager.generateWithRequired(OtpDoGlobals.OTP_ZONE_ID_MANAGEMENT)
-
-        self.estateMgr = EstateManagerAI(self)
-        self.estateMgr.generateWithRequired(OtpDoGlobals.OTP_ZONE_ID_MANAGEMENT)
-
-        self.safeZoneManager = SafeZoneManagerAI(self)
-        self.safeZoneManager.generateWithRequired(OtpDoGlobals.OTP_ZONE_ID_MANAGEMENT)
 
         self.fishManager = FishManagerAI(self)
         self.fishBingoManager = FishBingoManagerAI(self)
@@ -256,21 +241,48 @@ class ToontownAIRepository(ToontownInternalRepository):
 
         self.raceMgr = RaceManagerAI(self)
 
-        self.magicWordMgr = ToontownMagicWordManagerAI(self)
-        self.magicWordMgr.generateWithRequired(OtpDoGlobals.OTP_ZONE_ID_MANAGEMENT)
-
         self.toontownTimeManager = ToontownTimeManager(serverTimeUponLogin = int(time.time()), globalClockRealTimeUponLogin = globalClock.getRealTime())
 
         self.banManager = BanManagerAI() # Disney's BanManager
 
         self.questManager = QuestManagerAI(self)
 
-        self.tutorialManager = TutorialManagerAI(self)
-        self.tutorialManager.generateWithRequired(OtpDoGlobals.OTP_ZONE_ID_MANAGEMENT)
-
         self.promotionMgr = PromotionManagerAI(self)
 
         self.cogPageManager = CogPageManagerAI(self)
+
+        self.cogSuitMgr = CogSuitManagerAI(self)
+
+        self.dialogueManager = DialogueManagerAI(self)
+
+    def createManagers(self):
+        # Generate our TimeManagerAI.
+        self.timeManager = TimeManagerAI(self)
+        self.timeManager.generateWithRequired(OtpDoGlobals.OTP_ZONE_ID_MANAGEMENT)
+
+        self.welcomeValleyManager = WelcomeValleyManagerAI(self)
+        self.welcomeValleyManager.generateWithRequired(OtpDoGlobals.OTP_ZONE_ID_MANAGEMENT)
+
+        self.inGameNewsMgr = DistributedInGameNewsMgrAI(self)
+        self.inGameNewsMgr.generateWithRequired(OtpDoGlobals.OTP_ZONE_ID_MANAGEMENT)
+
+        self.trophyMgr = DistributedTrophyMgrAI(self)
+        self.trophyMgr.generateWithRequired(OtpDoGlobals.OTP_ZONE_ID_MANAGEMENT)
+
+        self.newsManager = NewsManagerAI(self)
+        self.newsManager.generateWithRequired(OtpDoGlobals.OTP_ZONE_ID_MANAGEMENT)
+
+        self.estateMgr = EstateManagerAI(self)
+        self.estateMgr.generateWithRequired(OtpDoGlobals.OTP_ZONE_ID_MANAGEMENT)
+
+        self.safeZoneManager = SafeZoneManagerAI(self)
+        self.safeZoneManager.generateWithRequired(OtpDoGlobals.OTP_ZONE_ID_MANAGEMENT)
+
+        self.magicWordMgr = ToontownMagicWordManagerAI(self)
+        self.magicWordMgr.generateWithRequired(OtpDoGlobals.OTP_ZONE_ID_MANAGEMENT)
+
+        self.tutorialManager = TutorialManagerAI(self)
+        self.tutorialManager.generateWithRequired(OtpDoGlobals.OTP_ZONE_ID_MANAGEMENT)
 
         self.friendManager = FriendManagerAI(self)
         self.friendManager.generateWithRequired(OtpDoGlobals.OTP_ZONE_ID_MANAGEMENT)
@@ -285,8 +297,6 @@ class ToontownAIRepository(ToontownInternalRepository):
         self.partyManager = DistributedPartyManagerAI(self)
         self.partyManager.generateWithRequired(OtpDoGlobals.OTP_ZONE_ID_MANAGEMENT)
 
-        self.cogSuitMgr = CogSuitManagerAI(self)
-
         self.dataStoreManager = self.generateGlobalObject(OtpDoGlobals.OTP_DO_ID_TOONTOWN_TEMP_STORE_MANAGER, 'DistributedDataStoreManager')
 
         self.polarPlaceEffectMgr = DistributedPolarPlaceEffectMgrAI(self)
@@ -297,8 +307,6 @@ class ToontownAIRepository(ToontownInternalRepository):
 
         self.bankManager = DistributedBankMgrAI(self)
         self.bankManager.generateWithRequired(OtpDoGlobals.OTP_ZONE_ID_MANAGEMENT)
-
-        self.dialogueManager = DialogueManagerAI(self)
 
         self.avatarManager = OtpAvatarManagerAI(self)
         self.avatarManager.generateWithRequiredAndId(2, self.getGameDoId(), 2)
@@ -430,6 +438,9 @@ class ToontownAIRepository(ToontownInternalRepository):
 
         for suitPlanner in self.suitPlanners.values():
             suitPlanner.assignInitialSuitBuildings()
+
+        # Let our user know we have finished starting up.
+        self.notify.info('{0} has finished starting up.'.format(self.districtName))
 
         # Fireworks task.
         thetime = time.time() % 3600

@@ -11,4 +11,7 @@ class DialogueManagerAI:
         self.air = air
 
     def requestDialogue(self, npc, topic, endPause):
-        npc.sendUpdate('setChat', [topic, 1, 2020, 1, _constants.CFSpeech | _constants.CFTimeout])
+        npc.sendUpdate('setChat', [topic, 1, 2020, _constants.CFSpeech | _constants.CFTimeout])
+
+    def leaveDialogue(self, _):
+        pass

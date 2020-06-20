@@ -57,7 +57,7 @@ class SillyMeterHolidayAI(HolidayBaseAI):
         del holidayDates[-1]
 
         numPhases = len(holidayDates)
- 
+
         self.sillyMeterMgr.b_setNumPhases(numPhases)
         self.sillyMeterMgr.b_setCurPhase(curPhase)
         self.sillyMeterMgr.b_setDates(holidayDates)
