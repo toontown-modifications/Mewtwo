@@ -15,11 +15,13 @@ want-coderedemption true
 want-server-debugging false
 want-do-live-updates true
 want-delivery-manager false
-want-server-maintenance false
+want-server-maintenance true
 want-discord-integration true
 want-blacklist-warnings false
 active-holidays 60, 61, 62, 63, 64, 65, 66
 buildings-server-data-folder backups/buildings
+whitelist-url http://cdn.toontown.disney.go.com/toontown/en/
+whitelist-stage-dir game/whitelist
 
 max-code-redemption-attempts 5
 

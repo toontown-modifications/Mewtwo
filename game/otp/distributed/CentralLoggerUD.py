@@ -5,7 +5,7 @@ import json
 
 class CentralLoggerUD(DistributedObjectGlobalUD):
     notify = directNotify.newCategory('CentralLoggerUD')
-    notify.setDebug(True)
+    notify.setInfo(True)
 
     def sendMessage(self, category, message, targetDISLid, targetAvId):
         self.notify.debug('Received message from client')
@@ -23,7 +23,7 @@ class CentralLoggerUD(DistributedObjectGlobalUD):
             fields['feedbackCategory'] = parts[1]
             fields['feedbackMessage'] = parts[2]
 
-        if self.notify.getDebug():
+        if self.notify.getInfo():
             event = {
                 'category': category,
                 'message': message,

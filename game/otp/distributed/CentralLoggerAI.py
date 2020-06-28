@@ -3,13 +3,13 @@ from direct.distributed.DistributedObjectGlobalAI import DistributedObjectGlobal
 
 class CentralLoggerAI(DistributedObjectGlobalAI):
     notify = directNotify.newCategory('CentralLoggerAI')
-    notify.setDebug(True)
+    notify.setInfo(True)
 
     def sendMessage(self, category, message, targetDISLid, targetAvId):
         self.sendUpdate('sendMessage', [category, message, targetDISLid, targetAvId])
 
     def sendMessage(self, category, message, targetDISLid, targetAvId):
-        self.notify.debug('Received message from client') 
+        self.notify.debug('Received message from client')
 
     def logAIGarbage(self):
         pass
