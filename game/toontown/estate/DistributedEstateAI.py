@@ -8,6 +8,8 @@ from game.toontown.estate import GardenGlobals
 from game.toontown.estate import HouseGlobals
 from game.toontown.estate.DistributedCannonAI import DistributedCannonAI
 from game.toontown.estate.DistributedTargetAI import DistributedTargetAI
+from game.toontown.estate.DistributedFireworksCannonAI import DistributedFireworksCannonAI
+from game.toontown.estate.DistributedGardenAI import DistributedGardenAI
 from game.toontown.fishing.DistributedFishingPondAI import DistributedFishingPondAI
 from game.toontown.safezone.DistributedFishingSpotAI import DistributedFishingSpotAI
 from game.toontown.safezone.EFlyingTreasurePlannerAI import EFlyingTreasurePlannerAI
@@ -40,6 +42,8 @@ class DistributedEstateAI(DistributedObjectAI):
         self.pond = None
         self.treasurePlanner = None
         self.flyingTreasurePlanner = None
+        self.fireworksCannon = None
+        self.garden = None
 
     def announceGenerate(self):
         DistributedObjectAI.announceGenerate(self)
@@ -66,6 +70,13 @@ class DistributedEstateAI(DistributedObjectAI):
 
             spot.generateWithRequired(self.zoneId)
             self.pond.addSpot(spot)
+
+        self.fireworksCannon = DistributedFireworksCannonAI(self.air)
+        self.fireworksCannon.generateWithRequired(self.zoneId)
+
+        self.garden = DistributedGardenAI(self.air)
+        self.garden.generateWithRequired(self.zoneId)
+        self.garden.sendNewProp(HouseGlobals.PROP_ICECUBE, 4.710, -86.550, 2.478)
 
         # Start the collision loop:
         taskMgr.add(self.__collisionLoop, self.uniqueName('collisionLoop'), sort=30)
@@ -379,6 +390,14 @@ class DistributedEstateAI(DistributedObjectAI):
         for cannon in self.cannons[:]:
             cannon.requestDelete()
             self.cannons.remove(cannon)
+
+        if self.fireworksCannon:
+            self.fireworksCannon.requestDelete()
+            self.fireworksCannon = None
+
+        if self.garden:
+            self.garden.requestDelete()
+            self.garden = None
 
         taskMgr.remove(self.uniqueName('rentalExpire'))
         taskMgr.remove(self.uniqueName('collisionLoop'))

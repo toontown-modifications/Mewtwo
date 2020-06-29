@@ -1,9 +1,22 @@
-from direct.directnotify import DirectNotifyGlobal
+from direct.directnotify.DirectNotifyGlobal import directNotify
 from direct.distributed.DistributedObjectAI import DistributedObjectAI
 
+from game.toontown.estate import HouseGlobals
 
 class DistributedGardenAI(DistributedObjectAI):
-    notify = DirectNotifyGlobal.directNotify.newCategory("DistributedGardenAI")
+    notify = directNotify.newCategory('DistributedGardenAI')
 
-    def sendNewProp(self, todo0, todo1, todo2, todo3):
-        pass
+    def isValidProp(self, prop):
+        if not prop in (HouseGlobals.PROP_ICECUBE, HouseGlobals.PROP_FLOWER, HouseGlobals.PROP_SNOWFLAKE):
+            return False
+
+        return True
+
+    def sendNewProp(self, prop, x, y, z):
+        if not self.isValidProp(prop):
+            return
+
+        self.d_sendNewProp(avId, prop, x, y, z)
+
+    def d_sendNewProp(self, avId, prop, x, y, z):
+        self.sendUpdate('sendNewProp', [prop, x, y, z])
