@@ -15,9 +15,10 @@ want-coderedemption true
 want-server-debugging false
 want-do-live-updates true
 want-delivery-manager false
-want-server-maintenance true
+want-server-maintenance false
 want-discord-integration true
 want-blacklist-warnings false
+want-parties false
 active-holidays 60, 61, 62, 63, 64, 65, 66
 buildings-server-data-folder backups/buildings
 whitelist-url http://cdn.toontown.disney.go.com/toontown/en/

@@ -17,6 +17,8 @@ class DistributedPartyManagerAI(DistributedObjectAI):
     def __init__(self, air):
         DistributedObjectAI.__init__(self, air)
 
+        self.wantParties = config.GetBool('want-parties', False)
+
         self.host2party = {}
         self.party2host = {}
         self.publicParties = {}
@@ -256,7 +258,7 @@ class DistributedPartyManagerAI(DistributedObjectAI):
         pass
 
     def canBuyParties(self):
-        return True
+        return self.wantParties
 
     def getPublicParties(self):
         publicPartiesList = []
