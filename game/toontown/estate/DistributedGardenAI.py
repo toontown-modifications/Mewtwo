@@ -16,7 +16,7 @@ class DistributedGardenAI(DistributedObjectAI):
         if not self.isValidProp(prop):
             return
 
-        self.d_sendNewProp(avId, prop, x, y, z)
+        self.d_sendNewProp(prop, x, y, z)
 
-    def d_sendNewProp(self, avId, prop, x, y, z):
+    def d_sendNewProp(self, prop, x, y, z):
         self.sendUpdate('sendNewProp', [prop, x, y, z])
