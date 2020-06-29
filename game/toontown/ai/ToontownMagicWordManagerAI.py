@@ -173,7 +173,7 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
 
         av.b_setBankMoney(av.getMaxBankMoney())
 
-    def d_setTeleportAccess(self, avId, zoneId):
+    def d_setTeleportAccess(self, avId):
         if avId not in self.air.doId2do:
             return
 
