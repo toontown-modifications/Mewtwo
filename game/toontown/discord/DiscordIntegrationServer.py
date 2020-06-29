@@ -1,55 +1,45 @@
 from direct.directnotify.DirectNotifyGlobal import directNotify
-from twisted.internet import reactor, protocol
-import _thread, json, base64
+import socket, _thread, json
 
-class DiscordIntegrationClient(protocol.Protocol):
-    def connectionMade(self):
-        self.server = self.factory
-
-        self.server.clients.append(self)
-
-    def dataReceived(self, data):
-        data = json.loads(data)
-
-        whatToDo = data['whatToDo']
-        signature = data['signature']
-        actualSignature = 'PleaseDoNotAbuseThisFunction'
-
-        if signature != actualSignature:
-            pass
-
-        if whatToDo == 'kickRequest':
-            avId = data['avId']
-            reason = data['reason']
-            simbase.air.extAgent.sendKick(avId, reason)
-        elif whatToDo == 'systemMessage':
-            message = data['message']
-            channels = simbase.air.extAgent.clientChannel2avId
-
-            for clientChannel in channels:
-                simbase.air.extAgent.sendSystemMessage(clientChannel, message)
-
-    def connectionLost(self, reason):
-        self.server.clients.remove(self)
-
-class DiscordIntegrationServer(protocol.ServerFactory):
-    protocol = DiscordIntegrationClient
-
+class DiscordIntegrationServer:
     notify = directNotify.newCategory('DiscordIntegrationServer')
     notify.setInfo(True)
 
     def __init__(self, air):
         self.air = air
 
-        self.clients = []
-
         self.startServer()
 
-    def setupTwisted(self):
-        reactor.listenTCP(7199, self)
-        reactor.run(installSignalHandlers = False)
+    def setupServer(self):
+        server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        server.bind(('0.0.0.0', 7199))
+        server.listen(10)
+
+        while True:
+            client, address = server.accept()
+            data = client.recv(4096)
+
+            data = json.loads(data)
+
+            whatToDo = data['whatToDo']
+            signature = data['signature']
+            actualSignature = 'PleaseDoNotAbuseThisFunction'
+
+            if signature != actualSignature:
+                self.notify.info('Invalid signature: {0}!'.format(signature))
+
+            if whatToDo == 'kickRequest':
+                avId = data['avId']
+                reason = data['reason']
+                simbase.air.extAgent.sendKick(avId, reason)
+            elif whatToDo == 'systemMessage':
+                message = data['message']
+                channels = simbase.air.extAgent.clientChannel2avId
+
+                for clientChannel in channels:
+                    simbase.air.extAgent.sendSystemMessage(clientChannel, message)
 
     def startServer(self):
-        thread = _thread.start_new_thread(self.setupTwisted, ())
+        thread = _thread.start_new_thread(self.setupServer, ())
 
-        self.notify.info('Successfully started twisted server.')
+        self.notify.info('Successfully started socket server.')
