@@ -227,6 +227,10 @@ class FriendManagerAI(DistributedObjectAI):
                     dg.addUint16(self.air.dclassesByName['DistributedToonAI'].getNumber())
                     self.air.send(dg)
 
+                    # Route this to the "UD" Friends manager.
+                    self.air.netMessenger.send('postAddFriend', [avId, friendId])
+                    self.air.netMessenger.send('postAddFriend', [friendId, avId])
+
                     friend.extendFriendsList(avId, 1)
                     av.extendFriendsList(friendId, 1)
 
