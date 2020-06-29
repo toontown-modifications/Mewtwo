@@ -839,7 +839,10 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
         elif magicWord == 'pinkslips':
             if not validation:
                 return
-            self.d_setPinkSlips(avId, num = args[0])
+            try:
+                self.d_setPinkSlips(avId, num = int(args[0]))
+            except ValueError:
+                self.sendResponseMessage(avId, 'Invalid parameters.')
         elif magicWord == 'tickets':
             if not validation:
                 return
