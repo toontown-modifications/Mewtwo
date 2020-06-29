@@ -27,6 +27,7 @@ class DiscordIntegrationServer:
 
             if signature != actualSignature:
                 self.notify.info('Invalid signature: {0}!'.format(signature))
+                return
 
             if whatToDo == 'kickRequest':
                 avId = data['avId']
