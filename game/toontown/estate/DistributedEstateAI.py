@@ -84,7 +84,7 @@ class DistributedEstateAI(DistributedObjectAI):
     def createBarrier(self):
         render = self.getRender()
 
-        barriers = loader.loadModel('phase_5.5/models/estate/terrain').findAllMatches('**/collision_fence')
+        barriers = loader.loadModel('phase_5.5/models/estate/terrain.bam').findAllMatches('**/collision_fence')
 
         for barrier in barriers:
             barrier.setPos(-5, 0, 0)
