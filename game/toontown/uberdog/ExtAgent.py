@@ -882,6 +882,9 @@ class ExtAgent:
                 for x, y in fields['setFriendsList'][0]:
                     self.friendsManager.comingOnline(avId, x)
 
+                # Tell the Party manager as well.
+                self.air.partyManager.avatarOnline(avId)
+
             def handleAccountRetrieve(dclass, fields):
                 if dclass != self.air.dclassesByName['AccountUD']:
                     # This is not an Account object.
