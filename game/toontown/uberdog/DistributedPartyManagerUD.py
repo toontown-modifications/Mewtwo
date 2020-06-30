@@ -32,6 +32,12 @@ class DistributedPartyManagerUD(DistributedObjectUD):
         # Register our channel so that we can receive field updates from AIs.
         self.air.registerForChannel(self.doId)
 
+        # Create the Parties backup folder if it doesn't exist already.
+        backupPath = 'backups/parties/'
+
+        if not os.path.exists(backupPath):
+            os.makedirs(backupPath)
+
         # Load our dicts.
         self.load()
 
@@ -43,7 +49,7 @@ class DistributedPartyManagerUD(DistributedObjectUD):
         DistributedObjectUD.delete(self)
 
     def load(self):
-        fileName = os.path.join('backups', 'party-manager.wackyfuntime')
+        fileName = os.path.join('backups/parties/', 'party-manager.wackyfuntime')
         if not os.path.exists(fileName):
             return
 
@@ -67,7 +73,7 @@ class DistributedPartyManagerUD(DistributedObjectUD):
 
     def save(self):
         # Save all our dicts to a file.
-        fileName = os.path.join('backups', 'party-manager.wackyfuntime')
+        fileName = os.path.join('backups/parties/', 'party-manager.wackyfuntime')
 
         partyData = {}
         partyData['partyDoIds'] = self.partyDoIds

@@ -92,7 +92,7 @@ class DistributedPartyManagerAI(DistributedObjectAI):
         # And that marks the end of parties. I fucking hate you all.
 
     def load(self):
-        fileName = os.path.join('backups', 'party-manager-%s.wackyfuntime' % self.doId)
+        fileName = os.path.join('backups/parties/', 'party-manager-%s.wackyfuntime' % self.doId)
         if not os.path.exists(fileName):
             return
 
@@ -125,7 +125,7 @@ class DistributedPartyManagerAI(DistributedObjectAI):
 
     def save(self):
         # Save all our dicts to a file.
-        fileName = os.path.join('backups', 'party-manager-%s.wackyfuntime' % self.doId)
+        fileName = os.path.join('backups/parties/', 'party-manager-%s.wackyfuntime' % self.doId)
 
         partyData = {}
         partyData['partyInfo'] = self.partyInfo
