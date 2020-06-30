@@ -1,6 +1,6 @@
 import time
 
-from direct.directnotify import DirectNotifyGlobal
+from direct.directnotify.DirectNotifyGlobal import directNotify
 from direct.distributed.DistributedObjectAI import DistributedObjectAI
 
 from game.toontown.estate import CannonGlobals
@@ -17,7 +17,7 @@ from game.toontown.safezone.ETreasurePlannerAI import ETreasurePlannerAI
 from game.toontown.toonbase import ToontownGlobals
 
 class DistributedEstateAI(DistributedObjectAI):
-    notify = DirectNotifyGlobal.directNotify.newCategory('DistributedEstateAI')
+    notify = directNotify.newCategory('DistributedEstateAI')
 
     def __init__(self, air):
         DistributedObjectAI.__init__(self, air)
@@ -78,8 +78,18 @@ class DistributedEstateAI(DistributedObjectAI):
         self.garden.generateWithRequired(self.zoneId)
         self.garden.sendNewProp(HouseGlobals.PROP_ICECUBE, 4.710, -86.550, 2.478)
 
-        # Start the collision loop:
-        taskMgr.add(self.__collisionLoop, self.uniqueName('collisionLoop'), sort=30)
+        self.createBarrier()
+        self.getZoneData().startCollTrav()
+
+    def createBarrier(self):
+        render = self.getRender()
+
+        barriers = loader.loadModel('phase_5.5/models/estate/terrain').findAllMatches('**/collision_fence')
+
+        for barrier in barriers:
+            barrier.setPos(-5, 0, 0)
+
+        barriers.reparentTo(render)
 
     def setEstateType(self, estateType):
         self.estateType = estateType
@@ -400,7 +410,6 @@ class DistributedEstateAI(DistributedObjectAI):
             self.garden = None
 
         taskMgr.remove(self.uniqueName('rentalExpire'))
-        taskMgr.remove(self.uniqueName('collisionLoop'))
         DistributedObjectAI.delete(self)
 
     def destroy(self):
@@ -410,18 +419,6 @@ class DistributedEstateAI(DistributedObjectAI):
 
         del self.houses[:]
         self.requestDelete()
-
-    def __collisionLoop(self, task):
-        if hasattr(self, 'pets'):
-            for pet in self.pets:
-                if not pet:
-                    continue
-
-                collTrav = pet.getCollTrav()
-                if collTrav:
-                    collTrav.traverse(self.getRender())
-
-        return task.cont
 
     def doEpochNow(self, onlyForThisToonIndex):
         avId = self.idList[onlyForThisToonIndex]

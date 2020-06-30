@@ -316,6 +316,7 @@ class LoadPetOperation(FSM):
     def __generated(self, pet):
         self.pet = pet
         self.estate.pets.append(pet)
+        self.estate.acceptOnce(self.mgr.air.getAvatarExitEvent(pet.getDoId()), lambda x: self.estate.pets.remove(x), extraArgs = [pet])
         self.demand('Off')
 
     def enterOff(self):
@@ -501,8 +502,8 @@ class EstateManagerAI(DistributedObjectAI):
             self.sendUpdateToAvatarId(friend.doId, 'sendAvToPlayground', [friend.doId, 1])
 
     def _unloadEstate(self, av):
-        if getattr(av, 'estate', None):
-            estate = av.estate
+        estate = getattr(av, 'estate', None)
+        if estate:
             if estate not in self.estate2timeout:
                 self.estate2timeout[estate] = taskMgr.doMethodLater(HouseGlobals.BOOT_GRACE_PERIOD, self._cleanupEstate,
                                                                     estate.uniqueName('unload-estate'),
@@ -519,7 +520,7 @@ class EstateManagerAI(DistributedObjectAI):
         if av and hasattr(av, 'exitEstate') and hasattr(av, 'isInEstate') and av.isInEstate():
             av.exitEstate()
 
-        if av and av.getPetId() != 0:
+        if av and av.getPetId() != 0 and self.air.doId2do.get(av.doId) and not estate:
             self.ignore(self.air.getAvatarExitEvent(av.getPetId()))
             pet = self.air.doId2do.get(av.getPetId())
             if pet:
@@ -583,15 +584,13 @@ class EstateManagerAI(DistributedObjectAI):
         if estate in self.estate2timeout:
             del self.estate2timeout[estate]
 
-        # Destroy estate and unmap from owner:
-        estate.destroy()
-        estate.owner.estate = None
-
         # Destroy pets:
         for pet in estate.pets:
             pet.requestDelete()
 
-        estate.pets = []
+        # Destroy estate and unmap from owner:
+        estate.destroy()
+        estate.owner.estate = None
 
         # Free estate's zone:
         self.air.deallocateZone(estate.zoneId)

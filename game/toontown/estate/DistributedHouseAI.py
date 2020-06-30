@@ -8,6 +8,7 @@ from game.toontown.estate.DistributedHouseDoorAI import DistributedHouseDoorAI
 from game.toontown.estate.DistributedHouseInteriorAI import DistributedHouseInteriorAI
 from game.toontown.estate.DistributedMailboxAI import DistributedMailboxAI
 from game.toontown.estate.GardenManagerAI import GardenManagerAI
+import HouseGlobals
 
 class DistributedHouseAI(DistributedObjectAI):
     notify = directNotify.newCategory('DistributedHouseAI')
@@ -62,6 +63,9 @@ class DistributedHouseAI(DistributedObjectAI):
         if self.avatarId:
             self.mailbox = DistributedMailboxAI(self.air, self)
             self.mailbox.generateWithRequired(self.zoneId)
+
+        # Load collisions for AI traverse.
+        self.loadHouse()
 
         # Send the house ready update:
         self.d_setHouseReady()
@@ -348,3 +352,16 @@ class DistributedHouseAI(DistributedObjectAI):
                 self.gardenManager.loadGarden(self.getAvatarId())
 
         self.air.dbInterface.queryObject(self.air.dbId, self.getAvatarId(), __gotOwner)
+
+    def loadHouse(self):
+        render = self.getRender()
+
+        house = loader.loadModel(HouseGlobals.houseModels[self.houseType]).find('**/collision_house')
+
+        posHpr = HouseGlobals.houseDrops[self.housePos]
+
+        house.reparentTo(render)
+
+        house.setPosHpr(*posHpr)
+
+        house.setZ(0)
