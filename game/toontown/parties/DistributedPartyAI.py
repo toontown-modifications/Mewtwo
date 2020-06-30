@@ -1,4 +1,4 @@
-from direct.directnotify import DirectNotifyGlobal
+from direct.directnotify.DirectNotifyGlobal import directNotify
 from direct.distributed.DistributedObjectAI import DistributedObjectAI
 
 from game.toontown.parties import PartyGlobals
@@ -24,14 +24,14 @@ from game.toontown.parties.DistributedPartyWinterCogActivityAI import Distribute
 from game.toontown.parties.DistributedPartyWinterTrampolineActivityAI import DistributedPartyWinterTrampolineActivityAI
 from game.toontown.parties.DistributedPartyVictoryTrampolineActivityAI import DistributedPartyVictoryTrampolineActivityAI
 
-
 class DistributedPartyAI(DistributedObjectAI):
-    notify = DirectNotifyGlobal.directNotify.newCategory('DistributedPartyAI')
+    notify = directNotify.newCategory('DistributedPartyAI')
 
     def __init__(self, air, hostId, zoneId, partyInfo):
         DistributedObjectAI.__init__(self, air)
         self.hostId = hostId
         self.zoneId = zoneId
+        self.partyId = partyInfo.partyId
         self.partyInfo = partyInfo
         self.partyClockInfo = (0, 0, 0)
         self.inviteeIds = []
@@ -190,6 +190,12 @@ class DistributedPartyAI(DistributedObjectAI):
         return self.hostName
 
     def avIdEnteredParty(self, avId):
+        realAvId = self.air.getAvatarIdFromSender()
+
+        if avId != realAvId:
+            self.air.writeServerEvent('suspicious', tissuekleenex = 'Avatar provided is not the same as the received avatar.', avId = realAvId)
+            return
+
         av = self.air.doId2do.get(avId)
         if not av:
             return
@@ -197,12 +203,23 @@ class DistributedPartyAI(DistributedObjectAI):
         if avId in self.avIdsAtParty:
             return
 
+        # Update the party manager's party info shit ( fan time ).
+        # (hit the power button during the meeting)
+        self.air.partyManager.addAvIdToParty(self.partyId, avId)
+        self.air.partyManager.partyInfo[self.partyId][5] += 1
+
         self.avIdsAtParty.append(avId)
         self.b_setAvIdsAtParty(self.avIdsAtParty)
         self.acceptOnce(av.getZoneChangeEvent(), self.avIdExitedParty, extraArgs=[avId])
         self.acceptOnce(self.air.getAvatarExitEvent(avId), self.__handleUnexpectedExit, extraArgs=[avId])
 
     def avIdExitedParty(self, avId, zoneId, oldZoneId):
+        realAvId = self.air.getAvatarIdFromSender()
+
+        if avId != realAvId:
+            self.air.writeServerEvent('suspicious', tissuekleenex = 'Avatar provided is not the same as the received avatar.', avId = realAvId)
+            return
+
         # We don't actually care about zoneId or oldZoneId, we only care about avId.
         av = self.air.doId2do.get(avId)
         if not av:
@@ -210,6 +227,9 @@ class DistributedPartyAI(DistributedObjectAI):
 
         if avId not in self.avIdsAtParty:
             return
+
+        # Update the party manager's party info shit.
+        self.air.partyManager.partyInfo[self.partyId][5] -= 1
 
         self.avIdsAtParty.remove(avId)
         self.b_setAvIdsAtParty(self.avIdsAtParty)

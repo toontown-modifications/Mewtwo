@@ -1,351 +1,446 @@
-from panda3d.core import UniqueIdAllocator
+import datetime
+import os
+from pickle import dump, load
 
 from direct.directnotify.DirectNotifyGlobal import directNotify
-from direct.distributed.DistributedObjectGlobalUD import DistributedObjectGlobalUD
+from direct.distributed.DistributedObjectUD import DistributedObjectUD
+from panda3d.core import UniqueIdAllocator
 
-from game.toontown.parties import PartyGlobals
+from game.toontown.parties.PartyGlobals import ChangePartyFieldErrorCode, getCostOfParty, PartyStatus
+from game.toontown.parties.PartyGlobals import InviteStatus
 from game.toontown.parties.PartyInfo import PartyInfoAI
 
-import datetime
-
-class DistributedPartyManagerUD(DistributedObjectGlobalUD):
+class DistributedPartyManagerUD(DistributedObjectUD):
     notify = directNotify.newCategory('DistributedPartyManagerUD')
 
     def __init__(self, air):
-        DistributedObjectGlobalUD.__init__(self, air)
+        DistributedObjectUD.__init__(self, air)
 
-        self.host2party = {}
-        self.publicParties = {}
         self.partyDoIds = set()
-
-        self.wantInstantParties = config.GetBool('want-instant-parties', True)
-        self.inviteKeyAllocator = UniqueIdAllocator(1, 65535)
+        self.hostId2partyInfo = {}
+        self.partyId2invites = {}
+        self.avId2invites = {}
+        self.avId2partiesInvitedTo = {}
+        self.avId2partyReplies = {}
+        self.avId2inviteKey = {}
+        self.partyId2inviteeIds = {}
+        self.inviteKeyAllocator = UniqueIdAllocator(0, 65535)
 
     def announceGenerate(self):
-        DistributedObjectGlobalUD.announceGenerate(self)
+        DistributedObjectUD.announceGenerate(self)
 
-        self.__startPartiesTask()
+        # Register our channel so that we can receive field updates from AIs.
+        self.air.registerForChannel(self.doId)
+
+        # Load our dicts.
+        self.load()
+
+        # Set up our scheduling task.
+        self.runSchedulingTask()
 
     def delete(self):
-        taskMgr.remove(self.uniqueName('parties-task'))
+        taskMgr.remove(self.uniqueName('check-start-parties'))
+        DistributedObjectUD.delete(self)
 
-        DistributedObjectGlobalUD.delete(self)
+    def load(self):
+        fileName = os.path.join('backups', 'party-manager.wackyfuntime')
+        if not os.path.exists(fileName):
+            return
 
-    def sendUpdateToAV(self, avId, field, args = []):
-        dg = self.air.dclassesByName['DistributedToonUD'].getFieldByName(field).aiFormatUpdate(avId, avId,
-                                                                                               simbase.air.ourChannel,
-                                                                                               args)
-        self.air.send(dg)
+        with open(fileName, 'rb') as f:
+            partyData = load(f)
 
-    def __startPartiesTask(self):
+        if not partyData:
+            # Don't load anything I guess something something fuck you?
+            return
+
+        self.partyDoIds = partyData['partyDoIds']
+        self.hostId2partyInfo = partyData['hostId2partyInfo']
+        self.partyId2invites = partyData['partyId2invites']
+        self.avId2invites = partyData['avId2invites']
+        self.avId2partiesInvitedTo = partyData['avId2partiesInvitedTo']
+        self.avId2partyReplies = partyData['avId2partyReplies']
+        self.avId2inviteKey = partyData['avId2inviteKey']
+        self.partyId2inviteeIds = partyData['partyId2inviteeIds']
+
+        self.notify.info('Successfully loaded party data from file')
+
+    def save(self):
+        # Save all our dicts to a file.
+        fileName = os.path.join('backups', 'party-manager.wackyfuntime')
+
+        partyData = {}
+        partyData['partyDoIds'] = self.partyDoIds
+        partyData['hostId2partyInfo'] = self.hostId2partyInfo
+        partyData['partyId2invites'] = self.partyId2invites
+        partyData['avId2invites'] = self.avId2invites
+        partyData['avId2partiesInvitedTo'] = self.avId2partiesInvitedTo
+        partyData['avId2partyReplies'] = self.avId2partyReplies
+        partyData['avId2inviteKey'] = self.avId2inviteKey
+        partyData['partyId2inviteeIds'] = self.partyId2inviteeIds
+
+        with open(fileName, 'wb+') as f:
+            dump(partyData, f)
+
+    def getSchedulingDelay(self):
         now = datetime.datetime.now(tz=self.air.toontownTimeManager.serverTimeZone)
+
+        # The delay in this case is the amount of seconds until we reach the next 5 minutes.
         delay = (60 - now.second) + 60 * (4 - (now.minute % 5))
-        taskMgr.doMethodLater(delay, self.__partiesTask, self.uniqueName('parties-task'))
 
-    def __partiesTask(self, task):
-        now = datetime.datetime.now(tz=self.air.toontownTimeManager.serverTimeZone)
-        for party in self.host2party.values():
-            partyInfo = party[1]
-            partyStruct = party[2]
-            partyId = partyInfo.partyId
+        return delay
+
+    def runSchedulingTask(self):
+        delay = self.getSchedulingDelay()
+        taskMgr.doMethodLater(delay, self.__checkStartParties, self.uniqueName('check-start-parties'))
+
+    def __checkStartParties(self, task):
+        for partyInfo in list(self.hostId2partyInfo.values()):
             hostId = partyInfo.hostId
-            if self.canStartParty(partyInfo) and partyInfo.status == PartyGlobals.PartyStatus.Pending:
-                partyInfo.status = PartyGlobals.PartyStatus.CanStart
-                self.sendUpdateToAV(hostId, 'setHostedParties', [[partyStruct]])
-                self.sendUpdateToAV(hostId, 'setPartyCanStart', [partyId])
-            elif self.isTooLate(partyInfo):
-                partyInfo.status = PartyGlobals.PartyStatus.NeverStarted
-                self.sendUpdateToAV(hostId, 'setHostedParties', [[partyStruct]])
+            if self.isTooLate(partyInfo):
+                partyInfo.status = PartyStatus.NeverStarted
+                partyInfoTuple = self.getPartyInfoTuple(partyInfo)
+                self.annihilateParty(hostId, partyInfo.partyId)
+                self.sendUpdateToAvatar(hostId, 'setHostedParties', [[partyInfoTuple]])
+            elif self.canStartParty(partyInfo) and partyInfo.status == PartyStatus.Pending:
+                # Start the party now.
+                partyInfo.status = PartyStatus.CanStart
+                partyInfoTuple = self.getPartyInfoTuple(partyInfo)
+                self.sendUpdateToAvatar(hostId, 'setHostedParties', [[partyInfoTuple]])
+                self.sendUpdateToAvatar(hostId, 'setPartyCanStart', [partyInfo.partyId])
 
-        task.delayTime = (60 - now.second) + 60 * (4 - (now.minute % 5))
+        task.delayTime = self.getSchedulingDelay()
         return task.again
 
     def canStartParty(self, partyInfo):
-        return self.wantInstantParties or partyInfo.startTime < datetime.datetime.now(
-            tz=self.air.toontownTimeManager.serverTimeZone)
+        if config.GetBool('want-instant-parties', True):
+            return True
+
+        now = datetime.datetime.now(tz=self.air.toontownTimeManager.serverTimeZone)
+        return partyInfo.startTime < now
 
     def isTooLate(self, partyInfo):
         now = datetime.datetime.now(tz=self.air.toontownTimeManager.serverTimeZone)
         delta = datetime.timedelta(minutes=15)
-        endStartable = partyInfo.startTime + delta
-        return endStartable > now
+        tooLate = partyInfo.startTime + delta
+        return now > tooLate
 
-    def addParty(self, hostId, partyDoId, startTime, endTime, isPrivate, inviteTheme, activities, decorations,
-                 inviteeIds, cost):
-        partyTimeFormat = '%Y-%m-%d %H:%M:%S'
-        startDate = datetime.datetime.strptime(startTime, partyTimeFormat)
-        endDate = datetime.datetime.strptime(endTime, partyTimeFormat)
-        party = self.host2party[hostId][1]
-        self.host2party[hostId][4] = self.inviteKeyAllocator.allocate()
-        if party:
-            self.sendUpdateToAI(partyDoId, 'addPartyResponseUdToAi',
-                                [self.host2party[hostId][0], PartyGlobals.AddPartyErrorCode.TooManyHostedParties,
-                                 self.host2party[hostId][4]])
-            return
+    def getPartyInfoTuple(self, partyInfo):
+        partyInfoTuple = (
+            partyInfo.partyId,
+            partyInfo.hostId,
+            partyInfo.startTime.year,
+            partyInfo.startTime.month,
+            partyInfo.startTime.day,
+            partyInfo.startTime.hour,
+            partyInfo.startTime.minute,
+            partyInfo.endTime.year,
+            partyInfo.endTime.month,
+            partyInfo.endTime.day,
+            partyInfo.endTime.hour,
+            partyInfo.endTime.minute,
+            partyInfo.isPrivate,
+            partyInfo.inviteTheme,
+            partyInfo.activityList,
+            partyInfo.decors,
+            partyInfo.status
+        )
+        return partyInfoTuple
 
-        partyInfo = PartyInfoAI(self.host2party[hostId][0], hostId, startDate.year, startDate.month, startDate.day,
-                                startDate.hour, startDate.minute, endDate.year, endDate.month, endDate.day,
-                                endDate.hour, endDate.minute, isPrivate, inviteTheme, activities, decorations,
-                                PartyGlobals.PartyStatus.Pending)
+    def addParty(self, hostId, partyId, startTime, endTime, isPrivate, inviteTheme, activities, decorations, inviteeIds,
+                 zoneId):
+        # Get the shitty ID of the fucking AI.
+        doId = self.air.getMsgSender()
 
-        partyStruct = [
-            self.host2party[hostId][0],
-            hostId,
-            startDate.year,
-            startDate.month,
-            startDate.day,
-            startDate.hour,
-            startDate.minute,
-            endDate.year,
-            endDate.month,
-            endDate.day,
-            endDate.hour,
-            endDate.minute,
-            isPrivate,
-            inviteTheme,
-            activities,
-            decorations,
-            PartyGlobals.PartyStatus.Pending
-        ]
+        # Get our time variables:
+        PARTY_TIME_FORMAT = '%Y-%m-%d %H:%M:%S'
+        startDateTime = datetime.datetime.strptime(startTime, PARTY_TIME_FORMAT)
+        startYear = startDateTime.year
+        startMonth = startDateTime.month
+        startDay = startDateTime.day
+        startHour = startDateTime.hour
+        startMinute = startDateTime.minute
+        endDateTime = datetime.datetime.strptime(endTime, PARTY_TIME_FORMAT)
+        endYear = endDateTime.year
+        endMonth = endDateTime.month
+        endDay = endDateTime.day
+        endHour = endDateTime.hour
+        endMinute = endDateTime.minute
 
-        self.host2party[hostId][1] = partyInfo
-        self.host2party[hostId][2] = partyStruct
-        self.host2party[hostId][3] = inviteeIds
+        # Create our PartyInfo.
+        partyInfo = PartyInfoAI(partyId, hostId, startYear, startMonth, startDay, startHour,
+                                startMinute, endYear, endMonth, endDay, endHour, endMinute,
+                                isPrivate, inviteTheme, activities, decorations, PartyStatus.Pending)
 
-        self.sendUpdateToAI(partyDoId, 'addPartyResponseUdToAi',
-                            [self.host2party[hostId][0], PartyGlobals.AddPartyErrorCode.AllOk,
-                             self.host2party[hostId][4]])
+        # Add the information to our dict.
+        self.hostId2partyInfo[hostId] = partyInfo
 
-        if self.wantInstantParties:
-            taskMgr.remove(self.uniqueName('parties-task'))
-            taskMgr.doMethodLater(15, self.__partiesTask, self.uniqueName('parties-task'))
+        # add the inviteeIds to partyId2inviteeIds because bernie can still win
+        self.partyId2inviteeIds[partyId] = inviteeIds
 
-    def markInviteAsReadButNotReplied(self, todo0, todo1):
+        # Calculate the cost of the party so that the AI can deduct USD.
+        cost = getCostOfParty(partyInfo)
+
+        # Tell the shitty AI.
+        self.sendUpdateToAI(doId, 'addPartyResponseUdToAi', [partyId, PartyStatus.Pending, cost])
+
+        # invite shit BWEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+        partyInfoTuple = self.getPartyInfoTuple(partyInfo)
+        partyReplies = []
+        partyReplyInfoBases = []
+        for inviteeId in inviteeIds:
+            partyReply = [inviteeId, InviteStatus.NotRead]
+            partyReplies.append(partyReply)
+
+            inviteKey = self.inviteKeyAllocator.allocate()
+            self.avId2inviteKey[inviteeId] = inviteKey
+            newInvite = [inviteKey, partyId, InviteStatus.NotRead, hostId]
+            invites = self.partyId2invites.get(partyId, [])
+            if newInvite not in invites:
+                invites.append(newInvite)
+
+            self.partyId2invites[partyId] = invites[:]
+
+            avId2invites = self.avId2invites.get(inviteeId, [])
+            if newInvite[0:3] not in avId2invites:
+                avId2invites.append(newInvite[0:3])
+
+            self.avId2invites[inviteeId] = avId2invites[:]
+
+            partiesInvitedTo = self.avId2partiesInvitedTo.get(inviteeId, [])
+            if partyInfoTuple not in partiesInvitedTo:
+                partiesInvitedTo.append(partyInfoTuple)
+
+            self.avId2partiesInvitedTo[inviteeId] = partiesInvitedTo[:]
+
+            # we need to send the goddamn fucking invites to the invitees.
+            # both the invites and the parties invited to because fuck you.
+            self.sendUpdateToAvatar(inviteeId, 'setInvites', [avId2invites])
+            self.sendUpdateToAvatar(inviteeId, 'setPartiesInvitedTo', [partiesInvitedTo])
+
+        partyReplyInfoBase = [partyId, partyReplies]
+        partyReplyInfoBases.append(partyReplyInfoBase)
+        self.avId2partyReplies[hostId] = partyReplyInfoBases
+
+        self.sendUpdateToAvatar(hostId, 'setHostedParties', [[partyInfoTuple]])
+        self.sendUpdateToAvatar(hostId, 'setPartyReplies', [partyReplyInfoBases])
+
+        # Save.
+        self.save()
+
+    def addPartyResponse(self, todo0, todo1):
         pass
 
-    def respondToInvite(self, partyDoId, avId, inviteKey, partyId, response):
-        inviteeIds = []
-        for partyIndices in self.host2party.values():
-            if partyIndices[0] == partyId:
-                inviteeIds = partyIndices[3]
+    def addPartyResponseUdToAi(self, todo0, todo1, todo2):
+        pass
+
+    def markInviteAsReadButNotReplied(self, senderId, inviteKey):
+        ourInvite = None
+        for invite in list(self.partyId2invites.values()):
+            if invite[0][0] == inviteKey:
+                ourInvite = invite[:]
                 break
 
+        ourInvite[0][2] = InviteStatus.ReadButNotReplied
+        self.partyId2invites[ourInvite[0][1]] = ourInvite[:]
+
+        ourAvId = None
+        ourAvIdInvite = None
+        for avId, inviteTuple in self.avId2invites.items():
+            if inviteTuple[0][0] == inviteKey:
+                ourAvId = avId
+                ourAvIdInvite = inviteTuple[:]
+                break
+
+        ourAvIdInvite[0][2] = InviteStatus.ReadButNotReplied
+        self.avId2invites[ourAvId] = ourAvIdInvite[:]
+
+        self.sendUpdateToAvatar(ourInvite[0][3], 'updateReply',
+                                [ourInvite[0][1], senderId, InviteStatus.ReadButNotReplied])
+
+        self.save()
+
+    def respondToInvite(self, senderId, todo1, todo2, inviteKey, status):
+        partyId = None
+        senderInvites = self.avId2invites.get(senderId)
+        if not senderInvites:
+            return
+
+        for senderInvite in senderInvites:
+            if senderInvite[0] == inviteKey:
+                partyId = senderInvite[1]
+                senderInvite[2] = status
+
+        self.avId2invites[senderId] = senderInvites[:]
+
+        if not partyId:
+            return
+
+        invites = self.partyId2invites.get(partyId)
+        if not invites:
+            return
+
+        hostId = None
+        for invite in invites:
+            if invite[0] == inviteKey:
+                hostId = invite[3]
+                invite[2] = status
+
+        self.partyId2invites[partyId] = invites[:]
+
+        if not hostId:
+            return
+
+        self.sendUpdateToAvatar(hostId, 'updateReply', [partyId, senderId, status])
+        self.save()
+
+    def respondToInviteResponse(self, todo0, todo1, todo2, todo3, todo4):
+        pass
+
+    def changePrivateRequestAiToUd(self, hostId, partyId, privateStatus):
+        doId = self.air.getMsgSender()
+
+        if hostId not in self.hostId2partyInfo:
+            # AI is sending us garbage.
+            return
+
+        # Change the actual party status.
+        self.hostId2partyInfo[hostId].isPrivate = privateStatus
+
+        self.sendUpdateToAI(doId, 'changePrivateResponseUdToAi', [
+            hostId,
+            partyId,
+            privateStatus,
+            ChangePartyFieldErrorCode.AllOk])
+
+        self.save()
+
+    def changePartyStatusRequestAiToUd(self, hostId, partyId, partyStatus):
+        doId = self.air.getMsgSender()
+
+        if hostId not in self.hostId2partyInfo:
+            # AI is sending us garbage.
+            return
+
+        # Change the actual party status.
+        self.hostId2partyInfo[hostId].status = partyStatus
+
+        if partyStatus == PartyStatus.Cancelled:
+            # Kill the party.
+            self.annihilateParty(hostId, partyId)
+
+        self.sendUpdateToAI(doId, 'changePartyStatusResponseUdToAi', [
+            hostId,
+            partyId,
+            partyStatus,
+            ChangePartyFieldErrorCode.AllOk])
+
+        self.save()
+
+    def partyInfoOfHostRequestAiToUd(self, hostId, avId):
+        # Get the shard ID.
+        doId = self.air.getMsgSender()
+
+        # Check to make sure the AI is requesting for information that exists.
+        if hostId not in self.hostId2partyInfo:
+            # We don't have information for this host ID...
+            self.sendUpdateToAI(doId, 'partyInfoOfHostFailedResponseUdToAi', [avId])
+            return
+
+        # Send the data to the AI.
+        self.sendUpdateToAI(doId, 'partyInfoOfHostResponseUdToAi',
+                            [self.getPartyInfoTuple(self.hostId2partyInfo[hostId]), [avId, hostId]])
+
+        self.hostId2partyInfo[hostId].status = PartyStatus.Started
+        self.save()
+
+        partyInfo = self.hostId2partyInfo.get(hostId)
+        if not partyInfo:
+            return
+
+        partyId = partyInfo.partyId
+        inviteeIds = self.partyId2inviteeIds.get(partyId)
         if not inviteeIds:
             return
 
-        if avId not in inviteeIds:
-            return
-
-        self.sendUpdateToAI(partyDoId, 'respondToInviteResponse',
-                            [avId, inviteKey, partyId, response, 0])
-
-    def changePrivateRequest(self, todo0, todo1):
-        pass
-
-    def changePrivateRequestAiToUd(self, hostId, partyId, newPrivateStatus):
-        party = self.host2party.get(hostId)
-        partyStruct = party[2]
-
-        if party is None:
-            self.changePrivateResponseUdToAi(hostId, partyId, newPrivateStatus,
-                                             PartyGlobals.ChangePartyFieldErrorCode.ValidationError)
-            return
-        if partyStruct[1] != hostId:
-            self.changePrivateResponseUdToAi(hostId, partyId, newPrivateStatus,
-                                             PartyGlobals.ChangePartyFieldErrorCode.ValidationError)
-            return
-        if partyStruct[16] not in (PartyGlobals.PartyStatus.CanStart, PartyGlobals.PartyStatus.Pending):
-            self.changePrivateResponseUdToAi(hostId, partyId, newPrivateStatus,
-                                             PartyGlobals.ChangePartyFieldErrorCode.AlreadyStarted)
-            return
-
-        partyStruct[12] = newPrivateStatus
-        self.host2party[hostId] = party
-
-        if partyId in self.publicParties.keys():
-            publicPartyInfo = self.publicParties[partyId]
-            minLeft = int((PartyGlobals.PARTY_DURATION - (datetime.datetime.now() - publicPartyInfo['started']).seconds) / 60)
-            self.updateToPublicPartyInfoUdToAllAi(publicPartyInfo['shardId'], publicPartyInfo['zoneId'], partyId,
-                                                  hostId, publicPartyInfo['numberOfGuests'],
-                                                  publicPartyInfo['hostName'], partyStruct[14], minLeft,
-                                                  partyStruct[12])
-
-        self.sendUpdateToAV(hostId, 'setHostedParties', [[partyStruct]])
-        self.changePrivateResponseUdToAi(hostId, partyId, newPrivateStatus,
-                                         PartyGlobals.ChangePartyFieldErrorCode.AllOk)
-
-    def changePrivateResponseUdToAi(self, hostId, partyId, newPrivateStatus, errorCode):
-        partyDoId = self.air.getMsgSender()
-        self.sendUpdateToAI(partyDoId, 'changePrivateResponseUdToAi', [hostId, partyId, newPrivateStatus, errorCode])
-
-    def changePrivateResponse(self, todo0, todo1, todo2):
-        pass
-
-    def changePartyStatusRequest(self, partyId, newPartyStatus):
-        pass
-
-    def changePartyStatusRequestAiToUd(self, hostId, partyId, newPartyStatus):
-        party = self.host2party.get(hostId)
-        partyStruct = party[2]
-
-        if party is None:
-            self.changePrivateResponseUdToAi(hostId, partyId, newPartyStatus,
-                                             PartyGlobals.ChangePartyFieldErrorCode.ValidationError)
-            return
-        if partyStruct[1] != hostId:
-            self.changePrivateResponseUdToAi(hostId, partyId, newPartyStatus,
-                                             PartyGlobals.ChangePartyFieldErrorCode.ValidationError)
-            return
-        if partyStruct[16] not in (PartyGlobals.PartyStatus.CanStart, PartyGlobals.PartyStatus.Pending):
-            self.changePrivateResponseUdToAi(hostId, partyId, newPartyStatus,
-                                             PartyGlobals.ChangePartyFieldErrorCode.AlreadyStarted)
-            return
-
-        partyStruct[16] = newPartyStatus
-        self.sendUpdateToAV(hostId, 'setHostedParties', [[partyStruct]])
-
-        beansRefunded = 0
-        if newPartyStatus == PartyGlobals.PartyStatus.Cancelled:
-            beansRefunded = PartyGlobals.getCostOfParty(party[1]) * PartyGlobals.PartyRefundPercentage
-            if hostId in self.host2party:
-                del self.host2party[hostId]
-        else:
-            self.host2party[hostId] = party
-            self.updateToPublicPartyInfoUdToAllAi(0, 0, 0, 0, 0, 0, 0, 0, 0)
-
-        self.changePartyStatusResponseUdToAi(partyId, newPartyStatus, PartyGlobals.ChangePartyFieldErrorCode.AllOk,
-                                             beansRefunded)
-        if newPartyStatus == PartyGlobals.PartyStatus.Cancelled:
-            self.partyHasFinishedUdToAllAi(partyId)
-
-    def changePartyStatusResponseUdToAi(self, partyId, newPartyStatus, errorCode, beansRefunded):
-        partyDoId = self.air.getMsgSender()
-        self.sendUpdateToAI(partyDoId, 'changePartyStatusResponseUdToAi', [partyId, newPartyStatus, errorCode, beansRefunded])
-
-    def changePartyStatusResponse(self, todo0, todo1, todo2, todo3):
-        pass
-
-    def partyInfoOfHostRequestAiToUd(self, partyDoId, hostId):
-        if hostId in self.host2party:
-            partyInfo = self.host2party[hostId][1]
-            if partyInfo.status == PartyGlobals.PartyStatus.CanStart:
-                partyStruct = self.host2party[hostId][2]
-                inviteeIds = self.host2party[hostId][3]
-                self.sendUpdateToAI(partyDoId, 'partyInfoOfHostResponseUdToAi', [partyStruct, inviteeIds])
-                return
-
-        partyId = self.host2party[hostId][1].partyId
-        party = self.publicParties[partyId]
-        zoneId = party['zoneId']
-
-        avId = self.air.getAvatarIdFromSender()
-        self.sendUpdateToAvatarId(avId, 'receivePartyZone', [hostId, partyId, zoneId])
-
-    def partyInfoOfHostFailedResponseUdToAi(self, todo0):
-        pass
+        for inviteeId in inviteeIds:
+            self.sendUpdateToAvatar(inviteeId, 'setPartyStatus', [partyId, self.hostId2partyInfo[hostId].status])
 
     def givePartyRefundResponse(self, todo0, todo1, todo2, todo3, todo4):
         pass
 
-    def freeZoneIdFromPlannedParty(self, avId, zoneId):
+    def freeZoneIdFromPlannedParty(self, todo0, todo1):
         pass
 
     def sendAvToPlayground(self, todo0, todo1):
         pass
 
-    def exitParty(self, zoneIdOfAv):
+    def exitParty(self, todo0):
         pass
 
-    def removeGuest(self, ownerId, avId):
+    def removeGuest(self, todo0, todo1):
         pass
 
-    def partyManagerAIStartingUp(self, todo0, todo1):
-        pass
+    def partyManagerAIStartingUp(self, shardId, doId):
+        self.partyDoIds.add(doId)
 
     def partyManagerAIGoingDown(self, todo0, todo1):
         pass
 
-    def partyHasStartedAiToUd(self, partyId, shardId, zoneId, hostId, hostName):
-        self.publicParties[partyId] = {
-            'shardId': shardId,
-            'zoneId': zoneId,
-            'hostId': hostId,
-            'numberOfGuests': 0,
-            'hostName': hostName,
-            'started': datetime.datetime.now()}
+    def partyHasStartedAiToUd(self, todo0, todo1, todo2, todo3, todo4):
+        pass
 
-        party = self.host2party.get(hostId)
-        partyStruct = party[2]
-        minLeft = int((PartyGlobals.PARTY_DURATION - (datetime.datetime.now() - self.publicParties[partyId]['started']).seconds) / 60)
-        self.updateToPublicPartyInfoUdToAllAi(shardId, zoneId, partyId, hostId, 0, hostName, partyStruct[14], minLeft,
-                                              partyStruct[12])
-        party[1].status = PartyGlobals.PartyStatus.Started
-
-    def toonHasEnteredPartyAiToUd(self, avId, partyId, gateId):
-        if partyId not in self.publicParties:
-            return
-
-        party = self.publicParties[partyId]
-        if party['numberOfGuests'] >= PartyGlobals.MaxToonsAtAParty:
-            return
-
-        party['numberOfGuests'] += 1
-        shardId = party['shardId']
-        zoneId = party['zoneId']
-        hostId = party['hostId']
-        hostName = party['hostName']
-        minLeft = int((PartyGlobals.PARTY_DURATION - (datetime.datetime.now() - party['started']).seconds) / 60)
-        partyStruct = self.host2party.get(hostId)[2]
-        self.updateToPublicPartyInfoUdToAllAi(shardId, zoneId, partyId, hostId, 0, hostName, partyStruct[14], minLeft,
-                                              partyStruct[12])
-
-        actIds = []
-        for activity in partyStruct[14]:
-            actIds.append(activity[0])
-        partyInfoTuple = [party['shardId'], party['zoneId'], party['numberOfGuests'], party['hostName'], actIds, 0]
-
-        self.toonHasEnteredPartyUdToAI(avId, gateId, partyInfoTuple)
-
-    def toonHasEnteredPartyUdToAI(self, avId, gateId, partyInfoTuple):
-        partyDoId = self.air.getMsgSender()
-
-        self.sendUpdateToAI(partyDoId, 'toonHasEnteredPartyUdToAI', [avId, gateId, partyInfoTuple])
+    def toonHasEnteredPartyAiToUd(self, todo0):
+        pass
 
     def toonHasExitedPartyAiToUd(self, todo0):
         pass
 
-    def partyHasFinishedUdToAllAi(self, partyId):
-        self.sendUpdateToAllAI('partyHasFinishedUdToAllAi', [partyId])
+    def partyHasFinishedUdToAllAi(self, todo0):
+        pass
 
-    def updateToPublicPartyInfoUdToAllAi(self, shardId, zoneId, partyId, hostId, numberOfGuests, hostName, activityIds,
-                                         minLeft, isPrivate):
-        actIds = []
-        for activity in activityIds:
-            actIds.append(activity[0])
-        self.sendUpdateToAllAI('updateToPublicPartyInfoUdToAllAi', [hostId, partyId, shardId, zoneId, numberOfGuests,
-                                                                    isPrivate, hostName, actIds, minLeft])
+    def updateToPublicPartyInfoUdToAllAi(self, todo0, todo1, todo2, todo3, todo4, todo5, todo6, todo7, todo8):
+        pass
+
     def updateToPublicPartyCountUdToAllAi(self, todo0, todo1):
         pass
 
-    def requestShardIdZoneIdForHostId(self, hostId):
-        partyId = self.host2party[hostId][1].partyId
-        party = self.publicParties[partyId]
-        shardId = party['shardId']
-        zoneId = party['zoneId']
-        self.sendShardIdZoneIdToAvatar(shardId, zoneId)
+    def requestShardIdZoneIdForHostId(self, todo0):
+        pass
 
-    def sendShardIdZoneIdToAvatar(self, shardId, zoneId):
-        avId = self.air.getAvatarIdFromSender()
-        self.sendUpdateToAvatarId(avId, 'sendShardIdZoneIdToAvatar', [shardId, zoneId])
+    def sendShardIdZoneIdToAvatar(self, todo0, todo1):
+        pass
 
     def partyManagerUdStartingUp(self):
         pass
 
-    def updateAllPartyInfoToUd(self, hostId, partyId, todo2, todo3, todo4, todo5, todo6, todo7, todo8):
-        if hostId not in self.host2party:
-            sender = self.air.getMsgSender()
-            self.partyDoIds.add(sender)
-            self.host2party[hostId] = [partyId, None, None, None, None]
+    def updateAllPartyInfoToUd(self, hostId, partyId, zoneId, minLeft, status, numberOfGuests, hostName, activityIds,
+                               shardId):
+        if not minLeft:
+            # Kill the party.
+            self.annihilateParty(hostId, partyId)
+            return
+
+        self.sendUpdateToAllAI('updateToPublicPartyInfoUdToAllAi',
+                               [hostId, partyId, zoneId, minLeft, status, numberOfGuests, hostName, activityIds,
+                                shardId])
+
+    def annihilateParty(self, hostId, partyId):
+        # We don't want to update the public party info, rather we want to delete
+        # our own information of this party and tell every AI to delete theirs.
+        # First, remove the party from our own dicts.
+        if hostId in self.hostId2partyInfo:
+            del self.hostId2partyInfo[hostId]
+        if partyId in self.partyId2invites:
+            del self.partyId2invites[partyId]
+        if partyId in self.partyId2inviteeIds:
+            del self.partyId2inviteeIds[partyId]
+
+        # Tell each AI to delete this party from their dict(s).
+        self.sendUpdateToAllAI('partyHasFinishedUdToAllAi', [hostId])
+
+        # Finally, save.
+        self.save()
 
     def forceCheckStart(self):
         pass
@@ -356,10 +451,68 @@ class DistributedPartyManagerUD(DistributedObjectGlobalUD):
     def mwResponseUdToAllAi(self, todo0, todo1, todo2, todo3):
         pass
 
-    def sendUpdateToAI(self, doId, field, args = []):
+    def sendUpdateToAI(self, doId, field, args=[]):
         dg = self.dclass.aiFormatUpdate(field, doId, doId, self.doId, args)
         self.air.send(dg)
 
-    def sendUpdateToAllAI(self, field, args = []):
+    def sendUpdateToAllAI(self, field, args=[]):
         for partyDoId in self.partyDoIds:
             self.sendUpdateToAI(partyDoId, field, args)
+
+    def sendUpdateToAvatar(self, avId, field, args=[]):
+        dg = self.air.dclassesByName['DistributedToonUD'].getFieldByName(field).aiFormatUpdate(avId, avId,
+                                                                                               simbase.air.ourChannel,
+                                                                                               args)
+        self.air.send(dg)
+
+    def avatarOnline(self, avId):
+        partyInfo = self.hostId2partyInfo.get(avId)
+        if partyInfo:
+            partyInfoTuple = self.getPartyInfoTuple(partyInfo)
+            self.sendUpdateToAvatar(avId, 'setHostedParties', [[partyInfoTuple]])
+            if partyInfo.status == PartyStatus.CanStart:
+                self.sendUpdateToAvatar(avId, 'setPartyCanStart', [partyInfo.partyId])
+
+        avId2invites = self.avId2invites.get(avId)
+        if avId2invites:
+            self.sendUpdateToAvatar(avId, 'setInvites', [avId2invites])
+
+        partiesInvitedTo = self.avId2partiesInvitedTo.get(avId)
+        if partiesInvitedTo:
+            self.sendUpdateToAvatar(avId, 'setPartiesInvitedTo', [partiesInvitedTo])
+
+        partyReplies = self.avId2partyReplies.get(avId)
+        if partyReplies:
+            self.sendUpdateToAvatar(avId, 'setPartyReplies', [partyReplies])
+
+        if partyInfo:
+            invites = self.partyId2invites.get(partyInfo.partyId)
+            inviteeIds = self.partyId2inviteeIds.get(partyInfo.partyId)
+            for inviteeId in inviteeIds:
+                inviteKey = self.avId2inviteKey.get(inviteeId, -1)
+                if inviteKey < 0:
+                    continue
+
+                for invite in invites:
+                    if invite[0] == inviteKey:
+                        self.sendUpdateToAvatar(avId, 'updateReply', [partyInfo.partyId, inviteeId, invite[2]])
+
+        partyIds = []
+        for partyId, inviteeIds in self.partyId2inviteeIds.items():
+            for inviteeId in inviteeIds:
+                if inviteeId == avId:
+                    partyIds.append(partyId)
+                    break
+
+        parties = []
+        for partyId in partyIds:
+            for partyInfo in list(self.hostId2partyInfo.values()):
+                if partyInfo.partyId == partyId:
+                    parties.append(partyInfo)
+                    break
+
+        for party in parties:
+            taskMgr.doMethodLater(5,
+                                  lambda x: self.sendUpdateToAvatar(avId, 'setPartyStatus',
+                                                                    [party.partyId, party.status]),
+                                  self.uniqueName('set-party-status-%s' % avId), appendTask=False)

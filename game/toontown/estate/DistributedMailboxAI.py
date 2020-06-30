@@ -2,7 +2,7 @@ from direct.directnotify.DirectNotifyGlobal import directNotify
 from direct.distributed.DistributedObjectAI import DistributedObjectAI
 
 from game.toontown.estate import MailboxGlobals
-from game.toontown.parties import PartyGlobals
+from game.toontown.parties.PartyGlobals import InviteStatus
 from game.toontown.toonbase import ToontownGlobals
 
 class DistributedMailboxAI(DistributedObjectAI):
@@ -60,7 +60,7 @@ class DistributedMailboxAI(DistributedObjectAI):
         if not av:
             return
 
-        if len(av.mailboxContents) + av.getNumInvitesToShowInMailbox():
+        if len(av.mailboxContents) != 0 or av.numMailItems or av.getNumInvitesToShowInMailbox() or len(av.awardMailboxContents) != 0:
             self.d_setMovie(MailboxGlobals.MAILBOX_MOVIE_READY, avId)
             self.user = avId
             self.busy = True
@@ -126,29 +126,49 @@ class DistributedMailboxAI(DistributedObjectAI):
 
     def acceptInviteMessage(self, context, inviteKey):
         avId = self.air.getAvatarIdFromSender()
-        if not avId:
+        if avId != self.user:
             return
 
-        self.air.partyManager.d_respondToInvite(avId, PartyGlobals.InviteStatus.Accepted, context, inviteKey)
+        av = self.air.doId2do.get(avId)
+        if not av:
+            return
+
+        av.updateInvite(inviteKey, InviteStatus.Accepted)
+        av.sendUpdate('setInvites', [av.invites[:]])
+        self.air.partyManager.sendRespondToInvite(avId, 0, 0, inviteKey, InviteStatus.Accepted)
+        self.sendUpdateToAvatarId(avId, 'acceptItemResponse', [context, ToontownGlobals.P_ItemAvailable])
 
     def rejectInviteMessage(self, context, inviteKey):
         avId = self.air.getAvatarIdFromSender()
-        if not avId:
+        if avId != self.user:
             return
 
-        self.air.partyManager.d_respondToInvite(avId, PartyGlobals.InviteStatus.Rejected, context, inviteKey)
+        av = self.air.doId2do.get(avId)
+        if not av:
+            return
+
+        av.updateInvite(inviteKey, InviteStatus.Rejected)
+        av.sendUpdate('setInvites', [av.invites[:]])
+        self.air.partyManager.sendRespondToInvite(avId, 0, 0, inviteKey, InviteStatus.Rejected)
+        self.sendUpdateToAvatarId(avId, 'discardItemResponse', [context, ToontownGlobals.P_ItemAvailable])
 
     def markInviteReadButNotReplied(self, inviteKey):
         avId = self.air.getAvatarIdFromSender()
-        if not avId:
+        if avId != self.user:
             return
 
-        self.air.partyManager.d_respondToInvite(avId, PartyGlobals.InviteStatus.ReadButNotReplied, 0, inviteKey)
+        av = self.air.doId2do.get(avId)
+        if not av:
+            return
+
+        av.updateInvite(inviteKey, InviteStatus.ReadButNotReplied)
+        av.sendUpdate('setInvites', [av.invites[:]])
+        self.air.partyManager.sendMarkInviteAsReadButNotReplied(avId, inviteKey)
 
     def updateIndicatorFlag(self):
         av = self.air.doId2do.get(self.house.avatarId)
         if av:
-            self.b_setFullIndicator(len(av.mailboxContents) + av.getNumInvitesToShowInMailbox())
+            self.b_setFullIndicator(len(av.mailboxContents) != 0 or av.numMailItems or av.getNumInvitesToShowInMailbox() or len(av.awardMailboxContents) != 0)
         else:
             self.b_setFullIndicator(0)
 

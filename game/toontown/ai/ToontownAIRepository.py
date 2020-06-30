@@ -97,6 +97,7 @@ class ToontownAIRepository(ToontownInternalRepository):
         self.dnaDataMap = {}
         self.suitPlanners = {}
         self.buildingManagers = {}
+        self.partyGates = []
 
         # What we want to have on the server:
         self.wantCogdominiums = config.GetBool('want-cogdominiums', False)
@@ -582,6 +583,7 @@ class ToontownAIRepository(ToontownInternalRepository):
             partyHat = DistributedPartyGateAI(self)
             partyHat.generateWithRequired(zoneId)
             partyHats.append(partyHat)
+            self.partyGates.append(partyHat)
 
         for i in xrange(dnaData.getNumChildren()):
             foundPartyHats = self.findPartyHats(dnaData.at(i), zoneId)
