@@ -249,17 +249,13 @@ class DistributedToonAI(DistributedPlayerAI.DistributedPlayerAI, DistributedSmoo
         self.startPing()
 
         if config.GetBool('want-randomized-hats', False):
-            from game.toontown.toon.DistributedNPCToonBaseAI import DistributedNPCToonBaseAI
-
-            if not isinstance(self, DistributedNPCToonBaseAI):
+            if self.isPlayerControlled():
                 self.b_setHat(random.randint(0, 56), 0, 0)
 
     def setLocation(self, parentId, zoneId):
         DistributedPlayerAI.DistributedPlayerAI.setLocation(self, parentId, zoneId)
 
-        from game.toontown.toon.DistributedNPCToonBaseAI import DistributedNPCToonBaseAI
-
-        if not isinstance(self, DistributedNPCToonBaseAI):
+        if self.isPlayerControlled():
             if 100 <= zoneId < ToontownGlobals.DynamicZonesBegin:
                 hood = ZoneUtil.getHoodId(zoneId)
 
