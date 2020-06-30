@@ -1,12 +1,16 @@
+# uncompyle6 version 3.7.1
+# Python bytecode 2.4 (62061)
+# Decompiled from: Python 2.7.16 (v2.7.16:413a49145e, Mar  4 2019, 01:37:19) [MSC v.1500 64 bit (AMD64)]
+# Embedded file name: toontown.catalog.CatalogNametagItem
 import CatalogItem
-from game.toontown.toonbase import ToontownGlobals
-from game.toontown.toonbase import TTLocalizer
-from game.otp.otpbase import OTPLocalizer
+from toontown.toonbase import ToontownGlobals
+from toontown.toonbase import TTLocalizer
+from otp.otpbase import OTPLocalizer
 from direct.interval.IntervalGlobal import *
 from direct.gui.DirectGui import *
 
-
 class CatalogNametagItem(CatalogItem.CatalogItem):
+    __module__ = __name__
     sequenceNumber = 0
 
     def makeNewItem(self, nametagStyle):
@@ -17,18 +21,15 @@ class CatalogNametagItem(CatalogItem.CatalogItem):
         return 1
 
     def reachedPurchaseLimit(self, avatar):
-        if self in avatar.onOrder and self in avatar.mailboxContents and self in avatar.onGiftOrder and self in avatar.awardMailboxContents or self in avatar.onAwardOrder:
+        if self in avatar.onOrder or self in avatar.mailboxContents or self in avatar.onGiftOrder or self in avatar.awardMailboxContents or self in avatar.onAwardOrder:
             return 1
-
         if avatar.nametagStyle == self.nametagStyle:
             return 1
-
         return 0
 
     def getAcceptItemErrorText(self, retcode):
         if retcode == ToontownGlobals.P_ItemAvailable:
             return TTLocalizer.CatalogAcceptNametag
-
         return CatalogItem.CatalogItem.getAcceptItemErrorText(self, retcode)
 
     def saveHistory(self):
@@ -57,7 +58,6 @@ class CatalogNametagItem(CatalogItem.CatalogItem):
     def recordPurchase(self, avatar, optional):
         if avatar:
             avatar.b_setNametagStyle(self.nametagStyle)
-
         return ToontownGlobals.P_ItemAvailable
 
     def getPicture(self, avatar):
@@ -66,21 +66,19 @@ class CatalogNametagItem(CatalogItem.CatalogItem):
             inFont = ToontownGlobals.getToonFont()
         else:
             inFont = ToontownGlobals.getNametagFont(self.nametagStyle)
-        nameTagDemo = DirectLabel(parent=frame,
-                                  relief=None,
-                                  pos=(0, 0, 0.23999999999999999),
-                                  scale=0.5,
-                                  text=localAvatar.getName(),
-                                  text_fg=(1.0, 1.0, 1.0, 1),
-                                  text_shadow=(0, 0, 0, 1),
-                                  text_font=inFont,
-                                  text_wordwrap=9)
+        nameTagDemo = DirectLabel(parent=frame, relief=None, pos=(0, 0, 0.24), scale=0.5, text=localAvatar.getName(), text_fg=(1.0,
+                                                                                                                               1.0,
+                                                                                                                               1.0,
+                                                                                                                               1), text_shadow=(0,
+                                                                                                                                                0,
+                                                                                                                                                0,
+                                                                                                                                                1), text_font=inFont, text_wordwrap=9)
         self.hasPicture = True
-        return (frame, None)
+        return (
+         frame, None)
 
     def output(self, store=-1):
-        return 'CatalogNametagItem(%s%s)' % (self.nametagStyle,
-                                             self.formatOptionalData(store))
+        return 'CatalogNametagItem(%s%s)' % (self.nametagStyle, self.formatOptionalData(store))
 
     def compareTo(self, other):
         return self.nametagStyle - other.nametagStyle
@@ -99,7 +97,6 @@ class CatalogNametagItem(CatalogItem.CatalogItem):
             cost = 600
         elif self.nametagStyle == 100:
             cost = 50
-
         return cost
 
     def decodeDatagram(self, di, versionNumber, store):

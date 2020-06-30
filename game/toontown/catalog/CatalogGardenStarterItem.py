@@ -1,14 +1,18 @@
-import CatalogItem
-import time
-from game.toontown.toonbase import ToontownGlobals
-from game.toontown.toonbase import TTLocalizer
-from game.otp.otpbase import OTPLocalizer
+# uncompyle6 version 3.7.1
+# Python bytecode 2.4 (62061)
+# Decompiled from: Python 2.7.16 (v2.7.16:413a49145e, Mar  4 2019, 01:37:19) [MSC v.1500 64 bit (AMD64)]
+# Embedded file name: toontown.catalog.CatalogGardenStarterItem
+import CatalogItem, time
+from toontown.toonbase import ToontownGlobals
+from toontown.toonbase import TTLocalizer
+from otp.otpbase import OTPLocalizer
 from direct.interval.IntervalGlobal import *
-from game.toontown.toontowngui import TTDialog
-from game.toontown.estate import GardenTutorial
-
+from toontown.toontowngui import TTDialog
+from toontown.estate import GardenTutorial
 
 class CatalogGardenStarterItem(CatalogItem.CatalogItem):
+    __module__ = __name__
+
     def makeNewItem(self):
         CatalogItem.CatalogItem.makeNewItem(self)
 
@@ -16,13 +20,8 @@ class CatalogGardenStarterItem(CatalogItem.CatalogItem):
         return 0
 
     def reachedPurchaseLimit(self, avatar):
-        if (self in avatar.onOrder and self in avatar.mailboxContents
-                and self in avatar.onGiftOrder
-                and self in avatar.awardMailboxContents
-                and self in avatar.onAwardOrder or hasattr(
-                    avatar, 'gardenStarted')) and avatar.getGardenStarted():
+        if self in avatar.onOrder or self in avatar.mailboxContents or self in avatar.onGiftOrder or self in avatar.awardMailboxContents or self in avatar.onAwardOrder or hasattr(avatar, 'gardenStarted') and avatar.getGardenStarted():
             return 1
-
         return 0
 
     def saveHistory(self):
@@ -44,7 +43,6 @@ class CatalogGardenStarterItem(CatalogItem.CatalogItem):
                 estate.placeStarterGarden(avatar.doId)
             else:
                 print 'starter garden-- something not there'
-
         return ToontownGlobals.P_ItemAvailable
 
     def getPicture(self, avatar):
@@ -55,7 +53,7 @@ class CatalogGardenStarterItem(CatalogItem.CatalogItem):
         roll = 0
         spin = 1
         down = -1
-        modelParent = loader.loadModel('phase_5.5/models/estate/watering_cans')
+        modelParent = loader.loadModelCopy('phase_5.5/models/estate/watering_cans')
         model = modelParent.find('**/water_canA')
         scale = 0.5
         heading = 45
@@ -89,12 +87,7 @@ class CatalogGardenStarterItem(CatalogItem.CatalogItem):
         return 0
 
     def acceptItem(self, mailbox, index, callback):
-        self.confirmGarden = TTDialog.TTGlobalDialog(
-            doneEvent='confirmGarden',
-            message=TTLocalizer.MessageConfirmGarden,
-            command=Functor(self.handleGardenConfirm, mailbox, index,
-                            callback),
-            style=TTDialog.TwoChoice)
+        self.confirmGarden = TTDialog.TTGlobalDialog(doneEvent='confirmGarden', message=TTLocalizer.MessageConfirmGarden, command=Functor(self.handleGardenConfirm, mailbox, index, callback), style=TTDialog.TwoChoice)
         self.confirmGarden.show()
 
     def handleGardenConfirm(self, mailbox, index, callback, choice):
@@ -103,15 +96,15 @@ class CatalogGardenStarterItem(CatalogItem.CatalogItem):
             def handleTutorialDone():
                 self.gardenTutorial.destroy()
                 self.gardenTutorial = None
+                return
 
-            self.gardenTutorial = GardenTutorial.GardenTutorial(
-                callback=handleTutorialDone)
+            self.gardenTutorial = GardenTutorial.GardenTutorial(callback=handleTutorialDone)
             if hasattr(mailbox, 'mailboxGui') and mailbox.mailboxGui:
                 mailbox.acceptItem(self, index, callback)
                 mailbox.mailboxGui.justExit()
-
         else:
             callback(ToontownGlobals.P_UserCancelled, self, index)
         if self.confirmGarden:
             self.confirmGarden.cleanup()
             self.confirmGarden = None
+        return

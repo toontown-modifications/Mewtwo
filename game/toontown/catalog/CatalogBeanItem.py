@@ -1,11 +1,15 @@
+# uncompyle6 version 3.7.1
+# Python bytecode 2.4 (62061)
+# Decompiled from: Python 2.7.16 (v2.7.16:413a49145e, Mar  4 2019, 01:37:19) [MSC v.1500 64 bit (AMD64)]
+# Embedded file name: toontown.catalog.CatalogBeanItem
 import CatalogItem
-from game.toontown.toonbase import ToontownGlobals
-from game.toontown.toonbase import TTLocalizer
-from game.otp.otpbase import OTPLocalizer
+from toontown.toonbase import ToontownGlobals
+from toontown.toonbase import TTLocalizer
+from otp.otpbase import OTPLocalizer
 from direct.interval.IntervalGlobal import *
 
-
 class CatalogBeanItem(CatalogItem.CatalogItem):
+    __module__ = __name__
     sequenceNumber = 0
 
     def makeNewItem(self, beanAmount, tagCode=1):
@@ -17,20 +21,16 @@ class CatalogBeanItem(CatalogItem.CatalogItem):
         return 0
 
     def reachedPurchaseLimit(self, avatar):
-        if self in avatar.onOrder and self in avatar.mailboxContents and self in avatar.onGiftOrder and self in avatar.awardMailboxContents or self in avatar.onAwardOrder:
+        if self in avatar.onOrder or self in avatar.mailboxContents or self in avatar.onGiftOrder or self in avatar.awardMailboxContents or self in avatar.onAwardOrder:
             return 1
-
         return 0
 
     def getAcceptItemErrorText(self, retcode):
         if retcode == ToontownGlobals.P_ItemAvailable:
             if self.giftCode == ToontownGlobals.GIFT_RAT:
                 return TTLocalizer.CatalogAcceptRATBeans
-            elif self.giftCode == ToontownGlobals.GIFT_partyrefund:
-                return TTLocalizer.CatalogAcceptPartyRefund
             else:
                 return TTLocalizer.CatalogAcceptBeans
-
         return CatalogItem.CatalogItem.getAcceptItemErrorText(self, retcode)
 
     def saveHistory(self):
@@ -46,7 +46,6 @@ class CatalogBeanItem(CatalogItem.CatalogItem):
     def recordPurchase(self, avatar, optional):
         if avatar:
             avatar.addMoney(self.beanAmount)
-
         return ToontownGlobals.P_ItemAvailable
 
     def getPicture(self, avatar):
@@ -56,11 +55,11 @@ class CatalogBeanItem(CatalogItem.CatalogItem):
         beanJar.setPos(0, 0, 0)
         beanJar.setScale(2.5)
         self.hasPicture = True
-        return (frame, None)
+        return (
+         frame, None)
 
     def output(self, store=-1):
-        return 'CatalogBeanItem(%s%s)' % (self.beanAmount,
-                                          self.formatOptionalData(store))
+        return 'CatalogBeanItem(%s%s)' % (self.beanAmount, self.formatOptionalData(store))
 
     def compareTo(self, other):
         return self.beanAmount - other.beanAmount

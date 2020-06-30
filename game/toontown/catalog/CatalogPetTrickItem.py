@@ -1,12 +1,16 @@
+# uncompyle6 version 3.7.1
+# Python bytecode 2.4 (62061)
+# Decompiled from: Python 2.7.16 (v2.7.16:413a49145e, Mar  4 2019, 01:37:19) [MSC v.1500 64 bit (AMD64)]
+# Embedded file name: toontown.catalog.CatalogPetTrickItem
 import CatalogItem
-from game.toontown.pets import PetTricks
-from game.toontown.toonbase import ToontownGlobals
-from game.toontown.toonbase import TTLocalizer
-from game.otp.otpbase import OTPLocalizer
+from toontown.pets import PetTricks
+from toontown.toonbase import ToontownGlobals
+from toontown.toonbase import TTLocalizer
+from otp.otpbase import OTPLocalizer
 from direct.interval.IntervalGlobal import *
 
-
 class CatalogPetTrickItem(CatalogItem.CatalogItem):
+    __module__ = __name__
     sequenceNumber = 0
     petPicture = None
 
@@ -18,15 +22,13 @@ class CatalogPetTrickItem(CatalogItem.CatalogItem):
         return 1
 
     def reachedPurchaseLimit(self, avatar):
-        if self in avatar.onOrder and self in avatar.mailboxContents and self in avatar.onGiftOrder and self in avatar.awardMailboxContents or self in avatar.onAwardOrder:
+        if self in avatar.onOrder or self in avatar.mailboxContents or self in avatar.onGiftOrder or self in avatar.awardMailboxContents or self in avatar.onAwardOrder:
             return 1
-
         return self.trickId in avatar.petTrickPhrases
 
     def getAcceptItemErrorText(self, retcode):
         if retcode == ToontownGlobals.P_ItemAvailable:
             return TTLocalizer.CatalogAcceptPet
-
         return CatalogItem.CatalogItem.getAcceptItemErrorText(self, retcode)
 
     def saveHistory(self):
@@ -45,14 +47,11 @@ class CatalogPetTrickItem(CatalogItem.CatalogItem):
         return ToontownGlobals.P_ItemAvailable
 
     def getPicture(self, avatar):
-        PetDNA = PetDNA
-        Pet = Pet
-        import toontown.pets
+        from toontown.pets import PetDNA, Pet
         pet = Pet.Pet(forGui=1)
         dna = avatar.petDNA
-        if dna is None:
+        if dna == None:
             dna = PetDNA.getRandomPetDNA()
-
         pet.setDNA(dna)
         pet.setH(180)
         (model, ival) = self.makeFrameModel(pet, 0)
@@ -61,25 +60,24 @@ class CatalogPetTrickItem(CatalogItem.CatalogItem):
         track = PetTricks.getTrickIval(pet, self.trickId)
         name = 'petTrick-item-%s' % self.sequenceNumber
         CatalogPetTrickItem.sequenceNumber += 1
-        if track is not None:
-            track = Sequence(Sequence(track),
-                             ActorInterval(pet, 'neutral', duration=2),
-                             name=name)
+        if track != None:
+            track = Sequence(Sequence(track), ActorInterval(pet, 'neutral', duration=2), name=name)
         else:
             pet.animFSM.request('neutral')
             track = Sequence(Wait(4), name=name)
         self.petPicture = pet
         self.hasPicture = True
-        return (model, track)
+        return (
+         model, track)
 
     def cleanupPicture(self):
         CatalogItem.CatalogItem.cleanupPicture(self)
         self.petPicture.delete()
         self.petPicture = None
+        return
 
     def output(self, store=-1):
-        return 'CatalogPetTrickItem(%s%s)' % (self.trickId,
-                                              self.formatOptionalData(store))
+        return 'CatalogPetTrickItem(%s%s)' % (self.trickId, self.formatOptionalData(store))
 
     def compareTo(self, other):
         return self.trickId - other.trickId
@@ -96,6 +94,7 @@ class CatalogPetTrickItem(CatalogItem.CatalogItem):
         self.dna = None
         if self.trickId not in PetTricks.TrickId2scIds:
             raise ValueError
+        return
 
     def encodeDatagram(self, dg, store):
         CatalogItem.CatalogItem.encodeDatagram(self, dg, store)

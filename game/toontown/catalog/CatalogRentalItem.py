@@ -1,21 +1,22 @@
-import CatalogItem
-import time
-from game.toontown.toonbase import ToontownGlobals
-from game.toontown.toonbase import TTLocalizer
-from game.otp.otpbase import OTPLocalizer
+# uncompyle6 version 3.7.1
+# Python bytecode 2.4 (62061)
+# Decompiled from: Python 2.7.16 (v2.7.16:413a49145e, Mar  4 2019, 01:37:19) [MSC v.1500 64 bit (AMD64)]
+# Embedded file name: toontown.catalog.CatalogRentalItem
+import CatalogItem, time
+from toontown.toonbase import ToontownGlobals
+from toontown.toonbase import TTLocalizer
+from otp.otpbase import OTPLocalizer
 from direct.interval.IntervalGlobal import *
-from game.toontown.toontowngui import TTDialog
-
+from toontown.toontowngui import TTDialog
 
 class CatalogRentalItem(CatalogItem.CatalogItem):
+    __module__ = __name__
+
     def makeNewItem(self, typeIndex, duration, cost):
         self.typeIndex = typeIndex
         self.duration = duration
         self.cost = cost
         CatalogItem.CatalogItem.makeNewItem(self)
-
-    def getRentalType(self):
-        return self.typeIndex
 
     def getDuration(self):
         return self.duration
@@ -24,9 +25,8 @@ class CatalogRentalItem(CatalogItem.CatalogItem):
         return 0
 
     def reachedPurchaseLimit(self, avatar):
-        if self in avatar.onOrder and self in avatar.mailboxContents and self in avatar.onGiftOrder and self in avatar.awardMailboxContents or self in avatar.onAwardOrder:
+        if self in avatar.onOrder or self in avatar.mailboxContents or self in avatar.onGiftOrder or self in avatar.awardMailboxContents or self in avatar.onAwardOrder:
             return 1
-
         return 0
 
     def saveHistory(self):
@@ -38,12 +38,9 @@ class CatalogRentalItem(CatalogItem.CatalogItem):
     def getName(self):
         hours = int(self.duration / 60)
         if self.typeIndex == ToontownGlobals.RentalCannon:
-            return '%s %s %s %s' % (hours, TTLocalizer.RentalHours,
-                                    TTLocalizer.RentalOf,
-                                    TTLocalizer.RentalCannon)
+            return '%s %s %s %s' % (hours, TTLocalizer.RentalHours, TTLocalizer.RentalOf, TTLocalizer.RentalCannon)
         elif self.typeIndex == ToontownGlobals.RentalGameTable:
-            return '%s %s %s' % (hours, TTLocalizer.RentalHours,
-                                 TTLocalizer.RentalGameTable)
+            return '%s %s %s' % (hours, TTLocalizer.RentalHours, TTLocalizer.RentalGameTable)
         else:
             return TTLocalizer.RentalTypeName
 
@@ -57,7 +54,6 @@ class CatalogRentalItem(CatalogItem.CatalogItem):
                 estate.rentItem(self.typeIndex, self.duration)
             else:
                 self.notify.debug('rental -- something not there')
-
         return ToontownGlobals.P_ItemAvailable
 
     def getPicture(self, avatar):
@@ -73,13 +69,11 @@ class CatalogRentalItem(CatalogItem.CatalogItem):
             heading = 45
         elif self.typeIndex == ToontownGlobals.RentalGameTable:
             model = loader.loadModel('phase_6/models/golf/game_table')
-
         self.hasPicture = True
         return self.makeFrameModel(model, spin)
 
     def output(self, store=-1):
-        return 'CatalogRentalItem(%s%s)' % (self.typeIndex,
-                                            self.formatOptionalData(store))
+        return 'CatalogRentalItem(%s%s)' % (self.typeIndex, self.formatOptionalData(store))
 
     def compareTo(self, other):
         return self.typeIndex - other.typeIndex
@@ -117,11 +111,7 @@ class CatalogRentalItem(CatalogItem.CatalogItem):
         return 1
 
     def acceptItem(self, mailbox, index, callback):
-        self.confirmRent = TTDialog.TTGlobalDialog(
-            doneEvent='confirmRent',
-            message=TTLocalizer.MessageConfirmRent,
-            command=Functor(self.handleRentConfirm, mailbox, index, callback),
-            style=TTDialog.TwoChoice)
+        self.confirmRent = TTDialog.TTGlobalDialog(doneEvent='confirmRent', message=TTLocalizer.MessageConfirmRent, command=Functor(self.handleRentConfirm, mailbox, index, callback), style=TTDialog.TwoChoice)
         self.confirmRent.show()
 
     def handleRentConfirm(self, mailbox, index, callback, choice):
@@ -132,11 +122,12 @@ class CatalogRentalItem(CatalogItem.CatalogItem):
         if self.confirmRent:
             self.confirmRent.cleanup()
             self.confirmRent = None
+        return
 
 
 def getAllRentalItems():
     list = []
-    for rentalType in (ToontownGlobals.RentalCannon, ):
+    for rentalType in (ToontownGlobals.RentalCannon,):
         list.append(CatalogRentalItem(rentalType, 2880, 1000))
 
     return list

@@ -1,13 +1,15 @@
+# uncompyle6 version 3.7.1
+# Python bytecode 2.4 (62061)
+# Decompiled from: Python 2.7.16 (v2.7.16:413a49145e, Mar  4 2019, 01:37:19) [MSC v.1500 64 bit (AMD64)]
+# Embedded file name: toontown.catalog.CatalogItem
 from direct.directnotify import DirectNotifyGlobal
-from panda3d.core import *
-from panda3d.direct import *
-from game.toontown.toonbase import TTLocalizer
-from game.toontown.toonbase import ToontownGlobals
+from pandac.PandaModules import *
+from toontown.toonbase import TTLocalizer
+from toontown.toonbase import ToontownGlobals
 from direct.interval.IntervalGlobal import *
 from direct.distributed.PyDatagram import PyDatagram
 from direct.distributed.PyDatagramIterator import PyDatagramIterator
 import types, sys
-
 CatalogReverseType = None
 CatalogItemVersion = 8
 CatalogBackorderMarkup = 1.2
@@ -24,6 +26,7 @@ CatalogTypeMonthly = 3
 CatalogTypeLoyalty = 4
 
 class CatalogItem:
+    __module__ = __name__
     notify = DirectNotifyGlobal.directNotify.newCategory('CatalogItem')
 
     def __init__(self, *args, **kw):
@@ -57,8 +60,7 @@ class CatalogItem:
     def getBackSticky(self):
         itemType = 0
         numSticky = 0
-        return (
-         itemType, numSticky)
+        return (itemType, numSticky)
 
     def putInBackCatalog(self, backCatalog, lastBackCatalog):
         if self.saveHistory() and not self.isSaleItem():
@@ -77,9 +79,6 @@ class CatalogItem:
         return
 
     def storedInCloset(self):
-        return 0
-
-    def storedInTrunk(self):
         return 0
 
     def storedInAttic(self):
@@ -116,8 +115,6 @@ class CatalogItem:
         return self.saleItem
 
     def isGift(self):
-        if self.getEmblemPrices():
-            return 0
         return 1
 
     def isRental(self):
@@ -135,14 +132,16 @@ class CatalogItem:
     def loyaltyRequirement(self):
         if not hasattr(self, 'loyaltyDays'):
             return 0
-        return self.loyaltyDays
+        else:
+            return self.loyaltyDays
 
     def getPrice(self, catalogType):
         if catalogType == CatalogTypeBackorder:
             return self.getBackPrice()
-        if self.isSaleItem():
+        elif self.isSaleItem():
             return self.getSalePrice()
-        return self.getCurrentPrice()
+        else:
+            return self.getCurrentPrice()
 
     def getCurrentPrice(self):
         return int(self.getBasePrice())
@@ -175,32 +174,34 @@ class CatalogItem:
     def getRequestPurchaseErrorText(self, retcode):
         if retcode == ToontownGlobals.P_ItemAvailable:
             return TTLocalizer.CatalogPurchaseItemAvailable
-        if retcode == ToontownGlobals.P_ItemOnOrder:
+        elif retcode == ToontownGlobals.P_ItemOnOrder:
             return TTLocalizer.CatalogPurchaseItemOnOrder
-        if retcode == ToontownGlobals.P_MailboxFull:
+        elif retcode == ToontownGlobals.P_MailboxFull:
             return TTLocalizer.CatalogPurchaseMailboxFull
-        if retcode == ToontownGlobals.P_OnOrderListFull:
+        elif retcode == ToontownGlobals.P_OnOrderListFull:
             return TTLocalizer.CatalogPurchaseOnOrderListFull
-        return TTLocalizer.CatalogPurchaseGeneralError % retcode
+        else:
+            return TTLocalizer.CatalogPurchaseGeneralError % retcode
 
     def getRequestGiftPurchaseErrorText(self, retcode):
         if retcode == ToontownGlobals.P_ItemAvailable:
             return TTLocalizer.CatalogPurchaseGiftItemAvailable
-        if retcode == ToontownGlobals.P_ItemOnOrder:
+        elif retcode == ToontownGlobals.P_ItemOnOrder:
             return TTLocalizer.CatalogPurchaseGiftItemOnOrder
-        if retcode == ToontownGlobals.P_MailboxFull:
+        elif retcode == ToontownGlobals.P_MailboxFull:
             return TTLocalizer.CatalogPurchaseGiftMailboxFull
-        if retcode == ToontownGlobals.P_OnOrderListFull:
+        elif retcode == ToontownGlobals.P_OnOrderListFull:
             return TTLocalizer.CatalogPurchaseGiftOnOrderListFull
-        if retcode == ToontownGlobals.P_NotAGift:
+        elif retcode == ToontownGlobals.P_NotAGift:
             return TTLocalizer.CatalogPurchaseGiftNotAGift
-        if retcode == ToontownGlobals.P_WillNotFit:
+        elif retcode == ToontownGlobals.P_WillNotFit:
             return TTLocalizer.CatalogPurchaseGiftWillNotFit
-        if retcode == ToontownGlobals.P_ReachedPurchaseLimit:
+        elif retcode == ToontownGlobals.P_ReachedPurchaseLimit:
             return TTLocalizer.CatalogPurchaseGiftLimitReached
-        if retcode == ToontownGlobals.P_NotEnoughMoney:
+        elif retcode == ToontownGlobals.P_NotEnoughMoney:
             return TTLocalizer.CatalogPurchaseGiftNotEnoughMoney
-        return TTLocalizer.CatalogPurchaseGiftGeneralError % {'friend': '%s', 'error': retcode}
+        else:
+            return TTLocalizer.CatalogPurchaseGiftGeneralError % {'friend': '%s', 'error': retcode}
 
     def acceptItem(self, mailbox, index, callback):
         mailbox.acceptItem(self, index, callback)
@@ -215,13 +216,14 @@ class CatalogItem:
     def getAcceptItemErrorText(self, retcode):
         if retcode == ToontownGlobals.P_NoRoomForItem:
             return TTLocalizer.CatalogAcceptRoomError
-        if retcode == ToontownGlobals.P_ReachedPurchaseLimit:
+        elif retcode == ToontownGlobals.P_ReachedPurchaseLimit:
             return TTLocalizer.CatalogAcceptLimitError
-        if retcode == ToontownGlobals.P_WillNotFit:
+        elif retcode == ToontownGlobals.P_WillNotFit:
             return TTLocalizer.CatalogAcceptFitError
-        if retcode == ToontownGlobals.P_InvalidIndex:
+        elif retcode == ToontownGlobals.P_InvalidIndex:
             return TTLocalizer.CatalogAcceptInvalidError
-        return TTLocalizer.CatalogAcceptGeneralError % retcode
+        else:
+            return TTLocalizer.CatalogAcceptGeneralError % retcode
 
     def output(self, store=-1):
         return 'CatalogItem'
@@ -262,9 +264,6 @@ class CatalogItem:
     def getBasePrice(self):
         return 0
 
-    def getEmblemPrices(self):
-        return ()
-
     def loadModel(self):
         return
 
@@ -279,26 +278,19 @@ class CatalogItem:
                 h = di.getArg(STInt16, 10)
                 p = 0.0
                 r = 0.0
+            elif versionNumber < 5:
+                h = di.getArg(STInt8, 256.0 / 360.0)
+                p = di.getArg(STInt8, 256.0 / 360.0)
+                r = di.getArg(STInt8, 256.0 / 360.0)
+                hpr = oldToNewHpr(VBase3(h, p, r))
+                h = hpr[0]
+                p = hpr[1]
+                r = hpr[2]
             else:
-                if versionNumber < 5:
-                    h = di.getArg(STInt16, 256.0 / 360.0)
-                    p = di.getArg(STInt16, 256.0 / 360.0)
-                    r = di.getArg(STInt16, 256.0 / 360.0)
-                    hpr = oldToNewHpr(VBase3(h, p, r))
-                    h = hpr[0]
-                    p = hpr[1]
-                    r = hpr[2]
-                else:
-                    h = di.getArg(STInt16, 256.0 / 360.0)
-                    p = di.getArg(STInt16, 256.0 / 360.0)
-                    r = di.getArg(STInt16, 256.0 / 360.0)
-            self.posHpr = (
-             x,
-             y,
-             z,
-             h,
-             p,
-             r)
+                h = di.getArg(STInt8, 256.0 / 360.0)
+                p = di.getArg(STInt8, 256.0 / 360.0)
+                r = di.getArg(STInt8, 256.0 / 360.0)
+            self.posHpr = (x, y, z, h, p, r)
         if store & GiftTag:
             self.giftTag = di.getString()
         if versionNumber >= 8:
@@ -313,9 +305,9 @@ class CatalogItem:
             dg.putArg(self.posHpr[0], STInt16, 10)
             dg.putArg(self.posHpr[1], STInt16, 10)
             dg.putArg(self.posHpr[2], STInt16, 100)
-            dg.putArg(self.posHpr[3], STInt16, 256.0 / 360.0)
-            dg.putArg(self.posHpr[4], STInt16, 256.0 / 360.0)
-            dg.putArg(self.posHpr[5], STInt16, 256.0 / 360.0)
+            dg.putArg(self.posHpr[3], STInt8, 256.0 / 360.0)
+            dg.putArg(self.posHpr[4], STInt8, 256.0 / 360.0)
+            dg.putArg(self.posHpr[5], STInt8, 256.0 / 360.0)
         if store & GiftTag:
             dg.addString(self.giftTag)
         dg.addUint8(self.specialEventId)
@@ -327,7 +319,7 @@ class CatalogItem:
     def applyColor(self, model, colorDesc):
         if model == None or colorDesc == None:
             return
-        for partName, color in colorDesc:
+        for (partName, color) in colorDesc:
             matches = model.findAllMatches(partName)
             if color == None:
                 matches.hide()
@@ -335,13 +327,13 @@ class CatalogItem:
                 tex = loader.loadTexture(color)
                 tex.setMinfilter(Texture.FTLinearMipmapLinear)
                 tex.setMagfilter(Texture.FTLinear)
-                for i in xrange(matches.getNumPaths()):
+                for i in range(matches.getNumPaths()):
                     matches.getPath(i).setTexture(tex, 1)
 
             else:
                 needsAlpha = color[3] != 1
                 color = VBase4(color[0], color[1], color[2], color[3])
-                for i in xrange(matches.getNumPaths()):
+                for i in range(matches.getNumPaths()):
                     matches.getPath(i).setColorScale(color, 1)
                     if needsAlpha:
                         matches.getPath(i).setTransparency(1)
@@ -353,7 +345,7 @@ class CatalogItem:
         frame = DirectFrame(parent=hidden, frameSize=(-1.0, 1.0, -1.0, 1.0), relief=None)
         return frame
 
-    def makeFrameModel(self, model, spin = 1):
+    def makeFrameModel(self, model, spin=1):
         frame = self.makeFrame()
         ival = None
         if model:
@@ -364,11 +356,11 @@ class CatalogItem:
                 rotate = pitch.attachNewNode('rotate')
                 scale = rotate.attachNewNode('scale')
                 model.reparentTo(scale)
-                bMin, bMax = model.getTightBounds()
+                (bMin, bMax) = model.getTightBounds()
                 center = (bMin + bMax) / 2.0
                 model.setPos(-center[0], -center[1], -center[2])
                 pitch.setP(20)
-                bMin, bMax = pitch.getTightBounds()
+                (bMin, bMax) = pitch.getTightBounds()
                 center = (bMin + bMax) / 2.0
                 corner = Vec3(bMax - center)
                 scale.setScale(1.0 / max(corner[0], corner[1], corner[2]))
@@ -377,12 +369,13 @@ class CatalogItem:
             else:
                 scale = frame.attachNewNode('scale')
                 model.reparentTo(scale)
-                bMin, bMax = model.getTightBounds()
+                (bMin, bMax) = model.getTightBounds()
                 center = (bMin + bMax) / 2.0
                 model.setPos(-center[0], 2, -center[2])
                 corner = Vec3(bMax - center)
                 scale.setScale(1.0 / max(corner[0], corner[1], corner[2]))
-        return (frame, ival)
+        return (
+         frame, ival)
 
     def getBlob(self, store=0):
         dg = PyDatagram()
@@ -394,8 +387,6 @@ class CatalogItem:
         return 6
 
     def getDaysToGo(self, avatar):
-        if not config.GetBool('want-loyalty-requirement', False):
-            return 0
         accountDays = avatar.getAccountDays()
         daysToGo = self.loyaltyRequirement() - accountDays
         if daysToGo < 0:
@@ -425,7 +416,7 @@ def decodeCatalogItem(di, versionNumber, store):
     import CatalogItemTypes
     if CatalogReverseType == None:
         CatalogReverseType = {}
-        for itemClass, index in CatalogItemTypes.CatalogItemTypes.items():
+        for (itemClass, index) in CatalogItemTypes.CatalogItemTypes.items():
             CatalogReverseType[index] = itemClass
 
     startIndex = di.getCurrentIndex()
@@ -439,7 +430,7 @@ def decodeCatalogItem(di, versionNumber, store):
             code = di.getUint8()
         itemClass = CatalogReverseType[typeIndex]
         item = itemClass(di, versionNumber, store=store)
-    except Exception as e:
+    except Exception, e:
         CatalogItem.notify.warning('Invalid catalog item in stream: %s, %s' % (sys.exc_info()[0], e))
         d = Datagram(di.getDatagram().getMessage()[startIndex:])
         d.dumpHex(Notify.out())
@@ -459,7 +450,7 @@ def getItem(blob, store=0):
     try:
         versionNumber = di.getUint8()
         return decodeCatalogItem(di, versionNumber, store)
-    except Exception as e:
+    except Exception, e:
         CatalogItem.notify.warning('Invalid catalog item: %s, %s' % (sys.exc_info()[0], e))
         dg.dumpHex(Notify.out())
         import CatalogInvalidItem

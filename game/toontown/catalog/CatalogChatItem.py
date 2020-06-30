@@ -1,12 +1,18 @@
+# uncompyle6 version 3.7.1
+# Python bytecode 2.4 (62061)
+# Decompiled from: Python 2.7.16 (v2.7.16:413a49145e, Mar  4 2019, 01:37:19) [MSC v.1500 64 bit (AMD64)]
+# Embedded file name: toontown.catalog.CatalogChatItem
 from pandac.PandaModules import *
 import CatalogItem
-from game.toontown.toonbase import ToontownGlobals
-from game.otp.otpbase import OTPLocalizer
-from game.toontown.toonbase import TTLocalizer
-bannedPhrases = [11009]
-
+from toontown.toonbase import ToontownGlobals
+from otp.otpbase import OTPLocalizer
+from toontown.toonbase import TTLocalizer
+bannedPhrases = [
+ 11009]
 
 class CatalogChatItem(CatalogItem.CatalogItem):
+    __module__ = __name__
+
     def makeNewItem(self, customIndex):
         self.customIndex = customIndex
         CatalogItem.CatalogItem.makeNewItem(self)
@@ -15,17 +21,15 @@ class CatalogChatItem(CatalogItem.CatalogItem):
         return 1
 
     def reachedPurchaseLimit(self, avatar):
-        if self in avatar.onOrder and self in avatar.mailboxContents and self in avatar.onGiftOrder and self in avatar.awardMailboxContents or self in avatar.onAwardOrder:
+        if self in avatar.onOrder or self in avatar.mailboxContents or self in avatar.onGiftOrder or self in avatar.awardMailboxContents or self in avatar.onAwardOrder:
             return 1
-
         return avatar.customMessages.count(self.customIndex) != 0
 
     def getTypeName(self):
         return TTLocalizer.ChatTypeName
 
     def getName(self):
-        return TTLocalizer.ChatItemQuotes % OTPLocalizer.CustomSCStrings[
-            self.customIndex]
+        return TTLocalizer.ChatItemQuotes % OTPLocalizer.CustomSCStrings[self.customIndex]
 
     def getDisplayName(self):
         return OTPLocalizer.CustomSCStrings[self.customIndex]
@@ -33,14 +37,11 @@ class CatalogChatItem(CatalogItem.CatalogItem):
     def recordPurchase(self, avatar, optional):
         if avatar.customMessages.count(self.customIndex) != 0:
             return ToontownGlobals.P_ReachedPurchaseLimit
-
         if len(avatar.customMessages) >= ToontownGlobals.MaxCustomMessages:
             if optional >= 0 and optional < len(avatar.customMessages):
                 del avatar.customMessages[optional]
-
             if len(avatar.customMessages) >= ToontownGlobals.MaxCustomMessages:
                 return ToontownGlobals.P_NoRoomForItem
-
         avatar.customMessages.append(self.customIndex)
         avatar.d_setCustomMessages(avatar.customMessages)
         return ToontownGlobals.P_ItemAvailable
@@ -48,12 +49,10 @@ class CatalogChatItem(CatalogItem.CatalogItem):
     def getAcceptItemErrorText(self, retcode):
         if retcode == ToontownGlobals.P_ItemAvailable:
             return TTLocalizer.CatalogAcceptChat
-
         return CatalogItem.CatalogItem.getAcceptItemErrorText(self, retcode)
 
     def output(self, store=-1):
-        return 'CatalogChatItem(%s%s)' % (self.customIndex,
-                                          self.formatOptionalData(store))
+        return 'CatalogChatItem(%s%s)' % (self.customIndex, self.formatOptionalData(store))
 
     def compareTo(self, other):
         return self.customIndex - other.customIndex
@@ -64,7 +63,6 @@ class CatalogChatItem(CatalogItem.CatalogItem):
     def getBasePrice(self):
         if self.customIndex >= 10000:
             return 150
-
         return 100
 
     def decodeDatagram(self, di, versionNumber, store):
@@ -77,15 +75,13 @@ class CatalogChatItem(CatalogItem.CatalogItem):
         dg.addUint16(self.customIndex)
 
     def acceptItem(self, mailbox, index, callback):
-        if len(base.localAvatar.customMessages
-               ) < ToontownGlobals.MaxCustomMessages:
+        if len(base.localAvatar.customMessages) < ToontownGlobals.MaxCustomMessages:
             mailbox.acceptItem(self, index, callback)
         else:
             self.showMessagePickerOnAccept(mailbox, index, callback)
 
     def requestPurchase(self, phone, callback):
-        if len(base.localAvatar.customMessages
-               ) < ToontownGlobals.MaxCustomMessages:
+        if len(base.localAvatar.customMessages) < ToontownGlobals.MaxCustomMessages:
             CatalogItem.CatalogItem.requestPurchase(self, phone, callback)
         else:
             self.showMessagePicker(phone, callback)
@@ -93,9 +89,8 @@ class CatalogChatItem(CatalogItem.CatalogItem):
     def showMessagePicker(self, phone, callback):
         self.phone = phone
         self.callback = callback
-        import CatalogChatItemPicker as CatalogChatItemPicker
-        self.messagePicker = CatalogChatItemPicker.CatalogChatItemPicker(
-            self._CatalogChatItem__handlePickerDone, self.customIndex)
+        import CatalogChatItemPicker
+        self.messagePicker = CatalogChatItemPicker.CatalogChatItemPicker(self.__handlePickerDone, self.customIndex)
         self.messagePicker.show()
 
     def showMessagePickerOnAccept(self, mailbox, index, callback):
@@ -103,17 +98,13 @@ class CatalogChatItem(CatalogItem.CatalogItem):
         self.callback = callback
         self.index = index
         import CatalogChatItemPicker
-        self.messagePicker = CatalogChatItemPicker.CatalogChatItemPicker(
-            self._CatalogChatItem__handlePickerOnAccept, self.customIndex)
+        self.messagePicker = CatalogChatItemPicker.CatalogChatItemPicker(self.__handlePickerOnAccept, self.customIndex)
         self.messagePicker.show()
 
-    def _CatalogChatItem__handlePickerOnAccept(self,
-                                               status,
-                                               pickedMessage=None):
+    def __handlePickerOnAccept(self, status, pickedMessage=None):
         print 'Picker Status%s' % status
         if status == 'pick':
-            self.mailbox.acceptItem(self, self.index, self.callback,
-                                    pickedMessage)
+            self.mailbox.acceptItem(self, self.index, self.callback, pickedMessage)
         else:
             print 'picker canceled'
             self.callback(ToontownGlobals.P_UserCancelled, None, self.index)
@@ -122,13 +113,11 @@ class CatalogChatItem(CatalogItem.CatalogItem):
         del self.messagePicker
         del self.callback
         del self.mailbox
+        return
 
-    def _CatalogChatItem__handlePickerDone(self, status, pickedMessage=None):
+    def __handlePickerDone(self, status, pickedMessage=None):
         if status == 'pick':
-            CatalogItem.CatalogItem.requestPurchase(self, self.phone,
-                                                    self.callback,
-                                                    pickedMessage)
-
+            CatalogItem.CatalogItem.requestPurchase(self, self.phone, self.callback, pickedMessage)
         self.messagePicker.hide()
         self.messagePicker.destroy()
         del self.messagePicker
@@ -136,30 +125,32 @@ class CatalogChatItem(CatalogItem.CatalogItem):
         del self.phone
 
     def getPicture(self, avatar):
-        chatBalloon = loader.loadModel('phase_3/models/props/chatbox.bam')
+        chatBalloon = loader.loadModelCopy('phase_3/models/props/chatbox.bam')
         chatBalloon.find('**/top').setPos(1, 0, 5)
         chatBalloon.find('**/middle').setScale(1, 1, 3)
         frame = self.makeFrame()
         chatBalloon.reparentTo(frame)
-        chatBalloon.setPos(-2.1899999999999999, 0, -1.74)
-        chatBalloon.setScale(0.40000000000000002)
+        chatBalloon.setPos(-2.19, 0, -1.74)
+        chatBalloon.setScale(0.4)
         self.hasPicture = True
-        return (frame, None)
+        return (
+         frame, None)
 
 
 def getChatRange(fromIndex, toIndex, *otherRanges):
     list = []
-    froms = [fromIndex]
+    froms = [
+     fromIndex]
     tos = [toIndex]
     i = 0
     while i < len(otherRanges):
         froms.append(otherRanges[i])
-        tos.append(otherRanges[i + 1])
+        tos.append(otherRanges[(i + 1)])
         i += 2
+
     for chatId in OTPLocalizer.CustomSCStrings.keys():
         for (fromIndex, toIndex) in zip(froms, tos):
             if chatId >= fromIndex and chatId <= toIndex and chatId not in bannedPhrases:
                 list.append(CatalogChatItem(chatId))
-                continue
 
     return list

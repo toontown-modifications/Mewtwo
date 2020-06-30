@@ -1,19 +1,16 @@
+# uncompyle6 version 3.7.1
+# Python bytecode 2.4 (62061)
+# Decompiled from: Python 2.7.16 (v2.7.16:413a49145e, Mar  4 2019, 01:37:19) [MSC v.1500 64 bit (AMD64)]
+# Embedded file name: toontown.catalog.CatalogWainscotingItem
 from CatalogSurfaceItem import *
 WSTTextureName = 0
 WSTColor = 1
 WSTBasePrice = 2
-WainscotingTypes = {
-    1000: ('phase_3.5/maps/wall_paper_b3.jpg', CTFlatColorDark, 200),
-    1010: ('phase_5.5/maps/wall_paper_b4_greyscale.jpg',
-           CTBasicWoodColorOnWhite, 200),
-    1020:
-    ('phase_5.5/maps/wainscotings_neutral.jpg', CTBasicWoodColorOnWhite, 200),
-    1030: ('phase_3.5/maps/wall_paper_b3.jpg', CTValentinesColors, 200),
-    1040: ('phase_3.5/maps/wall_paper_b3.jpg', CTUnderwaterColors, 200)
-}
-
+WainscotingTypes = {1000: ('phase_3.5/maps/wall_paper_b3.jpg', CTFlatColorDark, 200), 1010: ('phase_5.5/maps/wall_paper_b4_greyscale.jpg', CTBasicWoodColorOnWhite, 200), 1020: ('phase_5.5/maps/wainscotings_neutral.jpg', CTBasicWoodColorOnWhite, 200), 1030: ('phase_3.5/maps/wall_paper_b3.jpg', CTValentinesColors, 200), 1040: ('phase_3.5/maps/wall_paper_b3.jpg', CTUnderwaterColors, 200)}
 
 class CatalogWainscotingItem(CatalogSurfaceItem):
+    __module__ = __name__
+
     def makeNewItem(self, patternIndex, colorIndex):
         self.patternIndex = patternIndex
         self.colorIndex = colorIndex
@@ -26,7 +23,6 @@ class CatalogWainscotingItem(CatalogSurfaceItem):
         name = TTLocalizer.WainscotingNames.get(self.patternIndex)
         if name:
             return name
-
         return self.getTypeName()
 
     def getSurfaceType(self):
@@ -34,7 +30,7 @@ class CatalogWainscotingItem(CatalogSurfaceItem):
 
     def getPicture(self, avatar):
         frame = self.makeFrame()
-        sample = loader.loadModel('phase_5.5/models/estate/wallpaper_sample')
+        sample = loader.loadModelCopy('phase_5.5/models/estate/wallpaper_sample')
         a = sample.find('**/a')
         b = sample.find('**/b')
         c = sample.find('**/c')
@@ -44,11 +40,11 @@ class CatalogWainscotingItem(CatalogSurfaceItem):
         c.setColorScale(*self.getColor())
         sample.reparentTo(frame)
         self.hasPicture = True
-        return (frame, None)
+        return (
+         frame, None)
 
     def output(self, store=-1):
-        return 'CatalogWainscotingItem(%s, %s%s)' % (
-            self.patternIndex, self.colorIndex, self.formatOptionalData(store))
+        return 'CatalogWainscotingItem(%s, %s%s)' % (self.patternIndex, self.colorIndex, self.formatOptionalData(store))
 
     def getFilename(self):
         return WainscotingTypes[self.patternIndex][WSTTextureName]
@@ -56,18 +52,17 @@ class CatalogWainscotingItem(CatalogSurfaceItem):
     def compareTo(self, other):
         if self.patternIndex != other.patternIndex:
             return self.patternIndex - other.patternIndex
-
         return self.colorIndex - other.colorIndex
 
     def getHashContents(self):
-        return (self.patternIndex, self.colorIndex)
+        return (
+         self.patternIndex, self.colorIndex)
 
     def getBasePrice(self):
         return WainscotingTypes[self.patternIndex][WSTBasePrice]
 
     def loadTexture(self):
-        Texture = Texture
-        import pandac.PandaModules
+        from pandac.PandaModules import Texture
         filename = WainscotingTypes[self.patternIndex][WSTTextureName]
         texture = loader.loadTexture(filename)
         texture.setMinfilter(Texture.FTLinearMipmapLinear)
@@ -75,7 +70,7 @@ class CatalogWainscotingItem(CatalogSurfaceItem):
         return texture
 
     def getColor(self):
-        if self.colorIndex is None:
+        if self.colorIndex == None:
             colorIndex = 0
         else:
             colorIndex = self.colorIndex
@@ -88,10 +83,10 @@ class CatalogWainscotingItem(CatalogSurfaceItem):
                 return CT_WHITE
         else:
             return CT_WHITE
+        return
 
     def decodeDatagram(self, di, versionNumber, store):
-        CatalogAtticItem.CatalogAtticItem.decodeDatagram(
-            self, di, versionNumber, store)
+        CatalogAtticItem.CatalogAtticItem.decodeDatagram(self, di, versionNumber, store)
         if versionNumber < 3:
             self.patternIndex = di.getUint8()
         else:
@@ -121,20 +116,23 @@ def getAllWainscotings(*indexList):
             for n in range(len(colors)):
                 list.append(CatalogWainscotingItem(index, n))
 
-        list.append(CatalogWainscotingItem(index, 0))
+        else:
+            list.append(CatalogWainscotingItem(index, 0))
 
     return list
 
 
 def getWainscotingRange(fromIndex, toIndex, *otherRanges):
     list = []
-    froms = [fromIndex]
+    froms = [
+     fromIndex]
     tos = [toIndex]
     i = 0
     while i < len(otherRanges):
         froms.append(otherRanges[i])
-        tos.append(otherRanges[i + 1])
+        tos.append(otherRanges[(i + 1)])
         i += 2
+
     for patternIndex in WainscotingTypes.keys():
         for (fromIndex, toIndex) in zip(froms, tos):
             if patternIndex >= fromIndex and patternIndex <= toIndex:
