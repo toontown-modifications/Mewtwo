@@ -5,6 +5,7 @@
 *.pets
 otpd/config/account-bridge.json
 otpd/databases/accounts.json
+otpd/databases/bak/*
 
 .idea/*
 venv/*
