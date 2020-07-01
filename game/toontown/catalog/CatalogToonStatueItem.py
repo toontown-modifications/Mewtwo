@@ -1,28 +1,26 @@
-# uncompyle6 version 3.7.1
-# Python bytecode 2.4 (62061)
-# Decompiled from: Python 2.7.16 (v2.7.16:413a49145e, Mar  4 2019, 01:37:19) [MSC v.1500 64 bit (AMD64)]
-# Embedded file name: toontown.catalog.CatalogToonStatueItem
 import CatalogGardenItem
-from toontown.toonbase import ToontownGlobals
-from toontown.toonbase import TTLocalizer
-from otp.otpbase import OTPLocalizer
+from game.toontown.toonbase import ToontownGlobals
+from game.toontown.toonbase import TTLocalizer
+from game.otp.otpbase import OTPLocalizer
 from direct.interval.IntervalGlobal import *
-from toontown.estate import GardenGlobals
+from game.toontown.estate import GardenGlobals
+
 
 class CatalogToonStatueItem(CatalogGardenItem.CatalogGardenItem):
-    __module__ = __name__
     pictureToonStatue = None
 
     def makeNewItem(self, itemIndex=105, count=1, tagCode=1, endPoseIndex=108):
         self.startPoseIndex = itemIndex
         self.endPoseIndex = endPoseIndex
-        CatalogGardenItem.CatalogGardenItem.makeNewItem(self, itemIndex, count, tagCode)
+        CatalogGardenItem.CatalogGardenItem.makeNewItem(
+            self, itemIndex, count, tagCode)
 
     def needsCustomize(self):
         return self.endPoseIndex - self.startPoseIndex > 0
 
     def getPicture(self, avatar):
-        from toontown.estate import DistributedToonStatuary
+        DistributedToonStatuary = DistributedToonStatuary
+        import toontown.estate
         toonStatuary = DistributedToonStatuary.DistributedToonStatuary(None)
         toonStatuary.setupStoneToon(base.localAvatar.style)
         toonStatuary.poseToonFromSpecialsIndex(self.gardenIndex)
@@ -36,10 +34,10 @@ class CatalogToonStatueItem(CatalogGardenItem.CatalogGardenItem):
         self.pictureToonStatue.deleteToon()
         self.pictureToonStatue = None
         CatalogGardenItem.CatalogGardenItem.cleanupPicture(self)
-        return
 
     def decodeDatagram(self, di, versionNumber, store):
-        CatalogGardenItem.CatalogGardenItem.decodeDatagram(self, di, versionNumber, store)
+        CatalogGardenItem.CatalogGardenItem.decodeDatagram(
+            self, di, versionNumber, store)
         self.startPoseIndex = di.getUint8()
         self.endPoseIndex = di.getUint8()
 
@@ -51,12 +49,14 @@ class CatalogToonStatueItem(CatalogGardenItem.CatalogGardenItem):
     def compareTo(self, other):
         if self.gardenIndex >= self.startPoseIndex and self.gardenIndex <= self.endPoseIndex:
             return 0
+
         return 1
 
     def getAllToonStatues(self):
         self.statueList = []
         for index in range(self.startPoseIndex, self.endPoseIndex + 1):
-            self.statueList.append(CatalogToonStatueItem(index, 1, endPoseIndex=index))
+            self.statueList.append(
+                CatalogToonStatueItem(index, 1, endPoseIndex=index))
 
         return self.statueList
 
@@ -65,4 +65,5 @@ class CatalogToonStatueItem(CatalogGardenItem.CatalogGardenItem):
             item = self.statueList[0]
             if item.pictureToonStatue:
                 item.pictureToonStatue.deleteToon()
+
             self.statueList.remove(item)

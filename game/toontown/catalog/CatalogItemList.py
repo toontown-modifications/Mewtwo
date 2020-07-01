@@ -1,7 +1,3 @@
-# uncompyle6 version 3.7.1
-# Python bytecode 2.4 (62061)
-# Decompiled from: Python 2.7.16 (v2.7.16:413a49145e, Mar  4 2019, 01:37:19) [MSC v.1500 64 bit (AMD64)]
-# Embedded file name: toontown.catalog.CatalogItemList
 import CatalogItem
 from pandac.PandaModules import *
 import types
@@ -9,9 +5,8 @@ from direct.distributed.PyDatagram import PyDatagram
 from direct.distributed.PyDatagramIterator import PyDatagramIterator
 
 class CatalogItemList:
-    __module__ = __name__
 
-    def __init__(self, source=None, store=0):
+    def __init__(self, source = None, store = 0):
         self.store = store
         self.__blob = None
         self.__list = None
@@ -33,7 +28,7 @@ class CatalogItemList:
             self.__blob = None
         return
 
-    def getBlob(self, store=None):
+    def getBlob(self, store = None):
         if store == None or store == self.store:
             if self.__blob == None:
                 self.__encodeList()
@@ -73,12 +68,10 @@ class CatalogItemList:
             else:
                 afterTime.append(item)
 
-        return (
-         CatalogItemList(beforeTime, store=self.store), CatalogItemList(afterTime, store=self.store))
+        return (CatalogItemList(beforeTime, store=self.store), CatalogItemList(afterTime, store=self.store))
 
     def extractOldestItems(self, count):
-        return (
-         self[0:count], self[count:])
+        return (self[0:count], self[count:])
 
     def __encodeList(self):
         self.__blob = self.__makeBlob(self.store)
@@ -134,7 +127,7 @@ class CatalogItemList:
         self.__blob = None
         return
 
-    def pop(self, index=None):
+    def pop(self, index = None):
         if self.__list == None:
             self.__decodeList()
         self.__blob = None
@@ -158,7 +151,7 @@ class CatalogItemList:
         self.__blob = None
         return
 
-    def sort(self, cmpfunc=None):
+    def sort(self, cmpfunc = None):
         if self.__list == None:
             self.__decodeList()
         if cmpfunc == None:
@@ -232,7 +225,7 @@ class CatalogItemList:
     def __str__(self):
         return self.output()
 
-    def output(self, store=-1):
+    def output(self, store = -1):
         if self.__list == None:
             self.__decodeList()
         inner = ''
