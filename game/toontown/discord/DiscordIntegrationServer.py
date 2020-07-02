@@ -5,7 +5,7 @@ try:
 except:
     import thread as _thread
 
-import json
+import socket, json
 
 class DiscordIntegrationServer:
     notify = directNotify.newCategory('DiscordIntegrationServer')
