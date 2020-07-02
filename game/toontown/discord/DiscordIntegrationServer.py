@@ -1,5 +1,11 @@
 from direct.directnotify.DirectNotifyGlobal import directNotify
-import socket, _thread, json
+
+try:
+    import _thread
+except:
+    import thread as _thread
+
+import json
 
 class DiscordIntegrationServer:
     notify = directNotify.newCategory('DiscordIntegrationServer')
