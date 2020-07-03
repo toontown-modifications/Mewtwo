@@ -1,11 +1,6 @@
 from direct.directnotify.DirectNotifyGlobal import directNotify
 
-try:
-    import _thread
-except:
-    import thread as _thread
-
-import socket, json
+import thread, socket, json
 
 class DiscordIntegrationServer:
     notify = directNotify.newCategory('DiscordIntegrationServer')
@@ -47,6 +42,6 @@ class DiscordIntegrationServer:
                     simbase.air.extAgent.sendSystemMessage(clientChannel, message)
 
     def startServer(self):
-        thread = _thread.start_new_thread(self.setupServer, ())
+        thread = thread.start_new_thread(self.setupServer, ())
 
         self.notify.info('Successfully started socket server.')
