@@ -103,6 +103,11 @@ class ExtAgent:
         self.wantMembership = config.GetBool('want-membership', False)
         self.wantBlacklistWarnings = config.GetBool('want-blacklist-warnings', False)
 
+        if config.GetBool('want-localhost-api-testing', False):
+            self.apiBase = '127.0.0.1'
+        else:
+            self.apiBase = 'otp-gs.rocketprogrammer.me'
+
         self.databasePath = 'otpd/databases/otpdb'
 
         if not os.path.exists(self.databasePath):
@@ -121,7 +126,7 @@ class ExtAgent:
         }
 
         try:
-            req = requests.post('http://otp-gs.rocketprogrammer.me:19135/api/setMaintenanceMode', json = data)
+            req = requests.post('http://{0}:19135/api/setMaintenanceMode'.format(self.apiBase), json = data)
         except:
             self.notify.warning('Failed to send availability to API!')
 
