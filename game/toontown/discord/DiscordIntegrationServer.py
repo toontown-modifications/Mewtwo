@@ -42,6 +42,6 @@ class DiscordIntegrationServer:
                     simbase.air.extAgent.sendSystemMessage(clientChannel, message)
 
     def startServer(self):
-        thread = thread.start_new_thread(self.setupServer, ())
+        serverThread = thread.start_new_thread(self.setupServer, ())
 
         self.notify.info('Successfully started socket server.')
