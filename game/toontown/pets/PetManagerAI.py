@@ -1,10 +1,9 @@
 from direct.directnotify.DirectNotifyGlobal import directNotify
 
-from game.toontown.pets import PetDNA
-from game.toontown.pets import PetUtil
+from game.toontown.pets import PetDNA, PetMood, PetTraits, PetUtil
 from game.toontown.pets.PetNameGenerator import PetNameGenerator
 
-import json, os, random, time
+import json, os, random, string, time
 
 MINUTE = 60
 HOUR = 60 * MINUTE
@@ -63,23 +62,33 @@ class PetManagerAI:
 
         petName = self.nameGenerator.getName(nameIndex)
         _, dna, traitSeed = PetUtil.getPetInfoFromSeed(seed, safeZoneId)
-        head, ears, nose, tail, bodyTexture, color, colorScale, eyeColor, _ = dna
+        traits = PetTraits.PetTraits(traitSeed, safeZoneId)
+        head, ears, nose, tail, body, color, colorScale, eyes, _ = dna
         numGenders = len(PetDNA.PetGenders)
         gender %= numGenders
         fields = {'setOwnerId': avId, 'setPetName': petName, 'setTraitSeed': traitSeed, 'setSafeZone': safeZoneId,
-                  'setHead': head, 'setEars': ears, 'setNose': nose, 'setTail': tail, 'setBodyTexture': bodyTexture,
-                  'setColor': color, 'setColorScale': colorScale, 'setEyeColor': eyeColor, 'setGender': gender}
+                  'setHead': head, 'setEars': ears, 'setNose': nose, 'setTail': tail, 'setBodyTexture': body,
+                  'setColor': color, 'setColorScale': colorScale, 'setEyeColor': eyes, 'setGender': gender,
+                  'setLastSeenTimestamp': int(time.time()), 'setTrickAptitudes': []}
 
-        def response(doId):
-            if not doId:
+        for traitName in PetTraits.getTraitNames():
+            setter = 'set%s%s' % (string.upper(traitName[0]), traitName[1:])
+            fields[setter] = traits.getTraitValue(traitName)
+
+        for component in PetMood.PetMood.Components:
+            setter = 'set%s%s' % (string.upper(component[0]), component[1:])
+            fields[setter] = 0.0
+
+        def petCreated(petId):
+            if not petId:
                 self.notify.warning('Cannot create pet for %s!' % avId)
                 return
 
-            self.air.writeServerEvent('bought-pet', avId = avId, petId = doId)
-            av.b_setPetId(doId)
+            self.air.writeServerEvent('bought-pet', avId = avId, petId = petId)
+            av.b_setPetId(petId)
 
         self.air.dbInterface.createObject(self.air.dbId, self.air.dclassesByName['DistributedPetAI'],
-                                          {key: (value,) for key, value in fields.items()}, response)
+                                          {key: (value,) for key, value in fields.items()}, petCreated)
 
     def deleteToonsPet(self, avId):
         av = self.air.doId2do.get(avId)
