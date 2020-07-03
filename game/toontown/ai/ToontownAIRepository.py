@@ -127,10 +127,13 @@ class ToontownAIRepository(ToontownInternalRepository):
         else:
             baseEndpoint = 'http://otp-gs.rocketprogrammer.me:19135/api/{0}'
 
+        apiToken = config.GetString('api-token', '')
+
         if not decrease:
             endpoint = baseEndpoint.format('setPopulation')
 
             data = {
+                'token': apiToken,
                 'districtPopulation': districtPopulation
             }
 
@@ -142,6 +145,7 @@ class ToontownAIRepository(ToontownInternalRepository):
             endpoint = baseEndpoint.format('decreasePopulation')
 
             data = {
+                'token': apiToken,
                 'decreaseValue': districtPopulation
             }
 

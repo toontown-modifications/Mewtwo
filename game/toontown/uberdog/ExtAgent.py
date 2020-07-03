@@ -122,6 +122,7 @@ class ExtAgent:
 
     def sendAvailabilityToAPI(self):
         data = {
+            'token': config.GetString('api-token', ''),
             'setter': self.wantServerMaintenance
         }
 
