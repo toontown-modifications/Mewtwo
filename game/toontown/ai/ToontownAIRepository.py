@@ -318,7 +318,7 @@ class ToontownAIRepository(ToontownInternalRepository):
         self.bankManager.generateWithRequired(OtpDoGlobals.OTP_ZONE_ID_MANAGEMENT)
 
         self.avatarManager = OtpAvatarManagerAI(self)
-        self.avatarManager.generateWithRequiredAndId(2, self.getGameDoId(), 2)
+        self.avatarManager.generateWithRequiredAndId(self.allocateChannel(), self.getGameDoId(), OtpDoGlobals.OTP_ZONE_ID_MANAGEMENT)
 
     def createHood(self, hoodCtr, zoneId):
         # Bossbot HQ doesn't use DNA, so we skip over that.
