@@ -20,7 +20,6 @@ class FireworkHolidayAI(HolidayBaseAI):
     def start(self):
         currentMinute = self.air.toontownTimeManager.getCurServerDateTime().now(
                         tz=self.air.toontownTimeManager.serverTimeZone).minute
-        print currentMinute
         if currentMinute == 0:
             # Holiday started right on top of the hour, start the show!
             self.startShow()
