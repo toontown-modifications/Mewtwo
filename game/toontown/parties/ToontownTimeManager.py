@@ -1,9 +1,74 @@
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, tzinfo
 import pytz
 from direct.distributed import DistributedObject
 from direct.directnotify import DirectNotifyGlobal
 from game.toontown.toonbase import TTLocalizer
+import sys
+
+def isLinux():
+    if sys.platform != 'linux2':
+        return True
+
+    return False
+
+class ToontownTimeZone(tzinfo):
+    """
+    A simple implementation of US/Pacific time (UTC-08:00) that is only able to calculate
+    correct DST for dates post-2006, which is perfectly acceptable for our use case.
+    """
+    offset = -8
+    dstBegin = datetime(1, 3, 8, 2) # DST begins on the second Sunday of March.
+    dstEnd = datetime(1, 11, 1, 1) # DST ends on the first Sunday of November.
+    names = ('PST', 'PDT')
+
+    @staticmethod
+    def forwardToSunday(dt):
+        daysToGo = 6 - dt.weekday()
+
+        if daysToGo:
+            dt += timedelta(daysToGo)
+
+        return dt
+
+    def dst(self, dt):
+        # Determine if DST is active for the dt.
+        beginning = self.forwardToSunday(self.dstBegin.replace(year = dt.year))
+        ending = self.forwardToSunday(self.dstEnd.replace(year = dt.year))
+
+        if beginning <= dt.replace(tzinfo = None) < ending:
+            return timedelta(hours = 1)
+        else:
+            return timedelta(0)
+
+    def utcoffset(self, dt):
+        offset = timedelta(hours = self.offset)
+
+        offset += self.dst(dt)
+
+        return offset
+
+    def tzname(self, dt):
+        standardName, dstName = self.names
+
+        if self.dst(dt):
+            return dstName
+        else:
+            return standardName
+
+class UTC(tzinfo):
+    """
+    A very simple UTC implementation.
+    """
+
+    def utcoffset(self, dt):
+        return timedelta(0)
+
+    def tzname(self, dt):
+        return 'UTC'
+
+    def dst(self, dt):
+        return timedelta(0)
 
 class ToontownTimeManager(DistributedObject.DistributedObject):
     notify = DirectNotifyGlobal.directNotify.newCategory('ToontownTimeManager')
@@ -19,6 +84,14 @@ class ToontownTimeManager(DistributedObject.DistributedObject):
             except:
                 notify.error('ToontownTimeManager does not have access to base or simbase.')
 
+        if not isLinux:
+            self.serverTimeZone = pytz.timezone(self.serverTimeZoneString)
+        else:
+            if self.serverTimeZoneString == 'US/Pacific':
+                self.serverTimeZone = ToontownTimeZone()
+            else:
+                self.notify.error('Time Zone {0} is not supported.'.format(self.serverTimeZoneString))
+
         self.serverTimeZone = pytz.timezone(self.serverTimeZoneString)
         self.updateLoginTimes(serverTimeUponLogin, clientTimeUponLogin, globalClockRealTimeUponLogin)
         self.debugSecondsAdded = 0
@@ -27,19 +100,32 @@ class ToontownTimeManager(DistributedObject.DistributedObject):
         self.serverTimeUponLogin = serverTimeUponLogin
         self.clientTimeUponLogin = clientTimeUponLogin
         self.globalClockRealTimeUponLogin = globalClockRealTimeUponLogin
-        naiveTime = datetime.utcfromtimestamp(self.serverTimeUponLogin)
-        self.utcServerDateTime = naiveTime.replace(tzinfo=pytz.utc)
+
+        if not isLinux():
+            naiveTime = datetime.utcfromtimestamp(self.serverTimeUponLogin)
+            self.utcServerDateTime = naiveTime.replace(tzinfo=pytz.utc)
+
         self.serverDateTime = datetime.fromtimestamp(self.serverTimeUponLogin, self.serverTimeZone)
 
     def getCurServerDateTime(self):
         secondsPassed = globalClock.getRealTime() - self.globalClockRealTimeUponLogin + self.debugSecondsAdded
-        curDateTime = self.serverTimeZone.normalize(self.serverDateTime + timedelta(seconds=secondsPassed))
+
+        if not isLinux():
+            curDateTime = self.serverTimeZone.normalize(self.serverDateTime + timedelta(seconds=secondsPassed))
+        else:
+            curDateTime = (self.serverDateTime + timedelta(seconds = secondsPassed)).astimezone(self.serverTimeZone)
+
         return curDateTime
 
     def getRelativeServerDateTime(self, timeOffset):
         secondsPassed = globalClock.getRealTime() - self.globalClockRealTimeUponLogin + self.debugSecondsAdded
         secondsPassed += timeOffset
-        curDateTime = self.serverTimeZone.normalize(self.serverDateTime + timedelta(seconds=secondsPassed))
+
+        if not isLinux():
+            curDateTime = self.serverTimeZone.normalize(self.serverDateTime + timedelta(seconds=secondsPassed))
+        else:
+            curDateTime = (self.serverDateTime + timedelta(seconds = secondsPassed)).astimezone(self.serverTimeZone)
+
         return curDateTime
 
     def getCurServerDateTimeForComparison(self):
@@ -80,7 +166,9 @@ class ToontownTimeManager(DistributedObject.DistributedObject):
         curDateTime = self.getCurServerDateTime()
         try:
             curDateTime = datetime.fromtimestamp(time.mktime(time.strptime(dateStr, self.formatStr)), self.serverTimeZone)
-            curDateTime = self.serverTimeZone.normalize(curDateTime)
+
+            if not isLinux:
+                curDateTime = self.serverTimeZone.normalize(curDateTime)
         except:
             self.notify.warning('error parsing date string=%s' % dateStr)
 
@@ -91,9 +179,16 @@ class ToontownTimeManager(DistributedObject.DistributedObject):
         curDateTime = self.getCurServerDateTime()
         try:
             timeTuple = time.strptime(dateStr, self.formatStr)
-            utcDateTime = datetime(timeTuple[0], timeTuple[1], timeTuple[2], timeTuple[3], timeTuple[4], timeTuple[5], timeTuple[6], pytz.utc)
+
+            if not isLinux:
+                utcDateTime = datetime(timeTuple[0], timeTuple[1], timeTuple[2], timeTuple[3], timeTuple[4], timeTuple[5], timeTuple[6], pytz.utc)
+            else:
+                utcDateTime = datetime(timeTuple[0], timeTuple[1], timeTuple[2], timeTuple[3], timeTuple[4], timeTuple[5], timeTuple[6], UTC())
+
             curDateTime = utcDateTime.astimezone(self.serverTimeZone)
-            curDateTime = self.serverTimeZone.normalize(curDateTime)
+
+            if not isLinux:
+                curDateTime = self.serverTimeZone.normalize(curDateTime)
         except:
             self.notify.warning('error parsing date string=%s' % dateStr)
 
