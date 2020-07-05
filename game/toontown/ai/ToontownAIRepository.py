@@ -59,8 +59,6 @@ from game.toontown.parties.ToontownTimeManager import ToontownTimeManager
 from game.toontown.ai.QuestManagerAI import QuestManagerAI
 from game.toontown.tutorial.TutorialManagerAI import TutorialManagerAI
 from game.toontown.safezone.DistributedPartyGateAI import DistributedPartyGateAI
-from game.toontown.effects.DistributedFireworkShowAI import DistributedFireworkShowAI
-from game.toontown.effects import FireworkShows
 from game.otp.ai.BanManagerAI import BanManagerAI
 from game.toontown.ai.CogPageManagerAI import CogPageManagerAI
 from game.otp.friends.FriendManagerAI import FriendManagerAI
@@ -73,7 +71,7 @@ from game.toontown.estate.DistributedBankMgrAI import DistributedBankMgrAI
 from game.toontown.ai.DialogueManagerAI import DialogueManagerAI
 from game.otp.uberdog.OtpAvatarManagerAI import OtpAvatarManagerAI
 
-import __builtin__, time, os, requests, random
+import __builtin__, time, os, requests
 
 __builtin__.isClient = lambda: PythonUtil.isClient()
 
@@ -451,14 +449,6 @@ class ToontownAIRepository(ToontownInternalRepository):
         # Let our user know we have finished starting up.
         self.notify.info('{0} has finished starting up.'.format(self.districtName))
 
-        # Fireworks task.
-        thetime = time.time() % 3600
-
-        if thetime < 60:
-            taskMgr.doMethodLater(1, self.startFireworks, 'fireworks-taskmgr-hourly')
-        else:
-            taskMgr.doMethodLater(3600 - thetime, self.startFireworks, 'fireworks-taskmgr-hourly')
-
     def loadDNAFileAI(self, dnaStore, dnaFileName):
         resourcesPath = 'game/resources/'
 
@@ -597,18 +587,3 @@ class ToontownAIRepository(ToontownInternalRepository):
             partyHats.extend(foundPartyHats)
 
         return partyHats
-
-    def startFireworks(self, task):
-        if simbase.air.holidayManager.isHolidayRunning(ToontownGlobals.COMBO_FIREWORKS):
-            allFwTypes = [ToontownGlobals.NEWYEARS_FIREWORKS, ToontownGlobals.JULY4_FIREWORKS]
-            fwType = allFwTypes[random.randint(0, len(allFwTypes) - 1)]
-            numShows = len(FireworkShows.shows.get(fwType, []))
-            showIndex = random.randint(0, numShows - 1)
-            for hood in simbase.air.hoods:
-                if hood.zoneId == ToontownGlobals.GolfZone:
-                    continue
-                fwShow = DistributedFireworkShowAI(simbase.air)
-                fwShow.generateWithRequired(hood.zoneId)
-                fwShow.d_startShow(fwType, showIndex)
-        task.delayTime = 3600
-        return task.again
