@@ -17,17 +17,23 @@ class DiscordIntegrationServer:
         server.listen(10)
 
         while True:
-            client, address = server.accept()
+            client, ipAddress = server.accept()
             data = client.recv(4096)
 
-            data = json.loads(data)
+            try:
+                data = json.loads(data)
+            except:
+                # Skid, log the attempt.
+                self.notify.warning('Client with IP address of {0} tried to send non-JSON data!'.format(ipAddress))
+                return
 
             whatToDo = data['whatToDo']
             signature = data['signature']
             actualSignature = 'PleaseDoNotAbuseThisFunction'
 
             if signature != actualSignature:
-                self.notify.info('Invalid signature: {0}!'.format(signature))
+                # Skid, log the attempt.
+                self.notify.warning('Client with IP address {0} sent invalid signature: {0}!'.format(ipAddress, signature))
                 return
 
             if whatToDo == 'kickRequest':
