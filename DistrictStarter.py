@@ -35,12 +35,23 @@ districtNames = [
 
 startingNum = 401000000
 
-if sys.platform == 'win32':
+isWindows = sys.platform == 'win32'
+isLinux = sys.platform == 'linux2'
+
+if isWindows:
     os.chdir('startup/win32')
+elif isLinux:
+    os.chdir('startup/linux')
 
 for index, elem in enumerate(districtNames):
     subprocess.shell = True
+
     os.environ['DISTRICT_NAME'] = str(districtNames[index])
     os.environ['BASE_CHANNEL'] = str(startingNum)
-    os.system('start cmd /c districtStarter.bat')
+
+    if isWindows:
+        os.system('start cmd /c districtStarter.bat')
+    elif isLinux:
+        os.system('screen -d ./districtStarter.sh')
+
     startingNum = startingNum + 1000000
