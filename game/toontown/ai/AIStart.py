@@ -33,6 +33,8 @@ simbase.air.connect(host, port)
 try:
     run()
 except Exception:
+    info = PythonUtil.describeException()
+
     with open('data/ai-traceback.txt', 'w+') as log:
         log.write(info + '\n')
     raise
