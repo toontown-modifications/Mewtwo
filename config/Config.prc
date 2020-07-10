@@ -15,7 +15,7 @@ want-coderedemption true
 want-server-debugging false
 want-do-live-updates true
 want-delivery-manager false
-want-server-maintenance true
+want-server-maintenance false
 want-discord-integration true
 want-blacklist-warnings false
 want-parties true
