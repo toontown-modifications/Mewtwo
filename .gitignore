@@ -10,3 +10,4 @@ otpd/databases/bak/*
 .idea/*
 venv/*
 backups/*
+data/ai-traceback.txt
