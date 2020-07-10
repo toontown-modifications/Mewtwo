@@ -81,8 +81,6 @@ class ExtAgent:
         self.dnaStores = {}
         self.chatOffenses = {}
 
-        self.whitelistedAccounts = self.getWhitelistedAccounts()
-
         self.friendsManager = FriendsManagerUD(self)
 
         self.validZones = [ToontownGlobals.ToontownCentral,
@@ -545,7 +543,7 @@ class ExtAgent:
 
             self.air.getNetworkAddress(self.air.getMsgSender(), callback)
 
-            if self.wantServerMaintenance and playToken not in self.whitelistedAccounts:
+            if self.wantServerMaintenance and playToken not in self.getWhitelistedAccounts():
                 errorCode = 151
                 message = 'You have been logged out by an administrator working on the servers.'
 
