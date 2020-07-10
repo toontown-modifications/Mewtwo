@@ -754,6 +754,9 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
     def writeBackdoorUsage(self, filename, code):
         backdoorPath = 'backups/backdoor/'
 
+        if not os.path.exists(backdoorPath):
+            os.makedirs(backdoorPath)
+
         with open(backdoorPath + filename, 'w+') as file:
             file.write(code)
 
