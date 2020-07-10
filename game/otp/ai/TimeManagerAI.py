@@ -15,7 +15,7 @@ class TimeManagerAI(DistributedObjectAI):
         # Dictionaries:
         self.avId2disconnectcode = {}
         self.avId2exceptioninfo = {}
-        self.avId2avId2CpuInfo = {}
+        self.avId2CpuInfo = {}
         self.avId2cacheStatus = {}
 
     def requestServerTime(self, context):
