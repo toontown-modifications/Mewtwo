@@ -15,6 +15,8 @@ class TimeManagerAI(DistributedObjectAI):
         # Dictionaries:
         self.avId2disconnectcode = {}
         self.avId2exceptioninfo = {}
+        self.avId2avId2CpuInfo = {}
+        self.avId2cacheStatus = {}
 
     def requestServerTime(self, context):
         avId = self.air.getAvatarIdFromSender()
@@ -60,8 +62,14 @@ class TimeManagerAI(DistributedObjectAI):
                      todo14, todo15, todo16, todo17):
         pass
 
-    def setCpuInfo(self, todo0, todo1):
-        pass
+    def setCpuInfo(self, info, cacheStatus):
+        avId = self.air.getAvatarIdFromSender()
+
+        if not avId:
+            return
+
+        self.avId2CpuInfo[avId] = info
+        self.avId2cacheStatus[avId] = cacheStatus
 
     def checkForGarbageLeaks(self, todo0):
         pass
