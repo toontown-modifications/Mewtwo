@@ -39,13 +39,12 @@ class FireworkHolidayAI(HolidayBaseAI):
         taskMgr.remove(self.showTask)
 
     def getSecondsTillHour(self):
-        # Get the current epoch relative to the server's time zone.
-        currentEpoch = time.mktime(datetime.datetime.now(
-            tz=self.air.toontownTimeManager.serverTimeZone).timetuple()) + datetime.datetime.now(
-            tz=self.air.toontownTimeManager.serverTimeZone).microsecond * 1e-6
-
         # The top of each hour.
         if sys.platform == 'win32':
+            currentEpoch = time.mktime(date.datetime.now(
+                tz=self.air.toontownTimeManager.serverTimeZone).timetuple()) + datetime.datetime.now(
+                tz=self.air.toontownTimeManager.serverTimeZone).microsecond * 1e-6
+
             seconds = 3600.0 - (currentEpoch % 3600.0)
         else:
             seconds = 3600

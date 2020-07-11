@@ -175,13 +175,12 @@ class NewsManagerAI(DistributedObjectAI):
                                 # the Grand Prix.
                                 self.air.holidayManager.startHoliday(ToontownGlobals.SILLY_SATURDAY_CIRCUIT)
 
-                    # Get the current epoch relative to the server's time zone.
-                    currentEpoch = time.mktime(datetime.datetime.now(
-                        tz=self.air.toontownTimeManager.serverTimeZone).timetuple()) + datetime.datetime.now(
-                        tz=self.air.toontownTimeManager.serverTimeZone).microsecond * 1e-6
-
                     # We want this task to run again at the top of each hour.
                     if sys.platform == 'win32':
+                        currentEpoch = time.mktime(datetime.datetime.now(
+                            tz=self.air.toontownTimeManager.serverTimeZone).timetuple()) + datetime.datetime.now(
+                            tz=self.air.toontownTimeManager.serverTimeZone).microsecond * 1e-6
+
                         task.delayTime = 3600.0 - (currentEpoch % 3600.0)
                     else:
                         task.delayTime = 3600
