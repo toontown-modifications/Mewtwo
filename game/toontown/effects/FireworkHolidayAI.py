@@ -6,7 +6,7 @@ from game.toontown.ai.HolidayBaseAI import HolidayBaseAI
 import FireworkShows
 from DistributedFireworkShowAI import DistributedFireworkShowAI
 
-import time, random
+import time, datetime, random
 
 class FireworkHolidayAI(HolidayBaseAI):
     notify = directNotify.newCategory('FireworkHolidayAI')
@@ -18,15 +18,27 @@ class FireworkHolidayAI(HolidayBaseAI):
         self.zoneToShow = {} # zoneId: FireworkShowAI
 
     def start(self):
-        thetime = time.time() % 3600
+        currentMinute = self.air.toontownTimeManager.getCurServerDateTime().now(
+                        tz=self.air.toontownTimeManager.serverTimeZone).minute
+        if currentMinute == 0:
+            # Holiday started right on top of the hour, start the show!
+            self.startShow()
 
-        if thetime < 60:
-            self.showTask = taskMgr.doMethodLater(1, self.startShow, 'hourly-fireworks')
-        else:
-            self.showTask = taskMgr.doMethodLater(3600 - thetime, self.startShow, 'hourly-fireworks')
+        self.showTask = taskMgr.doMethodLater(self.getSecondsTillHour(), self.startShow, 'hourly-fireworks')
 
     def stop(self):
         taskMgr.remove(self.showTask)
+
+    def getSecondsTillHour(self):
+        # Get the current epoch relative to the server's time zone.
+        currentEpoch = time.mktime(datetime.datetime.now(
+            tz=self.air.toontownTimeManager.serverTimeZone).timetuple()) + datetime.datetime.now(
+            tz=self.air.toontownTimeManager.serverTimeZone).microsecond * 1e-6
+
+        # The top of each hour.
+        seconds = 3600.0 - (currentEpoch % 3600.0)
+
+        return seconds
 
     # TODO: Create a FireworkManagerAI for the functions below
     # for starting non-holiday fireworks (magic words)
@@ -49,7 +61,7 @@ class FireworkHolidayAI(HolidayBaseAI):
             self.zoneToShow[hood.zoneId] = fireworkShow
 
         if task:
-            task.delayTime = 3600
+            task.delayTime = self.getSecondsTillHour()
             return task.again
 
     def stopShow(self, zoneId):
