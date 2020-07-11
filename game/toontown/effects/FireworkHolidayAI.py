@@ -6,7 +6,7 @@ from game.toontown.ai.HolidayBaseAI import HolidayBaseAI
 import FireworkShows
 from DistributedFireworkShowAI import DistributedFireworkShowAI
 
-import time, datetime, random
+import time, datetime, random, sys
 
 class FireworkHolidayAI(HolidayBaseAI):
     notify = directNotify.newCategory('FireworkHolidayAI')
@@ -20,11 +20,20 @@ class FireworkHolidayAI(HolidayBaseAI):
     def start(self):
         currentMinute = self.air.toontownTimeManager.getCurServerDateTime().now(
                         tz=self.air.toontownTimeManager.serverTimeZone).minute
-        if currentMinute == 0:
-            # Holiday started right on top of the hour, start the show!
-            self.startShow()
 
-        self.showTask = taskMgr.doMethodLater(self.getSecondsTillHour(), self.startShow, 'hourly-fireworks')
+        if sys.platform == 'win32':
+            if currentMinute == 0:
+                # Holiday started right on top of the hour, start the show!
+                self.startShow()
+
+                self.showTask = taskMgr.doMethodLater(self.getSecondsTillHour(), self.startShow, 'hourly-fireworks')
+            else:
+                thetime = time.time() % 3600
+
+                if thetime < 60:
+                    self.showTask = taskMgr.doMethodLater(1, self.startShow, 'hourly-fireworks')
+                else:
+                    self.showTask = taskMgr.doMethodLater(3600 - thetime, self.startShow, 'hourly-fireworks')
 
     def stop(self):
         taskMgr.remove(self.showTask)
@@ -36,7 +45,10 @@ class FireworkHolidayAI(HolidayBaseAI):
             tz=self.air.toontownTimeManager.serverTimeZone).microsecond * 1e-6
 
         # The top of each hour.
-        seconds = 3600.0 - (currentEpoch % 3600.0)
+        if sys.platform == 'win32':
+            seconds = 3600.0 - (currentEpoch % 3600.0)
+        else:
+            seconds = 3600
 
         return seconds
 

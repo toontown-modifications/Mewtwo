@@ -12,21 +12,24 @@ class DistributedDataStoreManagerAI(DistributedObjectGlobalAI):
     ctx2Callback = {}
 
     def startStore(self, typeId):
-        self.sendUpdateToUD('startStore', [typeId])
+        self.sendUpdate('startStore', [typeId])
 
     def stopStore(self, typeId):
-        self.sendUpdateToUD('stopStore', [typeId])
+        self.sendUpdate('stopStore', [typeId])
 
     def queryStore(self, query, callback):
+        if type(query) != str:
+            return
+
         self.context += 1
         self.ctx2Callback[self.context] = callback
-        self.sendUpdateToUD('queryStore', [self.context, query])
+        self.sendUpdate('queryStore', [self.context, query])
 
     def receiveResults(self, context, results):
         callback = self.ctx2Callback.get(context)
 
         if not callback:
-            self.notify.warning('Got receiveResults with unknown context: {}'.format(context))
+            self.notify.warning('Got receiveResults with unknown context: {0}'.format(context))
             return
 
         results = cPickle.loads(results)
@@ -34,8 +37,4 @@ class DistributedDataStoreManagerAI(DistributedObjectGlobalAI):
         del self.ctx2Callback[context]
 
     def deleteBackupStores(self):
-        self.sendUpdateToUD('deleteBackupStores')
-
-    def sendUpdateToUD(self, field, args = []):
-        dg = self.dclass.aiFormatUpdate(field, OTP_DO_ID_TOONTOWN_TEMP_STORE_MANAGER, OTP_DO_ID_TOONTOWN_TEMP_STORE_MANAGER, self.doId, args)
-        self.air.send(dg)
+        self.sendUpdate('deleteBackupStores')

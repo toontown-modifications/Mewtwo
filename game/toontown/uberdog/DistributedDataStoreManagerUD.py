@@ -50,11 +50,7 @@ class DistributedDataStoreManagerUD(DistributedObjectGlobalUD):
 
         results = self.dataStore.query(query)
 
-        self.sendUpdateToAI(sender, 'receiveResults', [context, results])
-
-    def sendUpdateToAI(self, doId, field, args = []):
-        dg = self.dclass.aiFormatUpdate(field, doId, doId, self.doId, args)
-        self.air.send(dg)
+        self.sendUpdateToChannel(sender, 'receiveResults', [context, results])
 
     def deleteBackupStores(self):
         pass

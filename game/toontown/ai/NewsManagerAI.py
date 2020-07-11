@@ -1,10 +1,9 @@
-import datetime
-import time
-
 from direct.directnotify.DirectNotifyGlobal import directNotify
 from direct.distributed.DistributedObjectAI import DistributedObjectAI
 
 from game.toontown.toonbase import ToontownGlobals
+
+import datetime, time, sys
 
 class NewsManagerAI(DistributedObjectAI):
     notify = directNotify.newCategory('NewsManagerAI')
@@ -182,7 +181,11 @@ class NewsManagerAI(DistributedObjectAI):
                         tz=self.air.toontownTimeManager.serverTimeZone).microsecond * 1e-6
 
                     # We want this task to run again at the top of each hour.
-                    task.delayTime = 3600.0 - (currentEpoch % 3600.0)
+                    if sys.platform == 'win32':
+                        task.delayTime = 3600.0 - (currentEpoch % 3600.0)
+                    else:
+                        task.delayTime = 3600
+
                     return task.again
                 else:
                     # It does not, so we want to end any Silly Saturday holidays if they are still running.

@@ -12,6 +12,7 @@ from game.toontown.minigame.TrolleyWeekendMgrAI import TrolleyWeekendMgrAI
 from game.toontown.ai.CharacterSwitchHolidayAI import CharacterSwitchHolidayAI
 from game.toontown.ai.DistributedGreenToonEffectMgrAI import GreenToonHolidayAI
 from game.toontown.ai.SillyMeterHolidayAI import SillyMeterHolidayAI
+from game.toontown.ai.ScavengerHuntHolidayMgrAI import ScavengerHuntHolidayMgrAI
 
 holidayToMgr = {
     ToontownGlobals.JULY4_FIREWORKS: FireworkHolidayAI, # 1
@@ -20,6 +21,7 @@ holidayToMgr = {
     ToontownGlobals.BLACK_CAT_DAY: BlackCatDayHolidayAI, # 9
     ToontownGlobals.KART_RECORD_DAILY_RESET: KartRecordDailyResetter, # 11
     ToontownGlobals.KART_RECORD_WEEKLY_RESET: KartRecordWeeklyResetter, # 12
+    ToontownGlobals.TRICK_OR_TREAT: ScavengerHuntHolidayMgrAI, # 13
     ToontownGlobals.CIRCUIT_RACING: CircuitRaceHolidayMgr, # 14
     ToontownGlobals.CIRCUIT_RACING_EVENT: CircuitRaceHolidayMgr, # 16
     ToontownGlobals.TROLLEY_HOLIDAY: TrolleyHolidayMgrAI, # 17
@@ -29,11 +31,14 @@ holidayToMgr = {
     ToontownGlobals.SILLY_SATURDAY_TROLLEY: TrolleyHolidayMgrAI, # 21
     ToontownGlobals.HALLOWEEN_COSTUMES: CharacterSwitchHolidayAI, # 27
     ToontownGlobals.APRIL_FOOLS_COSTUMES: CharacterSwitchHolidayAI, # 29
+    ToontownGlobals.WINTER_CAROLING: ScavengerHuntHolidayMgrAI, # 57
     ToontownGlobals.COMBO_FIREWORKS: FireworkHolidayAI, # 112
     ToontownGlobals.IDES_OF_MARCH: GreenToonHolidayAI, # 105
     ToontownGlobals.SPOOKY_BLACK_CAT: BlackCatDayHolidayAI, # 117
+    ToontownGlobals.SPOOKY_TRICK_OR_TREAT: ScavengerHuntHolidayMgrAI, # 118
     ToontownGlobals.SPOOKY_COSTUMES: CharacterSwitchHolidayAI, # 120
-    ToontownGlobals.SILLYMETER_HOLIDAY: SillyMeterHolidayAI # 60
+    ToontownGlobals.SILLYMETER_HOLIDAY: SillyMeterHolidayAI, # 60
+    ToontownGlobals.WACKY_WINTER_CAROLING: ScavengerHuntHolidayMgrAI # 122
 }
 
 class HolidayManagerAI:

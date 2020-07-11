@@ -1,7 +1,5 @@
-from direct.directnotify import DirectNotifyGlobal
+from direct.directnotify.DirectNotifyGlobal import directNotify
 from game.toontown.ai.DistributedScavengerHuntTargetAI import DistributedScavengerHuntTargetAI
 
-
 class DistributedTrickOrTreatTargetAI(DistributedScavengerHuntTargetAI):
-    notify = DirectNotifyGlobal.directNotify.newCategory(
-        "DistributedTrickOrTreatTargetAI")
+    notify = directNotify.newCategory('DistributedTrickOrTreatTargetAI')
