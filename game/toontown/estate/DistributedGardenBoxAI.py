@@ -21,11 +21,11 @@ class DistributedGardenBoxAI(DistributedLawnDecorAI):
         collNode = '**/collision'
 
         if self.typeIndex == GardenGlobals.BOX_THREE:
-            model = 'phase_5.5/models/estate/planterA'
+            model = 'phase_5.5/models/estate/planterA.bam'
         elif self.typeIndex == GardenGlobals.BOX_TWO:
-            model = 'phase_5.5/models/estate/planterC'
+            model = 'phase_5.5/models/estate/planterC.bam'
         else:
-            model = 'phase_5.5/models/estate/planterD'
+            model = 'phase_5.5/models/estate/planterD.bam'
             collNode = '**/collision2'
 
         render = self.getRender()
