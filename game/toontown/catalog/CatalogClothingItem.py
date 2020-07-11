@@ -335,7 +335,7 @@ class CatalogClothingItem(CatalogItem.CatalogItem):
             return 1
 
         if avatar.mailboxContents.count(self) != 0:
-            return 1
+            return 2
 
         if self in avatar.awardMailboxContents or self in avatar.onAwardOrder:
             return 1
@@ -348,26 +348,26 @@ class CatalogClothingItem(CatalogItem.CatalogItem):
                     self.colorIndex][0] and dna.sleeveTex == defn[
                         1] and dna.sleeveTexColor == defn[2][
                             self.colorIndex][1]:
-                return 1
+                return 3
 
             l = avatar.clothesTopsList
             for i in range(0, len(l), 4):
                 if l[i] == defn[0] and l[i + 1] == defn[2][
                         self.colorIndex][0] and l[i + 2] == defn[1] and l[
                             i + 3] == defn[2][self.colorIndex][1]:
-                    return 1
+                    return 4
                     continue
 
         else:
             defn = ToonDNA.BottomStyles[str]
             if dna.botTex == defn[0] and dna.botTexColor == defn[1][
                     self.colorIndex]:
-                return 1
+                return 3
 
             l = avatar.clothesBottomsList
             for i in range(0, len(l), 2):
                 if l[i] == defn[0] and l[i + 1] == defn[1][self.colorIndex]:
-                    return 1
+                    return 4
                     continue
 
         return 0
