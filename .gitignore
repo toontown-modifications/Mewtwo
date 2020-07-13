@@ -11,3 +11,4 @@ otpd/databases/bak/*
 venv/*
 backups/*
 data/ai-traceback.txt
+data/ud-traceback.txt
