@@ -524,8 +524,9 @@ class ExtAgent:
                 wantMagicWords = dgi.getString()
             except:
                 message = 'You have been ejected for attempting to send a incorrectly formatted datagram.'
-                self.sendBootMessage(clientChannel, 122, message)
+                self.sendBoot(clientChannel, 122, message)
                 self.sendEject(clientChannel, 122, message)
+                return
 
             if playToken in ['Rocket', 'developer']:
                 # We got ourselves a skid!
@@ -925,15 +926,21 @@ class ExtAgent:
             resp.addServerHeader(clientChannel, self.air.ourChannel, CLIENT_HEARTBEAT)
             self.air.send(resp)
         elif msgType == 67: # CLIENT_SET_NAME_PATTERN
-            avId = dgi.getUint32()
-            p1 = dgi.getInt16()
-            f1 = dgi.getInt16()
-            p2 = dgi.getInt16()
-            f2 = dgi.getInt16()
-            p3 = dgi.getInt16()
-            f3 = dgi.getInt16()
-            p4 = dgi.getInt16()
-            f4 = dgi.getInt16()
+            try:
+                avId = dgi.getUint32()
+                p1 = dgi.getInt16()
+                f1 = dgi.getInt16()
+                p2 = dgi.getInt16()
+                f2 = dgi.getInt16()
+                p3 = dgi.getInt16()
+                f3 = dgi.getInt16()
+                p4 = dgi.getInt16()
+                f4 = dgi.getInt16()
+            except:
+                message = 'You have been ejected for attempting to send a incorrectly formatted datagram.'
+                self.sendBoot(clientChannel, 122, message)
+                self.sendEject(clientChannel, 122, message)
+                return
 
             # Construct a pattern.
             pattern = [(p1, f1), (p2, f2),
