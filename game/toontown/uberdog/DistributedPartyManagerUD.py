@@ -44,6 +44,9 @@ class DistributedPartyManagerUD(DistributedObjectUD):
         # Set up our scheduling task.
         self.runSchedulingTask()
 
+        # Check to start parties right off the bat.
+        self.__checkStartParties(None)
+
     def delete(self):
         taskMgr.remove(self.uniqueName('check-start-parties'))
         DistributedObjectUD.delete(self)
@@ -60,7 +63,6 @@ class DistributedPartyManagerUD(DistributedObjectUD):
             # Don't load anything I guess something something fuck you?
             return
 
-        self.partyDoIds = partyData['partyDoIds']
         self.hostId2partyInfo = partyData['hostId2partyInfo']
         self.partyId2invites = partyData['partyId2invites']
         self.avId2invites = partyData['avId2invites']
@@ -76,7 +78,6 @@ class DistributedPartyManagerUD(DistributedObjectUD):
         fileName = os.path.join('backups/parties/', 'party-manager.wackyfuntime')
 
         partyData = {}
-        partyData['partyDoIds'] = self.partyDoIds
         partyData['hostId2partyInfo'] = self.hostId2partyInfo
         partyData['partyId2invites'] = self.partyId2invites
         partyData['avId2invites'] = self.avId2invites
@@ -110,10 +111,15 @@ class DistributedPartyManagerUD(DistributedObjectUD):
                 self.sendUpdateToAvatar(hostId, 'setHostedParties', [[partyInfoTuple]])
             elif self.canStartParty(partyInfo) and partyInfo.status == PartyStatus.Pending:
                 # Start the party now.
+                self.hostId2partyInfo[hostId].status = PartyStatus.CanStart
                 partyInfo.status = PartyStatus.CanStart
                 partyInfoTuple = self.getPartyInfoTuple(partyInfo)
                 self.sendUpdateToAvatar(hostId, 'setHostedParties', [[partyInfoTuple]])
                 self.sendUpdateToAvatar(hostId, 'setPartyCanStart', [partyInfo.partyId])
+                self.save()
+
+        if not task:
+            return
 
         task.delayTime = self.getSchedulingDelay()
         return task.again
@@ -402,15 +408,6 @@ class DistributedPartyManagerUD(DistributedObjectUD):
     def toonHasExitedPartyAiToUd(self, todo0):
         pass
 
-    def partyHasFinishedUdToAllAi(self, todo0):
-        pass
-
-    def updateToPublicPartyInfoUdToAllAi(self, todo0, todo1, todo2, todo3, todo4, todo5, todo6, todo7, todo8):
-        pass
-
-    def updateToPublicPartyCountUdToAllAi(self, todo0, todo1):
-        pass
-
     def requestShardIdZoneIdForHostId(self, todo0):
         pass
 
@@ -441,6 +438,8 @@ class DistributedPartyManagerUD(DistributedObjectUD):
             del self.partyId2invites[partyId]
         if partyId in self.partyId2inviteeIds:
             del self.partyId2inviteeIds[partyId]
+        if hostId in self.avId2partyReplies:
+            del self.avId2partyReplies[hostId]
 
         # Tell each AI to delete this party from their dict(s).
         self.sendUpdateToAllAI('partyHasFinishedUdToAllAi', [hostId])
@@ -449,12 +448,6 @@ class DistributedPartyManagerUD(DistributedObjectUD):
         self.save()
 
     def forceCheckStart(self):
-        pass
-
-    def requestMw(self, todo0, todo1, todo2, todo3):
-        pass
-
-    def mwResponseUdToAllAi(self, todo0, todo1, todo2, todo3):
         pass
 
     def sendUpdateToAI(self, doId, field, args=[]):

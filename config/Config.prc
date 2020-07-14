@@ -20,6 +20,7 @@ want-discord-integration true
 want-blacklist-warnings false
 want-parties true
 want-localhost-api-testing false
+want-instant-parties false
 active-holidays 60, 61, 62, 63, 64, 65, 66
 buildings-server-data-folder backups/buildings
 whitelist-url http://cdn.toontown.disney.go.com/toontown/en/

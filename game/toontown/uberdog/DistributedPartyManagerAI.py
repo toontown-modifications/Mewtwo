@@ -468,17 +468,11 @@ class DistributedPartyManagerAI(DistributedObjectAI):
 
         self.sendUpdateToAvatarId(avId, 'sendAvToPlayground', [avId, 1])
 
-    def partyManagerAIStartingUp(self, todo0, todo1):
-        pass
-
-    def partyManagerAIGoingDown(self, todo0, todo1):
-        pass
-
     def partyHasFinishedUdToAllAi(self, hostId):
         # If we have information for this party, delete it.
-        if hostId in self.hostId2publicParty:
-            del self.hostId2publicParty[hostId]
-            self.save()
+        partyId = self.hostId2data.get(hostId, (0, 0))[1]
+        if partyId:
+            self.annihilateParty(partyId)
 
     def updateToPublicPartyInfoUdToAllAi(self, hostId, partyId, zoneId, minLeft, status, numberOfGuests, hostName,
                                          activityIds, shardId):
@@ -519,12 +513,6 @@ class DistributedPartyManagerAI(DistributedObjectAI):
         pass
 
     def forceCheckStart(self):
-        pass
-
-    def requestMw(self, todo0, todo1, todo2, todo3):
-        pass
-
-    def mwResponseUdToAllAi(self, todo0, todo1, todo2, todo3):
         pass
 
     def sendUpdateToUD(self, field, args=[]):
