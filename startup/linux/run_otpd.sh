@@ -1,4 +1,4 @@
 #!/bin/sh
 cd ../../otpd
 
-./otpd-linux --loglevel info config/otpd.yml
+./otp_server_linux --loglevel info config/otpd.yml
