@@ -64,8 +64,6 @@ from game.toontown.ai.CogPageManagerAI import CogPageManagerAI
 from game.otp.friends.FriendManagerAI import FriendManagerAI
 from game.toontown.coderedemption.TTCodeRedemptionMgrAI import TTCodeRedemptionMgrAI
 from game.toontown.uberdog.DistributedPartyManagerAI import DistributedPartyManagerAI
-from game.toontown.ai.DistributedPolarPlaceEffectMgrAI import DistributedPolarPlaceEffectMgrAI
-from game.toontown.ai.DistributedResistanceEmoteMgrAI import DistributedResistanceEmoteMgrAI
 from game.toontown.distributed.ToontownInternalRepository import ToontownInternalRepository
 from game.toontown.estate.DistributedBankMgrAI import DistributedBankMgrAI
 from game.toontown.ai.DialogueManagerAI import DialogueManagerAI
@@ -305,12 +303,6 @@ class ToontownAIRepository(ToontownInternalRepository):
         self.partyManager.generateWithRequired(OtpDoGlobals.OTP_ZONE_ID_MANAGEMENT)
 
         self.dataStoreManager = self.generateGlobalObject(OtpDoGlobals.OTP_DO_ID_TOONTOWN_TEMP_STORE_MANAGER, 'DistributedDataStoreManager')
-
-        self.polarPlaceEffectMgr = DistributedPolarPlaceEffectMgrAI(self)
-        self.polarPlaceEffectMgr.generateWithRequired(3821)
-
-        self.resistanceEmoteMgr = DistributedResistanceEmoteMgrAI(self)
-        self.resistanceEmoteMgr.generateWithRequired(9720)
 
         self.bankManager = DistributedBankMgrAI(self)
         self.bankManager.generateWithRequired(OtpDoGlobals.OTP_ZONE_ID_MANAGEMENT)

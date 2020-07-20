@@ -17,6 +17,7 @@ class NewsManagerAI(DistributedObjectAI):
         self.relativelyCalendarHolidays = []
         self.multipleStartHolidays = []
         self.forcedHolidays = []
+        self.permanentHolidays = set()
 
     def announceGenerate(self):
         DistributedObjectAI.announceGenerate(self)
@@ -26,6 +27,9 @@ class NewsManagerAI(DistributedObjectAI):
 
         # Setup our yearly calendar holidays.
         self.setupYearlyCalendarHolidays()
+
+        # Setup our permanent holidays.
+        self.setupPermanentHolidays()
 
         # Setup our forced holidays from the config.
         self.setupForcedHolidays()
@@ -101,6 +105,23 @@ class NewsManagerAI(DistributedObjectAI):
 
         self.b_setYearlyCalendarHolidays(yearlyCalendarHolidays)
 
+    def setupPermanentHolidays(self):
+        permanentEvents = [
+            ToontownGlobals.RESISTANCE_EVENT,
+            ToontownGlobals.POLAR_PLACE_EVENT,
+            ToontownGlobals.SILLYMETER_HOLIDAY,
+            ToontownGlobals.MAILBOX_ZERO_HOLIDAY,
+            ToontownGlobals.TRASHCAN_ZERO_HOLIDAY,
+            ToontownGlobals.SILLY_SURGE_HOLIDAY,
+            ToontownGlobals.HYDRANTS_BUFF_BATTLES,
+            ToontownGlobals.MAILBOXES_BUFF_BATTLES,
+            ToontownGlobals.TRASHCANS_BUFF_BATTLES
+        ]
+
+        for permanentEvent in permanentEvents:
+            if permanentEvent not in self.permanentHolidays:
+                self.permanentHolidays.add(permanentEvent)
+
     def setupForcedHolidays(self):
         # These holidays are defined in the PRC configuration, (normally used for debugging.)
         holidays = config.GetString('active-holidays', '')
@@ -117,6 +138,9 @@ class NewsManagerAI(DistributedObjectAI):
         # Add any forced holidays to holidaysToStart if defined (either defined from configuration,
         # or fired later on with magic words.)
         holidaysToStart += self.forcedHolidays
+
+        # Add our permanent holidays as well.
+        holidaysToStart += self.permanentHolidays
 
         # Get our current list of weekly calendar holidays.
         weeklyCalendarHolidays = self.getWeeklyCalendarHolidays()[:]
@@ -260,7 +284,7 @@ class NewsManagerAI(DistributedObjectAI):
         # We will now loop through all of our holidays that we want to end.
         for holidayToEnd in holidaysToEnd:
             # Check if the holiday is forced-started.
-            if holidayToEnd in self.forcedHolidays:
+            if holidayToEnd in self.forcedHolidays or holidayToEnd in self.permanentHolidays:
                 # It is, ignore, and continue on.
                 continue
             # Let's check if this holiday is currently running or not.

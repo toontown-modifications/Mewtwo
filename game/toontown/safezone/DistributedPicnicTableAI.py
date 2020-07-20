@@ -153,6 +153,11 @@ class DistributedPicnicTableAI(DistributedNodeAI):
 
     def requestZone(self):
         avId = self.air.getAvatarIdFromSender()
+
+        if not hasattr(self.game, 'zoneId'):
+            self.air.writeServerEvent('suspicious', avId, 'Tried to request picnic table zone without zoneId!')
+            return
+
         self.sendUpdateToAvatarId(avId, 'setZone', [self.game.zoneId])
 
     def requestGameZone(self):
