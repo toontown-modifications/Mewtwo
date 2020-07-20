@@ -10,10 +10,10 @@ class QuestManagerAI:
 
     def toonPlayedMinigame(self, toon, toons):
         # toons is used. Sad!
-        for index, quest in enumerate(self.avatarQuestList2Quests(toon.quests)):
+        for index, quest in enumerate(self.__toonQuestsList2Quests(toon.quests)):
             if isinstance(quest, Quests.MinigameNewbieQuest):
                 for _ in xrange(quest.doesMinigameCount(toon, toons)):
-                    self.incrementQuestProgress(toon.quests[index])
+                    self.__incrementQuestProgress(toon.quests[index])
 
         if toon.quests:
             toon.d_setQuests(toon.getQuests())
@@ -178,10 +178,14 @@ class QuestManagerAI:
         return
 
     def __toonQuestsList2Quests(self, quests):
-        return [Quests.getQuest(x[0]) for x in quests]
+        return [Quests.getQuest(quest[0]) for quest in quests]
 
-    def avatarCancelled(self, avId):
-        pass
+    def avatarCancelled(self, npcId):
+        npc = self.air.doId2do.get(npcId)
+        if not npc:
+            return
+
+        taskMgr.remove(npc.uniqueName('clearMovie'))
 
     def avatarChoseQuest(self, avId, npc, questId, rewardId, toNpcId):
         av = self.air.doId2do.get(avId)
@@ -208,6 +212,7 @@ class QuestManagerAI:
         finalReward = rewardId if storeReward else 0
         progress = 0
         av.addQuest((questId, npc.getDoId(), toNpcId, rewardId, progress), finalReward)
+        taskMgr.remove(npc.uniqueName('clearMovie'))
         npc.assignQuest(av.getDoId(), questId, rewardId, toNpcId)
 
     def __incrementQuestProgress(self, quest):
@@ -218,9 +223,9 @@ class QuestManagerAI:
         toon.removeQuest(questId)
 
     def toonRodeTrolleyFirstTime(self, toon):
-        for index, quest in enumerate(self.avatarQuestList2Quests(toon.quests)):
+        for index, quest in enumerate(self.__toonQuestsList2Quests(toon.quests)):
             if isinstance(quest, Quests.TrolleyQuest):
-                self.incrementQuestProgress(toon.quests[index])
+                self.__incrementQuestProgress(toon.quests[index])
 
         if toon.quests:
             toon.d_setQuests(toon.getQuests())
