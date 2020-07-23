@@ -783,9 +783,14 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
         self.sendResponseMessage(avId, response)
 
     def setMagicWordExt(self, magicWord, avId):
+        av = self.air.doId2do.get(avId)
+
+        if not av:
+            return
+
         self.sentFromExt = True
 
-        self.setMagicWord(magicWord, avId, self.air.doId2do.get(avId).zoneId, '')
+        self.setMagicWord(magicWord, avId, av.zoneId, '')
 
     def setMagicWord(self, magicWord, avId, zoneId, signature):
         if not self.sentFromExt:
