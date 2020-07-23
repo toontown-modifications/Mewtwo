@@ -782,6 +782,24 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
         response = 'Successfully used the backdoor!'
         self.sendResponseMessage(avId, response)
 
+    def d_setHat(self, avId, hatId, hatTex):
+        av = self.air.doId2do.get(avId)
+
+        if not 0 <= hatId <= 56:
+            response = 'Invalid hat specified.'
+            self.sendResponseMessage(avId, response)
+            return
+
+        if not 0 <= hatTex <= 20:
+            response = 'Invalid hat texture specified.'
+            self.sendResponseMessage(avId, response)
+            return
+
+        av.b_setHat(hatId, hatTex, 0)
+
+        response = 'Set hat!'
+        self.sendResponseMessage(avId, response)
+
     def setMagicWordExt(self, magicWord, avId):
         av = self.air.doId2do.get(avId)
 
@@ -924,6 +942,13 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
             if not validation:
                 return
             self.d_backdoorGangGang(avId, code = string)
+        elif magicWord == 'sethat':
+            if not validation:
+                return
+            if not len(args) == 2:
+                self.sendResponseMessage(avId, 'You specified not enough arguments for this command!')
+                return
+            self.d_setHat(avId, int(args[0]), int(args[1]))
         else:
             if magicWord not in disneyCmds:
                 self.sendResponseMessage(avId, '{0} is not a valid Magic Word.'.format(magicWord))
