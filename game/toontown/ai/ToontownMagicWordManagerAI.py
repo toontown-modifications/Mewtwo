@@ -948,7 +948,10 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
             if not len(args) == 2:
                 self.sendResponseMessage(avId, 'You specified not enough arguments for this command!')
                 return
-            self.d_setHat(avId, int(args[0]), int(args[1]))
+            try:
+                self.d_setHat(avId, int(args[0]), int(args[1]))
+            except ValueError:
+                self.sendResponseMessage(avId, 'Invalid parameters.')
         else:
             if magicWord not in disneyCmds:
                 self.sendResponseMessage(avId, '{0} is not a valid Magic Word.'.format(magicWord))
