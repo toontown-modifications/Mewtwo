@@ -1,7 +1,6 @@
-from panda3d.core import *
+from panda3d.core import loadPrcFile
 from panda3d.toontown import DNAStorage, SuitLeg, SuitLegList
-from direct.showbase import PythonUtil
-import __builtin__, sys, os
+import __builtin__, sys, os, traceback
 
 __builtin__.isClient = lambda: PythonUtil.isClient()
 __builtin__.DNAStorage = DNAStorage
@@ -33,7 +32,7 @@ simbase.air.connect(host, port)
 try:
     run()
 except Exception:
-    info = PythonUtil.describeException()
+    info = traceback.format_exc()
 
     with open('data/ai-traceback.txt', 'w+') as log:
         log.write(info + '\n')

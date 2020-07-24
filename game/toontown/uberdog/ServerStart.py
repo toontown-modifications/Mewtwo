@@ -1,6 +1,5 @@
-from panda3d.core import *
-from direct.showbase import PythonUtil
-import __builtin__, sys, os
+from panda3d.core import loadPrcFile
+import __builtin__, sys, os, traceback
 
 loadPrcFile(''.join(sys.argv[1:]))
 
@@ -30,7 +29,7 @@ simbase.air.connect(host, port)
 try:
     run()
 except Exception:
-    info = PythonUtil.describeException()
+    info = traceback.format_exc()
 
     with open('data/ud-traceback.txt', 'w+') as log:
         log.write(info + '\n')
