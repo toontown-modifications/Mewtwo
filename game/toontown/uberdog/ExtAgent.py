@@ -1289,7 +1289,7 @@ class ExtAgent:
             resp = PyDatagram()
             resp.addUint16(msgType)
 
-            resp.addString(string)
+            resp.addString(message)
 
             # Dispatch the response to the client.
             dg = PyDatagram()
@@ -1308,7 +1308,7 @@ class ExtAgent:
             resp = PyDatagram()
             resp.addUint16(msgType)
 
-            resp.addString(string)
+            resp.addString(message)
 
             # Dispatch the response to the client.
             dg = PyDatagram()
