@@ -1277,6 +1277,44 @@ class ExtAgent:
                 self.getAvatars(clientChannel)
 
             self.air.dbInterface.queryObject(self.air.dbId, target, handleRetrieve)
+        elif msgType == 78: # CLIENT_SYSTEM_MESSAGE
+            try:
+                message = dgi.getString()
+            except:
+                message = 'You have been ejected for attempting to send a incorrectly formatted datagram.'
+                self.sendBoot(clientChannel, 122, message)
+                self.sendEject(clientChannel, 122, message)
+                return
+
+            resp = PyDatagram()
+            resp.addUint16(msgType)
+
+            resp.addString(string)
+
+            # Dispatch the response to the client.
+            dg = PyDatagram()
+            dg.addServerHeader(clientChannel, self.air.ourChannel, CLIENTAGENT_SEND_DATAGRAM)
+            dg.addString(resp.getMessage())
+            self.air.send(dg)
+        elif msgType == 123: # CLIENT_SYSTEMMESSAGE_AKNOWLEDGE
+            try:
+                message = dgi.getString()
+            except:
+                message = 'You have been ejected for attempting to send a incorrectly formatted datagram.'
+                self.sendBoot(clientChannel, 122, message)
+                self.sendEject(clientChannel, 122, message)
+                return
+
+            resp = PyDatagram()
+            resp.addUint16(msgType)
+
+            resp.addString(string)
+
+            # Dispatch the response to the client.
+            dg = PyDatagram()
+            dg.addServerHeader(clientChannel, self.air.ourChannel, CLIENTAGENT_SEND_DATAGRAM)
+            dg.addString(resp.getMessage())
+            self.air.send(dg)
         else:
             self.notify.warning('Received unknown message type %s from Client' % msgType)
 
