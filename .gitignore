@@ -12,3 +12,4 @@ venv/*
 backups/*
 data/ai-traceback.txt
 data/ud-traceback.txt
+trickOrTreat-anydbm
