@@ -1,0 +1,88 @@
+general:
+    eventlogger: 127.0.0.1:7197
+    dc_files:
+        - ../dclass/otp.dc
+        - ../dclass/toon.dc
+
+messagedirector:
+    bind: 127.0.0.1:7100
+    threaded: false
+
+uberdogs:
+    - class: CentralLogger
+      id: 4688
+      anonymous: false
+
+    - class: DistributedDeliveryManager
+      id: 4683
+      anonymous: false
+
+    - class: TTCodeRedemptionMgr
+      id: 4695
+      anonymous: false
+
+    - class: FriendManager
+      id: 4501
+      anonymous: false
+
+roles:
+    - type: clientagent
+      bind: 0.0.0.0:6665
+      version: "sv1.0.47.38"
+      client:
+          type: libdisney
+          game_name: toon
+          name_file: "../../game/resources/phase_3/etc/NameMasterEnglish.txt"
+          whitelist_file: "../../game/whitelist/twhitelist.dat"
+          dna_files: [
+            "../../game/resources/phase_5/dna/toontown_central_2100.dna",
+            "../../game/resources/phase_5/dna/toontown_central_2200.dna",
+            "../../game/resources/phase_5/dna/toontown_central_2300.dna",
+
+            "../../game/resources/phase_6/dna/donalds_dock_1100.dna",
+            "../../game/resources/phase_6/dna/donalds_dock_1200.dna",
+            "../../game/resources/phase_6/dna/donalds_dock_1300.dna",
+
+            "../../game/resources/phase_6/dna/minnies_melody_land_4100.dna",
+            "../../game/resources/phase_6/dna/minnies_melody_land_4200.dna",
+            "../../game/resources/phase_6/dna/minnies_melody_land_4300.dna",
+
+            "../../game/resources/phase_8/dna/daisys_garden_5100.dna",
+            "../../game/resources/phase_8/dna/daisys_garden_5200.dna",
+            "../../game/resources/phase_8/dna/daisys_garden_5300.dna",
+
+            "../../game/resources/phase_8/dna/donalds_dreamland_9100.dna",
+            "../../game/resources/phase_8/dna/donalds_dreamland_9200.dna",
+
+            "../../game/resources/phase_8/dna/the_burrrgh_3100.dna",
+            "../../game/resources/phase_8/dna/the_burrrgh_3200.dna",
+            "../../game/resources/phase_8/dna/the_burrrgh_3300.dna"
+            ]
+          send_hash: false
+          send_version: false
+          heartbeat_timeout: 60000
+      channels:
+          min: 1000000000
+          max: 1009999999
+
+    - type: stateserver
+      control: 4002
+
+    - type: database
+      control: 4003
+      generate:
+          min: 100000000
+          max: 399999999
+      backend:
+          type: yaml
+          directory: ../databases/otpdb
+
+    - type: dbss
+      database: 4003
+      ranges:
+          - min: 100000000
+            max: 399999999
+
+    - type: eventlogger
+      bind: 127.0.0.1:7197
+      output: ../logs/events-%y%m%d_%H%M%S.log
