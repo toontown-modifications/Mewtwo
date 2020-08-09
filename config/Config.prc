@@ -24,7 +24,7 @@ want-instant-parties false
 buildings-server-data-folder backups/buildings
 whitelist-url http://cdn.toontown.disney.go.com/toontown/en/
 whitelist-stage-dir game/whitelist
-api-token dfAXJ5QAPYpy8UQV
+api-token QrLEtq3CCWEax3M2
 
 max-code-redemption-attempts 5
 
