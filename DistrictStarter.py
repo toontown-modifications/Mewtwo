@@ -52,6 +52,6 @@ for index, elem in enumerate(districtNames):
     if isWindows:
         os.system('start cmd /c districtStarter.bat')
     elif isLinux:
-        os.system('screen -d ./districtStarter.sh')
+        os.system('screen -d -m ./districtStarter.sh')
 
     startingNum = startingNum + 1000000
