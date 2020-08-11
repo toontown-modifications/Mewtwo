@@ -214,7 +214,7 @@ class DistributedFurnitureManagerAI(DistributedObjectAI):
         self.b_setAtticItems(self.getAtticItems())
         item.posHpr = (x, y, z, h, p, r)
         obj = self.generateItem(item)
-        taskMgr.doMethodLater(1.5, self.sendUpdateToAvatarId, self.uniqueName('send-attic-response'), extraArgs = [avId, 'moveItemFromAtticResponse', [ToontownGlobals.FM_MovedItem, obj.doId, context]])
+        self.sendUpdateToAvatarId(avId, 'moveItemFromAtticResponse', [ToontownGlobals.FM_MovedItem, obj.doId, context])
 
     def deleteItemFromAtticMessage(self, blob, index, context):
         # blob is USELESS
