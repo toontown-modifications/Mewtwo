@@ -538,6 +538,8 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
             showType = ToontownGlobals.NEWYEARS_FIREWORKS
         elif showName == 'summer':
             showType = PartyGlobals.FireworkShows.Summer
+        elif showName == 'combo':
+            showType = ToontownGlobals.COMBO_FIREWORKS
         else:
             msg = 'Invalid fireworks show name!'
             self.sendResponseMessage(avId, msg)
