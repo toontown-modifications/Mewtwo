@@ -13,7 +13,7 @@ from game.toontown.chat.TTWhiteList import TTWhiteList
 from panda3d.toontown import DNAStorage, loadDNAFileAI
 from game import genDNAFileName, extractGroupName
 from game.toontown.friends.FriendsManagerUD import FriendsManagerUD
-import json, time, os, random, requests, httplib
+import json, time, os, random, requests
 
 class JSONBridge:
 
@@ -96,25 +96,19 @@ class ExtAgent:
                            23000]
         self.blacklistZones = [ToontownGlobals.SellbotLobby, ToontownGlobals.LawbotOfficeExt, ToontownGlobals.LawbotLobby, ToontownGlobals.CashbotLobby, ToontownGlobals.WelcomeValleyEnd]
 
-        self.serverAddress = config.GetString('server-address', '127.0.0.1')
-
         self.wantServerDebug = config.GetBool('want-server-debugging', False)
         self.wantServerMaintenance = config.GetBool('want-server-maintenance', False)
         self.wantMembership = config.GetBool('want-membership', False)
         self.wantBlacklistWarnings = config.GetBool('want-blacklist-warnings', False)
+        self.serverType = config.GetString('server-type', 'dev')
 
         self.databasePath = 'otpd/databases/otpdb'
 
         if not os.path.exists(self.databasePath):
             os.makedirs(self.databasePath)
 
-        conn = httplib.HTTPSConnection('ip.42.pl')
-        conn.request('GET', '/raw')
-
-        ipAddress = conn.getresponse().read()
-
-        if ipAddress == self.serverAddress:
-            # The IP address is the Gameserver IP.
+        if self.serverType == 'prod':
+            # This is the production server.
             # Send our status.
             self.sendAvailabilityToAPI()
 

@@ -25,7 +25,7 @@ buildings-server-data-folder backups/buildings
 whitelist-url http://cdn.toontown.disney.go.com/toontown/en/
 whitelist-stage-dir game/whitelist
 api-token QrLEtq3CCWEax3M2
-server-address 46.101.231.114
+server-type dev
 
 max-code-redemption-attempts 5
 
