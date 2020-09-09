@@ -102,6 +102,8 @@ class ToontownAIRepository(ToontownInternalRepository):
 
         self.cogSuitMessageSent = False
 
+        self.serverType = config.GetString('server-type', 'dev')
+
         # Enable logging.
         self.notify.setInfo(True)
 
@@ -153,12 +155,20 @@ class ToontownAIRepository(ToontownInternalRepository):
     def incrementPopulation(self):
         self.districtPopulation += 1
         self.districtStats.b_setAvatarCount(self.districtStats.getAvatarCount() + 1)
-        self.sendToAPI(self.districtPopulation, False)
+
+        if self.serverType == 'prod':
+            # This is the production server.
+            # Send our district population increase.
+            self.sendToAPI(self.districtPopulation, False)
 
     def decrementPopulation(self):
         self.districtPopulation -= 1
         self.districtStats.b_setAvatarCount(self.districtStats.getAvatarCount() - 1)
-        self.sendToAPI(self.districtPopulation, True)
+
+        if self.serverType == 'prod':
+            # This is the production server.
+            # Send our district population decrease.
+            self.sendToAPI(self.districtPopulation, True)
 
     def sendQueryToonMaxHp(self, doId, checkResult):
         if self.notify.getDebug():
