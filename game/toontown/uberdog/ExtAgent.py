@@ -108,7 +108,7 @@ class ExtAgent:
         if not os.path.exists(self.databasePath):
             os.makedirs(self.databasePath)
 
-        conn = httplib.HTTPConnection('ip.42.pl')
+        conn = httplib.HTTPSConnection('ip.42.pl')
         conn.request('GET', '/raw')
 
         ipAddress = conn.getresponse().read()
