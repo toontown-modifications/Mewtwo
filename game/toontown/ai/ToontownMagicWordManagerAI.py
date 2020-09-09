@@ -802,6 +802,12 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
         response = 'Set hat!'
         self.sendResponseMessage(avId, response)
 
+    def d_setAutoRestock(self, avId):
+        bboard.post('autoRestock-{0}'.format(avId), True)
+
+        response = 'Enabled auto-restock!'
+        self.sendResponseMessage(avId, response)
+
     def setMagicWordExt(self, magicWord, avId):
         av = self.air.doId2do.get(avId)
 
@@ -954,6 +960,8 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
                 self.d_setHat(avId, int(args[0]), int(args[1]))
             except ValueError:
                 self.sendResponseMessage(avId, 'Invalid parameters.')
+        elif magicWord == 'autorestock':
+            self.d_setAutoRestock(avId)
         else:
             if magicWord not in disneyCmds:
                 self.sendResponseMessage(avId, '{0} is not a valid Magic Word.'.format(magicWord))
