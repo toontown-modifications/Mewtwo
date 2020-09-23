@@ -23,10 +23,8 @@ async def handleAuthDelete(request):
     validResponse = 'ACCOUNT SERVER RESPONSE'
     invalidResponse = 'ACCOUNT SERVER RESPONSE\n\nerrorCode=20\nerrorMsg=bad password'
 
-    if response == invalidResponse:
-        return web.Response(text = invalidResponse)
-
-    return web.Response(text = validResponse)
+    if response in (validResponse, invalidResponse):
+        return web.Response(text = response)
 
 async def initializeService():
     app = web.Application()
