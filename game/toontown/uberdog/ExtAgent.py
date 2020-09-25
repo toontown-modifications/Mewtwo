@@ -571,7 +571,7 @@ class ExtAgent:
                 self.sendEject(clientChannel, 122, reason)
                 return
 
-            if self.serverType == 'dev':
+            if self.serverType == 'prod':
                 # To migitate skids trying to auth without the stock Disney launcher.
                 # We check if the account is banned here too.
                 # TODO: Find a way to enable TLS 1.3 on Cloudflare once again.
