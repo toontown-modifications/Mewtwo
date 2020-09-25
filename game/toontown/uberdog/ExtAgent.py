@@ -572,7 +572,7 @@ class ExtAgent:
                 return
 
             if self.serverType == 'prod':
-                # To migitate skids trying to auth without the stock Disney launcher.
+                # To prevent skids trying to auth without the stock Disney launcher.
                 # We check if the account is banned here too.
                 # TODO: Find a way to enable TLS 1.3 on Cloudflare once again.
                 banCheck = requests.post('https://rocketprogrammer.me/bans/?username={0}'.format(playToken))
