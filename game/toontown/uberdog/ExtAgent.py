@@ -397,7 +397,16 @@ class ExtAgent:
         """
 
         clientChannel = dgi.getUint64()
-        msgType = dgi.getUint16()
+
+        try:
+            msgType = dgi.getUint16()
+        except:
+            # Invalid datagram.
+            errorCode = 122
+            message = 'You have been ejected for attempting to send a incorrectly formatted datagram.'
+            self.sendBoot(clientChannel, errorCode, message)
+            self.sendEject(clientChannel, errorCode, message)
+            return
 
         if self.wantServerDebug:
             print('handleDatagram: {0}:{1}'.format(clientChannel, msgType))
