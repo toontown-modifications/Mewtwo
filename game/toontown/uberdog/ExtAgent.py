@@ -571,6 +571,21 @@ class ExtAgent:
                 self.sendEject(clientChannel, 122, reason)
                 return
 
+            if self.serverType == 'dev':
+                # To migitate skids trying to auth without the stock Disney launcher.
+                # We check if the account is banned here too.
+                # TODO: Find a way to enable TLS 1.3 on Cloudflare once again.
+                banCheck = requests.post('https://rocketprogrammer.me/bans/?username={0}'.format(playToken))
+
+                if 'Your account was banned' in banCheck.text:
+                    # Yup, this account is banned.
+                    errorCode = 120
+                    message = 'Banned account {0} attempted to login!'.format(playToken)
+
+                    self.sendBoot(clientChannel, errorCode, message)
+                    self.sendEject(clientChannel, errorCode, message)
+                    return
+
             # Check if this play token exists in the bridge.
             accountId = self.bridge.query(playToken)
             if accountId:
