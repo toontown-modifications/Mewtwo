@@ -107,10 +107,13 @@ class ExtAgent:
         if not os.path.exists(self.databasePath):
             os.makedirs(self.databasePath)
 
-        if self.serverType == 'prod':
+        if self.isProdServer():
             # This is the production server.
             # Send our status.
             self.sendAvailabilityToAPI()
+
+    def isProdServer(self):
+        return self.serverType == 'prod'
 
     def getWhitelistedAccounts(self):
         with open('data/whitelistedAccounts.json') as data:
@@ -580,7 +583,7 @@ class ExtAgent:
                 self.sendEject(clientChannel, 122, reason)
                 return
 
-            if self.serverType == 'prod':
+            if self.isProdServer():
                 # To prevent skids trying to auth without the stock Disney launcher.
                 # We check if the account is banned here too.
                 # TODO: Find a way to enable TLS 1.3 on Cloudflare once again.
@@ -1074,7 +1077,6 @@ class ExtAgent:
                 isCogHQ = self.getInCogHQ(zoneId)
                 isPlayground = ZoneUtil.isPlayground(zoneId)
                 branchId = ZoneUtil.getBranchZone(zoneId)
-                isWelcomeValley = ZoneUtil.isWelcomeValley(zoneId)
 
                 if isStreetBranch:
                     zoneId = ZoneUtil.getCanonicalZoneId(zoneId)

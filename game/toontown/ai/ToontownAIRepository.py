@@ -446,7 +446,8 @@ class ToontownAIRepository(ToontownInternalRepository):
         self.notify.info('Assigning initial Cog buildings and Field Offices...')
 
         for suitPlanner in self.suitPlanners.values():
-            suitPlanner.assignInitialSuitBuildings()
+            if not ZoneUtil.isWelcomeValley(suitPlanner.zoneId):
+                suitPlanner.assignInitialSuitBuildings()
 
         # Let our user know we have finished starting up.
         self.notify.info('{0} has finished starting up.'.format(self.districtName))
