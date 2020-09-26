@@ -68,12 +68,13 @@ from game.toontown.distributed.ToontownInternalRepository import ToontownInterna
 from game.toontown.estate.DistributedBankMgrAI import DistributedBankMgrAI
 from game.toontown.ai.DialogueManagerAI import DialogueManagerAI
 from game.otp.uberdog.OtpAvatarManagerAI import OtpAvatarManagerAI
+from game.toontown.uberdog.ServerBase import ServerBase
 
 import __builtin__, time, os, requests
 
 __builtin__.isClient = lambda: PythonUtil.isClient()
 
-class ToontownAIRepository(ToontownInternalRepository):
+class ToontownAIRepository(ToontownInternalRepository, ServerBase):
     notify = directNotify.newCategory('ToontownAIRepository')
 
     def __init__(self, baseChannel, districtName):
@@ -156,7 +157,7 @@ class ToontownAIRepository(ToontownInternalRepository):
         self.districtPopulation += 1
         self.districtStats.b_setAvatarCount(self.districtStats.getAvatarCount() + 1)
 
-        if self.serverType == 'prod':
+        if self.isProdServer():
             # This is the production server.
             # Send our district population increase.
             self.sendToAPI(self.districtPopulation, False)
@@ -165,7 +166,7 @@ class ToontownAIRepository(ToontownInternalRepository):
         self.districtPopulation -= 1
         self.districtStats.b_setAvatarCount(self.districtStats.getAvatarCount() - 1)
 
-        if self.serverType == 'prod':
+        if self.isProdServer():
             # This is the production server.
             # Send our district population decrease.
             self.sendToAPI(self.districtPopulation, True)

@@ -13,6 +13,7 @@ from game.toontown.chat.TTWhiteList import TTWhiteList
 from panda3d.toontown import DNAStorage, loadDNAFileAI
 from game import genDNAFileName, extractGroupName
 from game.toontown.friends.FriendsManagerUD import FriendsManagerUD
+from game.toontown.uberdog.ServerBase import ServerBase
 import json, time, os, random, requests
 
 class JSONBridge:
@@ -53,10 +54,12 @@ class JSONBridge:
         else:
             return False
 
-class ExtAgent:
+class ExtAgent(ServerBase):
     notify = directNotify.newCategory('ExtAgent')
 
     def __init__(self, air):
+        ServerBase.__init__(self)
+
         self.air = air
 
         self.air.registerForChannel(5536)
@@ -100,7 +103,6 @@ class ExtAgent:
         self.wantServerMaintenance = config.GetBool('want-server-maintenance', False)
         self.wantMembership = config.GetBool('want-membership', False)
         self.wantBlacklistWarnings = config.GetBool('want-blacklist-warnings', False)
-        self.serverType = config.GetString('server-type', 'dev')
 
         self.databasePath = 'otpd/databases/otpdb'
 
@@ -111,9 +113,6 @@ class ExtAgent:
             # This is the production server.
             # Send our status.
             self.sendAvailabilityToAPI()
-
-    def isProdServer(self):
-        return self.serverType == 'prod'
 
     def getWhitelistedAccounts(self):
         with open('data/whitelistedAccounts.json') as data:
