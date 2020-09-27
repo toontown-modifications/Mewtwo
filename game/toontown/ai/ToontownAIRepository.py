@@ -79,6 +79,7 @@ class ToontownAIRepository(ToontownInternalRepository, ServerBase):
 
     def __init__(self, baseChannel, districtName):
         ToontownInternalRepository.__init__(self, baseChannel, config.GetInt('air-stateserver', 0), dcSuffix = 'AI')
+        ServerBase.__init__(self)
 
         self.districtName = districtName
         self.districtPopulation = 0
