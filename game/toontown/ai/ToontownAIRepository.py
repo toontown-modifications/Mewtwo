@@ -104,8 +104,6 @@ class ToontownAIRepository(ToontownInternalRepository, ServerBase):
 
         self.cogSuitMessageSent = False
 
-        self.serverType = config.GetString('server-type', 'dev')
-
         # Enable logging.
         self.notify.setInfo(True)
 
