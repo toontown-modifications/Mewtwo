@@ -472,7 +472,7 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
         dna.topTexColor = 27
         dna.sleeveTex = 84
         dna.sleeveTexColor = 27
-        dna.botTex = 12
+        dna.botTex = 48
         dna.botTexColor = 27
 
         # Animal Colors.
