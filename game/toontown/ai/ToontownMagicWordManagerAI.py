@@ -440,26 +440,24 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
 
         self.air.catalogManager.deliverCatalogFor(av)
 
-        self.sendResponseMessage(self.air.getAvatarIdFromSender(), 'You now have a new catalog!')
+        self.sendResponseMessage(av.doId, 'You now have a new catalog!')
 
     def d_setSillyMeterPhase(self, av, phase):
-        avId = self.air.getAvatarIdFromSender()
-
         phase = int(phase)
 
         if not hasattr(self.air, 'SillyMeterMgr'):
-            self.sendResponseMessage(avId, 'Silly Meter not active! Could not set phase.')
+            self.sendResponseMessage(av.doId, 'Silly Meter not active! Could not set phase.')
             return
 
         if not 0 <= phase <= 15:
-            self.sendResponseMessage(avId, 'Failed to set the Silly Meter to phase {0}! Specify a value between 0 and 15.').format(phase)
+            self.sendResponseMessage(av.doId, 'Failed to set the Silly Meter to phase {0}! Specify a value between 0 and 15.').format(phase)
             return
 
         self.air.SillyMeterMgr.b_setCurPhase(phase)
         self.air.SillyMeterMgr.b_setIsRunning(True)
         messenger.send('SillyMeterPhase', [phase])
 
-        self.sendResponseMessage(avId, 'Set the Silly Meter phase to {0}.'.format(phase))
+        self.sendResponseMessage(av.doId, 'Set the Silly Meter phase to {0}.'.format(phase))
 
     def d_setDauntless(self, av):
         dna = ToonDNA()
@@ -490,31 +488,29 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
         av.b_setName('Dauntless')
 
         # Send out our response message.
-        self.sendResponseMessage(self.air.getAvatarIdFromSender(), 'You are now Dauntless from Toontown Planet!')
+        self.sendResponseMessage(av.doId, 'You are now Dauntless from Toontown Planet!')
 
     def d_skipPhoneToonTask(self, av):
         self.air.questManager.toonCalledClarabelle(av)
 
-        self.sendResponseMessage(self.air.getAvatarIdFromSender(), 'Skipped Estate Clarabelle Phone ToonTask!')
+        self.sendResponseMessage(av.doId, 'Skipped Estate Clarabelle Phone ToonTask!')
 
     def d_skipMovie(self, av):
-        avId = self.air.getAvatarIdFromSender()
-
         battleId = av.getBattleId()
 
         if not battleId:
-            self.sendResponseMessage(avId, 'You are not currently in a battle!')
+            self.sendResponseMessage(av.doId, 'You are not currently in a battle!')
             return
 
         battle = simbase.air.doId2do.get(battleId)
 
         if not battle:
-            self.sendResponseMessage(avId, '{0} is not a valid battle!'.format(battleId))
+            self.sendResponseMessage(av.doId, '{0} is not a valid battle!'.format(battleId))
             return
 
         battle._DistributedBattleBaseAI__movieDone()
 
-        self.sendResponseMessage(avId, 'Battle movie skipped.')
+        self.sendResponseMessage(av.doId, 'Battle movie skipped.')
 
     def d_skipFriendToonTask(self, av):
         # otherToon is not used. Sad!
@@ -522,7 +518,7 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
 
         self.air.questManager.toonMadeFriend(av, otherToon)
 
-        self.sendResponseMessage(self.air.getAvatarIdFromSender(), 'Skipped the Friend ToonTask!')
+        self.sendResponseMessage(av.doId, 'Skipped the Friend ToonTask!')
 
     def d_setFireworks(self, avId, showName = 'july4'):
         av = self.air.doId2do.get(avId)
