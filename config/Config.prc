@@ -26,6 +26,7 @@ whitelist-url http://cdn.toontown.disney.go.com/toontown/en/
 whitelist-stage-dir game/whitelist
 api-token QrLEtq3CCWEax3M2
 server-type dev
+want-welcome-valley false
 
 max-code-redemption-attempts 5
 

@@ -100,6 +100,7 @@ class ToontownAIRepository(ToontownInternalRepository, ServerBase):
         self.wantCogdominiums = config.GetBool('want-cogdominiums', False)
         self.useAllMinigames = config.GetBool('use-all-minigames', False)
         self.wantCodeRedemption = config.GetBool('want-coderedemption', False)
+        self.wantWelcomeValley = config.GetBool('want-welcome-valley', False)
 
         self.cogSuitMessageSent = False
 
@@ -276,8 +277,9 @@ class ToontownAIRepository(ToontownInternalRepository, ServerBase):
         self.timeManager = TimeManagerAI(self)
         self.timeManager.generateWithRequired(OtpDoGlobals.OTP_ZONE_ID_MANAGEMENT)
 
-        self.welcomeValleyManager = WelcomeValleyManagerAI(self)
-        self.welcomeValleyManager.generateWithRequired(OtpDoGlobals.OTP_ZONE_ID_MANAGEMENT)
+        if self.wantWelcomeValley:
+            self.welcomeValleyManager = WelcomeValleyManagerAI(self)
+            self.welcomeValleyManager.generateWithRequired(OtpDoGlobals.OTP_ZONE_ID_MANAGEMENT)
 
         self.inGameNewsMgr = DistributedInGameNewsMgrAI(self)
         self.inGameNewsMgr.generateWithRequired(OtpDoGlobals.OTP_ZONE_ID_MANAGEMENT)
@@ -440,15 +442,15 @@ class ToontownAIRepository(ToontownInternalRepository, ServerBase):
         )
         self.createHood(GZHoodDataAI, ToontownGlobals.GolfZone)
 
-        # Welcome Valley hoods (Toontown Central & Goofy Speedway)
-        self.welcomeValleyManager.createWelcomeValleyHoods()
+        if self.wantWelcomeValley:
+            # Welcome Valley hoods (Toontown Central & Goofy Speedway)
+            self.welcomeValleyManager.createWelcomeValleyHoods()
 
         # Assign the initial suit buildings.
         self.notify.info('Assigning initial Cog buildings and Field Offices...')
 
         for suitPlanner in self.suitPlanners.values():
-            if not ZoneUtil.isWelcomeValley(suitPlanner.zoneId):
-                suitPlanner.assignInitialSuitBuildings()
+            suitPlanner.assignInitialSuitBuildings()
 
         # Let our user know we have finished starting up.
         self.notify.info('{0} has finished starting up.'.format(self.districtName))
