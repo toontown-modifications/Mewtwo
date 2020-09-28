@@ -41,7 +41,7 @@ isLinux = sys.platform == 'linux2'
 if isWindows:
     os.chdir('startup/win32')
 elif isLinux:
-    os.chdir('startup/linux')
+    os.chdir('startup/unix')
 
 for index, elem in enumerate(districtNames):
     subprocess.shell = True
