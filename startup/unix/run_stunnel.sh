@@ -1,4 +1,4 @@
 #!/bin/sh
-cd ../../stunnel/bin
+cd ../../../stunnel/bin
 
 ./start_tstunnel.sh
