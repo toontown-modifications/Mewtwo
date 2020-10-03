@@ -10,21 +10,23 @@ Mewtwo uses a modified fork of Panda3D.
 
 [Linux (x86_64)](https://rocketprogrammer.me/linux/py2.deb)
 
-## Usage
+## Getting Started
 Install the Panda3D using the above installer.
 
-Install required dependencies using the below command.
+Invoke these commands.
 
 * `python -m pip install -r requirements.txt`
+* `cd startup/win32`
+* `run_otpd.bat`
+* `run_server_ext.bat`
+* `run_ai.bat`
 
 ## Credits
-Mewtwo uses multiple open source and/or reverse-engineered components.
-
+* [Astron](https://github.com/Astron/Astron)
 * [ExtAgent](https://github.com/pythonengineer)
 * [Panda3D](https://github.com/rocketprogrammer/panda3d)
-* [libpandadna](https://github.com/rocketprogrammer/panda3d/tree/master/panda/src/toontown)
-* [libotp-movement](https://github.com/open-toontown/libotp-movement)
-* [libotp-nametags](https://github.com/loblao/libotp-nametags)
-* [libtoontown-pets](https://github.com/open-toontown/libtoontown-pets)
 * [Anesidora](https://github.com/satire6/Anesidora)
-* [Disney Interactive](https://disney.com)
+* [DNA](https://github.com/rocketprogrammer/panda3d/tree/master/panda/src/toontown)
+* [Movement](https://github.com/open-toontown/libotp-movement)
+* [Nametags](https://github.com/loblao/libotp-nametags)
+* [Pets](https://github.com/open-toontown/libtoontown-pets)

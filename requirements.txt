@@ -1,0 +1,2 @@
+requests
+mysqlclient==1.3.9
