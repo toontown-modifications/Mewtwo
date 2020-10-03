@@ -16,7 +16,7 @@ Mewtwo is a implementation of Disney's OTP server.
 * `run_server_ext.bat`
 * `run_ai.bat`
 
-## Credits
+## Components
 * [Astron](https://github.com/Astron/Astron)
 * [ExtAgent](https://github.com/pythonengineer)
 * [Panda3D](https://github.com/rocketprogrammer/panda3d)
