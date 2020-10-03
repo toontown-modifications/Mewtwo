@@ -1,6 +1,6 @@
 import requests
 
-banEndpoint = 'https://rocketprogrammer.me/bans/BanAccount.php'
+banEndpoint = 'https://sunrisegames.tech/bans/BanAccount.php'
 
 username = input('Username: ')
 reason = input('Reason for Ban: ')

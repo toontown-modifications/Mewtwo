@@ -4,9 +4,9 @@ Mewtwo
 Mewtwo is a implementation of Disney's OTP server.
 
 ## Panda3D
-[Windows](https://drive.google.com/file/d/1KuAB6FZTMk8D5SqskF-490MxhBqkpqlM)
+[Windows SDK (x86_64)](https://drive.google.com/file/d/1KuAB6FZTMk8D5SqskF-490MxhBqkpqlM)
 
-[Linux](https://rocketprogrammer.me/linux/py2.deb)
+[Linux SDK (x86_64)](https://rocketprogrammer.me/linux/py2.deb)
 
 ## Getting Started
 * `git clone https://gitlab.com/rocketstoontownonline/Game-OTP/Mewtwo`
@@ -17,8 +17,7 @@ Mewtwo is a implementation of Disney's OTP server.
 * `run_ai.bat`
 
 ## Components
-* [Astron](https://github.com/Astron/Astron)
-* [ExtAgent](https://github.com/pythonengineer)
+* [OTP Server](https://gitlab.com/rocketstoontownonline/Game-OTP/OTP-Server)
 * [Panda3D](https://github.com/rocketprogrammer/panda3d)
 * [Anesidora](https://github.com/satire6/Anesidora)
 * [DNA](https://github.com/rocketprogrammer/panda3d/tree/master/panda/src/toontown)
