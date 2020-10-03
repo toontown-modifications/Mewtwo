@@ -3,18 +3,12 @@ Mewtwo
 
 Mewtwo is a implementation of Disney's OTP server.
 
-## Dependencies
-Mewtwo uses a modified fork of Panda3D.
-
-[Windows (x86_64)](https://drive.google.com/file/d/1KuAB6FZTMk8D5SqskF-490MxhBqkpqlM)
-
-[Linux (x86_64)](https://rocketprogrammer.me/linux/py2.deb)
+## Panda3D
+[Windows](https://drive.google.com/file/d/1KuAB6FZTMk8D5SqskF-490MxhBqkpqlM)
+[Linux](https://rocketprogrammer.me/linux/py2.deb)
 
 ## Getting Started
-Install the Panda3D using the above installer.
-
-Invoke these commands.
-
+* `git clone https://gitlab.com/rocketstoontownonline/Game-OTP/Mewtwo`
 * `python -m pip install -r requirements.txt`
 * `cd startup/win32`
 * `run_otpd.bat`
