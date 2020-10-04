@@ -459,7 +459,7 @@ class ExtAgent(ServerBase):
             self.sendSystemMessage(avClientChannel, message)
             self.sendKick(doId, 'Language')
 
-            if not self.isProdServer() and playToken:
+            if self.isProdServer() and playToken:
                 self.banAccount(playToken)
 
             del self.chatOffenses[doId]
@@ -1109,7 +1109,7 @@ class ExtAgent(ServerBase):
             if avId:
                 self.air.dbInterface.updateObject(self.air.dbId, avId, self.air.dclassesByName['DistributedToonUD'], fields)
 
-                if not self.isProdServer():
+                if self.isProdServer():
                     message = Webhook()
                     message.setTitle('Typed name request.')
                     message.setDescription('Avatar with ID {0} has requested name {1}.'.format(avId, name))
