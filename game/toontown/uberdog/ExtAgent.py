@@ -15,7 +15,9 @@ from game import genDNAFileName, extractGroupName
 from game.toontown.friends.FriendsManagerUD import FriendsManagerUD
 from game.toontown.uberdog.ServerBase import ServerBase
 from game.toontown.discord.Webhook import Webhook
-import json, time, os, random, requests
+from Crypto.Cipher import AES
+from Crypto.Util.Padding import unpad
+import json, time, os, random, requests, binascii, base64
 
 class JSONBridge:
 
@@ -84,6 +86,7 @@ class ExtAgent(ServerBase):
         self.clientChannel2handle = {}
         self.dnaStores = {}
         self.chatOffenses = {}
+        self.accId2playToken = {}
 
         self.friendsManager = FriendsManagerUD(self)
 
@@ -114,6 +117,16 @@ class ExtAgent(ServerBase):
             # This is the production server.
             # Send our status.
             self.sendAvailabilityToAPI()
+
+        self.banEndpointBase = 'https://sunrisegames.tech/bans/{0}'
+
+        self.requestHeaders = {
+            'User-Agent': 'Sunrise Games - ExtAgent'
+        }
+
+        self.playTokenDecryptKey = 'eee39eae6e156222a460e240496876f00623ae6b5ad08701209de12ae298fac4'
+
+        self.notify.setInfo(True)
 
     def getWhitelistedAccounts(self):
         with open('data/whitelistedAccounts.json') as data:
@@ -179,6 +192,21 @@ class ExtAgent(ServerBase):
         dg.addServerHeader(clientChannel, self.air.ourChannel, CLIENTAGENT_SEND_DATAGRAM)
         dg.addString(resp.getMessage())
         self.air.send(dg)
+
+    def banAccount(self, playToken):
+        endpoint = self.banEndpointBase.format('BanAccount.php')
+        secretKey = 'jzYEqAZkEP'
+
+        banData = {
+            'username': playToken,
+            'banReason': 'Chat Filter',
+            'secretKey': secretKey
+        }
+
+        request = requests.post(endpoint, banData, headers = self.requestHeaders)
+
+        if request.text == 'Banned account!':
+            self.notify.info('Successfully banned account: {0}.'.format(playToken))
 
     def registerShard(self, shardId, shardName):
         self.shardInfo[shardId] = (shardName, 0)
@@ -248,6 +276,8 @@ class ExtAgent(ServerBase):
         dg.addServerHeader(clientChannel, self.air.ourChannel, CLIENTAGENT_SEND_DATAGRAM)
         dg.addString(resp.getMessage())
         self.air.send(dg)
+
+        self.accId2playToken[accountId] = playToken
 
     def getInStreetBranch(self, zoneId):
         if not ZoneUtil.isPlayground(zoneId):
@@ -397,6 +427,44 @@ class ExtAgent(ServerBase):
             cleanMesssage = cleanMesssage[:modStart] + '*' * (modStop - modStart + 1) + cleanMesssage[modStop + 1:]
 
         return cleanMesssage, modifications
+
+    def filterBlacklist(self, doId, accId, message):
+        avClientChannel = self.air.GetPuppetConnectionChannel(doId)
+        flagged = None
+        playToken = self.accId2playToken.get(accId)
+
+        for word in message.split(' '):
+            cleanWord = self.whiteList.cleanText(word)
+
+            if cleanWord in TTLocalizer.Blacklist:
+                flagged = word
+                break
+
+        if not flagged:
+            return False
+
+        if not doId in self.chatOffenses:
+            self.chatOffenses[doId] = 0
+
+        self.chatOffenses[doId] += 1
+
+        if self.chatOffenses[doId] == 1:
+            message = 'Warning - Watch your language. \nUsing inappropriate words will get you suspended. You said "{0}"'.format(message)
+            self.sendSystemMessage(avClientChannel, message)
+        elif self.chatOffenses[doId] == 2:
+            message = 'Final Warning. If you continue using inappropriate language you will be suspended. You said "{0}"'.format(message)
+            self.sendSystemMessage(avClientChannel, message)
+        elif self.chatOffenses[doId] == 3:
+            message = 'Your account has been suspended for 24 hours for using inappropriate language. You said "{0}"'.format(message)
+            self.sendSystemMessage(avClientChannel, message)
+            self.sendKick(doId, 'Language')
+
+            if not self.isProdServer() and playToken:
+                self.banAccount(playToken)
+
+            del self.chatOffenses[doId]
+
+        return True
 
     def handleDatagram(self, dgi):
         """
@@ -550,21 +618,46 @@ class ExtAgent(ServerBase):
                 self.sendEject(clientChannel, 122, message)
                 return
 
-            if playToken in ['Rocket', 'developer']:
-                # We got ourselves a skid!
-                errorCode = 288
-                message = 'Sorry, you have used up all of your available minutes this month.'
-
-                self.sendBoot(clientChannel, errorCode, message)
-                self.sendEject(clientChannel, errorCode, message)
-                return
-
-            print('{0} is trying to login!'.format(playToken))
+            print('{0} is trying to login!'.format(playToken.decode()))
 
             def callback(remoteIp, remotePort, localIp, localPort):
                 print(remoteIp)
 
             self.air.getNetworkAddress(self.air.getMsgSender(), callback)
+
+            if self.isProdServer():
+                try:
+                    # Decrypt the play token.
+                    key = binascii.unhexlify(self.playTokenDecryptKey)
+                    encrypted = json.loads(base64.b64decode(playToken))
+                    encryptedData = base64.b64decode(encrypted['data'])
+                    iv = base64.b64decode(encrypted['iv'])
+                    cipher = AES.new(key, AES.MODE_CBC, iv)
+                    playToken = unpad(cipher.decrypt(encryptedData), AES.block_size)
+                except:
+                    # Bad play token.
+                    errorCode = 122
+                    message = 'Invalid play token.'
+
+                    self.sendBoot(clientChannel, errorCode, message)
+                    self.sendEject(clientChannel, errorCode, message)
+                    return
+
+            if self.isProdServer():
+                # To prevent skids trying to auth without the stock Disney launcher.
+                # We check if the account is banned here too.
+                # TODO: Find a way to enable TLS 1.3 on Cloudflare once again.
+                endpoint = self.banEndpointBase.format('?username={0}'.format(playToken))
+                banCheck = requests.post(endpoint, headers = self.requestHeaders)
+
+                if 'Your account was banned' in banCheck.text:
+                    # Yup, this account is banned.
+                    errorCode = 120
+                    message = 'Banned account {0} attempted to login!'.format(playToken)
+
+                    self.sendBoot(clientChannel, errorCode, message)
+                    self.sendEject(clientChannel, errorCode, message)
+                    return
 
             if self.wantServerMaintenance and playToken not in self.getWhitelistedAccounts():
                 errorCode = 151
@@ -588,21 +681,6 @@ class ExtAgent(ServerBase):
                 reason = 'Client DC hash mismatch: client=%s, server=%s' % (hashVal, self.air.hashVal)
                 self.sendEject(clientChannel, 122, reason)
                 return
-
-            if self.isProdServer():
-                # To prevent skids trying to auth without the stock Disney launcher.
-                # We check if the account is banned here too.
-                # TODO: Find a way to enable TLS 1.3 on Cloudflare once again.
-                banCheck = requests.post('https://sunrisegames.tech/bans/?username={0}'.format(playToken))
-
-                if 'Your account was banned' in banCheck.text:
-                    # Yup, this account is banned.
-                    errorCode = 120
-                    message = 'Banned account {0} attempted to login!'.format(playToken)
-
-                    self.sendBoot(clientChannel, errorCode, message)
-                    self.sendEject(clientChannel, errorCode, message)
-                    return
 
             # Check if this play token exists in the bridge.
             accountId = self.bridge.query(playToken)
@@ -648,11 +726,10 @@ class ExtAgent(ServerBase):
                                               createLoginResponse)
         elif msgType == 24: # CLIENT_OBJECT_UPDATE_FIELD
             # Certain fields need to be handled specifically...
-            # The only example of this right now is setTalk.
+            # The only example of this right now are setTalk and setTalkWhisper.
             doId = dgi.getUint32()
             fieldNumber = dgi.getUint16()
             dcData = dgi.getRemainingBytes()
-            avClientChannel = self.air.GetPuppetConnectionChannel(doId)
 
             if fieldNumber == 103: # setTalk field
                 # We'll have to unpack the data and send our own datagrams.
@@ -678,28 +755,12 @@ class ExtAgent(ServerBase):
                     self.air.netMessenger.send('magicWord', [message, doId])
                     return
 
-                cleanMessage, modifications = self.filterWhiteList(message)
+                blacklisted = self.filterBlacklist(doId, int(self.air.getAccountIdFromSender()), message)
 
-                # TODO: Fix this
-                if self.wantBlacklistWarnings:
-                    for word in words:
-                        if word.lower() in TTLocalizer.Blacklist:
-                            if not doId in self.chatOffenses:
-                                self.chatOffenses[doId] = 0
-
-                        self.chatOffenses[doId] += 1
-
-                        if self.chatOffenses[doId] == 1:
-                            message = 'Warning - Watch your language. \nUsing inappropriate words will get you suspended. You said "{0}"'.format(message)
-                            self.sendSystemMessage(avClientChannel, message)
-                        elif self.chatOffenses[doId] == 2:
-                            message = 'Final Warning. If you continue using inappropriate language you will be suspended. You said "{0}"'.format(message)
-                            self.sendSystemMessage(avClientChannel, message)
-                        elif self.chatOffenses[doId] == 3:
-                            message = 'Your account has been suspended for 24 hours for using inappropriate language. You said "{0}"'.format(message)
-                            self.sendSystemMessage(avClientChannel, message)
-                            self.sendKick(doId, 'Language')
-                            del self.chatOffenses[doId]
+                if blacklisted:
+                    cleanMessage, modifications = '', []
+                else:
+                    cleanMessage, modifications = self.filterWhiteList(message)
 
                 # Construct a new aiFormatUpdate.
                 resp = toon.aiFormatUpdate('setTalk', doId, doId,
@@ -1069,7 +1130,6 @@ class ExtAgent(ServerBase):
             dg.addServerHeader(clientChannel, self.air.ourChannel, CLIENTAGENT_SEND_DATAGRAM)
             dg.addString(resp.getMessage())
             self.air.send(dg)
-
         elif msgType == 97: # CLIENT_ADD_INTEREST
             # Reformat the packets for the CA.
             handle = dgi.getUint16()
