@@ -618,13 +618,6 @@ class ExtAgent(ServerBase):
                 self.sendEject(clientChannel, 122, message)
                 return
 
-            print('{0} is trying to login!'.format(playToken.decode()))
-
-            def callback(remoteIp, remotePort, localIp, localPort):
-                print(remoteIp)
-
-            self.air.getNetworkAddress(self.air.getMsgSender(), callback)
-
             if self.isProdServer():
                 try:
                     # Decrypt the play token.
@@ -642,6 +635,13 @@ class ExtAgent(ServerBase):
                     self.sendBoot(clientChannel, errorCode, message)
                     self.sendEject(clientChannel, errorCode, message)
                     return
+
+            print('{0} is trying to login!'.format(playToken))
+
+            def callback(remoteIp, remotePort, localIp, localPort):
+                print(remoteIp)
+
+            self.air.getNetworkAddress(self.air.getMsgSender(), callback)
 
             if self.isProdServer():
                 # To prevent skids trying to auth without the stock Disney launcher.
