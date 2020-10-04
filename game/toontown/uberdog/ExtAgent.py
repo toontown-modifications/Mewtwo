@@ -14,6 +14,7 @@ from panda3d.toontown import DNAStorage, loadDNAFileAI
 from game import genDNAFileName, extractGroupName
 from game.toontown.friends.FriendsManagerUD import FriendsManagerUD
 from game.toontown.uberdog.ServerBase import ServerBase
+from game.toontown.discord.Webhook import Webhook
 import json, time, os, random, requests
 
 class JSONBridge:
@@ -123,7 +124,7 @@ class ExtAgent(ServerBase):
         if config.GetBool('want-localhost-api-testing', False):
             apiBase = '127.0.0.1'
         else:
-            apiBase = 'otp-gs.rocketprogrammer.me'
+            apiBase = 'otp-gs.sunrisegames.tech'
 
         data = {
             'token': config.GetString('api-token', ''),
@@ -302,31 +303,37 @@ class ExtAgent(ServerBase):
             # Prepare the potential avatar datagram for the client.
             resp = PyDatagram()
             resp.addUint16(5) # CLIENT_GET_AVATARS_RESP
-            resp.addUint8(0)
-            resp.addUint16(len(avatarFields))
+            resp.addUint8(0) # returnCode
+            resp.addUint16(len(avatarFields)) # avatarTotal
 
             for avId, fields in avatarFields.iteritems():
                 # Get the basic avatar fields the client needs.
                 index = avList.index(avId)
-                wishName = ''
                 wishNameState = fields.get('WishNameState', [''])[0]
                 name = fields['setName'][0]
+
+                names = [name, '', '', '']
                 allowedName = 0
+
                 if wishNameState == 'OPEN':
                     allowedName = 1
+                elif wishNameState == 'PENDING':
+                    names[1] = name
                 elif wishNameState == 'APPROVED':
-                    name = fields['WishName'][0]
+                    names[2] = fields['WishName'][0]
                 elif wishNameState == 'REJECTED':
-                    allowedName = 1
+                    names[3] = name
 
-                resp.addUint32(avId)
-                resp.addString(name)
-                resp.addString('')
-                resp.addString('')
-                resp.addString('')
-                resp.addString(fields['setDNAString'][0])
-                resp.addUint8(index)
-                resp.addUint8(0)
+                resp.addUint32(avId) # avatarId
+
+                resp.addString(name) # name
+                resp.addString(names[1]) # wantName
+                resp.addString(names[2]) # approvedName
+                resp.addString(names[3]) # rejectedName
+
+                resp.addString(fields['setDNAString'][0]) # avDNA
+                resp.addUint8(index) # avPosition
+                resp.addUint8(allowedName) # aName
 
             dg = PyDatagram()
             dg.addServerHeader(clientChannel, self.air.ourChannel, CLIENTAGENT_SEND_DATAGRAM)
@@ -586,7 +593,7 @@ class ExtAgent(ServerBase):
                 # To prevent skids trying to auth without the stock Disney launcher.
                 # We check if the account is banned here too.
                 # TODO: Find a way to enable TLS 1.3 on Cloudflare once again.
-                banCheck = requests.post('https://rocketprogrammer.me/bans/?username={0}'.format(playToken))
+                banCheck = requests.post('https://sunrisegames.tech/bans/?username={0}'.format(playToken))
 
                 if 'Your account was banned' in banCheck.text:
                     # Yup, this account is banned.
@@ -1034,22 +1041,28 @@ class ExtAgent(ServerBase):
 
             # If we have a avId, update the Avatar object with the new wish name.
             fields = {
-                'WishNameState': ('APPROVED',),
-                'WishName': (name,),
-                'setName': (name,),
+                'WishNameState': ('PENDING',),
+                'WishName': (name,)
                 }
 
             if avId:
                 self.air.dbInterface.updateObject(self.air.dbId, avId, self.air.dclassesByName['DistributedToonUD'], fields)
 
+                if not self.isProdServer():
+                    message = Webhook()
+                    message.setTitle('Typed name request.')
+                    message.setDescription('Avatar with ID {0} has requested name {1}.'.format(avId, name))
+                    message.setColor(1127128)
+                    message.send()
+
             # Prepare the wish name response.
             resp = PyDatagram()
             resp.addUint16(71) # CLIENT_SET_WISHNAME_RESP
             resp.addUint32(avId)
-            resp.addUint16(0)
-            resp.addString('')
-            resp.addString(name)
-            resp.addString('')
+            resp.addUint16(0) # returnCode
+            resp.addString(name) # pendingName
+            resp.addString('') # approvedName
+            resp.addString('') # rejectedName
 
             # Send it.
             dg = PyDatagram()
@@ -1299,7 +1312,7 @@ class ExtAgent(ServerBase):
                         self.sendEject(clientChannel, 122, 'Database failed to mark the avatar as removed!')
                         return
 
-                # We can now update the account with the new data. __handleRemove is the
+                # We can now update the account with the new data. handleRemove is the
                 # callback which will be called upon completion of updateObject.
                 self.air.dbInterface.updateObject(self.air.dbId, target, self.air.dclassesByName['AccountUD'], newFields, oldFields, handleRemove)
 
@@ -1344,6 +1357,38 @@ class ExtAgent(ServerBase):
             dg.addServerHeader(clientChannel, self.air.ourChannel, CLIENTAGENT_SEND_DATAGRAM)
             dg.addString(resp.getMessage())
             self.air.send(dg)
+        elif msgType == 72: # CLIENT_SET_WISHNAME_CLEAR
+            avatarId = dgi.getUint32()
+            actionFlag = dgi.getUint8()
+
+            def handleRetrieve(dclass, fields):
+                toonDclass = self.air.dclassesByName['DistributedToonUD']
+
+                if dclass != toonDclass:
+                    # This is not an Avatar object.
+                    self.sendEject(clientChannel, 122, 'An Avatar object was not retrieved.')
+                    return
+
+                if actionFlag == 1:
+                    # This name was approved.
+                    # Set their name.
+                    fields = {
+                        'WishNameState': ('',),
+                        'WishName': ('',),
+                        'setName': (fields['WishName'][0],)
+                    }
+                else:
+                    # This name was rejected.
+                    # Set them to the OPEN state so they can try again.
+                    fields = {
+                        'WishNameState': ('OPEN',),
+                        'WishName': ('',)
+                    }
+
+                simbase.air.dbInterface.updateObject(simbase.air.dbId, avatarId, toonDclass, fields)
+
+            # Query the avatar.
+            self.air.dbInterface.queryObject(self.air.dbId, avatarId, handleRetrieve)
         else:
             self.notify.warning('Received unknown message type %s from Client' % msgType)
 
