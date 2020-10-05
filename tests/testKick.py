@@ -1,10 +1,14 @@
-import socket, base64, json
+from panda3d.core import loadPrcFile
+from direct.showbase import DConfig
+import socket, json
+
+loadPrcFile('../config/Config.prc')
 
 kickRequest = {
     'whatToDo': 'kickRequest',
     'reason': 'You are a pathetic skid.',
     'avId': 100000004,
-    'signature': base64.b64decode('UGxlYXNlRG9Ob3RBYnVzZVRoaXNGdW5jdGlvbg==')
+    'signature': DConfig.GetString('discord-integration-sig')
 }
 
 request = json.dumps(kickRequest)

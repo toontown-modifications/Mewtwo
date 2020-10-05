@@ -1,9 +1,13 @@
-import socket, base64, json
+from panda3d.core import loadPrcFile
+from direct.showbase import DConfig
+import socket, json
+
+loadPrcFile('../config/Config.prc')
 
 messageRequest = {
     'whatToDo': 'systemMessage',
     'message': 'System message test from Twisted server.',
-    'signature': base64.b64decode('UGxlYXNlRG9Ob3RBYnVzZVRoaXNGdW5jdGlvbg==')
+    'signature': DConfig.GetString('discord-integration-sig')
 }
 
 request = json.dumps(messageRequest)

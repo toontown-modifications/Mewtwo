@@ -29,7 +29,7 @@ class DiscordIntegrationServer:
 
             whatToDo = data['whatToDo']
             signature = data['signature']
-            actualSignature = 'PleaseDoNotAbuseThisFunction'
+            actualSignature = config.GetString('discord-integration-sig')
 
             if signature != actualSignature:
                 # Skid, log the attempt.
