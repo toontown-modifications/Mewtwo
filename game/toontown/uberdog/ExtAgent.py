@@ -193,8 +193,9 @@ class ExtAgent(ServerBase):
         dg.addString(resp.getMessage())
         self.air.send(dg)
 
-    def banAccount(self, playToken):
+    def banAccount(self, playToken, message):
         endpoint = self.banEndpointBase.format('BanAccount.php')
+        emailDispatchEndpoint = self.banEndpointBase.format('ChatBanEmail.php')
         secretKey = 'jzYEqAZkEP'
 
         banData = {
@@ -203,10 +204,19 @@ class ExtAgent(ServerBase):
             'secretKey': secretKey
         }
 
-        request = requests.post(endpoint, banData, headers = self.requestHeaders)
+        emailData = {
+            'playToken': playToken,
+            'chatMessages': message,
+            'secretKey': secretKey
+        }
 
-        if request.text == 'Banned account!':
+        banRequest = requests.post(endpoint, banData, headers = self.requestHeaders)
+        emailRequest = requests.post(emailDispatchEndpoint, emailData, headers = self.requestHeaders)
+
+        if banRequest.text == 'Banned account!':
             self.notify.info('Successfully banned account: {0}.'.format(playToken))
+        elif emailRequest.text == 'Successfully dispatched email!':
+            self.notify.info('Successfully sent ban email!')
 
     def registerShard(self, shardId, shardName):
         self.shardInfo[shardId] = (shardName, 0)
@@ -460,7 +470,7 @@ class ExtAgent(ServerBase):
             self.sendKick(doId, 'Language')
 
             if self.isProdServer() and playToken:
-                self.banAccount(playToken)
+                self.banAccount(playToken, message)
 
             del self.chatOffenses[doId]
 
