@@ -1223,11 +1223,18 @@ class ExtAgent(ServerBase):
             resp.addUint32(dgi.getUint32())
             resp.addUint32(dgi.getUint32())
             self.air.send(resp)
-        elif msgType == 14: # CLIENT_GET_AVATAR_DETAILS
-            avatarId = dgi.getUint32()
+        elif msgType in (14, 81): # CLIENT_GET_AVATAR_DETAILS, CLIENT_GET_PET_DETAILS
+            if msgType == 14:
+                dclassName = 'DistributedToonUD'
+                sendId = 15 # CLIENT_GET_AVATAR_DETAILS_RESP
+            elif msgType == 14:
+                dclassName = 'DistributedPetAI'
+                sendId = 82 # CLIENT_GET_PET_DETAILS_RESP
 
-            def handleAvatar(dclass, fields):
-                if dclass != self.air.dclassesByName['DistributedToonUD']:
+            doId = dgi.getUint32()
+
+            def handleRetrieve(dclass, fields):
+                if dclass != self.air.dclassesByName[dclassName]:
                     return
 
                 requiredPacker = DCPacker()
@@ -1253,12 +1260,12 @@ class ExtAgent(ServerBase):
                         otherPacker.endPack()
                         otherCount += 1
 
-                # Our avatar details response.
+                # Our details response.
                 resp = PyDatagram()
 
-                resp.addUint16(15) # CLIENT_GET_AVATAR_DETAILS_RESP
+                resp.addUint16(sendId)
 
-                resp.addUint32(avatarId)
+                resp.addUint32(doId)
                 resp.addUint8(0)
                 resp.appendData(requiredPacker.getString())
                 resp.appendData(otherPacker.getString())
@@ -1269,54 +1276,7 @@ class ExtAgent(ServerBase):
                 dg.addString(resp.getMessage())
                 self.air.send(dg)
 
-            self.air.dbInterface.queryObject(self.air.dbId, avatarId, handleAvatar)
-        elif msgType == 81: # CLIENT_GET_PET_DETAILS
-            petId = dgi.getUint32()
-
-            def handlePet(dclass, fields):
-                if dclass != self.air.dclassesByName['DistributedPetAI']:
-                    return
-
-                requiredPacker = DCPacker()
-                otherCount = 0
-                otherPacker = DCPacker()
-
-                for f in range(dclass.getNumInheritedFields()):
-                    field = dclass.getInheritedField(f)
-
-                    if field.isRequired():
-                        requiredPacker.beginPack(field)
-                        if field.getName() in fields:
-                            field.packArgs(requiredPacker, fields[field.getName()])
-                        else:
-                            requiredPacker.packDefaultValue()
-
-                        requiredPacker.endPack()
-
-                    elif field.isRam() and field.getName() in fields:
-                        otherPacker.rawPackUint16(field.getNumber())
-                        otherPacker.beginPack(field)
-                        field.packArgs(otherPacker, fields[field.getName()])
-                        otherPacker.endPack()
-                        otherCount += 1
-
-                # Our pet details response.
-                resp = PyDatagram()
-
-                resp.addUint16(82) # CLIENT_GET_PET_DETAILS_RESP
-
-                resp.addUint32(petId)
-                resp.addUint8(0)
-                resp.appendData(requiredPacker.getString())
-                resp.appendData(otherPacker.getString())
-
-                # Send it.
-                dg = PyDatagram()
-                dg.addServerHeader(clientChannel, self.air.ourChannel, CLIENTAGENT_SEND_DATAGRAM)
-                dg.addString(resp.getMessage())
-                self.air.send(dg)
-
-            self.air.dbInterface.queryObject(self.air.dbId, petId, handlePet)
+            self.air.dbInterface.queryObject(self.air.dbId, doId, handleRetrieve)
         elif msgType == 56: # CLIENT_REMOVE_FRIEND
             avId = self.air.getAvatarIdFromSender()
 
@@ -1389,26 +1349,7 @@ class ExtAgent(ServerBase):
                 self.getAvatars(clientChannel)
 
             self.air.dbInterface.queryObject(self.air.dbId, target, handleRetrieve)
-        elif msgType == 78: # CLIENT_SYSTEM_MESSAGE
-            try:
-                message = dgi.getString()
-            except:
-                message = 'You have been ejected for attempting to send a incorrectly formatted datagram.'
-                self.sendBoot(clientChannel, 122, message)
-                self.sendEject(clientChannel, 122, message)
-                return
-
-            resp = PyDatagram()
-            resp.addUint16(msgType)
-
-            resp.addString(message)
-
-            # Dispatch the response to the client.
-            dg = PyDatagram()
-            dg.addServerHeader(clientChannel, self.air.ourChannel, CLIENTAGENT_SEND_DATAGRAM)
-            dg.addString(resp.getMessage())
-            self.air.send(dg)
-        elif msgType == 123: # CLIENT_SYSTEMMESSAGE_AKNOWLEDGE
+        elif msgType in (78, 123): # CLIENT_SYSTEM_MESSAGE, CLIENT_SYSTEMMESSAGE_AKNOWLEDGE
             try:
                 message = dgi.getString()
             except:
