@@ -1120,9 +1120,20 @@ class ExtAgent(ServerBase):
                 self.air.dbInterface.updateObject(self.air.dbId, avId, self.air.dclassesByName['DistributedToonUD'], fields)
 
                 if self.isProdServer():
+                    fields = [{
+                        'name': 'Avatar Id',
+                        'value': avId,
+                        'inline': True
+                    },
+                    {
+                        'name': 'Name',
+                        'value': name,
+                        'inline': True
+                    }]
+
                     message = Webhook()
-                    message.setTitle('Typed name request.')
-                    message.setDescription('Avatar with ID {0} has requested name {1}.'.format(avId, name))
+                    message.setDescription('A new toon has requested a typed name!')
+                    message.setFields(fields)
                     message.setColor(1127128)
                     message.send()
 

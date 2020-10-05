@@ -10,6 +10,7 @@ class Webhook:
         self.title = ''
         self.description = ''
         self.color = 0
+        self.fields = []
 
     def setTitle(self, title):
         self.title = title
@@ -29,16 +30,25 @@ class Webhook:
     def getColor(self):
         return self.color
 
+    def setFields(self, fields):
+        self.fields = fields
+
+    def getFields(self):
+        return self.fields
+
     def send(self):
-        data = {
-            'embeds': [
-                {
-                    'title': self.getTitle(),
-                    'description': self.getDescription(),
-                    'color': self.getColor()
-                }
-            ]
-        }
+        data = {}
+
+        data['embeds'] = []
+        embed = {}
+
+        embed['title'] = self.getTitle()
+        embed['description'] = self.getDescription()
+        embed['color'] = self.getColor()
+
+        embed['fields'] = self.getFields()
+
+        data['embeds'].append(embed)
 
         request = requests.post(self.webhookUrl, json = data)
 
