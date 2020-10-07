@@ -7,7 +7,7 @@ import asyncio, requests
 
 deleteEndpoint = 'http://download.sunrisegames.tech/api/authDelete'
 usernameAvailabilityEndpoint = 'https://demo.sunrisegames.tech/checkUsernameAvailability'
-regEndpoint = 'https://demo.sunrisegames.tech/register/regDisney.php'
+regEndpoint = 'https://demo.sunrisegames.tech/register'
 
 headers = {
     'User-Agent': 'Sunrise Games - EndpointManager'
