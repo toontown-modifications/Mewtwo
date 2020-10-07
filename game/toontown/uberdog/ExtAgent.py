@@ -647,7 +647,17 @@ class ExtAgent(ServerBase):
                     self.sendEject(clientChannel, errorCode, message)
                     return
 
-            print('{0} is trying to login!'.format(playToken))
+            field = {
+                'name': 'Playtoken',
+                'value': playToken,
+                'inline': True
+            }
+
+            message = Webhook()
+            message.setDescription('Someone is trying to login!')
+            message.setFields(field)
+            message.setColor(1127128)
+            message.send()
 
             def callback(remoteIp, remotePort, localIp, localPort):
                 print(remoteIp)
