@@ -107,6 +107,7 @@ class ExtAgent(ServerBase):
         self.wantServerMaintenance = config.GetBool('want-server-maintenance', False)
         self.wantMembership = config.GetBool('want-membership', False)
         self.wantBlacklistWarnings = config.GetBool('want-blacklist-warnings', False)
+        self.wantPartialProd = config.GetBool('want-partial-prod', False)
 
         self.databasePath = 'otpd/databases/otpdb'
 
@@ -1119,7 +1120,7 @@ class ExtAgent(ServerBase):
             if avId:
                 self.air.dbInterface.updateObject(self.air.dbId, avId, self.air.dclassesByName['DistributedToonUD'], fields)
 
-                if self.isProdServer():
+                if self.isProdServer() or self.wantPartialProd:
                     fields = [{
                         'name': 'Avatar Id',
                         'value': avId,

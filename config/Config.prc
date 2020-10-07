@@ -29,6 +29,7 @@ server-type dev
 want-welcome-valley false
 discord-webhook-url https://canary.discordapp.com/api/webhooks/762088157155819522/gpKHMJ3eoOCC4pB2p-6W2hhNRnAUnlF2EouGUHKOvC9U1zsVXsppk-K9vJ0CMIbULFpn
 discord-integration-sig SOB0GLTKBTlpqt0O4nUiwl1EMlKVz6x5
+want-partial-prod false
 
 max-code-redemption-attempts 5
 
