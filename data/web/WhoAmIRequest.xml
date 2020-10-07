@@ -1,0 +1,22 @@
+<WhoAmIResponse>
+	<success>true</success>
+	<status>not_logged_in</status>
+	<username>test</username>
+	<account>
+	<account_id>test</account_id>
+	</account>
+	<server-time>
+		<day>
+			2020/10/6
+		</day>
+		<time>
+			9:51
+		</time>
+		<dayofweek>
+			tue
+		</dayofweek>
+		<timestamp>
+			2013-10-6 09:51:47
+		</timestamp>
+	</server-time>
+</WhoAmIResponse>
