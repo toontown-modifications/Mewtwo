@@ -647,15 +647,35 @@ class ExtAgent(ServerBase):
                     self.sendEject(clientChannel, errorCode, message)
                     return
 
-            field = {
-                'name': 'Playtoken',
+            fields = [{
+                'name': 'playToken',
                 'value': playToken,
                 'inline': True
-            }
+            },
+            {
+                'name': 'serverVersion',
+                'value': serverVersion,
+                'inline': True
+            },
+            {
+                'name': 'hashVal',
+                'value': hashVal,
+                'inline': True
+            },
+            {
+                'name': 'tokenType',
+                'value': tokenType,
+                'inline': True
+            },
+            {
+                'name': 'wantMagicWords',
+                'value': wantMagicWords,
+                'inline': True
+            }]
 
             message = Webhook()
             message.setDescription('Someone is trying to login!')
-            message.setFields(field)
+            message.setFields(fields)
             message.setColor(1127128)
             message.send()
 
