@@ -903,7 +903,10 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
         elif magicWord == 'setgm':
             if not validation:
                 return
-            self.d_setGM(avId, gmType = int(args[0]))
+            try:
+                self.d_setGM(avId, gmType = int(args[0]))
+            except ValueError:
+                self.sendResponseMessage(avId, 'Invalid parameters.')
         elif magicWord == 'skipvp':
             if not validation:
                 return

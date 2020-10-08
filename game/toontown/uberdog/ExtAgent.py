@@ -219,6 +219,40 @@ class ExtAgent(ServerBase):
         elif emailRequest.text == 'Successfully dispatched email!':
             self.notify.info('Successfully sent ban email!')
 
+    def approveName(self, avId):
+        toonDC = simbase.air.dclassesByName['DistributedToonUD']
+
+        def handleAvatar(dclass, fields):
+            if dclass != toonDC:
+                return
+
+            pendingName = fields['WishName'][0]
+
+            fields = {
+                'WishNameState': ('APPROVED',)
+                }
+
+            simbase.air.dbInterface.updateObject(simbase.air.dbId, avId, toonDC, fields)
+
+        # Query the avatar to get the pending name.
+        simbase.air.dbInterface.queryObject(simbase.air.dbId, avId, handleAvatar)
+
+    def rejectName(self, avId):
+        toonDC = simbase.air.dclassesByName['DistributedToonUD']
+
+        def handleAvatar(dclass, fields):
+            if dclass != toonDC:
+                return
+
+            fields = {
+                'WishNameState': ('REJECTED',)
+                }
+
+            simbase.air.dbInterface.updateObject(simbase.air.dbId, avId, toonDC, fields)
+
+        # Query the avatar to get the pending name.
+        simbase.air.dbInterface.queryObject(simbase.air.dbId, avId, handleAvatar)
+
     def registerShard(self, shardId, shardName):
         self.shardInfo[shardId] = (shardName, 0)
 

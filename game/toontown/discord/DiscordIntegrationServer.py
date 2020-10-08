@@ -46,6 +46,14 @@ class DiscordIntegrationServer:
 
                 for clientChannel in channels:
                     simbase.air.extAgent.sendSystemMessage(clientChannel, message)
+            elif whatToDo == 'approveName':
+                avId = int(data['avId'])
+
+                simbase.air.extAgent.approveName(avId)
+            elif whatToDo == 'rejectName':
+                avId = int(data['avId'])
+
+                simbase.air.extAgent.rejectName(avId)
 
     def startServer(self):
         serverThread = thread.start_new_thread(self.setupServer, ())
