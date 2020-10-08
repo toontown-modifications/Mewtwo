@@ -27,7 +27,7 @@ whitelist-stage-dir game/whitelist
 api-token QrLEtq3CCWEax3M2
 server-type dev
 want-welcome-valley false
-discord-webhook-url https://canary.discordapp.com/api/webhooks/762088157155819522/gpKHMJ3eoOCC4pB2p-6W2hhNRnAUnlF2EouGUHKOvC9U1zsVXsppk-K9vJ0CMIbULFpn
+discord-webhook-url https://canary.discord.com/api/webhooks/763881621815296010/NWqqmo7NllIb1XzEcVK8qBW3TKR_NPNNR3Pr529vAjo7lsgOcekQj9JZVTb6zApjFH_F
 discord-integration-sig SOB0GLTKBTlpqt0O4nUiwl1EMlKVz6x5
 want-partial-prod true
 
