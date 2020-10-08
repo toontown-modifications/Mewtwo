@@ -1,9 +1,8 @@
-# This is a hacky solution.
-# I cannot get the authDelete parameters from the request in PHP.
-# This is used for other Disney endpoints, too.
+# This is a hacky solution for Disney endpoints.
+# I cannot get parameters from the endpoint requests in PHP.
 
 from aiohttp import web
-import asyncio, requests
+import asyncio, requests, lxml.etree as et, random
 
 deleteEndpoint = 'http://download.sunrisegames.tech/api/authDelete'
 usernameAvailabilityEndpoint = 'https://demo.sunrisegames.tech/checkUsernameAvailability'
@@ -24,8 +23,6 @@ async def login(request):
 
 async def AccountLoginRequest(request):
     args = await request.post()
-
-    print('e')
 
     response = open('data/web/AccountLoginRequest.xml', 'r').read()
 
@@ -92,14 +89,46 @@ async def checkUsernameAvailability(request):
         'siteCode': siteCode
     }
 
-    requestGet = requests.get(usernameAvailabilityEndpoint, data, headers = headers)
+    requestResponse = requests.get(usernameAvailabilityEndpoint, data, headers = headers).text
 
-    if requestGet.text == '1':
-        response = open('data/web/success.xml', 'r').read()
+    root = et.Element('config')
+
+    if requestResponse == 1:
+        success = 'true'
     else:
-        response = open('data/web/fail.xml', 'r').read()
+        success = 'false'
+        resultsRoot = et.SubElement(root, 'results')
 
-    if requestGet.text in ('0', '1'):
+        words = [
+            'Amazing',
+            'Cool',
+            'Super',
+            'Fantastic'
+        ]
+
+        suggestedUsername1 = '{0}{1}'.format(username, random.randint(1, 100))
+        suggestedUsername2 = '{0}{1}'.format(username, random.randint(1, 100))
+        suggestedUsername3 = '{0}{1}'.format(random.choice(words), username)
+
+        resultsFields = [
+            ('suggestedUsername1', suggestedUsername1),
+            ('suggestedUsername2', suggestedUsername2),
+            ('suggestedUsername3', suggestedUsername3)
+        ]
+
+        for key, value in resultsFields:
+            et.SubElement(resultsRoot, key).text = value
+
+    fields = [
+        ('success', success)
+    ]
+
+    for key, value in fields:
+        et.SubElement(root, key).text = value
+
+    response = et.tostring(root, pretty_print = True).decode()
+
+    if requestResponse in ('0', '1'):
         return web.Response(text = response)
 
 async def handleAuthDelete(request):
