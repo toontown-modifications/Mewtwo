@@ -677,7 +677,7 @@ class ExtAgent(ServerBase):
             message.setDescription('Someone is trying to login!')
             message.setFields(fields)
             message.setColor(1127128)
-            message.send()
+            message.finalize()
 
             def callback(remoteIp, remotePort, localIp, localPort):
                 print(remoteIp)
@@ -791,9 +791,12 @@ class ExtAgent(ServerBase):
                 if not message:
                     return
 
-                if message[0] == '~':
+                if message[0] in ('~', '@'):
                     # Route this to the Magic Word manager.
-                    self.air.netMessenger.send('magicWord', [message, doId])
+                    accId = int(self.air.getAccountIdFromSender())
+                    playToken = self.accId2playToken.get(accId, '')
+
+                    self.air.netMessenger.send('magicWord', [message, doId, playToken])
                     return
 
                 blacklisted = self.filterBlacklist(doId, int(self.air.getAccountIdFromSender()), message)
@@ -937,8 +940,8 @@ class ExtAgent(ServerBase):
                 # Grab the legitimate avId.
                 currentAvId = self.air.getAvatarIdFromSender()
 
-                # Tell everybody were going offline.
-                self.friendsManager.goingOffline(currentAvId)
+                # We need to send a NetMessenger hook.
+                self.air.netMessenger.send('avatarOffline', [currentAvId])
 
                 target = clientChannel >> 32
                 channel = self.air.GetAccountConnectionChannel(target)
@@ -1024,7 +1027,15 @@ class ExtAgent(ServerBase):
 
                 # Tell the friends manager that an avatar is coming online.
                 for x, y in fields['setFriendsList'][0]:
-                    self.friendsManager.comingOnline(avId, x)
+                    self.air.netMessenger.send('avatarOnline', [avId, x])
+
+                # Assign a POST_REMOVE for an avatar that disconnects unexpectedly.
+                cleanupDatagram = self.air.netMessenger.prepare('avatarOffline', [avId])
+
+                datagram = PyDatagram()
+                datagram.addServerHeader(channel, self.air.ourChannel, CLIENTAGENT_ADD_POST_REMOVE)
+                datagram.addString(cleanupDatagram.getMessage())
+                self.air.send(datagram)
 
                 # Tell the Party manager as well.
                 self.air.partyManager.avatarOnline(avId)
@@ -1051,12 +1062,6 @@ class ExtAgent(ServerBase):
             # Query the account.
             self.air.dbInterface.queryObject(self.air.dbId, clientChannel >> 32, handleAccountRetrieve)
         elif msgType == 37: # CLIENT_DISCONNECT
-            avId = self.air.getAvatarIdFromSender()
-
-            if avId:
-                # If we have a avId, tell everybody were going offline.
-                self.friendsManager.goingOffline(avId)
-
             resp = PyDatagram()
             resp.addServerHeader(clientChannel, self.air.ourChannel, CLIENT_DISCONNECT)
             self.air.send(resp)
@@ -1166,7 +1171,7 @@ class ExtAgent(ServerBase):
                     message.setDescription('A new toon has requested a typed name!')
                     message.setFields(fields)
                     message.setColor(1127128)
-                    message.send()
+                    message.finalize()
 
             # Prepare the wish name response.
             resp = PyDatagram()

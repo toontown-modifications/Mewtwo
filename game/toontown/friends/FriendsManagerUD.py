@@ -194,6 +194,9 @@ class FriendsManagerUD:
         self.operations = {}
         self.avBasicInfoCache = {}
 
+        self.air.air.netMessenger.accept('avatarOnline', self, self.comingOnline)
+        self.air.air.netMessenger.accept('avatarOffline', self, self.goingOffline)
+
     def deleteOperation(self, avId):
         operation = self.operations.get(avId)
         if not operation:

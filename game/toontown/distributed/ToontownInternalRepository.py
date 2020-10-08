@@ -18,6 +18,9 @@ class ToontownInternalRepository(AstronInternalRepository):
     def handleConnected(self):
         AstronInternalRepository.handleConnected(self)
 
+        self.netMessenger.register(3, 'avatarOnline')
+        self.netMessenger.register(4, 'avatarOffline')
+
         if self.isUber:
             from game.toontown.uberdog.ExtAgent import ExtAgent
 

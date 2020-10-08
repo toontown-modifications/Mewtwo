@@ -16,7 +16,7 @@ want-server-debugging false
 want-do-live-updates true
 want-delivery-manager false
 want-server-maintenance false
-want-discord-integration true
+want-discord-integration false
 want-blacklist-warnings false
 want-parties true
 want-localhost-api-testing false

@@ -36,7 +36,7 @@ class ToontownServerRepositoryAgent(ToontownInternalRepository):
         self.notify.info('Generating managers...')
         self.generateManagers()
 
-        self.notify.info('UberDOG is now ready.')
+        self.notify.info('Server is now ready.')
 
     def createRootObject(self):
         rootObj = DistributedDirectoryAI(self)

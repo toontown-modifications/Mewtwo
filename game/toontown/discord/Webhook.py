@@ -1,5 +1,5 @@
 from direct.directnotify.DirectNotifyGlobal import directNotify
-import requests
+import requests, thread
 
 class Webhook:
     notify = directNotify.newCategory('Webhook')
@@ -36,7 +36,13 @@ class Webhook:
     def getFields(self):
         return self.fields
 
-    def send(self):
+    def send(self, data):
+        request = requests.post(self.webhookUrl, json = data)
+
+        if request.status_code == 204:
+            self.notify.info('Successfully sent webhook!')
+
+    def finalize(self):
         data = {}
 
         data['embeds'] = []
@@ -50,7 +56,4 @@ class Webhook:
 
         data['embeds'].append(embed)
 
-        request = requests.post(self.webhookUrl, json = data)
-
-        if request.status_code == 204:
-            self.notify.info('Successfully sent webhook!')
+        webhookThread = thread.start_new_thread(self.send, (data,))

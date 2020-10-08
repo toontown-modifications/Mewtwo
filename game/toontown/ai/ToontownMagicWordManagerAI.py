@@ -23,7 +23,7 @@ from game.toontown.effects import FireworkShows
 from game.toontown.effects.DistributedFireworkShowAI import DistributedFireworkShowAI
 from game.toontown.pets.DistributedPetAI import DistributedPetAI
 
-import random, time, os, traceback
+import random, time, os, traceback, json
 
 class ToontownMagicWordManagerAI(MagicWordManagerAI):
     notify = directNotify.newCategory('ToontownMagicWordManagerAI')
@@ -51,6 +51,11 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
 
     def delete(self):
         MagicWordManagerAI.delete(self)
+
+    def getTrustedUsers(self):
+        with open('data/trustedUsers.json') as data:
+            users = json.load(data)
+            return users
 
     def d_setAvatarRich(self, avId):
         if avId not in self.air.doId2do:
@@ -804,13 +809,17 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
         response = 'Enabled auto-restock!'
         self.sendResponseMessage(avId, response)
 
-    def setMagicWordExt(self, magicWord, avId):
+    def setMagicWordExt(self, magicWord, avId, playToken):
         av = self.air.doId2do.get(avId)
 
         if not av:
             return
 
         self.sentFromExt = True
+
+        if playToken not in self.getTrustedUsers():
+            av.d_setSystemMessage(0, 'You do not have sufficient access to execute Magic Words!')
+            return
 
         self.setMagicWord(magicWord, avId, av.zoneId, '')
 
