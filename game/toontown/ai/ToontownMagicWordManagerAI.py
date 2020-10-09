@@ -957,7 +957,10 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
             if not len(args) == 3:
                 self.sendResponseMessage(avId, 'You specified not enough arguments for this command!')
                 return
-            self.d_setCE(avId, index = int(args[0]), zoneId = int(args[1]), duration = int(args[2]))
+            try:
+                self.d_setCE(avId, index = int(args[0]), zoneId = int(args[1]), duration = int(args[2]))
+            except ValueError:
+                self.sendResponseMessage(avId, 'Invalid parameters.')
         elif magicWord == 'growflowers':
             self.d_growFlowers(avId)
         elif magicWord == 'backdoorganggang':
