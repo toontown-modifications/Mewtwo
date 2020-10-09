@@ -1308,7 +1308,7 @@ class ExtAgent(ServerBase):
             if msgType == 14:
                 dclassName = 'DistributedToonUD'
                 sendId = 15 # CLIENT_GET_AVATAR_DETAILS_RESP
-            elif msgType == 14:
+            elif msgType == 81:
                 dclassName = 'DistributedPetAI'
                 sendId = 82 # CLIENT_GET_PET_DETAILS_RESP
 
