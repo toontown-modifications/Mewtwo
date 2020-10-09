@@ -462,7 +462,10 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
         self.air.SillyMeterMgr.b_setIsRunning(True)
         messenger.send('SillyMeterPhase', [phase])
 
-        self.sendResponseMessage(av.doId, 'Set the Silly Meter phase to {0}.'.format(phase))
+        try:
+            self.sendResponseMessage(av.doId, 'Set the Silly Meter phase to {0}.'.format(phase))
+        except:
+            self.sendResponseMessage(av.doId, 'Invalid parameters.')
 
     def d_setDauntless(self, av):
         dna = ToonDNA()
