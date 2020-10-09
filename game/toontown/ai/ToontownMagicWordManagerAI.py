@@ -455,7 +455,10 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
             return
 
         if not 0 <= phase <= 15:
-            self.sendResponseMessage(av.doId, 'Failed to set the Silly Meter to phase {0}! Specify a value between 0 and 15.').format(phase)
+            try:
+                self.sendResponseMessage(av.doId, 'Failed to set the Silly Meter to phase {0}! Specify a value between 0 and 15.').format(phase)
+            except:
+                self.sendResponseMessage(av.doId, 'Invalid parameters.')
             return
 
         self.air.SillyMeterMgr.b_setCurPhase(phase)
