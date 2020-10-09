@@ -221,12 +221,7 @@ class DistributedPhoneAI(DistributedFurnitureItemAI):
                 return
 
             retCode = ToontownGlobals.P_ItemOnOrder
-            if item.getName() in ('Boy Trunk', 'Girl Trunk'):
-                print('aaa')
-                trunk = True
-                deliveryTime = int(time.time() / 60) + 1
-                print(deliveryTime)
-            if not trunk and item.getDeliveryTime():
+            if not item.getDeliveryTime():
                 retCode = item.recordPurchase(av, optional)
                 deliveryTime = 0
             elif config.GetBool('want-instant-delivery', False):
