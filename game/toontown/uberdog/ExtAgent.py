@@ -101,7 +101,13 @@ class ExtAgent(ServerBase):
                            ToontownGlobals.LawbotHQ,
                            ToontownGlobals.WelcomeValleyBegin,
                            23000]
-        self.blacklistZones = [ToontownGlobals.SellbotLobby, ToontownGlobals.LawbotOfficeExt, ToontownGlobals.LawbotLobby, ToontownGlobals.CashbotLobby, ToontownGlobals.WelcomeValleyEnd]
+        self.blacklistZones = [
+            ToontownGlobals.SellbotLobby
+            ToontownGlobals.LawbotOfficeExt
+            ToontownGlobals.LawbotLobby,
+            ToontownGlobals.CashbotLobby,
+            ToontownGlobals.WelcomeValleyEnd,
+            ToontownGlobals.BossbotHQ]
 
         self.wantServerDebug = config.GetBool('want-server-debugging', False)
         self.wantServerMaintenance = config.GetBool('want-server-maintenance', False)
