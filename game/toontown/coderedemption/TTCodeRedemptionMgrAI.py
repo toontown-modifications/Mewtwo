@@ -16,6 +16,7 @@ from game.toontown.catalog.CatalogClothingItem import CatalogClothingItem, getAl
 from game.toontown.catalog.CatalogAccessoryItem import CatalogAccessoryItem
 from game.toontown.catalog.CatalogRentalItem import CatalogRentalItem
 from game.toontown.catalog.CatalogInvalidItem import CatalogInvalidItem
+from game.toontown.catalog.CatalogFurnitureItem import CatalogFurnitureItem
 
 import time
 
@@ -213,6 +214,13 @@ class TTCodeRedemptionMgrAI(DistributedObjectAI):
         if code == 'doodle':
             shirt = CatalogClothingItem(1746, 0)
             return [shirt]
+
+        if code == 'trunk':
+            if av.getStyle().getGender() == 'm':
+                trunk = CatalogFurnitureItem(4000, 0)
+            else:
+                shirt = CatalogFurnitureItem(4010, 0)
+            return [trunk]
 
         return False
 
