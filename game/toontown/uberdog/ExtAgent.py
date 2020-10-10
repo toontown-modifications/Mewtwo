@@ -102,8 +102,8 @@ class ExtAgent(ServerBase):
                            ToontownGlobals.WelcomeValleyBegin,
                            23000]
         self.blacklistZones = [
-            ToontownGlobals.SellbotLobby
-            ToontownGlobals.LawbotOfficeExt
+            ToontownGlobals.SellbotLobby,
+            ToontownGlobals.LawbotOfficeExt,
             ToontownGlobals.LawbotLobby,
             ToontownGlobals.CashbotLobby,
             ToontownGlobals.WelcomeValleyEnd,
