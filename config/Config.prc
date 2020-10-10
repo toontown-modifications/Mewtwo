@@ -20,7 +20,7 @@ want-discord-integration true
 want-blacklist-warnings false
 want-parties true
 want-localhost-api-testing false
-want-instant-parties false
+want-instant-parties true
 buildings-server-data-folder backups/buildings
 whitelist-url http://cdn.toontown.disney.go.com/toontown/en/
 whitelist-stage-dir game/whitelist
