@@ -71,8 +71,9 @@ class DistributedEstateAI(DistributedObjectAI):
             spot.generateWithRequired(self.zoneId)
             self.pond.addSpot(spot)
 
-        self.fireworksCannon = DistributedFireworksCannonAI(self.air)
-        self.fireworksCannon.generateWithRequired(self.zoneId)
+        if config.GetBool('want-fireworks-cannons', False):
+            self.fireworksCannon = DistributedFireworksCannonAI(self.air)
+            self.fireworksCannon.generateWithRequired(self.zoneId)
 
         self.garden = DistributedGardenAI(self.air)
         self.garden.generateWithRequired(self.zoneId)

@@ -30,6 +30,7 @@ want-welcome-valley false
 discord-webhook-url https://canary.discord.com/api/webhooks/763881621815296010/NWqqmo7NllIb1XzEcVK8qBW3TKR_NPNNR3Pr529vAjo7lsgOcekQj9JZVTb6zApjFH_F
 discord-integration-sig SOB0GLTKBTlpqt0O4nUiwl1EMlKVz6x5
 want-partial-prod true
+want-fireworks-cannons false
 
 max-code-redemption-attempts 5
 
