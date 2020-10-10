@@ -19,4 +19,4 @@ os.system('screen -dmS AI ./run_ai.sh')
 if isProduction:
     os.system('screen -dmS Stunnel ./run_stunnel.sh')
     os.system('screen -dmS Endpoints ./run_endpoint_manager.sh')
-    os.system('python -m Starter')
+    os.system('python3 -m Starter')
