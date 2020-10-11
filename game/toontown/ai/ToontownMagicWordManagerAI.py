@@ -350,6 +350,8 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
         elif gmType == 4:
             av.b_setGM(4)
 
+        self.sendResponseMessage(avId, 'Enabled GM icon!')
+
     def d_skipVP(self, av, avId, zoneId, battle):
         from game.toontown.suit.DistributedSellbotBossAI import DistributedSellbotBossAI
 
@@ -815,6 +817,26 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
         response = 'Enabled auto-restock!'
         self.sendResponseMessage(avId, response)
 
+    def d_setRegularToon(self, avId):
+        av = self.air.doId2do.get(avId)
+
+        if not av:
+            return
+
+        pickTrack = ([1, 1, 1, 1, 1, 1, 0], [1, 1, 1, 0, 1, 1, 1], [0, 1, 1, 1, 1, 1, 1], [1, 0, 1, 1, 1, 1, 1])
+
+        av.b_setTrackAccess(random.choice(pickTrack))
+        av.b_setMaxCarry(ToontownGlobals.MaxCarryLimit)
+        av.b_setQuestCarryLimit(ToontownGlobals.MaxQuestCarryLimit)
+
+        av.experience.makeExpRegular()
+        av.d_setExperience(av.experience.makeNetString())
+
+        laughminus = int(random.random() * 20.0) + 10.0
+
+        av.b_setMaxHp(ToontownGlobals.MaxHpLimit - laughminus)
+        av.b_setHp(ToontownGlobals.MaxHpLimit - laughminus)
+
     def setMagicWordExt(self, magicWord, avId, playToken):
         av = self.air.doId2do.get(avId)
 
@@ -844,7 +866,17 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
 
         string = ' '.join(str(x) for x in args)
         validation = self.checkArguments(args, avId)
-        disneyCmds = ['run', 'fps', 'fanfare', 'walk', 'sbm', 'skipBattleMovie']
+
+        disneyCmds = [
+            'run',
+            'fps',
+            'fanfare',
+            'walk',
+            'sbm',
+            'skipBattleMovie',
+            'endgame',
+            'wingame'
+        ]
 
         if magicWord == 'maxbankmoney':
             self.d_setMaxBankMoney(avId)
@@ -979,6 +1011,8 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
                 self.sendResponseMessage(avId, 'Invalid parameters.')
         elif magicWord == 'autorestock':
             self.d_setAutoRestock(avId)
+        elif magicWord == 'regulartoon':
+            self.d_setRegularToon(avId)
         else:
             if magicWord not in disneyCmds:
                 self.sendResponseMessage(avId, '{0} is not a valid Magic Word.'.format(magicWord))

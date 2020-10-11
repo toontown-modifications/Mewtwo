@@ -42,36 +42,32 @@ SQUIRT = SQUIRT_TRACK
 DROP = DROP_TRACK
 TOON_ATTACK_TIME = 12.0
 SUIT_ATTACK_TIME = 12.0
-TOON_TRAP_DELAY = 0.80000000000000004
+TOON_TRAP_DELAY = 0.8
 TOON_SOUND_DELAY = 1.0
 TOON_THROW_DELAY = 0.5
 TOON_THROW_SUIT_DELAY = 1.0
 TOON_SQUIRT_DELAY = 0.5
 TOON_SQUIRT_SUIT_DELAY = 1.0
-TOON_DROP_DELAY = 0.80000000000000004
+TOON_DROP_DELAY = 0.8
 TOON_DROP_SUIT_DELAY = 1.0
-TOON_RUN_T = 3.2999999999999998
+TOON_RUN_T = 3.3
 TIMEOUT_PER_USER = 5
 TOON_FIRE_DELAY = 0.5
 TOON_FIRE_SUIT_DELAY = 1.0
 REWARD_TIMEOUT = 120
 FLOOR_REWARD_TIMEOUT = 4
 BUILDING_REWARD_TIMEOUT = 300
-
 try:
-    CLIENT_INPUT_TIMEOUT = base.config.GetFloat(
-        'battle-input-timeout', TTLocalizer.BBbattleInputTimeout)
-except BaseException:
-    CLIENT_INPUT_TIMEOUT = simbase.config.GetFloat(
-        'battle-input-timeout', TTLocalizer.BBbattleInputTimeout)
-
+    CLIENT_INPUT_TIMEOUT = base.config.GetFloat('battle-input-timeout', TTLocalizer.BBbattleInputTimeout)
+except:
+    CLIENT_INPUT_TIMEOUT = simbase.config.GetFloat('battle-input-timeout', TTLocalizer.BBbattleInputTimeout)
 
 def levelAffectsGroup(track, level):
     return attackAffectsGroup(track, level)
 
 
-def attackAffectsGroup(track, level, type=None):
-    if track == NPCSOS and type == NPCSOS and track == PETSOS or type == PETSOS:
+def attackAffectsGroup(track, level, type = None):
+    if track == NPCSOS or type == NPCSOS or track == PETSOS or type == PETSOS:
         return 1
     elif track >= 0 and track <= DROP_TRACK:
         return AvPropTargetCat[AvPropTarget[track]][level]
@@ -79,53 +75,86 @@ def attackAffectsGroup(track, level, type=None):
         return 0
 
 
-def getToonAttack(id, track=NO_ATTACK, level=-1, target=-1):
-    return [id, track, level, target, [], 0, 0, [], 0, 0]
+def getToonAttack(id, track = NO_ATTACK, level = -1, target = -1):
+    return [id,
+     track,
+     level,
+     target,
+     [],
+     0,
+     0,
+     [],
+     0,
+     0]
 
 
 def getDefaultSuitAttacks():
-    suitAttacks = [[NO_ID, NO_ATTACK, -1, [], 0, 0, 0],
-                   [NO_ID, NO_ATTACK, -1, [], 0, 0, 0],
-                   [NO_ID, NO_ATTACK, -1, [], 0, 0, 0],
-                   [NO_ID, NO_ATTACK, -1, [], 0, 0, 0]]
+    suitAttacks = [[NO_ID,
+      NO_ATTACK,
+      -1,
+      [],
+      0,
+      0,
+      0],
+     [NO_ID,
+      NO_ATTACK,
+      -1,
+      [],
+      0,
+      0,
+      0],
+     [NO_ID,
+      NO_ATTACK,
+      -1,
+      [],
+      0,
+      0,
+      0],
+     [NO_ID,
+      NO_ATTACK,
+      -1,
+      [],
+      0,
+      0,
+      0]]
     return suitAttacks
 
 
 def getDefaultSuitAttack():
-    return [NO_ID, NO_ATTACK, -1, [], 0, 0, 0]
+    return [NO_ID,
+     NO_ATTACK,
+     -1,
+     [],
+     0,
+     0,
+     0]
 
 
 def findToonAttack(toons, attacks, track):
     foundAttacks = []
     for t in toons:
-        if t in attacks:
+        if attacks.has_key(t):
             attack = attacks[t]
             local_track = attack[TOON_TRACK_COL]
             if track != NPCSOS and attack[TOON_TRACK_COL] == NPCSOS:
                 local_track = NPCToons.getNPCTrack(attack[TOON_TGT_COL])
-
             if local_track == track:
                 if local_track == FIRE:
                     canFire = 1
                     for attackCheck in foundAttacks:
                         if attackCheck[TOON_TGT_COL] == attack[TOON_TGT_COL]:
                             canFire = 0
-                            continue
 
                     if canFire:
                         foundAttacks.append(attack)
-
                 else:
                     foundAttacks.append(attack)
-
-        local_track == track
 
     def compFunc(a, b):
         if a[TOON_LVL_COL] > b[TOON_LVL_COL]:
             return 1
         elif a[TOON_LVL_COL] < b[TOON_LVL_COL]:
             return -1
-
         return 0
 
     foundAttacks.sort(compFunc)
@@ -138,53 +167,68 @@ MAX_JOIN_T = TTLocalizer.BBbattleInputTimeout
 FACEOFF_TAUNT_T = 3.5
 FACEOFF_LOOK_AT_PROP_T = 6
 ELEVATOR_T = 4.0
-BATTLE_SMALL_VALUE = 9.9999999999999995e-008
+BATTLE_SMALL_VALUE = 1e-07
 MAX_EXPECTED_DISTANCE_FROM_BATTLE = 50.0
-
 
 class BattleBase:
     notify = DirectNotifyGlobal.directNotify.newCategory('BattleBase')
-    suitPoints = (((Point3(0, 5, 0), 179), ), ((Point3(2, 5.2999999999999998,
-                                                       0), 170),
-                                               (Point3(-2, 5.2999999999999998,
-                                                       0), 180)),
-                  ((Point3(4, 5.2000000000000002, 0), 170),
-                   (Point3(0, 6, 0), 179), (Point3(-4, 5.2000000000000002,
-                                                   0), 190)),
-                  ((Point3(6, 4.4000000000000004,
-                           0), 160), (Point3(2, 6.2999999999999998, 0), 170),
-                   (Point3(-2, 6.2999999999999998,
-                           0), 190), (Point3(-6, 4.4000000000000004, 0), 200)))
-    suitPendingPoints = ((Point3(-4, 8.1999999999999993,
-                                 0), 190), (Point3(0, 9, 0), 179),
-                         (Point3(4, 8.1999999999999993,
-                                 0), 170), (Point3(8, 3.2000000000000002,
-                                                   0), 160))
-    toonPoints = (((Point3(0, -6,
-                           0), 0), ), ((Point3(1.5, -6.5,
-                                               0), 5), (Point3(-1.5, -6.5,
-                                                               0), -5)),
-                  ((Point3(3, -6.75,
-                           0), 5), (Point3(0, -7,
-                                           0), 0), (Point3(-3, -6.75, 0), -5)),
-                  ((Point3(4.5, -7, 0), 10), (Point3(1.5, -7.5, 0), 5),
-                   (Point3(-1.5, -7.5, 0), -5), (Point3(-4.5, -7, 0), -10)))
-    toonPendingPoints = ((Point3(-3, -8, 0), -5), (Point3(0, -9, 0), 0),
-                         (Point3(3, -8, 0), 5), (Point3(5.5, -5.5, 0), 20))
+    suitPoints = (((Point3(0, 5, 0), 179),),
+     ((Point3(2, 5.3, 0), 170), (Point3(-2, 5.3, 0), 180)),
+     ((Point3(4, 5.2, 0), 170), (Point3(0, 6, 0), 179), (Point3(-4, 5.2, 0), 190)),
+     ((Point3(6, 4.4, 0), 160),
+      (Point3(2, 6.3, 0), 170),
+      (Point3(-2, 6.3, 0), 190),
+      (Point3(-6, 4.4, 0), 200)))
+    suitPendingPoints = ((Point3(-4, 8.2, 0), 190),
+     (Point3(0, 9, 0), 179),
+     (Point3(4, 8.2, 0), 170),
+     (Point3(8, 3.2, 0), 160))
+    toonPoints = (((Point3(0, -6, 0), 0),),
+     ((Point3(1.5, -6.5, 0), 5), (Point3(-1.5, -6.5, 0), -5)),
+     ((Point3(3, -6.75, 0), 5), (Point3(0, -7, 0), 0), (Point3(-3, -6.75, 0), -5)),
+     ((Point3(4.5, -7, 0), 10),
+      (Point3(1.5, -7.5, 0), 5),
+      (Point3(-1.5, -7.5, 0), -5),
+      (Point3(-4.5, -7, 0), -10)))
+    toonPendingPoints = ((Point3(-3, -8, 0), -5),
+     (Point3(0, -9, 0), 0),
+     (Point3(3, -8, 0), 5),
+     (Point3(5.5, -5.5, 0), 20))
     posA = Point3(0, 10, 0)
-    posB = Point3(-7.0709999999999997, 7.0709999999999997, 0)
+    posB = Point3(-7.071, 7.071, 0)
     posC = Point3(-10, 0, 0)
-    posD = Point3(-7.0709999999999997, -7.0709999999999997, 0)
+    posD = Point3(-7.071, -7.071, 0)
     posE = Point3(0, -10, 0)
-    posF = Point3(7.0709999999999997, -7.0709999999999997, 0)
+    posF = Point3(7.071, -7.071, 0)
     posG = Point3(10, 0, 0)
-    posH = Point3(7.0709999999999997, 7.0709999999999997, 0)
-    allPoints = (posA, posB, posC, posD, posE, posF, posG, posH)
-    toonCwise = [posA, posB, posC, posD, posE]
-    toonCCwise = [posH, posG, posF, posE]
-    suitCwise = [posE, posF, posG, posH, posA]
-    suitCCwise = [posD, posC, posB, posA]
-    suitSpeed = 4.7999999999999998
+    posH = Point3(7.071, 7.071, 0)
+    allPoints = (posA,
+     posB,
+     posC,
+     posD,
+     posE,
+     posF,
+     posG,
+     posH)
+    toonCwise = [posA,
+     posB,
+     posC,
+     posD,
+     posE]
+    toonCCwise = [posH,
+     posG,
+     posF,
+     posE]
+    suitCwise = [posE,
+     posF,
+     posG,
+     posH,
+     posA]
+    suitCCwise = [posD,
+     posC,
+     posB,
+     posA]
+    suitSpeed = 4.8
     toonSpeed = 8.0
 
     def __init__(self):
@@ -223,7 +267,7 @@ class BattleBase:
         dist = Vec3(pos0 - pos1).length()
         return dist / BattleBase.toonSpeed
 
-    def buildJoinPointList(self, avPos, destPos, toon=0):
+    def buildJoinPointList(self, avPos, destPos, toon = 0):
         minDist = 999999.0
         nearestP = None
         for p in BattleBase.allPoints:
@@ -231,15 +275,12 @@ class BattleBase:
             if dist < minDist:
                 nearestP = p
                 minDist = dist
-                continue
 
-        self.notify.debug('buildJoinPointList() - avp: %s nearp: %s' %
-                          (avPos, nearestP))
+        self.notify.debug('buildJoinPointList() - avp: %s nearp: %s' % (avPos, nearestP))
         dist = Vec3(avPos - destPos).length()
         if dist < minDist:
             self.notify.debug('buildJoinPointList() - destPos is nearest')
             return []
-
         if toon == 1:
             if nearestP == BattleBase.posE:
                 self.notify.debug('buildJoinPointList() - posE')

@@ -12,7 +12,6 @@ TIME_BUFFER_PER_WPT = 0.25
 TIME_DIVISOR = 100
 DISTRIBUTE_TASK_CREATION = 0
 
-
 class SuitBase:
     notify = DirectNotifyGlobal.directNotify.newCategory('SuitBase')
 
@@ -85,4 +84,4 @@ class SuitBase:
             print '\t', self.sp.dnaStore.getSuitPointWithIndex(indexVal)
 
     def makeLegList(self):
-        self.legList = SuitLegList(self.path, self.sp.dnaStore)
+        self.legList = SuitLegList(self.path, self.sp.dnaStore, self.sp.suitWalkSpeed, SuitTimings.fromSky, SuitTimings.toSky, SuitTimings.fromSuitBuilding, SuitTimings.toSuitBuilding, SuitTimings.toToonBuilding)
