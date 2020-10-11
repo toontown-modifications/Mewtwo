@@ -18,7 +18,7 @@ want-delivery-manager false
 want-server-maintenance false
 want-discord-integration true
 want-blacklist-warnings false
-want-parties false
+want-parties true
 want-localhost-api-testing false
 want-instant-parties true
 buildings-server-data-folder backups/buildings

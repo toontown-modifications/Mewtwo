@@ -253,6 +253,9 @@ class DistributedPartyManagerUD(DistributedObjectUD):
                 ourInvite = invite[:]
                 break
 
+        if not ourInvite:
+            return
+
         ourInvite[0][2] = InviteStatus.ReadButNotReplied
         self.partyId2invites[ourInvite[0][1]] = ourInvite[:]
 
