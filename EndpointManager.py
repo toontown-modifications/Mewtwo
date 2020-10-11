@@ -93,7 +93,7 @@ async def checkUsernameAvailability(request):
 
     root = et.Element('config')
 
-    if requestResponse == 1:
+    if requestResponse == '1':
         success = 'true'
     else:
         success = 'false'
