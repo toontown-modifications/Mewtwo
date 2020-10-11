@@ -1183,8 +1183,14 @@ class ExtAgent(ServerBase):
             # Query the avatar.
             self.air.dbInterface.queryObject(self.air.dbId, avId, handleRetrieve)
         elif msgType == 70: # CLIENT_SET_WISHNAME
-            avId = dgi.getUint32()
-            name = dgi.getString()
+            try:
+                avId = dgi.getUint32()
+                name = dgi.getString()
+            except:
+                message = 'You have been ejected for attempting to send a incorrectly formatted datagram.'
+                self.sendBoot(clientChannel, 122, message)
+                self.sendEject(clientChannel, 122, message)
+                return
 
             # If we have a avId, update the Avatar object with the new wish name.
             fields = {
