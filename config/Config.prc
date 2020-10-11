@@ -18,10 +18,11 @@ want-delivery-manager false
 want-server-maintenance false
 want-discord-integration true
 want-blacklist-warnings false
-want-parties true
+want-parties false
 want-localhost-api-testing false
 want-instant-parties true
 buildings-server-data-folder backups/buildings
+store-server-data-folder backups/store
 whitelist-url http://cdn.toontown.disney.go.com/toontown/en/
 whitelist-stage-dir game/whitelist
 api-token QrLEtq3CCWEax3M2

@@ -8,23 +8,23 @@ import sys
 import anydbm
 import time
 
-
 class DataStore:
     QueryTypes = []
     QueryTypes = dict(zip(QueryTypes, range(len(QueryTypes))))
 
+    @classmethod
     def addQueryTypes(cls, typeStrings):
         superTypes = zip(cls.QueryTypes.values(), cls.QueryTypes.keys())
         superTypes.sort()
-        newTypes = [item[1] for item in superTypes] + typeStrings
+        newTypes = [ item[1] for item in superTypes ] + typeStrings
         newTypes = dict(zip(newTypes, range(1 + len(newTypes))))
         return newTypes
 
-    addQueryTypes = classmethod(addQueryTypes)
     notify = DirectNotifyGlobal.directNotify.newCategory('DataStore')
     wantAnyDbm = ConfigVariableBool('want-ds-anydbm', 1).getValue()
+    serverDataFolder = simbase.config.GetString('store-server-data-folder', '')
 
-    def __init__(self, filepath, writePeriod=300, writeCountTrigger=100):
+    def __init__(self, filepath, writePeriod = 300, writeCountTrigger = 100):
         self.filepath = filepath
         self.writePeriod = writePeriod
         self.writeCountTrigger = writeCountTrigger
@@ -33,65 +33,54 @@ class DataStore:
         self.className = self.__class__.__name__
         if self.wantAnyDbm:
             self.filepath += '-anydbm'
-            self.notify.debug('anydbm default module used: %s ' %
-                              anydbm._defaultmod.__name__)
-
+            self.notify.debug('anydbm default module used: %s ' % anydbm._defaultmod.__name__)
         self.open()
+        return
 
     def readDataFromFile(self):
         if self.wantAnyDbm:
-
             try:
                 if os.path.exists(self.filepath):
                     self.data = anydbm.open(self.filepath, 'w')
-                    self.notify.debug(
-                        'Opening existing anydbm database at: %s.' %
-                        (self.filepath, ))
+                    self.notify.debug('Opening existing anydbm database at: %s.' % (self.filepath,))
                 else:
                     self.data = anydbm.open(self.filepath, 'c')
-                    self.notify.debug('Creating new anydbm database at: %s.' %
-                                      (self.filepath, ))
+                    self.notify.debug('Creating new anydbm database at: %s.' % (self.filepath,))
             except anydbm.error:
-                self.notify.warning(
-                    'Cannot open anydbm database at: %s.' % (self.filepath, ))
+                self.notify.warning('Cannot open anydbm database at: %s.' % (self.filepath,))
 
-        try:
-            file = open(self.filepath + '.bu', 'r')
-            self.notify.debug('Opening backup pickle data file at %s.' %
-                              (self.filepath + '.bu', ))
-            if os.path.exists(self.filepath):
-                os.remove(self.filepath)
-        except IOError:
-
-            try:
-                file = open(self.filepath, 'r')
-                self.notify.debug(
-                    'Opening old pickle data file at %s..' % (self.filepath, ))
-            except IOError:
-                file = None
-                self.notify.debug('New pickle data file will be written to %s.'
-                                  % (self.filepath, ))
-
-        if file:
-            data = cPickle.load(file)
-            file.close()
-            self.data = data
         else:
-            self.data = {}
+            try:
+                file = open(self.filepath + '.bu', 'r')
+                self.notify.debug('Opening backup pickle data file at %s.' % (self.filepath + '.bu',))
+                if os.path.exists(self.filepath):
+                    os.remove(self.filepath)
+            except IOError:
+                try:
+                    file = open(self.filepath, 'r')
+                    self.notify.debug('Opening old pickle data file at %s..' % (self.filepath,))
+                except IOError:
+                    file = None
+                    self.notify.debug('New pickle data file will be written to %s.' % (self.filepath,))
+
+            if file:
+                data = cPickle.load(file)
+                file.close()
+                self.data = data
+            else:
+                self.data = {}
+        return
 
     def writeDataToFile(self):
         if self.data is not None:
-            self.notify.debug(
-                'Data is now synced with disk at %s' % self.filepath)
+            self.notify.debug('Data is now synced with disk at %s' % self.filepath)
             if self.wantAnyDbm:
                 self.data.sync()
             else:
-
                 try:
                     backuppath = self.filepath + '.bu'
                     if os.path.exists(self.filepath):
                         os.rename(self.filepath, backuppath)
-
                     outfile = open(self.filepath, 'w')
                     cPickle.dump(self.data, outfile)
                     outfile.close()
@@ -100,7 +89,9 @@ class DataStore:
                 except EnvironmentError:
                     self.notify.warning(str(sys.exc_info()[1]))
 
-        self.notify.warning('No data to write. Aborting sync.')
+        else:
+            self.notify.warning('No data to write. Aborting sync.')
+        return
 
     def syncTask(self, task):
         task.timeElapsed += globalClock.getDt()
@@ -108,14 +99,11 @@ class DataStore:
             if self.writeCount:
                 self.writeDataToFile()
                 self.resetWriteCount()
-
             task.timeElapsed = 0.0
-
         if self.writeCount > self.writeCountTrigger:
             self.writeDataToFile()
             self.resetWriteCount()
             task.timeElapsed = 0.0
-
         return Task.cont
 
     def incrementWriteCount(self):
@@ -129,16 +117,16 @@ class DataStore:
             self.writeDataToFile()
             if self.wantAnyDbm:
                 self.data.close()
-
-            taskMgr.remove('%s-syncTask' % (self.className, ))
+            taskMgr.remove('%s-syncTask' % (self.className,))
             self.data = None
+        return
 
     def open(self):
         self.close()
         self.readDataFromFile()
         self.resetWriteCount()
-        taskMgr.remove('%s-syncTask' % (self.className, ))
-        t = taskMgr.add(self.syncTask, '%s-syncTask' % (self.className, ))
+        taskMgr.remove('%s-syncTask' % (self.className,))
+        t = taskMgr.add(self.syncTask, '%s-syncTask' % (self.className,))
         t.timeElapsed = 0.0
 
     def reset(self):
@@ -151,46 +139,31 @@ class DataStore:
             lt = time.asctime(time.localtime())
             trans = maketrans(': ', '__')
             t = lt.translate(trans)
-            (head, tail) = os.path.split(self.filepath)
-            newFileName = 'UDStoreBak' + t
+            head, tail = os.path.split(self.filepath)
+            newFileName = tail + '-bak-' + t
             if os.path.exists(self.filepath):
-
                 try:
-                    os.rename(tail, newFileName)
-                    uber.air.writeServerEvent(
-                        'Uberdog data store Info', 0,
-                        'Creating backup of file: %s saving as: %s' %
-                        (tail, newFileName))
+                    os.rename(self.filepath, self.serverDataFolder + newFileName)
+                    simbase.air.writeServerEvent('Uberdog data store Info', 0, 'Creating backup of file: %s saving as: %s' % (tail, newFileName))
                 except:
-                    uber.air.writeServerEvent(
-                        'Uberdog data store Info', 0,
-                        'Unable to create backup of file: %s ' % tail)
+                    simbase.air.writeServerEvent('Uberdog data store Info', 0, 'Unable to create backup of file: %s ' % tail)
 
             else:
                 files = os.listdir(head)
                 for file in files:
                     if file.find(tail) > -1:
-                        (filename, ext) = os.path.splitext(file)
-
+                        filename, ext = os.path.splitext(file)
                         try:
                             os.rename(file, newFileName + ext)
-                            uber.air.writeServerEvent(
-                                'Uberdog data store Info', 0,
-                                'Creating backup of file: %s saving as: %s' %
-                                (file, newFileName + ext))
+                            simbase.air.writeServerEvent('Uberdog data store Info', 0, 'Creating backup of file: %s saving as: %s' % (file, newFileName + ext))
                         except:
-                            uber.air.writeServerEvent(
-                                'Uberdog data store Info', 0,
-                                'Unable to create backup of file: %s ' %
-                                newFileName + ext)
+                            simbase.air.writeServerEvent('Uberdog data store Info', 0, 'Unable to create backup of file: %s ' % newFileName + ext)
 
-                        continue
-
-        elif os.path.exists(self.filepath + '.bu'):
-            os.remove(self.filepath + '.bu')
-
-        if os.path.exists(self.filepath):
-            os.remove(self.filepath)
+        else:
+            if os.path.exists(self.filepath + '.bu'):
+                os.remove(self.filepath + '.bu')
+            if os.path.exists(self.filepath):
+                os.remove(self.filepath)
 
     def query(self, query):
         if self.data is not None:
