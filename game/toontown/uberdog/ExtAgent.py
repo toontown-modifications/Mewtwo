@@ -36,7 +36,7 @@ class JSONBridge:
         """
 
         with open(self.__bridgeFile, 'w+') as f:
-            json.dump(self.__bridge, f)
+            json.dump(self.__bridge, f, sort_keys = 1, indent = 4, separators = [',', ': '])
 
     def put(self, playToken, accountId):
         """
