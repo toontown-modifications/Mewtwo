@@ -449,7 +449,7 @@ class FriendsManagerUD:
 
         if success and online:
             dg = self.air.air.dclassesByName['DistributedToonUD'].aiFormatUpdate('friendsNotify', friendId, friendId, self.air.air.ourChannel, [avId, 1])
-            self.air.send(dg)
+            self.air.air.send(dg)
 
         if not friendIds:
             return
