@@ -897,6 +897,7 @@ class ExtAgent(ServerBase):
                     # Construct a new aiFormatUpdate.
                     resp = toon.aiFormatUpdate('setTalkWhisper', doId, doId, self.air.ourChannel, [avId, accId, senderName, cleanMessage, modifications, 0])
                     self.air.send(resp)
+                    return
 
                 self.air.dbInterface.queryObject(self.air.dbId, avId, handleAvatar)
 
