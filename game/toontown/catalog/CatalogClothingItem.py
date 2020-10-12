@@ -301,10 +301,7 @@ class CatalogClothingItem(CatalogItem.CatalogItem):
         article = ClothingTypes[self.clothingType][CTArticle]
         if article == AShirt or article == AShorts:
             return 0
-
-        if not article == ABoysShirt:
-            pass
-        forBoys = article == ABoysShorts
+        forBoys = (article == ABoysShirt or article == ABoysShorts)
         if avatar.getStyle().getGender() == 'm':
             return not forBoys
         else:
@@ -319,7 +316,7 @@ class CatalogClothingItem(CatalogItem.CatalogItem):
 
     def forGirlsOnly(self):
         article = ClothingTypes[self.clothingType][CTArticle]
-        if article == AGirlsShirt and article == AGirlsSkirt or article == AGirlsShorts:
+        if article == AGirlsShirt or article == AGirlsSkirt or article == AGirlsShorts:
             return 1
         else:
             return 0
