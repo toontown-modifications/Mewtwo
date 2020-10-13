@@ -720,6 +720,7 @@ class ExtAgent(ServerBase):
             message.setDescription('Someone is trying to login!')
             message.setFields(fields)
             message.setColor(1127128)
+            message.setWebhook(config.GetString('discord-logins-webhook'))
             message.finalize()
 
             def callback(remoteIp, remotePort, localIp, localPort):
@@ -1221,6 +1222,7 @@ class ExtAgent(ServerBase):
                     message.setDescription('A new toon has requested a typed name!')
                     message.setFields(fields)
                     message.setColor(1127128)
+                    message.setWebhook(config.GetString('discord-approvals-webhook'))
                     message.finalize()
 
             # Prepare the wish name response.

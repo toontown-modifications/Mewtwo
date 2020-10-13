@@ -5,12 +5,11 @@ class Webhook:
     notify = directNotify.newCategory('Webhook')
 
     def __init__(self):
-        self.webhookUrl = config.GetString('discord-webhook-url')
-
         self.title = ''
         self.description = ''
         self.color = 0
         self.fields = []
+        self.webhook = ''
 
     def setTitle(self, title):
         self.title = title
@@ -36,8 +35,14 @@ class Webhook:
     def getFields(self):
         return self.fields
 
+    def setWebhook(self, webhook):
+        self.webhook = webhook
+
+    def getWebhook(self):
+        return self.webhook
+
     def send(self, data):
-        request = requests.post(self.webhookUrl, json = data)
+        request = requests.post(self.getWebhook(), json = data)
 
         if request.status_code == 204:
             self.notify.info('Successfully sent webhook!')
