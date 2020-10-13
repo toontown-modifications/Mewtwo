@@ -37,9 +37,24 @@ class DiscordIntegrationServer:
                 return
 
             if whatToDo == 'kickRequest':
-                avId = data['avId']
+                avId = int(data['avId'])
                 reason = data['reason']
                 simbase.air.extAgent.sendKick(avId, reason)
+            elif whatToDo == 'banAccount':
+                avatarId = int(data['avId'])
+
+                def handleRetrieve(dclass, fields):
+                    if dclass != simbase.air.dclassesByName['DistributedToonUD']:
+                        return
+
+                    accountId = fields['setDISLid'][0]
+                    playToken = simbase.air.extAgent.accId2playToken.get(accountId, '')
+
+                    simbase.air.extAgent.sendKick(avId, 'N/A')
+                    simbase.air.extAgent.banAccount(playToken, 'N/A', 'N/A', True)
+
+                # Query the avatar to get some account information.
+                simbase.air.dbInterface.queryObject(simbase.air.dbId, avatarId, handleRetrieve)
             elif whatToDo == 'systemMessage':
                 message = data['message']
                 channels = simbase.air.extAgent.clientChannel2avId

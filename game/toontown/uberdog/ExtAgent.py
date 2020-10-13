@@ -200,14 +200,14 @@ class ExtAgent(ServerBase):
         dg.addString(resp.getMessage())
         self.air.send(dg)
 
-    def banAccount(self, playToken, message):
+    def banAccount(self, playToken, message, banReason = 'Chat Filter', silent = False):
         endpoint = self.banEndpointBase.format('BanAccount.php')
         emailDispatchEndpoint = self.banEndpointBase.format('ChatBanEmail.php')
         secretKey = 'jzYEqAZkEP'
 
         banData = {
             'username': playToken,
-            'banReason': 'Chat Filter',
+            'banReason': banReason,
             'secretKey': secretKey
         }
 
@@ -218,12 +218,15 @@ class ExtAgent(ServerBase):
         }
 
         banRequest = requests.post(endpoint, banData, headers = self.requestHeaders)
-        emailRequest = requests.post(emailDispatchEndpoint, emailData, headers = self.requestHeaders)
 
         if banRequest.text == 'Banned account!':
             self.notify.info('Successfully banned account: {0}.'.format(playToken))
-        elif emailRequest.text == 'Successfully dispatched email!':
-            self.notify.info('Successfully sent ban email!')
+
+        if not silent:
+            emailRequest = requests.post(emailDispatchEndpoint, emailData, headers = self.requestHeaders)
+
+            if emailRequest.text == 'Successfully dispatched email!':
+                self.notify.info('Successfully sent ban email!')
 
     def approveName(self, avId):
         toonDC = simbase.air.dclassesByName['DistributedToonUD']
