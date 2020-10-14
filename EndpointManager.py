@@ -5,8 +5,8 @@ from aiohttp import web
 import asyncio, requests, lxml.etree as et, random
 
 deleteEndpoint = 'http://download.sunrisegames.tech/api/authDelete'
-usernameAvailabilityEndpoint = 'https://demo.sunrisegames.tech/checkUsernameAvailability'
-regEndpoint = 'https://demo.sunrisegames.tech/register'
+usernameAvailabilityEndpoint = 'https://sunrisegames.tech/checkUsernameAvailability'
+regEndpoint = 'https://sunrisegames.tech/register'
 
 headers = {
     'User-Agent': 'Sunrise Games - EndpointManager'
