@@ -672,7 +672,7 @@ class ExtAgent(ServerBase):
                 self.sendEject(clientChannel, 122, message)
                 return
 
-            if self.isProdServer():
+            if self.isProdServer() or self.wantPartialProd:
                 try:
                     # Decrypt the play token.
                     key = binascii.unhexlify(self.playTokenDecryptKey)

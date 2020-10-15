@@ -58,6 +58,8 @@ class CentralLoggerUD(DistributedObjectGlobalUD, ServerBase):
             print(data)
 
         if self.isProdServer() or self.wantPartialProd:
+            category = self.getCategory(category)
+
             # Report this to our Discord channel.
             hookFields = [{
                 'name': 'Message',
@@ -66,7 +68,7 @@ class CentralLoggerUD(DistributedObjectGlobalUD, ServerBase):
             },
             {
                 'name': 'Category',
-                'value': self.getCategory(category),
+                'value': category,
                 'inline': True
             },
             {
@@ -80,12 +82,13 @@ class CentralLoggerUD(DistributedObjectGlobalUD, ServerBase):
                 'inline': True
             }]
 
-            message = Webhook()
-            message.setDescription('Someone is reporting to us!')
-            message.setFields(hookFields)
-            message.setColor(1127128)
-            message.setWebhook(config.GetString('discord-reports-webhook'))
-            message.finalize()
+            if category != 'Unknown Category':
+                message = Webhook()
+                message.setDescription('Someone is reporting to us!')
+                message.setFields(hookFields)
+                message.setColor(1127128)
+                message.setWebhook(config.GetString('discord-reports-webhook'))
+                message.finalize()
 
         self.air.writeServerEvent(category, messageType = msgType, message = message, **fields)
 
