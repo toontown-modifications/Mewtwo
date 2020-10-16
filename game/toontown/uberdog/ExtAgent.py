@@ -314,19 +314,21 @@ class ExtAgent(ServerBase):
         resp.addUint32(int(time.time()))
         resp.addUint32(int(time.clock()))
 
-        if not self.wantPartialProd:
-            if self.wantMembership:
+        if self.wantPartialProd:
+            print(isPaid)
+            if isPaid == 1:
                 resp.addString('FULL')
             else:
                 resp.addString('unpaid')
         else:
-            if isPaid:
+            if self.wantMembership:
                 resp.addString('FULL')
             else:
                 resp.addString('unpaid')
 
         if self.wantPartialProd:
-            if openChat:
+            print(openChat)
+            if openChat == 1:
                 resp.addString('YES')
             else:
                 resp.addString('NO')
