@@ -265,17 +265,17 @@ class ExtAgent(ServerBase):
     def registerShard(self, shardId, shardName):
         self.shardInfo[shardId] = (shardName, 0)
 
-    def loginAccount(self, fields, clientChannel, accountId, playToken):
+    def loginAccount(self, fields, clientChannel, accountId, playToken, openChat, isPaid):
         # If somebody is logged into this account, disconnect them.
         errorCode = 100
         self.sendEject(self.air.GetAccountConnectionChannel(accountId), errorCode, OTPLocalizer.CRBootedReasons.get(errorCode))
 
         # Wait half a second before continuing to avoid a race condition.
         taskMgr.doMethodLater(0.5,
-                              lambda x: self.finishLoginAccount(fields, clientChannel, accountId, playToken),
+                              lambda x: self.finishLoginAccount(fields, clientChannel, accountId, playToken, openChat, isPaid),
                               self.air.uniqueName('wait-acc-%s' % accountId), appendTask=False)
 
-    def finishLoginAccount(self, fields, clientChannel, accountId, playToken):
+    def finishLoginAccount(self, fields, clientChannel, accountId, playToken, openChat, isPaid):
         # If there's anybody on the account, kill them for redundant login:
         errorCode = 100
 
@@ -314,12 +314,25 @@ class ExtAgent(ServerBase):
         resp.addUint32(int(time.time()))
         resp.addUint32(int(time.clock()))
 
-        if self.wantMembership:
-            resp.addString('FULL')
+        if not self.wantPartialProd:
+            if self.wantMembership:
+                resp.addString('FULL')
+            else:
+                resp.addString('unpaid')
         else:
-            resp.addString('unpaid')
+            if isPaid:
+                resp.addString('FULL')
+            else:
+                resp.addString('unpaid')
 
-        resp.addString('YES')
+        if self.wantPartialProd:
+            if openChat:
+                resp.addString('YES')
+            else:
+                resp.addString('NO')
+        else:
+            resp.addString('YES')
+
         resp.addString(time.strftime('%Y-%m-%d %I:%M:%S'))
         resp.addInt32(1000 * 60 * 60)
         resp.addString('NO_PARENT_ACCOUNT')
@@ -680,7 +693,12 @@ class ExtAgent(ServerBase):
                     encryptedData = base64.b64decode(encrypted['data'])
                     iv = base64.b64decode(encrypted['iv'])
                     cipher = AES.new(key, AES.MODE_CBC, iv)
-                    playToken = unpad(cipher.decrypt(encryptedData), AES.block_size)
+                    data = unpad(cipher.decrypt(encryptedData), AES.block_size)
+                    jsonData = json.loads(data)
+
+                    playToken = jsonData['playToken']
+                    openChat = jsonData['OpenChat']
+                    isPaid = jsonData['Member']
                 except:
                     # Bad play token.
                     errorCode = 122
@@ -778,7 +796,7 @@ class ExtAgent(ServerBase):
                         return
 
                     # Log in the account.
-                    self.loginAccount(fields, clientChannel, accountId, playToken)
+                    self.loginAccount(fields, clientChannel, accountId, playToken, openChat, isPaid)
 
                 # Query the Account object.
                 self.air.dbInterface.queryObject(self.air.dbId, accountId, queryLoginResponse)
