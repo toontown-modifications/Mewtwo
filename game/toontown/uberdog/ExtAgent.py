@@ -315,7 +315,6 @@ class ExtAgent(ServerBase):
         resp.addUint32(int(time.clock()))
 
         if self.wantPartialProd:
-            print(isPaid)
             if isPaid == 1:
                 resp.addString('FULL')
             else:
@@ -327,7 +326,6 @@ class ExtAgent(ServerBase):
                 resp.addString('unpaid')
 
         if self.wantPartialProd:
-            print(openChat)
             if openChat == 1:
                 resp.addString('YES')
             else:
