@@ -7,7 +7,7 @@ isProduction = '--prod' in sys.argv
 
 os.chdir('startup/unix')
 
-if sys.platform == 'linux2':
+if sys.platform in ('linux', 'linux2'):
     os.system('screen -dmS OTP ./run_otpd.sh')
 else:
     os.system('screen -dms OTP ./run_otpd_darwin.sh')
