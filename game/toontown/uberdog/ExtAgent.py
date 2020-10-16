@@ -314,8 +314,6 @@ class ExtAgent(ServerBase):
         resp.addUint32(int(time.time()))
         resp.addUint32(int(time.clock()))
 
-        print(isPaid == 1)
-
         if self.wantPartialProd:
             if isPaid == '1':
                 resp.addString('FULL')
