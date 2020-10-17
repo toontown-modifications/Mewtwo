@@ -820,7 +820,7 @@ class ExtAgent(ServerBase):
                 self.bridge.put(playToken, accountId)
 
                 # Log in the account.
-                self.loginAccount(account, clientChannel, accountId, playToken)
+                self.loginAccount(account, clientChannel, accountId, playToken, openChat, isPaid)
 
             # Create the Account in the database.
             self.air.dbInterface.createObject(self.air.dbId,
