@@ -699,6 +699,7 @@ class ExtAgent(ServerBase):
                     playToken = jsonData['playToken']
                     openChat = jsonData['OpenChat']
                     isPaid = jsonData['Member']
+                    tokenTimestamp = jsonData['Timestamp']
                 except:
                     # Bad play token.
                     errorCode = 122
