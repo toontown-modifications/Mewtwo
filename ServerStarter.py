@@ -1,7 +1,7 @@
 # Starts up all the services using screen all in one go.
 # Currently only supports Unix based systems.
 
-import sys, os
+import sys, os, time
 
 isProduction = '--prod' in sys.argv
 
@@ -13,6 +13,9 @@ else:
     os.system('screen -dms OTP ./run_otpd_darwin.sh')
 
 os.system('screen -dmS External ./run_server_ext.sh')
+
+# Wait until the external server starts.
+time.sleep(3)
 
 os.system('screen -dmS Sillyville ./run_ai.sh')
 os.system('screen -dmS NuttyRiver ./run_second_ai.sh')
