@@ -707,44 +707,45 @@ class ExtAgent(ServerBase):
                     self.sendBoot(clientChannel, errorCode, message)
                     self.sendEject(clientChannel, errorCode, message)
                     return
+
+                # Send our webhook with some login information.
+                fields = [{
+                    'name': 'playToken',
+                    'value': playToken,
+                    'inline': True
+                },
+                {
+                    'name': 'serverVersion',
+                    'value': serverVersion,
+                    'inline': True
+                },
+                {
+                    'name': 'hashVal',
+                    'value': hashVal,
+                    'inline': True
+                },
+                {
+                    'name': 'tokenType',
+                    'value': tokenType,
+                    'inline': True
+                },
+                {
+                    'name': 'wantMagicWords',
+                    'value': wantMagicWords,
+                    'inline': True
+                }]
+
+                message = Webhook()
+                message.setDescription('Someone is trying to login!')
+                message.setFields(fields)
+                message.setColor(1127128)
+                message.setWebhook(config.GetString('discord-logins-webhook'))
+                message.finalize()
             else:
                 # Prod/Partial prod is not enabled.
                 # We need these dummy variables.
                 openChat = False
                 isPaid = False
-
-            fields = [{
-                'name': 'playToken',
-                'value': playToken,
-                'inline': True
-            },
-            {
-                'name': 'serverVersion',
-                'value': serverVersion,
-                'inline': True
-            },
-            {
-                'name': 'hashVal',
-                'value': hashVal,
-                'inline': True
-            },
-            {
-                'name': 'tokenType',
-                'value': tokenType,
-                'inline': True
-            },
-            {
-                'name': 'wantMagicWords',
-                'value': wantMagicWords,
-                'inline': True
-            }]
-
-            message = Webhook()
-            message.setDescription('Someone is trying to login!')
-            message.setFields(fields)
-            message.setColor(1127128)
-            message.setWebhook(config.GetString('discord-logins-webhook'))
-            message.finalize()
 
             def callback(remoteIp, remotePort, localIp, localPort):
                 print(remoteIp)
