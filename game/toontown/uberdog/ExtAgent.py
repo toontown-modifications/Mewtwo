@@ -87,6 +87,7 @@ class ExtAgent(ServerBase):
         self.dnaStores = {}
         self.chatOffenses = {}
         self.accId2playToken = {}
+        self.memberInfo = {}
 
         self.friendsManager = FriendsManagerUD(self)
 
@@ -312,9 +313,10 @@ class ExtAgent(ServerBase):
         resp.addUint32(int(time.time()))
         resp.addUint32(int(time.clock()))
 
-        if self.isPartialProd():
+        if self.isProdServer() or self.isPartialProd():
             if isPaid == '1':
                 resp.addString('FULL')
+                self.memberInfo[accountId] = playToken
             else:
                 resp.addString('unpaid')
         else:
@@ -323,7 +325,7 @@ class ExtAgent(ServerBase):
             else:
                 resp.addString('unpaid')
 
-        if self.isPartialProd():
+        if self.isProdServer() or self.isPartialProd():
             if openChat == '1':
                 resp.addString('YES')
             else:
@@ -751,7 +753,7 @@ class ExtAgent(ServerBase):
 
             self.air.getNetworkAddress(self.air.getMsgSender(), callback)
 
-            if self.isProdServer():
+            if self.isProdServer() or self.isPartialProd():
                 # To prevent skids trying to auth without the stock Disney launcher.
                 # We check if the account is banned here too.
                 # TODO: Find a way to enable TLS 1.3 on Cloudflare once again.
@@ -1061,10 +1063,20 @@ class ExtAgent(ServerBase):
                 # Save the account ID.
                 self.loadAvProgress.add(target)
 
-                if self.wantMembership:
-                    access = OTPGlobals.AccessFull
+                if self.isProdServer() or self.isPartialProd():
+                    playToken = self.memberInfo.get(target, '')
+
+                    if playToken:
+                        # This account is a member.
+                        access = OTPGlobals.AccessFull
+                    else:
+                        # This account is not a member.
+                        access = OTPGlobals.AccessVelvetRope
                 else:
-                    access = OTPGlobals.AccessVelvetRope
+                    if self.wantMembership:
+                        access = OTPGlobals.AccessFull
+                    else:
+                        access = OTPGlobals.AccessVelvetRope
 
                 activateFields = {
                     'setCommonChatFlags': [0],
