@@ -9,6 +9,9 @@ __builtin__.SuitLegList = SuitLegList
 
 loadPrcFile(''.join(sys.argv[1:]))
 
+if os.path.exists('config/local.prc'):
+    loadPrcFile('config/local.prc')
+
 class game:
     name = 'toontown'
     process = 'server'

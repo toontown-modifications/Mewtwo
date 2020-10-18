@@ -157,7 +157,7 @@ class ToontownAIRepository(ToontownInternalRepository, ServerBase):
         self.districtPopulation += 1
         self.districtStats.b_setAvatarCount(self.districtStats.getAvatarCount() + 1)
 
-        if self.isProdServer():
+        if self.isProdServer() or self.isPartialProd():
             # This is the production server.
             # Send our district population increase.
             self.sendToAPI(self.districtPopulation, False)
@@ -166,7 +166,7 @@ class ToontownAIRepository(ToontownInternalRepository, ServerBase):
         self.districtPopulation -= 1
         self.districtStats.b_setAvatarCount(self.districtStats.getAvatarCount() - 1)
 
-        if self.isProdServer():
+        if self.isProdServer() or self.isPartialProd():
             # This is the production server.
             # Send our district population decrease.
             self.sendToAPI(self.districtPopulation, True)

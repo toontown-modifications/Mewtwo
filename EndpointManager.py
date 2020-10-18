@@ -12,31 +12,6 @@ headers = {
     'User-Agent': 'Sunrise Games - EndpointManager'
 }
 
-async def crossdomain(request):
-    data = open('data/web/crossdomain.xml').read()
-
-    return web.Response(text = data)
-
-async def login(request):
-    args = await request.post()
-    print(args)
-
-async def AccountLoginRequest(request):
-    args = await request.post()
-
-    response = open('data/web/AccountLoginRequest.xml', 'r').read()
-
-    return web.Response(text = response)
-
-async def WhoAmIRequest(request):
-    args = await request.post()
-
-    print(args)
-
-    response = open('data/web/WhoAmIRequest.xml', 'r').read()
-
-    return web.Response(text = response)
-
 async def registerAccount(request):
     args = await request.post()
 
@@ -155,10 +130,6 @@ async def initializeService():
     app.router.add_post('/api/authDelete', handleAuthDelete)
     app.router.add_post('/checkUsernameAvailability', checkUsernameAvailability)
     app.router.add_post('/register', registerAccount)
-    app.router.add_post('/api/WhoAmIRequest', WhoAmIRequest)
-    app.router.add_post('/api/AccountLoginRequest', AccountLoginRequest)
-    app.router.add_post('/api/login', login)
-    app.router.add_get('/crossdomain.xml', crossdomain)
 
     return app
 

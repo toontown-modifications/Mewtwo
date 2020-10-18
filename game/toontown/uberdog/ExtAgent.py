@@ -113,14 +113,13 @@ class ExtAgent(ServerBase):
         self.wantServerMaintenance = config.GetBool('want-server-maintenance', False)
         self.wantMembership = config.GetBool('want-membership', False)
         self.wantBlacklistWarnings = config.GetBool('want-blacklist-warnings', False)
-        self.wantPartialProd = config.GetBool('want-partial-prod', False)
 
         self.databasePath = 'otpd/databases/otpdb'
 
         if not os.path.exists(self.databasePath):
             os.makedirs(self.databasePath)
 
-        if self.isProdServer():
+        if self.isProdServer() or self.isPartialProd():
             # This is the production server.
             # Send our status.
             self.sendAvailabilityToAPI()
@@ -314,7 +313,7 @@ class ExtAgent(ServerBase):
         resp.addUint32(int(time.time()))
         resp.addUint32(int(time.clock()))
 
-        if self.wantPartialProd:
+        if self.isPartialProd():
             if isPaid == '1':
                 resp.addString('FULL')
             else:
@@ -325,7 +324,7 @@ class ExtAgent(ServerBase):
             else:
                 resp.addString('unpaid')
 
-        if self.wantPartialProd:
+        if self.isPartialProd():
             if openChat == '1':
                 resp.addString('YES')
             else:
@@ -685,7 +684,7 @@ class ExtAgent(ServerBase):
                 self.sendEject(clientChannel, 122, message)
                 return
 
-            if self.isProdServer() or self.wantPartialProd:
+            if self.isProdServer() or self.isPartialProd():
                 try:
                     # Decrypt the play token.
                     key = binascii.unhexlify(self.playTokenDecryptKey)
@@ -1225,7 +1224,7 @@ class ExtAgent(ServerBase):
             if avId:
                 self.air.dbInterface.updateObject(self.air.dbId, avId, self.air.dclassesByName['DistributedToonUD'], fields)
 
-                if self.isProdServer() or self.wantPartialProd:
+                if self.isProdServer() or self.isPartialProd():
                     fields = [{
                         'name': 'Avatar Id',
                         'value': avId,
