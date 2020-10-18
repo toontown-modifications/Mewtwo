@@ -106,8 +106,7 @@ class ExtAgent(ServerBase):
             ToontownGlobals.LawbotOfficeExt,
             ToontownGlobals.LawbotLobby,
             ToontownGlobals.CashbotLobby,
-            ToontownGlobals.WelcomeValleyEnd,
-            ToontownGlobals.BossbotHQ]
+            ToontownGlobals.WelcomeValleyEnd]
 
         self.wantServerDebug = config.GetBool('want-server-debugging', False)
         self.wantServerMaintenance = config.GetBool('want-server-maintenance', False)
