@@ -13,9 +13,12 @@ else:
     os.system('screen -dms OTP ./run_otpd_darwin.sh')
 
 os.system('screen -dmS External ./run_server_ext.sh')
-os.system('screen -dmS AI ./run_ai.sh')
+
+os.system('screen -dmS Sillyville ./run_ai.sh')
+os.system('screen -dmS Nutty River ./run_second_ai.sh')
 
 if isProduction:
     os.system('screen -dmS Stunnel ./run_stunnel.sh')
     os.system('screen -dmS Endpoints ./run_endpoint_manager.sh')
+
     os.system('cd ../../../discord-status-bot && python3 -m Starter')

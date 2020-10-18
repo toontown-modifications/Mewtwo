@@ -451,6 +451,11 @@ class ToontownAIRepository(ToontownInternalRepository, ServerBase):
         for suitPlanner in self.suitPlanners.values():
             suitPlanner.assignInitialSuitBuildings()
 
+        if self.districtName == 'Nutty River':
+            # This is our constant invasions district.
+            # We need to setup the initial invasion.
+            self.suitInvasionManager.generateInitialInvasion()
+
         # Let our user know we have finished starting up.
         self.notify.info('{0} has finished starting up.'.format(self.districtName))
 

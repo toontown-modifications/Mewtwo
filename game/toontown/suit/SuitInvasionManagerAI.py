@@ -1,6 +1,9 @@
 from direct.directnotify.DirectNotifyGlobal import directNotify
 
 from game.toontown.toonbase import ToontownGlobals
+from game.toontown.suit import SuitDNA
+
+import random
 
 class SuitInvasionManagerAI:
     notify = directNotify.newCategory('SuitInvasionManagerAI')
@@ -10,7 +13,25 @@ class SuitInvasionManagerAI:
 
         self.invadingCog = (None, 0)
         self.numCogs = 0
-        self.invading = False
+
+        self.constantInvasionsDistrict = False
+
+        if self.air.districtName == 'Nutty River':
+            self.constantInvasionsDistrict = True
+            self.invading = True
+        else:
+            self.invading = False
+
+    def generateInitialInvasion(self, task = None):
+        cogType = random.choice(SuitDNA.suitHeadTypes)
+        numCogs = random.randint(1000, 3000)
+
+        skeleton = 0
+
+        self.startInvasion(cogType, numCogs, skeleton)
+
+        if task:
+            return task.done
 
     def setInvadingCog(self, suitName, skeleton):
         self.invadingCog = (suitName, skeleton)
@@ -41,12 +62,16 @@ class SuitInvasionManagerAI:
             taskMgr.remove('invasion-timeout')
 
         self.numCogs = 0
-        self.setInvadingCog(None, 0)
-        self.invading = False
-        self._spGetOut()
+
+        if self.constantInvasionsDistrict:
+            self.generateInitialInvasion()
+        else:
+            self.setInvadingCog(None, 0)
+            self.invading = False
+            self._spGetOut()
 
     def startInvasion(self, cogType, numCogs, skeleton):
-        if self.getInvading():
+        if not self.constantInvasionsDistrict and self.getInvading():
             return False
 
         self.numCogs = numCogs
