@@ -12,6 +12,11 @@ headers = {
     'User-Agent': 'Sunrise Games - EndpointManager'
 }
 
+async def crossdomain(request):
+    data = open('data/web/crossdomain.xml').read()
+
+    return web.Response(text = data)
+
 async def registerAccount(request):
     args = await request.post()
 
@@ -130,6 +135,7 @@ async def initializeService():
     app.router.add_post('/api/authDelete', handleAuthDelete)
     app.router.add_post('/checkUsernameAvailability', checkUsernameAvailability)
     app.router.add_post('/register', registerAccount)
+    app.router.add_get('/crossdomain.xml', crossdomain)
 
     return app
 
