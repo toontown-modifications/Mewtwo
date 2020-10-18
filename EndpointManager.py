@@ -52,7 +52,8 @@ async def registerAccount(request):
         'email': email,
         'firstName': firstName,
         'lastName': lastName,
-        'password': password
+        'password': password,
+        'bdayYear': bdayYear
     }
 
     requestGet = requests.get(regEndpoint, data, headers = headers)
