@@ -14,9 +14,6 @@ else:
 
 os.system('screen -dmS External ./run_server_ext.sh')
 
-# Wait until the external server is started.
-os.sleep(3)
-
 os.system('screen -dmS Sillyville ./run_ai.sh')
 os.system('screen -dmS NuttyRiver ./run_second_ai.sh')
 
