@@ -235,7 +235,7 @@ class ToontownAIRepository(ToontownInternalRepository, ServerBase):
         self.district.b_setAvailable(1)
 
         # Inform the ExtAgent of us.
-        self.netMessenger.send('registerShard', [self.districtId, config.GetString('air-shardname', 'District')])
+        self.netMessenger.send('registerShard', [self.districtId, self.districtName])
 
     def createLocals(self):
         self.holidayManager = HolidayManagerAI(self)
