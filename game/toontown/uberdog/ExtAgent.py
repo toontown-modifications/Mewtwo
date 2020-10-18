@@ -707,6 +707,11 @@ class ExtAgent(ServerBase):
                     self.sendBoot(clientChannel, errorCode, message)
                     self.sendEject(clientChannel, errorCode, message)
                     return
+            else:
+                # Prod/Partial prod is not enabled.
+                # We need these dummy variables.
+                openChat = False
+                isPaid = False
 
             fields = [{
                 'name': 'playToken',
