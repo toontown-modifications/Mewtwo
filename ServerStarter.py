@@ -20,7 +20,7 @@ time.sleep(3)
 os.system('screen -dmS Sillyville ./run_first_ai.sh')
 
 # Wait until the first AI starts.
-time.sleep(7)
+time.sleep(10)
 
 os.system('screen -dmS NuttyRiver ./run_second_ai.sh')
 
