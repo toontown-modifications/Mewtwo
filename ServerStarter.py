@@ -15,7 +15,7 @@ else:
 os.system('screen -dmS External ./run_server_ext.sh')
 
 os.system('screen -dmS Sillyville ./run_ai.sh')
-os.system('screen -dmS NuttyRiver ./run_second_ai.sh')
+os.system('screen -dmS Nutty River ./run_second_ai.sh')
 
 if isProduction:
     os.system('screen -dmS Stunnel ./run_stunnel.sh')
