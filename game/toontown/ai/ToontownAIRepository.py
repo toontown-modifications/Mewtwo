@@ -124,7 +124,7 @@ class ToontownAIRepository(ToontownInternalRepository, ServerBase):
         if config.GetBool('want-localhost-api-testing', False):
             baseEndpoint = 'http://127.0.0.1:19135/api/{0}'
         else:
-            baseEndpoint = 'http://otp-gs.rocketprogrammer.me:19135/api/{0}'
+            baseEndpoint = 'http://otp-gs.sunrisegames.tech:19135/api/{0}'
 
         apiToken = config.GetString('api-token', '')
 
