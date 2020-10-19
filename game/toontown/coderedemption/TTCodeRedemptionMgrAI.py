@@ -41,22 +41,25 @@ class TTCodeRedemptionMgrAI(DistributedObjectAI):
         avId = self.air.getAvatarIdFromSender()
 
         if not avId:
+            # Invalid avatar id.
             self.air.writeServerEvent('suspicious', avId = avId, issue = 'Tried to redeem a code from an invalid avId')
             return
 
         av = self.air.doId2do.get(avId)
 
         if not av:
+            # Invalid avatar.
             self.air.writeServerEvent('suspicious', avId = avId, issue = 'Invalid avatar tried to redeem a code')
             return
 
-        # Do we want coderedemption?
+        # Check to see if redemption is enabled.
         if not self.air.wantCodeRedemption:
             result = TTCodeRedemptionConsts.RedeemErrors.SystemUnavailable
             awardMgrResult = 0
 
         # Check to see if this avatar has attempted redemption too many times.
         if self.failedAttempts > self.maxCodeAttempts:
+            # We have attempted to redeem too many times.
             result = TTCodeRedemptionConsts.RedeemErrors.TooManyAttempts
             awardMgrResult = 0
             self.failedAttempts = 0
@@ -72,10 +75,10 @@ class TTCodeRedemptionMgrAI(DistributedObjectAI):
             self.d_redeemCodeResult(avId, context, result, awardMgrResult)
             return
 
-        # This code is valid.
+        # Check to see if the items in the code are valid.
         for item in items:
             if isinstance(item, CatalogInvalidItem):
-                # This item is invalid!
+                # This item is invalid.
                 self.air.writeServerEvent('suspicious', avId = avId, issue = 'Invalid CatalogItem\'s for code: %s' % code)
                 result = TTCodeRedemptionConsts.RedeemErrors.CodeDoesntExist
                 awardMgrResult = 0
@@ -125,12 +128,14 @@ class TTCodeRedemptionMgrAI(DistributedObjectAI):
         avId = self.air.getAvatarIdFromSender()
 
         if not avId:
+            # Invalid avatar id.
             self.air.writeServerEvent('suspicious', avId = avId, issue = 'Could not parse the gender of an invalid avId')
             return
 
         av = self.air.doId2do.get(avId)
 
         if not av:
+            # Invalid avatar.
             self.air.writeServerEvent('suspicious', avId = avId, issue = 'Could not parse the gender of an invalid avatar')
             return
 

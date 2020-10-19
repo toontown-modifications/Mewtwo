@@ -1,7 +1,6 @@
 from direct.directnotify.DirectNotifyGlobal import directNotify
 
 from game.toontown.toonbase import ToontownGlobals
-from game.toontown.suit import SuitDNA
 
 import random
 
@@ -29,7 +28,9 @@ class SuitInvasionManagerAI:
             'nd', # Name Dropper
             'b', # Bloodsuckers
             'sc', # Short Change
-            'pp' # Penny Pincher
+            'pp', # Penny Pincher
+            'bf', # Bottom Feeder
+            'p': # Pencil Pusher
         ]
 
         cogType = random.choice(suitTypes)
