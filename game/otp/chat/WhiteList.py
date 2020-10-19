@@ -18,7 +18,7 @@ class WhiteList:
         else:
             text = text.strip('.,?!')
 
-        text = text.lower()
+        text = text.lower().encode()
         return text
 
     def isWord(self, text):
