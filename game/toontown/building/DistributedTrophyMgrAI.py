@@ -5,7 +5,6 @@ from game.toontown.toonbase import TTLocalizer
 
 from operator import itemgetter
 
-
 class DistributedTrophyMgrAI(DistributedObjectAI):
     notify = directNotify.newCategory('DistributedTrophyMgrAI')
 

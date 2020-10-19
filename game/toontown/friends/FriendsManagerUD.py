@@ -305,6 +305,18 @@ class FriendsManagerUD:
             newOperation = GetAvatarInfoOperation(self, avId, friendId, functools.partial(self.__handleRemoveFriend, friendId = friendId, final = True))
             newOperation.start()
             self.operations[avId] = newOperation
+        else:
+            # Undeclare to the friend.
+            friendDg = PyDatagram()
+            friendDg.addServerHeader(self.air.air.GetPuppetConnectionChannel(friendId), self.air.air.ourChannel, CLIENTAGENT_UNDECLARE_OBJECT)
+            friendDg.addUint32(avId)
+            self.air.air.send(friendDg)
+
+            # Undeclare to the avatar.
+            avatarDg = PyDatagram()
+            avatarDg.addServerHeader(self.air.air.GetAccountConnectionChannel(avId), self.air.air.ourChannel, CLIENTAGENT_UNDECLARE_OBJECT)
+            avatarDg.addUint32(friendId)
+            self.air.air.send(avatarDg)
 
     def postAddFriend(self, avId, friendId):
         clientChannel = self.air.air.GetPuppetConnectionChannel(avId)
