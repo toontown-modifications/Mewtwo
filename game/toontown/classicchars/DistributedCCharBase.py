@@ -11,8 +11,8 @@ from direct.controls.ControlManager import CollisionHandlerRayStart
 from game.toontown.toonbase import ToontownGlobals
 from game.toontown.toonbase.TTLocalizer import Donald, DonaldDock, WesternPluto, Pluto
 from game.toontown.effects import DustCloud
-import CCharChatter
-import CCharPaths
+from . import CCharChatter
+from . import CCharPaths
 import string
 import copy
 

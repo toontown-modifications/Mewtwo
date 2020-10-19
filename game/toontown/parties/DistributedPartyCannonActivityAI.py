@@ -69,7 +69,7 @@ class DistributedPartyCannonActivityAI(DistributedPartyActivityAI):
         if not avId:
             return
 
-        self.sendUpdateToAvatarId(avId, 'cloudsColorResponse', [self.cloudColors.values()])
+        self.sendUpdateToAvatarId(avId, 'cloudsColorResponse', [list(self.cloudColors.values())])
 
     def requestCloudHit(self, cloudId, r, g, b):
         avId = self.air.getAvatarIdFromSender()

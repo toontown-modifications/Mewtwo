@@ -3,11 +3,11 @@ from pandac.PandaModules import *
 from direct.interval.IntervalGlobal import *
 from direct.distributed.ClockDelta import *
 from game.toontown.toonbase import ToontownGlobals
-import ToonInterior
+from . import ToonInterior
 from direct.directnotify import DirectNotifyGlobal
 from direct.distributed import DistributedObject
 import random
-import ToonInteriorColors
+from . import ToonInteriorColors
 from game.toontown.hood import ZoneUtil
 from game.toontown.char import Char
 from game.toontown.suit import SuitDNA

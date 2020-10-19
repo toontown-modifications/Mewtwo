@@ -3,9 +3,9 @@ from game.toontown.toon import ToonDNA
 from direct.fsm import StateData
 from direct.gui.DirectGui import *
 from pandac.PandaModules import *
-from MakeAToonGlobals import *
+from .MakeAToonGlobals import *
 from game.toontown.toonbase import TTLocalizer
-import ShuffleButton
+from . import ShuffleButton
 import random
 from direct.directnotify import DirectNotifyGlobal
 
@@ -69,7 +69,7 @@ class ColorShop(StateData.StateData):
         try:
             del self.toon
         except BaseException:
-            print 'ColorShop: toon not found'
+            print('ColorShop: toon not found')
 
         self.hideButtons()
 

@@ -1,6 +1,6 @@
 from pandac.PandaModules import *
 from direct.directnotify import DirectNotifyGlobal
-import Quests
+from . import Quests
 from game.toontown.toonbase import ToontownGlobals
 from game.toontown.fishing import FishGlobals
 from game.toontown.suit import SuitDNA

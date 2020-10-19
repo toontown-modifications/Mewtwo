@@ -2,7 +2,7 @@ import sys
 import os
 import time
 import string
-import __builtin__
+import builtins
 #from pandac.libpandaexpressModules import *
 from direct.showbase.MessengerGlobal import *
 from direct.showbase.DirectObject import DirectObject
@@ -94,27 +94,27 @@ class LauncherBase(DirectObject):
             os.system('cat /proc/meminfo >>' + logfile)
             os.system('/sbin/ifconfig -a >>' + logfile)
 
-        print('\n\nStarting %s...' % self.GameName)
-        print('Current time: ' + time.asctime(time.localtime(time.time())) +
-              ' ' + time.tzname[0])
-        print('sys.path = ', sys.path)
-        print('sys.argv = ', sys.argv)
-        print('os.environ = ', os.environ)
+        print(('\n\nStarting %s...' % self.GameName))
+        print(('Current time: ' + time.asctime(time.localtime(time.time())) +
+              ' ' + time.tzname[0]))
+        print(('sys.path = ', sys.path))
+        print(('sys.argv = ', sys.argv))
+        print(('os.environ = ', os.environ))
         if len(sys.argv) >= self.ArgCount:
             Configrc_args = sys.argv[self.ArgCount - 1]
-            print("generating configrc using: '" + Configrc_args + "'")
+            print(("generating configrc using: '" + Configrc_args + "'"))
         else:
             Configrc_args = ''
             print('generating standard configrc')
-        if os.environ.has_key('PRC_EXECUTABLE_ARGS'):
-            print('PRC_EXECUTABLE_ARGS is set to: ' +
-                  os.environ['PRC_EXECUTABLE_ARGS'])
+        if 'PRC_EXECUTABLE_ARGS' in os.environ:
+            print(('PRC_EXECUTABLE_ARGS is set to: ' +
+                  os.environ['PRC_EXECUTABLE_ARGS']))
             print('Resetting PRC_EXECUTABLE_ARGS')
 
         ExecutionEnvironment.setEnvironmentVariable('PRC_EXECUTABLE_ARGS',
                                                     '-stdout ' + Configrc_args)
-        if os.environ.has_key('CONFIG_CONFIG'):
-            print('CONFIG_CONFIG is set to: ' + os.environ['CONFIG_CONFIG'])
+        if 'CONFIG_CONFIG' in os.environ:
+            print(('CONFIG_CONFIG is set to: ' + os.environ['CONFIG_CONFIG']))
             print('Resetting CONFIG_CONFIG')
 
         os.environ[
@@ -122,7 +122,7 @@ class LauncherBase(DirectObject):
         cpMgr = ConfigPageManager.getGlobalPtr()
         cpMgr.reloadImplicitPages()
         launcherConfig = getConfigExpress()
-        __builtin__.config = launcherConfig
+        builtins.config = launcherConfig
         self.miniTaskMgr = MiniTaskManager()
         self.VerifyFiles = self.getVerifyFiles()
         self.setServerVersion(
@@ -1043,7 +1043,7 @@ class LauncherBase(DirectObject):
 
     def getProgressSum(self, phase):
         sum = 0
-        for i in xrange(0, len(self.linesInProgress)):
+        for i in range(0, len(self.linesInProgress)):
             if self.linesInProgress[i].find(phase) > -1:
                 nameSizeTuple = self.linesInProgress[i].split()
                 numSize = nameSizeTuple[1].split('L')
@@ -1189,7 +1189,7 @@ class LauncherBase(DirectObject):
             self.notify.info('maybeStartGame: starting game')
             self.launcherMessage(self.Localizer.LauncherStartingGame)
             self.background()
-            __builtin__.launcher = self
+            builtins.launcher = self
             self.startGame()
 
     def _runTaskManager(self):
@@ -1273,7 +1273,7 @@ class LauncherBase(DirectObject):
             for i in range(self.dldb.getServerNumMultifiles()):
                 mfname = self.dldb.getServerMultifileName(i)
                 phase = self.dldb.getServerMultifilePhase(mfname)
-                print(i, mfname, phase)
+                print((i, mfname, phase))
 
             self.handleGenericMultifileError()
 
@@ -2066,43 +2066,43 @@ class LauncherBase(DirectObject):
     def scanForHacks(self):
         if not self.WIN32:
             return
-        import _winreg
+        import winreg
         hacksInstalled = {}
         hacksRunning = {}
         hackName = ['!xSpeed.net', 'A Speeder', 'Speed Gear']
         knownHacksRegistryKeys = {
             hackName[0]:
             [[
-                _winreg.HKEY_LOCAL_MACHINE,
+                winreg.HKEY_LOCAL_MACHINE,
                 'Software\\Microsoft\\Windows\\CurrentVersion\\Run\\!xSpeed'
-            ], [_winreg.HKEY_CURRENT_USER, 'Software\\!xSpeednethy'],
+            ], [winreg.HKEY_CURRENT_USER, 'Software\\!xSpeednethy'],
              [
-                 _winreg.HKEY_CURRENT_USER,
+                 winreg.HKEY_CURRENT_USER,
                  'Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\MenuOrder\\Start Menu\\Programs\\!xSpeednet'
              ],
              [
-                 _winreg.HKEY_LOCAL_MACHINE,
+                 winreg.HKEY_LOCAL_MACHINE,
                  'Software\\Gentee\\Paths\\!xSpeednet'
              ],
              [
-                 _winreg.HKEY_LOCAL_MACHINE,
+                 winreg.HKEY_LOCAL_MACHINE,
                  'Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\!xSpeed.net 2.0'
              ]],
             hackName[1]:
-            [[_winreg.HKEY_CURRENT_USER, 'Software\\aspeeder'],
-             [_winreg.HKEY_LOCAL_MACHINE, 'Software\\aspeeder'],
+            [[winreg.HKEY_CURRENT_USER, 'Software\\aspeeder'],
+             [winreg.HKEY_LOCAL_MACHINE, 'Software\\aspeeder'],
              [
-                 _winreg.HKEY_LOCAL_MACHINE,
+                 winreg.HKEY_LOCAL_MACHINE,
                  'Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\aspeeder'
              ]]
         }
         try:
-            for prog in knownHacksRegistryKeys.keys():
+            for prog in list(knownHacksRegistryKeys.keys()):
                 for key in knownHacksRegistryKeys[prog]:
                     try:
-                        h = _winreg.OpenKey(key[0], key[1])
+                        h = winreg.OpenKey(key[0], key[1])
                         hacksInstalled[prog] = 1
-                        _winreg.CloseKey(h)
+                        winreg.CloseKey(h)
                         break
                     except:
                         pass
@@ -2115,11 +2115,11 @@ class LauncherBase(DirectObject):
         }
         i = 0
         try:
-            rh = _winreg.OpenKey(
-                _winreg.HKEY_CURRENT_USER,
+            rh = winreg.OpenKey(
+                winreg.HKEY_CURRENT_USER,
                 'Software\\Microsoft\\Windows\\ShellNoRoam\\MUICache')
             while 1:
-                name, value, type = _winreg.EnumValue(rh, i)
+                name, value, type = winreg.EnumValue(rh, i)
                 i += 1
                 if type == 1:
                     val = value.lower()
@@ -2127,7 +2127,7 @@ class LauncherBase(DirectObject):
                         if val.find(hackprog) != -1:
                             hacksInstalled[knownHacksMUI[hackprog]] = 1
                             break
-            _winreg.CloseKey(rh)
+            winreg.CloseKey(rh)
         except:
             pass
 
@@ -2144,19 +2144,19 @@ class LauncherBase(DirectObject):
             try:
                 for p in procapi.getProcessList():
                     pname = p.name
-                    if knownHacksExe.has_key(pname):
+                    if pname in knownHacksExe:
                         hacksRunning[knownHacksExe[pname]] = 1
             except:
                 pass
 
         if len(hacksInstalled) > 0:
             self.notify.info("Third party programs installed:")
-            for hack in hacksInstalled.keys():
+            for hack in list(hacksInstalled.keys()):
                 self.notify.info(hack)
 
         if len(hacksRunning) > 0:
             self.notify.info("Third party programs running:")
-            for hack in hacksRunning.keys():
+            for hack in list(hacksRunning.keys()):
                 self.notify.info(hack)
             self.setPandaErrorCode(8)
             sys.exit()

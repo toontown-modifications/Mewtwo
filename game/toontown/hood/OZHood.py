@@ -1,9 +1,9 @@
 from pandac.PandaModules import *
-import ToonHood
+from . import ToonHood
 from game.toontown.safezone import OZSafeZoneLoader
 from game.toontown.toonbase.ToontownGlobals import *
 from game.toontown.racing import DistributedVehicle
-import SkyUtil
+from . import SkyUtil
 
 
 class OZHood(ToonHood.ToonHood):

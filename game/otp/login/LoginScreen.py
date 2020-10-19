@@ -13,8 +13,8 @@ from game.otp.otpgui import OTPDialog
 from game.otp.otpbase import OTPLocalizer
 from game.otp.otpbase import OTPGlobals
 from game.otp.uberdog.AccountDetailRecord import AccountDetailRecord, SubDetailRecord
-import TTAccount
-import GuiScreen
+from . import TTAccount
+from . import GuiScreen
 
 
 class LoginScreen(StateData.StateData, GuiScreen.GuiScreen):

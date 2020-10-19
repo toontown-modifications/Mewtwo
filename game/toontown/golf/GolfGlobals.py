@@ -416,7 +416,7 @@ TrophiesPerCup = NumTrophies / NumCups
 def calcTrophyListFromHistory(history):
     retval = []
     historyIndex = 0
-    for trophyIndex in xrange(NumHistory):
+    for trophyIndex in range(NumHistory):
         requirements = TrophyRequirements[trophyIndex]
         for amountNeeded in requirements:
             if history[historyIndex] >= amountNeeded:
@@ -438,7 +438,7 @@ def calcCupListFromHistory(history):
             numTrophiesWon += 1
             continue
 
-    for cupIndex in xrange(len(retval)):
+    for cupIndex in range(len(retval)):
         threshold = (cupIndex + 1) * TrophiesPerCup
         if threshold <= numTrophiesWon:
             retval[cupIndex] = True

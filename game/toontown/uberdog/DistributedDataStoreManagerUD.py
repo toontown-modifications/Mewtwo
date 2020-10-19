@@ -3,7 +3,7 @@ from datetime import datetime
 from direct.directnotify.DirectNotifyGlobal import directNotify
 from direct.distributed.DistributedObjectGlobalUD import DistributedObjectGlobalUD
 
-from ScavengerHuntDataStore import ScavengerHuntDataStore
+from .ScavengerHuntDataStore import ScavengerHuntDataStore
 
 import os
 

@@ -18,7 +18,7 @@ class CountryClubRoomBase:
     if __dev__:
 
         def getCountryClubEntityTypeReg(self):
-            import FactoryEntityTypes
+            from . import FactoryEntityTypes
             from game.otp.level import EntityTypeRegistry
             typeReg = EntityTypeRegistry.EntityTypeRegistry(FactoryEntityTypes)
             return typeReg

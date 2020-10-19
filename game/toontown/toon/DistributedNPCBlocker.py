@@ -1,8 +1,8 @@
 from pandac.PandaModules import *
-from DistributedNPCToonBase import *
+from .DistributedNPCToonBase import *
 from direct.gui.DirectGui import *
 from pandac.PandaModules import *
-import NPCToons
+from . import NPCToons
 from game.toontown.toonbase import TTLocalizer
 from direct.distributed import DistributedObject
 from game.toontown.quest import QuestParser

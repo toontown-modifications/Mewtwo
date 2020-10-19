@@ -2,8 +2,8 @@ from pandac.PandaModules import *
 from game.otp.login.HTTPUtil import *
 from direct.directnotify import DirectNotifyGlobal
 from game.otp.login import TTAccount
-import DateObject
-import TTDateObject
+from . import DateObject
+from . import TTDateObject
 import time
 
 

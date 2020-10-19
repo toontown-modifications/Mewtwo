@@ -103,7 +103,7 @@ class DistributedPartyCogActivityAI(DistributedPartyTeamActivityAI):
         DistributedPartyTeamActivityAI.startActive(self, data)
 
     def calcReward(self):
-        for avId, score in self.scores.items():
+        for avId, score in list(self.scores.items()):
             newScore = int(score / PartyGlobals.CogPinataPushBodyFactor)
             if newScore > self.highScore[1]:
                 av = self.air.doId2do.get(avId)
@@ -167,7 +167,7 @@ class DistributedPartyCogActivityAI(DistributedPartyTeamActivityAI):
             if numPlayersTeamTwo > numPlayersTeamOne:
                 index = 1
 
-            for i in xrange(numToMove):
+            for i in range(numToMove):
                 self.avIds[1 - index].append(self.avIds[index].pop())
 
         self.sendUpdate('setToonsPlaying', self.getToonsPlaying())

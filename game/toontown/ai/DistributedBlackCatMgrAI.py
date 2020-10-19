@@ -1,7 +1,7 @@
 from direct.directnotify.DirectNotifyGlobal import directNotify
 from direct.distributed.DistributedObjectAI import DistributedObjectAI
 
-from HolidayBaseAI import HolidayBaseAI
+from .HolidayBaseAI import HolidayBaseAI
 
 class DistributedBlackCatMgrAI(DistributedObjectAI):
     notify = directNotify.newCategory('DistributedBlackCatMgrAI')

@@ -1,6 +1,6 @@
 from direct.directnotify import DirectNotifyGlobal
-import TTAccount
-import HTTPUtil
+from . import TTAccount
+from . import HTTPUtil
 
 
 class RemoteValueSet:

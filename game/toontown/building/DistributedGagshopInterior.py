@@ -4,7 +4,7 @@ from game.toontown.toonbase.ToontownGlobals import *
 import random
 from direct.distributed import DistributedObject
 from direct.directnotify import DirectNotifyGlobal
-import ToonInteriorColors
+from . import ToonInteriorColors
 from game.toontown.hood import ZoneUtil
 
 

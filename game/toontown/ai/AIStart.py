@@ -1,11 +1,11 @@
 from panda3d.core import loadPrcFile
 from panda3d.toontown import DNAStorage, SuitLeg, SuitLegList
-import __builtin__, sys, os, traceback
+import builtins, sys, os, traceback
 
-__builtin__.isClient = lambda: PythonUtil.isClient()
-__builtin__.DNAStorage = DNAStorage
-__builtin__.SuitLeg = SuitLeg
-__builtin__.SuitLegList = SuitLegList
+builtins.isClient = lambda: PythonUtil.isClient()
+builtins.DNAStorage = DNAStorage
+builtins.SuitLeg = SuitLeg
+builtins.SuitLegList = SuitLegList
 
 loadPrcFile(''.join(sys.argv[1:]))
 
@@ -16,11 +16,11 @@ class game:
     name = 'toontown'
     process = 'server'
 
-__builtin__.game = game
+builtins.game = game
 
 from game.otp.ai.AIBaseGlobal import *
 
-from ToontownAIRepository import ToontownAIRepository
+from .ToontownAIRepository import ToontownAIRepository
 
 simbase.air = ToontownAIRepository(int(os.getenv('BASE_CHANNEL')), os.getenv('DISTRICT_NAME'))
 

@@ -179,8 +179,8 @@ class GardenAI:
             return
 
         bonus = [-1] * 7
-        for track in xrange(7):
-            for level in xrange(8):
+        for track in range(7):
+            for level in range(8):
                 if not self.hasTree(track, level):
                     break
 
@@ -364,7 +364,7 @@ class GardenManagerAI:
             self.gardens[avId] = garden
 
     def destroy(self):
-        for garden in self.gardens.values():
+        for garden in list(self.gardens.values()):
             garden.destroy()
 
         del self.gardens

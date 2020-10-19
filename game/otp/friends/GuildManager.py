@@ -1,4 +1,4 @@
-import Queue
+import queue
 from direct.distributed.DistributedObjectGlobal import DistributedObjectGlobal
 from direct.directnotify.DirectNotifyGlobal import directNotify
 from game.otp.distributed import OtpDoGlobals
@@ -248,19 +248,19 @@ class GuildManager(DistributedObjectGlobal):
             base.localAvatar.guildNameChange(guildName, changeStatus)
 
     def guildNameUpdate(self, avatarId, guildName):
-        print 'DEBUG - guildNameUpdate for ', avatarId, ' to ', guildName
+        print('DEBUG - guildNameUpdate for ', avatarId, ' to ', guildName)
 
     def invitationFrom(self, avatarId, avatarName, guildId, guildName):
-        print 'GM invitationFrom %s(%d)' % (avatarName, avatarId)
+        print('GM invitationFrom %s(%d)' % (avatarName, avatarId))
         if hasattr(base, 'localAvatar'):
             base.localAvatar.guiMgr.handleGuildInvitation(
                 avatarId, avatarName, guildId, guildName)
 
     def retractInvite(self, avatarId):
-        print 'GM retraction'
+        print('GM retraction')
 
     def guildAcceptInvite(self, avatarId):
-        print 'sending accept event'
+        print('sending accept event')
         messenger.send(OTPGlobals.GuildAcceptInviteEvent, [avatarId])
 
     def leaderboardTopTen(self, stuff):

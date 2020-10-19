@@ -1,7 +1,7 @@
 from direct.gui.DirectGui import *
 from pandac.PandaModules import *
 from direct.showbase import DirectObject
-import CatalogItem
+from . import CatalogItem
 from game.toontown.toonbase import ToontownGlobals
 from game.toontown.toonbase import TTLocalizer
 from game.otp.otpbase import OTPLocalizer

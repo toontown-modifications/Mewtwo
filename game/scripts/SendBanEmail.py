@@ -2,8 +2,8 @@ import requests
 
 banEndpoint = 'https://sunrisegames.tech/bans/ChatBanEmail.php'
 
-playToken = input('Playtoken: ')
-chatMessages = input('Chat messages: ')
+playToken = eval(input('Playtoken: '))
+chatMessages = eval(input('Chat messages: '))
 
 # Since you are in this repository.
 # I trust you to not leak this.

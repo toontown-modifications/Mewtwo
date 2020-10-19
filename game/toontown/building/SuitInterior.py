@@ -8,7 +8,7 @@ from direct.fsm import ClassicFSM, State
 from direct.fsm import State
 from game.toontown.town import TownBattle
 from game.toontown.suit import Suit
-import Elevator
+from . import Elevator
 from direct.task.Task import Task
 from game.otp.distributed.TelemetryLimiter import RotationLimitToH, TLGatherAllAvs
 from game.toontown.toonbase import ToontownGlobals

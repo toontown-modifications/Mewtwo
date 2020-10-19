@@ -5,7 +5,7 @@ from direct.showbase.ShowBase import *
 from pandac.PandaModules import *
 from game.toontown.toon import Toon
 from game.toontown.toon import ToonDNA
-import GardenGlobals
+from . import GardenGlobals
 from game.toontown.toonbase import TTLocalizer
 from game.toontown.toonbase import ToontownGlobals
 from pandac.PandaModules import NodePath

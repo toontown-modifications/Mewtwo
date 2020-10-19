@@ -1,5 +1,5 @@
 from game.otp.speedchat.SCMenu import SCMenu
-from TTSCToontaskTerminal import TTSCToontaskTerminal
+from .TTSCToontaskTerminal import TTSCToontaskTerminal
 from game.otp.speedchat.SCStaticTextTerminal import SCStaticTextTerminal
 from game.toontown.quest import Quests
 
@@ -39,7 +39,7 @@ class TTSCToontaskMenu(SCMenu):
             if not isinstance(msgs, type([])):
                 msgs = [msgs]
 
-            for i in xrange(len(msgs)):
+            for i in range(len(msgs)):
                 addTerminal(
                     TTSCToontaskTerminal(msgs[i], taskId, toNpcId,
                                          toonProgress, i))

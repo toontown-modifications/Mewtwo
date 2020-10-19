@@ -652,7 +652,7 @@ class FriendSecret(DirectFrame, StateData.StateData):
         self.ok2.show()
 
     def _FriendSecret__rejectAccountSecret(self, reason):
-        print '## rejectAccountSecret: reason = ', reason
+        print('## rejectAccountSecret: reason = ', reason)
         self.ignore(OTPGlobals.PlayerFriendNewSecretEvent)
         self.ignore(OTPGlobals.PlayerFriendRejectNewSecretEvent)
         self.nextText['text'] = OTPLocalizer.FriendSecretTooMany
@@ -747,7 +747,7 @@ class FriendSecret(DirectFrame, StateData.StateData):
         self._FriendSecret__enteredSecret(1, 0)
 
     def _FriendSecret__rejectUseAccountSecret(self, reason):
-        print '## rejectUseAccountSecret: reason = ', reason
+        print('## rejectUseAccountSecret: reason = ', reason)
         self.ignore(OTPGlobals.PlayerFriendUpdateEvent)
         self.ignore(OTPGlobals.PlayerFriendRejectUseSecretEvent)
         if reason == RejectCode.RejectCode.FRIENDS_LIST_FULL:

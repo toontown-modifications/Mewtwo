@@ -8,7 +8,7 @@ from direct.fsm import State
 from direct.directutil import Mopath
 from game.toontown.toonbase import ToontownGlobals
 from direct.actor import Actor
-import FishingTargetGlobals
+from . import FishingTargetGlobals
 import random
 import math
 from game.toontown.effects import Bubbles

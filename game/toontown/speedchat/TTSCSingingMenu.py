@@ -1,7 +1,7 @@
 from direct.showbase import PythonUtil
 from game.otp.speedchat.SCMenu import SCMenu
 from game.otp.speedchat.SCMenuHolder import SCMenuHolder
-from TTSCSingingTerminal import TTSCSingingTerminal
+from .TTSCSingingTerminal import TTSCSingingTerminal
 from game.otp.otpbase import OTPLocalizer
 SingingMenuGuide = [(OTPLocalizer.SingingMenuSections[0], [{
     9000: 25
@@ -43,18 +43,18 @@ class TTSCSingingMenu(SCMenu):
         except BaseException:
             return None
 
-        for count in xrange(len(SingingMenuGuide)):
+        for count in range(len(SingingMenuGuide)):
             section = SingingMenuGuide[count]
             if section[0] == -1:
                 for phrase in section[1]:
                     emote = None
                     if isinstance(phrase, type({})):
-                        item = phrase.keys()[0]
+                        item = list(phrase.keys())[0]
                         emote = phrase[item]
                         phrase = item
 
                     if phrase not in OTPLocalizer.SpeedChatStaticText:
-                        print 'warning: tried to link a singing phrase %s which does not seem to exist' % phrase
+                        print('warning: tried to link a singing phrase %s which does not seem to exist' % phrase)
                         break
 
                     terminal = TTSCSingingTerminal(phrase)

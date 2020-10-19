@@ -3,7 +3,7 @@ from direct.fsm import ClassicFSM, State
 from direct.fsm import State
 from direct.directnotify import DirectNotifyGlobal
 from game.toontown.distributed.DelayDeletable import DelayDeletable
-import DistributedSuitBase
+from . import DistributedSuitBase
 
 
 class DistributedTutorialSuit(DistributedSuitBase.DistributedSuitBase,

@@ -2,7 +2,7 @@ from pandac.PandaModules import *
 from direct.gui.DirectGui import *
 from game.toontown.toonbase import TTLocalizer
 from game.toontown.toonbase import ToontownGlobals
-from MakeAToonGlobals import *
+from .MakeAToonGlobals import *
 from direct.directnotify import DirectNotifyGlobal
 from direct.interval.IntervalGlobal import *
 import random

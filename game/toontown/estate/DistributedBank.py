@@ -6,10 +6,10 @@ from pandac.PandaModules import *
 from direct.interval.IntervalGlobal import *
 from direct.distributed.ClockDelta import *
 from game.toontown.toonbase import ToontownGlobals
-import DistributedFurnitureItem
+from . import DistributedFurnitureItem
 from game.toontown.toonbase import TTLocalizer
-import BankGUI
-from BankGlobals import *
+from . import BankGUI
+from .BankGlobals import *
 from game.toontown.toontowngui import TTDialog
 from game.toontown.catalog.CatalogFurnitureItem import FurnitureTypes
 from game.toontown.catalog.CatalogFurnitureItem import FTScale

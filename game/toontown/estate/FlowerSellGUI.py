@@ -4,8 +4,8 @@ from direct.directnotify import DirectNotifyGlobal
 from game.toontown.toonbase import ToontownGlobals
 from game.toontown.toonbase import TTLocalizer
 from direct.task import Task
-import FlowerBase
-import FlowerPicker
+from . import FlowerBase
+from . import FlowerPicker
 
 
 class FlowerSellGUI(DirectFrame):

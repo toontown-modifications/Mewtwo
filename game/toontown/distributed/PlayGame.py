@@ -5,7 +5,7 @@ from direct.fsm import StateData
 from direct.fsm import ClassicFSM, State
 from direct.fsm import State
 from direct.task.Task import Task
-from ToontownMsgTypes import *
+from .ToontownMsgTypes import *
 from game.toontown.toonbase import ToontownGlobals
 from game.toontown.hood import TTHood
 from game.toontown.hood import DDHood
@@ -155,7 +155,7 @@ class PlayGame(StateData.StateData):
 
     def loadDnaStoreTutorial(self):
         self.dnaStore = DNAStorage()
-        print "dna store definedAAAAAAAAAAAA"
+        print("dna store definedAAAAAAAAAAAA")
         loader.loadDNAFile(self.dnaStore, 'phase_3.5/dna/storage_tutorial.dna')
         loader.loadDNAFile(self.dnaStore, 'phase_3.5/dna/storage_interior.dna')
 
@@ -171,7 +171,7 @@ class PlayGame(StateData.StateData):
                                'phase_3.5/dna/storage_interior.dna')
 
     def unloadDnaStore(self):
-        print "dna store undefinedAAAAAAAAAAAAAAAAAAAAAA"
+        print("dna store undefinedAAAAAAAAAAAAAAAAAAAAAA")
         if hasattr(self, 'dnaStore'):
             self.dnaStore.resetNodes()
             self.dnaStore.resetTextures()

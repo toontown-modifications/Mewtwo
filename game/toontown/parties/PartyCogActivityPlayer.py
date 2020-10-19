@@ -11,11 +11,11 @@ from game.toontown.minigame.OrthoDrive import OrthoDrive
 from game.toontown.minigame.OrthoWalk import OrthoWalk
 from game.toontown.battle.BattleProps import globalPropPool
 from game.toontown.battle.BattleSounds import globalBattleSoundCache
-import PartyGlobals
-from PartyCogActivityInput import PartyCogActivityInput
-from PartyCogActivityGui import PartyCogActivityGui
-from PartyCogUtils import CameraManager
-from PartyCogUtils import StrafingControl
+from . import PartyGlobals
+from .PartyCogActivityInput import PartyCogActivityInput
+from .PartyCogActivityGui import PartyCogActivityGui
+from .PartyCogUtils import CameraManager
+from .PartyCogUtils import StrafingControl
 UPDATE_TASK_NAME = 'PartyCogActivityLocalPlayer_UpdateTask'
 THROW_PIE_LIMIT_TIME = 0.2
 

@@ -3,14 +3,14 @@ from pandac.PandaModules import *
 from direct.interval.IntervalGlobal import *
 from direct.distributed.ClockDelta import *
 from game.toontown.toonbase import ToontownGlobals
-import cPickle
-import ToonInterior
+import pickle
+from . import ToonInterior
 from direct.directnotify import DirectNotifyGlobal
 from direct.fsm import ClassicFSM, State
 from direct.distributed import DistributedObject
 from direct.fsm import State
 import random
-import ToonInteriorColors
+from . import ToonInteriorColors
 from game.toontown.hood import ZoneUtil
 from game.toontown.toon import ToonDNA
 from game.toontown.toon import ToonHead
@@ -159,7 +159,7 @@ class DistributedToonInterior(DistributedObject.DistributedObject):
         self.block = block
 
     def setToonData(self, toonData):
-        savedBy = cPickle.loads(toonData)
+        savedBy = pickle.loads(toonData)
         self.savedBy = savedBy
 
     def buildTrophy(self):

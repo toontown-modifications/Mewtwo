@@ -1,8 +1,8 @@
-import DistributedLawnDecor
+from . import DistributedLawnDecor
 from direct.directnotify import DirectNotifyGlobal
 from direct.showbase.ShowBase import *
 from direct.interval.IntervalGlobal import *
-import GardenGlobals
+from . import GardenGlobals
 from game.toontown.toonbase import TTLocalizer
 from game.toontown.estate import PlantingGUI
 from game.toontown.estate import PlantTreeGUI
@@ -65,7 +65,7 @@ class DistributedGardenPlot(DistributedLawnDecor.DistributedLawnDecor):
         self.model = None
         if self.defaultModel:
             self.model = loader.loadModel(self.defaultModel)
-            if isinstance(self.plotScale, types.TupleType):
+            if isinstance(self.plotScale, tuple):
                 self.model.setScale(*self.plotScale)
             else:
                 self.model.setScale(self.plotScale)

@@ -1,8 +1,8 @@
 from pandac.PandaModules import *
 from direct.distributed.ClockDelta import *
 from direct.interval.IntervalGlobal import *
-from ElevatorConstants import *
-from ElevatorUtils import *
+from .ElevatorConstants import *
+from .ElevatorUtils import *
 from direct.showbase import PythonUtil
 from direct.directnotify import DirectNotifyGlobal
 from direct.fsm import ClassicFSM, State
@@ -102,7 +102,7 @@ class DistributedElevator(DistributedObject.DistributedObject):
             self.cr.relatedObjectMgr.abortRequest(self.bldgRequest)
             self.bldgRequest = None
 
-        for request in self.toonRequests.values():
+        for request in list(self.toonRequests.values()):
             self.cr.relatedObjectMgr.abortRequest(request)
 
         self.toonRequests = {}
@@ -448,7 +448,7 @@ class DistributedElevator(DistributedObject.DistributedObject):
             place.fsm.request('walk')
 
     def rejectBoard(self, avId, reason=0):
-        print 'rejectBoard %s' % reason
+        print('rejectBoard %s' % reason)
         if hasattr(base.localAvatar, 'elevatorNotifier'):
             if reason == REJECT_SHUFFLE:
                 base.localAvatar.elevatorNotifier.showMe(
@@ -517,7 +517,7 @@ class DistributedElevator(DistributedObject.DistributedObject):
         pass
 
     def onDoorCloseFinish(self):
-        for avId in self.boardedAvIds.keys():
+        for avId in list(self.boardedAvIds.keys()):
             av = self.cr.doId2do.get(avId)
             if av is not None:
                 if av.getParent().compareTo(self.getElevatorModel()) == 0:

@@ -2,7 +2,7 @@ import requests
 
 terminateEndpoint = 'https://sunrisegames.tech/bans/TerminateAccount.php'
 
-username = input('Username: ')
+username = eval(input('Username: '))
 reason = 'Violated rules multiple times.'
 
 # Since you are in this repository.

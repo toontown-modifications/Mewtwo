@@ -1,5 +1,5 @@
 from game.otp.otpbase import OTPGlobals
-from CogdoFlyingShadowPlacer import CogdoFlyingShadowPlacer
+from .CogdoFlyingShadowPlacer import CogdoFlyingShadowPlacer
 
 def loadMockup(fileName, dmodelsAlt = 'coffin'):
     try:

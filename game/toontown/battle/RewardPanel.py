@@ -3,7 +3,7 @@ from direct.gui.DirectGui import *
 from pandac.PandaModules import *
 from direct.interval.IntervalGlobal import *
 from game.toontown.toonbase import ToontownBattleGlobals
-import BattleBase
+from . import BattleBase
 from direct.directnotify import DirectNotifyGlobal
 import random
 import string
@@ -16,7 +16,7 @@ from game.toontown.toon import NPCToons
 import math
 from game.toontown.coghq import CogDisguiseGlobals
 from game.toontown.shtiker import DisguisePage
-import Fanfare
+from . import Fanfare
 from game.otp.otpbase import OTPGlobals
 
 
@@ -462,7 +462,7 @@ class RewardPanel(DirectFrame):
     def getRandomCongratsPair(self, toon):
         congratsStrings = TTLocalizer.RewardPanelCongratsStrings
         numStrings = len(congratsStrings)
-        indexList = range(numStrings)
+        indexList = list(range(numStrings))
         index1 = random.choice(indexList)
         indexList.remove(index1)
         index2 = random.choice(indexList)
@@ -627,8 +627,8 @@ class RewardPanel(DirectFrame):
                              hasUber,
                              guestWaste=0):
         if hasUber < 0:
-            print(toon.doId,
-                  'Reward Panel received an invalid hasUber from an uberList')
+            print((toon.doId,
+                  'Reward Panel received an invalid hasUber from an uberList'))
 
         tickDelay = 1.0 / 60
         intervalList = []

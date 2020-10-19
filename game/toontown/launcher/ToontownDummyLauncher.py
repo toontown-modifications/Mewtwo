@@ -46,7 +46,7 @@ class ToontownDummyLauncher(DummyLauncherBase, ToontownLauncher):
         pass
 
     def setRegistry(self, name, value):
-        print 'setRegistry[%s] = %s' % (name, value)
+        print('setRegistry[%s] = %s' % (name, value))
         self.reg[name] = value
 
     def getRegistry(self, name, defaultValue=None):
@@ -54,7 +54,7 @@ class ToontownDummyLauncher(DummyLauncherBase, ToontownLauncher):
             value = self.reg[name]
         else:
             value = defaultValue
-        print 'getRegistry[%s] = %s' % (name, value)
+        print('getRegistry[%s] = %s' % (name, value))
         return value
 
     def getGame2Done(self):

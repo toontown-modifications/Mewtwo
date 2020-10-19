@@ -2,9 +2,9 @@ from pandac.PandaModules import *
 from direct.distributed.ClockDelta import *
 from direct.interval.IntervalGlobal import *
 from direct.directtools.DirectGeometry import *
-from ElevatorConstants import *
-from ElevatorUtils import *
-from SuitBuildingGlobals import *
+from .ElevatorConstants import *
+from .ElevatorUtils import *
+from .SuitBuildingGlobals import *
 from direct.gui.DirectGui import *
 from pandac.PandaModules import *
 from game.toontown.toonbase import ToontownGlobals

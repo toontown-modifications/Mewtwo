@@ -1,10 +1,10 @@
 from pandac.PandaModules import *
-import ShtikerPage
+from . import ShtikerPage
 from game.toontown.toontowngui import TTDialog
 from direct.gui.DirectGui import *
 from pandac.PandaModules import *
 from game.toontown.toonbase import TTLocalizer
-import DisplaySettingsDialog
+from . import DisplaySettingsDialog
 from direct.task import Task
 from game.otp.speedchat import SpeedChat
 from game.otp.speedchat import SCColorScheme
@@ -113,7 +113,7 @@ class OptionsPage(ShtikerPage.ShtikerPage):
             self.codesTab['state'] = DGG.DISABLED
             self.codesTabPage.enter()
         else:
-            raise StandardError, 'OptionsPage::setMode - Invalid Mode %s' % mode
+            raise Exception('OptionsPage::setMode - Invalid Mode %s' % mode)
 
 
 class OptionsTabPage(DirectFrame):

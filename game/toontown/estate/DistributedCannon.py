@@ -14,7 +14,7 @@ from game.toontown.toon import ToonHead
 from game.toontown.effects import Splash
 from game.toontown.effects import DustCloud
 from game.toontown.minigame import CannonGameGlobals
-import CannonGlobals
+from . import CannonGlobals
 from direct.gui.DirectGui import *
 from pandac.PandaModules import *
 from game.toontown.toonbase import TTLocalizer
@@ -275,7 +275,7 @@ class DistributedCannon(DistributedObject.DistributedObject):
                 self.curPinballMultiplier = 1
                 self.incrementPinballInfo(0, 0)
 
-            if self.cr.doId2do.has_key(self.avId):
+            if self.avId in self.cr.doId2do:
                 self.av = self.cr.doId2do[self.avId]
                 self.acceptOnce(
                     self.av.uniqueName('disable'),
@@ -827,7 +827,7 @@ class DistributedCannon(DistributedObject.DistributedObject):
             self.cannonMoving = 0
             self.sndCannonMove.stop()
             self._DistributedCannon__broadcastLocalCannonPosition()
-            print 'Cannon Rot:%s Angle:%s' % (pos[0], pos[1])
+            print('Cannon Rot:%s Angle:%s' % (pos[0], pos[1]))
 
         return Task.cont
 
@@ -904,7 +904,7 @@ class DistributedCannon(DistributedObject.DistributedObject):
         flightResults = self._DistributedCannon__calcFlightResults(
             avId, launchTime)
         for key in flightResults:
-            exec "%s = flightResults['%s']" % (key, key)
+            exec("%s = flightResults['%s']" % (key, key))
 
         self.notify.debug('start position: ' + str(startPos))
         self.notify.debug('start velocity: ' + str(startVel))
@@ -924,7 +924,7 @@ class DistributedCannon(DistributedObject.DistributedObject):
         head.reparentTo(hidden)
         av = self.toonModel
         av.reparentTo(render)
-        print 'start Pos%s Hpr%s' % (startPos, startHpr)
+        print('start Pos%s Hpr%s' % (startPos, startHpr))
         av.setPos(startPos)
         barrelHpr = self.barrel.getHpr(render)
         place = base.cr.playGame.getPlace()
@@ -971,7 +971,7 @@ class DistributedCannon(DistributedObject.DistributedObject):
         flyTask.info = info
         seqTask = Task.sequence(shootTask, smokeTask, flyTask)
         if self.av == base.localAvatar:
-            print 'disable controls'
+            print('disable controls')
             base.localAvatar.disableAvatarControls()
         taskMgr.add(seqTask, self.taskName('flyingToon') + '-' + str(avId))
         self.acceptOnce(self.uniqueName('stopFlyTask'), self.__stopFlyTask)
@@ -993,13 +993,13 @@ class DistributedCannon(DistributedObject.DistributedObject):
 
     def removeAvFromCannon(self):
         place = base.cr.playGame.getPlace()
-        print 'removeAvFromCannon'
+        print('removeAvFromCannon')
         self.notify.debug('self.inWater = %s' % self.inWater)
         if place:
             if not hasattr(place, 'fsm'):
                 return
             placeState = place.fsm.getCurrentState().getName()
-            print placeState
+            print(placeState)
             if (self.inWater
                     or place.toonSubmerged) and placeState != 'fishing':
                 if self.av != None:
@@ -1023,7 +1023,7 @@ class DistributedCannon(DistributedObject.DistributedObject):
             self.av.startSmooth()
             self.av.setScale(1, 1, 1)
             if self.av == base.localAvatar:
-                print 'enable controls'
+                print('enable controls')
                 base.localAvatar.enableAvatarControls()
             self.ignore(self.av.uniqueName('disable'))
             self.__destroyToonModels()
@@ -1337,7 +1337,7 @@ class DistributedCannon(DistributedObject.DistributedObject):
         if hitP[2] > ToontownGlobals.EstateWakeWaterHeight:
             self.notify.debug('we hit the ground before we hit water')
             self.__hitGround(avatar, pos, extraArgs)
-            print 'but not really'
+            print('but not really')
             return
         self.inWater = 1
         self.notify.debug('hit water')

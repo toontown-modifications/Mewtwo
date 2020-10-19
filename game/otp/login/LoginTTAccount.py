@@ -1,9 +1,9 @@
 from pandac.PandaModules import *
 from direct.distributed.MsgTypes import *
 from direct.directnotify import DirectNotifyGlobal
-import LoginBase
-import TTAccount
-from TTAccount import TTAccountException
+from . import LoginBase
+from . import TTAccount
+from .TTAccount import TTAccountException
 from direct.distributed.PyDatagram import PyDatagram
 
 

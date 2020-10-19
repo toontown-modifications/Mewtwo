@@ -104,5 +104,5 @@ def isClient():
         return False
     return True
 
-import __builtin__
-__builtin__.describeException = describeException
+import builtins
+builtins.describeException = describeException

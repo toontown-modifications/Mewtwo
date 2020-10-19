@@ -1,7 +1,7 @@
 from game.otp.ai.AIBaseGlobal import *
 from direct.directnotify import DirectNotifyGlobal
 from game.toontown.battle import SuitBattleGlobals
-import DistributedGoonAI
+from . import DistributedGoonAI
 from direct.task.Task import Task
 from game.toontown.coghq import DistributedCrushableEntityAI
 import random

@@ -8,7 +8,7 @@ from direct.showbase import BulletinBoardWatcher
 from direct.interval.IntervalGlobal import *
 from game.otp.otpbase import OTPGlobals
 from direct.interval.IntervalGlobal import *
-from RaceGag import RaceGag
+from .RaceGag import RaceGag
 from game.toontown.toonbase import ToontownGlobals, TTLocalizer
 from game.toontown.toon import ToonHeadFrame
 from game.toontown.racing.KartDNA import InvalidEntry, getAccessory, getDefaultColor
@@ -16,8 +16,8 @@ from pandac.PandaModules import CardMaker, OrthographicLens, LineSegs
 from direct.distributed import DistributedSmoothNode
 from math import fmod
 from math import sqrt
-from RaceGUI import RaceGUI
-import RaceGlobals
+from .RaceGUI import RaceGUI
+from . import RaceGlobals
 from direct.task.Task import Task
 from game.toontown.hood import SkyUtil
 from direct.fsm import ClassicFSM, State
@@ -282,7 +282,7 @@ class DistributedRace(DistributedObject.DistributedObject):
 
     def setCircuitPlace(self, avId, place, entryFee, winnings, bonus,
                         trophies):
-        print 'setting cicruit place'
+        print('setting cicruit place')
         if self.fsm.getCurrentState().getName() == 'leaving':
             return None
 
@@ -298,13 +298,13 @@ class DistributedRace(DistributedObject.DistributedObject):
 
         avatar = base.cr.doId2do.get(avId, None)
         if avatar:
-            print 'circuit trophies %s' % trophies
-            print 'winnings %s' % winnings
+            print('circuit trophies %s' % trophies)
+            print('winnings %s' % winnings)
             self.gui.racerFinishedCircuit(avId, oldPlace, entryFee, winnings,
                                           bonus, trophies)
 
     def endCircuitRace(self):
-        print self.placeFixup
+        print(self.placeFixup)
         self.gui.circuitFinished(self.placeFixup)
 
     def prepForRace(self):
@@ -1320,7 +1320,7 @@ class DistributedRace(DistributedObject.DistributedObject):
         idStr = into.getTag('boostId')
         arrowVec = self.boostDir.get(idStr)
         if arrowVec is None:
-            print 'Unknown boost arrow %s' % idStr
+            print('Unknown boost arrow %s' % idStr)
             return None
 
         fvec = self.localKart.forward.getPos(

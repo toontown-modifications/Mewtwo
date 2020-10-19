@@ -5,9 +5,9 @@ from direct.interval.IntervalGlobal import *
 import random
 from game.otp.level import DistributedLevel
 from direct.directnotify import DirectNotifyGlobal
-import LawOfficeBase
-import FactoryEntityCreator
-import FactorySpecs
+from . import LawOfficeBase
+from . import FactoryEntityCreator
+from . import FactorySpecs
 from game.otp.level import LevelSpec
 from game.otp.level import LevelConstants
 from game.toontown.toonbase import TTLocalizer

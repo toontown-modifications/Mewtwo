@@ -7,7 +7,7 @@ from direct.fsm import ClassicFSM, State
 from direct.fsm import State
 from game.toontown.minigame import Purchase
 from game.otp.avatar import DistributedAvatar
-import Hood
+from . import Hood
 from game.toontown.building import SuitInterior
 from game.toontown.cogdominium import CogdoInterior
 from game.toontown.toon.Toon import teleportDebug

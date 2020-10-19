@@ -1,4 +1,4 @@
-import CatalogItem
+from . import CatalogItem
 import time
 from game.toontown.toonbase import ToontownGlobals
 from game.toontown.toonbase import TTLocalizer

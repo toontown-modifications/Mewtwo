@@ -2,7 +2,7 @@ from direct.distributed import DistributedObjectAI
 from direct.directnotify import DirectNotifyGlobal
 from game.toontown.toonbase import ToontownGlobals
 from pandac.PandaModules import *
-import DistributedPhysicsWorldAI
+from . import DistributedPhysicsWorldAI
 from direct.fsm.FSM import FSM
 from game.toontown.ai.ToonBarrier import *
 from game.toontown.golf import GolfGlobals
@@ -81,7 +81,7 @@ class GolfHoleBase:
             if not self.golfBarrier.isEmpty():
                 golfBarrierCollection = self.terrainModel.findAllMatches(
                     '**/collision?')
-                for i in xrange(golfBarrierCollection.getNumPaths()):
+                for i in range(golfBarrierCollection.getNumPaths()):
                     oneBarrier = golfBarrierCollection.getPath(i)
                     if oneBarrier != self.golfBarrier:
                         oneBarrier.wrtReparentTo(self.golfBarrier)
@@ -298,7 +298,7 @@ class GolfHoleBase:
 
                 elif self.frame > 2100 + checkFrames:
                     self.comObjNeedPass = 0
-                    print 'recording limit passed comObj'
+                    print('recording limit passed comObj')
 
             if ball.isEnabled():
                 lastFrameEnabled = self.frame

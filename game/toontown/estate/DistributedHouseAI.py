@@ -8,7 +8,7 @@ from game.toontown.estate.DistributedHouseDoorAI import DistributedHouseDoorAI
 from game.toontown.estate.DistributedHouseInteriorAI import DistributedHouseInteriorAI
 from game.toontown.estate.DistributedMailboxAI import DistributedMailboxAI
 from game.toontown.estate.GardenManagerAI import GardenManagerAI
-import HouseGlobals
+from . import HouseGlobals
 
 class DistributedHouseAI(DistributedObjectAI):
     notify = directNotify.newCategory('DistributedHouseAI')
@@ -276,7 +276,7 @@ class DistributedHouseAI(DistributedObjectAI):
     def addAtticItem(self, item):
         if item.replacesExisting and item.hasExisting():
             if item.getFlags() & FLCloset:
-                closet = ClosetToClothes.keys()
+                closet = list(ClosetToClothes.keys())
                 for atticItem in self.atticItems:
                     if atticItem.furnitureType in closet:
                         self.interior.furnitureManager.atticItems.remove(atticItem)

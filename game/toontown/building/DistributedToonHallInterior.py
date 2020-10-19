@@ -3,8 +3,8 @@ from direct.interval.IntervalGlobal import *
 from direct.distributed.ClockDelta import *
 from direct.showbase import Audio3DManager
 from game.toontown.toonbase import ToontownGlobals
-import cPickle
-from DistributedToonInterior import DistributedToonInterior
+import pickle
+from .DistributedToonInterior import DistributedToonInterior
 from direct.directnotify import DirectNotifyGlobal
 from direct.fsm import ClassicFSM, State
 from direct.distributed import DistributedObject
@@ -12,7 +12,7 @@ from direct.fsm import State
 from direct.actor import Actor
 import random
 import time
-import ToonInteriorColors
+from . import ToonInteriorColors
 from game.toontown.hood import ZoneUtil
 from game.toontown.toon import ToonDNA
 from game.toontown.toon import ToonHead

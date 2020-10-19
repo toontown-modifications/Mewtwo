@@ -1,11 +1,11 @@
 from pandac.PandaModules import *
 from direct.interval.IntervalGlobal import *
 from direct.distributed.ClockDelta import *
-from KnockKnockJokes import *
+from .KnockKnockJokes import *
 from game.toontown.toonbase import ToontownGlobals
 from direct.directnotify import DirectNotifyGlobal
 from direct.fsm import ClassicFSM
-import DistributedAnimatedProp
+from . import DistributedAnimatedProp
 from game.toontown.distributed import DelayDelete
 from game.toontown.toonbase import TTLocalizer
 from game.toontown.hood import ZoneUtil
@@ -75,8 +75,8 @@ class DistributedKnockKnockDoor(DistributedAnimatedProp.DistributedAnimatedProp
                     joke = KnockKnockContestJokes[ToontownGlobals.SillyStreet]
 
             elif branch == ToontownGlobals.LoopyLane:
-                if self.propId in KnockKnockContestJokes[
-                        ToontownGlobals.LoopyLane].keys():
+                if self.propId in list(KnockKnockContestJokes[
+                        ToontownGlobals.LoopyLane].keys()):
                     joke = KnockKnockContestJokes[ToontownGlobals.LoopyLane][
                         self.propId]
 
@@ -86,8 +86,8 @@ class DistributedKnockKnockDoor(DistributedAnimatedProp.DistributedAnimatedProp
                         ToontownGlobals.PunchlinePlace]
 
             elif branch == ToontownGlobals.PolarPlace:
-                if self.propId in KnockKnockContestJokes[
-                        ToontownGlobals.PolarPlace].keys():
+                if self.propId in list(KnockKnockContestJokes[
+                        ToontownGlobals.PolarPlace].keys()):
                     joke = KnockKnockContestJokes[ToontownGlobals.PolarPlace][
                         self.propId]
 

@@ -1,6 +1,6 @@
 from pandac.PandaModules import *
 from game.toontown.toonbase import ToontownGlobals
-import Playground
+from . import Playground
 from game.toontown.launcher import DownloadForceAcknowledge
 from game.toontown.building import Elevator
 from game.toontown.toontowngui import TTDialog

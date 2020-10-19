@@ -4,7 +4,7 @@ from pandac.PandaModules import *
 from direct.showbase import DirectObject
 from game.otp.avatar import Avatar
 from direct.distributed import DistributedObject
-import SuitDNA
+from . import SuitDNA
 from game.toontown.toonbase import TTLocalizer
 from game.otp.avatar import AvatarPanel
 from game.toontown.friends import FriendsListPanel

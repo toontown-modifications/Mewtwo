@@ -12,9 +12,9 @@ from direct.fsm import State
 from direct.directnotify import DirectNotifyGlobal
 from game.toontown.toonbase import ToontownGlobals
 from game.toontown.toonbase import ToontownBattleGlobals
-import DistributedBossCog
+from . import DistributedBossCog
 from game.toontown.toonbase import TTLocalizer
-import SuitDNA
+from . import SuitDNA
 from game.toontown.toon import Toon
 from game.toontown.battle import BattleBase
 from direct.directutil import Mopath
@@ -1076,7 +1076,7 @@ class DistributedLawbotBoss(DistributedBossCog.DistributedBossCog, FSM.FSM):
             del self.juryTimer
             self.juryTimer = None
 
-        for chair in self.chairs.values():
+        for chair in list(self.chairs.values()):
             chair.stopCogsFlying()
 
     def enterRollToBattleThree(self):
@@ -2114,7 +2114,7 @@ class DistributedLawbotBoss(DistributedBossCog.DistributedBossCog, FSM.FSM):
 
     def countToonJurors(self):
         self.numToonJurorsSeated = 0
-        for key in self.chairs.keys():
+        for key in list(self.chairs.keys()):
             chair = self.chairs[key]
             if chair.state == 'ToonJuror' or chair.state == None and chair.newState == 'ToonJuror':
                 self.numToonJurorsSeated += 1
@@ -2173,7 +2173,7 @@ class DistributedLawbotBoss(DistributedBossCog.DistributedBossCog, FSM.FSM):
 
         if gotError:
             st = StackTrace()
-            print st
+            print(st)
             return None
 
         chatString = TTLocalizer.LawbotBossTaunts[1]
@@ -2230,7 +2230,7 @@ class DistributedLawbotBoss(DistributedBossCog.DistributedBossCog, FSM.FSM):
 
     def numJurorsSeatedByCannon(self, cannonIndex):
         retVal = 0
-        for chair in self.chairs.values():
+        for chair in list(self.chairs.values()):
             if chair.state == 'ToonJuror':
                 if chair.toonJurorIndex == cannonIndex:
                     retVal += 1

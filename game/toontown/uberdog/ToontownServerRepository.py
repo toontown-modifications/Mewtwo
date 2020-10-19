@@ -6,9 +6,9 @@ from game.otp.distributed.DistributedDirectoryAI import DistributedDirectoryAI
 from game.otp.uberdog.DistributedChatManagerUD import DistributedChatManagerUD
 from game.toontown.parties.ToontownTimeManager import ToontownTimeManager
 from game.otp.distributed import OtpDoGlobals
-import __builtin__, time
+import builtins, time
 
-__builtin__.isClient = lambda: PythonUtil.isClient()
+builtins.isClient = lambda: PythonUtil.isClient()
 
 class ToontownServerRepository(AstronInternalRepository):
     dbId = 4003

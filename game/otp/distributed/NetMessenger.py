@@ -2,7 +2,7 @@ from direct.directnotify import DirectNotifyGlobal
 from direct.distributed.PyDatagram import PyDatagram
 from direct.showbase.Messenger import Messenger
 
-from cPickle import dumps, loads
+from pickle import dumps, loads
 
 class NetMessenger(Messenger):
     """

@@ -599,7 +599,7 @@ class ObjectManager(NodePath, DirectObject):
                 self.selectedObject.collisionNodePath.unstash()
                 self.selectedObject.dfitem.stopAdjustPosHpr()
 
-            for object in self.objectDict.values():
+            for object in list(self.objectDict.values()):
                 object.unstashBuiltInCollisionNodes()
 
             self.centerMarker['image'] = [
@@ -621,7 +621,7 @@ class ObjectManager(NodePath, DirectObject):
     def moveObjectContinue(self, *args):
         messenger.send('wakeup')
         if self.selectedObject:
-            for object in self.objectDict.values():
+            for object in list(self.objectDict.values()):
                 object.stashBuiltInCollisionNodes()
 
             self.selectedObject.collisionNodePath.stash()
@@ -756,7 +756,7 @@ class ObjectManager(NodePath, DirectObject):
             entry = self.iSegment.findNextCollisionEntry(skipFlags=SKIP_CAMERA
                                                          | SKIP_UNPICKABLE)
         if offsetDict:
-            keys = offsetDict.keys()
+            keys = list(offsetDict.keys())
             ortho1 = offsetDict[keys[0]]
             ortho2 = Vec3(0)
             v1 = Vec3(ortho1)
@@ -959,7 +959,7 @@ class ObjectManager(NodePath, DirectObject):
         self.selectedObject.wrtReparentTo(self.collisionOffsetNP)
 
     def resetFurniture(self):
-        for o in self.objectDict.values():
+        for o in list(self.objectDict.values()):
             o.resetMovableObject()
 
         self.objectDict = {}
@@ -1353,7 +1353,7 @@ class ObjectManager(NodePath, DirectObject):
 
     def createInRoomPicker(self):
         self.inRoomPanels = []
-        for (objectId, object) in self.objectDict.items():
+        for (objectId, object) in list(self.objectDict.items()):
             panel = FurnitureItemPanel(
                 object.dfitem.item,
                 objectId,
@@ -1639,7 +1639,7 @@ class ObjectManager(NodePath, DirectObject):
                    repr(base.localAvatar.getPos(render)), repr(pos)))
 
         if item.getFlags() & CatalogFurnitureItem.FLPainting:
-            for object in self.objectDict.values():
+            for object in list(self.objectDict.values()):
                 object.stashBuiltInCollisionNodes()
 
             self.gridSnapNP.iPosHpr()
@@ -1651,7 +1651,7 @@ class ObjectManager(NodePath, DirectObject):
                 origin=Point3(0, 0, 6),
                 dir=Vec3(0, 1, 0),
                 skipFlags=SKIP_BACKFACE | SKIP_CAMERA | SKIP_UNPICKABLE)
-            for object in self.objectDict.values():
+            for object in list(self.objectDict.values()):
                 object.unstashBuiltInCollisionNodes()
 
             if entry:
@@ -2157,7 +2157,7 @@ class ObjectManager(NodePath, DirectObject):
                 self.helpText['text'] = helpText
                 self.helpText.show()
             else:
-                print 'category: %s not found'
+                print('category: %s not found')
 
         taskMgr.doMethodLater(0.75, showIt, 'showHelpTextDoLater')
 

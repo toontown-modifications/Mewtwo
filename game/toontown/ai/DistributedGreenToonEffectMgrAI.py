@@ -18,7 +18,7 @@ class DistributedGreenToonEffectMgrAI(DistributedObjectAI):
             expireTime = int(time.time() / 60 + 0.5) + 3600
             av.b_setCheesyEffect(ToontownGlobals.CEGreenToon, 0, expireTime)
 
-from HolidayBaseAI import HolidayBaseAI
+from .HolidayBaseAI import HolidayBaseAI
 
 class GreenToonHolidayAI(HolidayBaseAI):
 

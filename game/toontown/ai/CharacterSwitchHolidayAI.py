@@ -1,4 +1,4 @@
-from HolidayBaseAI import HolidayBaseAI
+from .HolidayBaseAI import HolidayBaseAI
 from direct.directnotify.DirectNotifyGlobal import directNotify
 
 from game.toontown.toonbase import TTLocalizer

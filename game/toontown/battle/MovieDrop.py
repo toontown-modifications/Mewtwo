@@ -1,12 +1,12 @@
 from direct.interval.IntervalGlobal import *
-from BattleBase import *
-from BattleProps import *
-from BattleSounds import *
-import MovieCamera
+from .BattleBase import *
+from .BattleProps import *
+from .BattleSounds import *
+from . import MovieCamera
 from direct.directnotify import DirectNotifyGlobal
-import MovieUtil
-import MovieNPCSOS
-from MovieUtil import calcAvgSuitPos
+from . import MovieUtil
+from . import MovieNPCSOS
+from .MovieUtil import calcAvgSuitPos
 from direct.showutil import Effects
 notify = DirectNotifyGlobal.directNotify.newCategory('MovieDrop')
 hitSoundFiles = ('AA_drop_flowerpot.mp3', 'AA_drop_sandbag.mp3',
@@ -63,7 +63,7 @@ def doDrops(drops):
                 else:
                     suitDropsDict[suitId] = [(drop, target)]
 
-    suitDrops = suitDropsDict.values()
+    suitDrops = list(suitDropsDict.values())
 
     def compFunc(a, b):
         if len(a) > len(b):
@@ -176,7 +176,7 @@ def __doGroupDrops(groupDrops):
         numTargets = len(targets)
         closestTarget = -1
         nearestDistance = 100000.0
-        for i in xrange(numTargets):
+        for i in range(numTargets):
             suit = drop['target'][i]['suit']
             suitPos = suit.getPos(battle)
             displacement = Vec3(centerPos)
@@ -211,7 +211,7 @@ def __dropGroupObject(drop, delay, closestTarget, alreadyDodged,
     npcs = []
     returnedParallel = __dropObject(drop, delay, objName, level, alreadyDodged,
                                     alreadyTeased, npcs, target, npcDrops)
-    for i in xrange(len(drop['target'])):
+    for i in range(len(drop['target'])):
         target = drop['target'][i]
         suitTrack = __createSuitTrack(drop, delay, level, alreadyDodged,
                                       alreadyTeased, target, npcs)

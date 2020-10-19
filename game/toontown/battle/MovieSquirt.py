@@ -1,13 +1,13 @@
 from direct.interval.IntervalGlobal import *
-from BattleBase import *
-from BattleProps import *
-from BattleSounds import *
+from .BattleBase import *
+from .BattleProps import *
+from .BattleSounds import *
 from game.toontown.toon.ToonDNA import *
 from game.toontown.suit.SuitDNA import *
-import MovieUtil
-import MovieCamera
+from . import MovieUtil
+from . import MovieCamera
 from direct.directnotify import DirectNotifyGlobal
-import BattleParticles
+from . import BattleParticles
 from game.toontown.toonbase import ToontownGlobals
 from game.toontown.toonbase import ToontownBattleGlobals
 import random
@@ -54,7 +54,7 @@ def doSquirts(squirts):
             continue
         suitSquirtsDict[suitId] = [squirt]
 
-    suitSquirts = suitSquirtsDict.values()
+    suitSquirts = list(suitSquirtsDict.values())
 
     def compFunc(a, b):
         if len(a) > len(b):
@@ -312,7 +312,7 @@ def __getSuitTrack(suit,
 
 
 def say(statement):
-    print statement
+    print(statement)
 
 
 def __getSoundTrack(level, hitSuit, delay, node=None):

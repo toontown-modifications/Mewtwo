@@ -1,7 +1,7 @@
 from direct.directnotify.DirectNotifyGlobal import directNotify
 from direct.distributed.DistributedObjectAI import DistributedObjectAI
 from game.toontown.toonbase import TTLocalizer
-import cPickle
+import pickle
 
 class DistributedLeaderBoardAI(DistributedObjectAI):
     notify = directNotify.newCategory('DistributedLeaderBoardAI')
@@ -49,5 +49,5 @@ class DistributedLeaderBoardAI(DistributedObjectAI):
         periodName = TTLocalizer.RecordPeriodStrings[self.subscriptions[self.currentIndex][1]]
         leaderList = self.records[self.subscriptions[self.currentIndex][0]][self.subscriptions[self.currentIndex][1]]
         pack = (trackName, periodName, leaderList)
-        response = cPickle.dumps(pack, 1)
+        response = pickle.dumps(pack, 1)
         self.sendUpdate('setDisplay', [response])

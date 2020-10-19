@@ -70,7 +70,7 @@ class HolidayManagerAI:
         if holidayId not in self.currentHolidays:
             if holidayId in holidayToMgr:
                 holidayMgr = holidayToMgr[holidayId]
-                for holiday in self.currentHolidays.values():
+                for holiday in list(self.currentHolidays.values()):
                     if isinstance(holiday, holidayMgr):
                         self.notify.warning('Unable to start holiday {} because the same manager for {} is already running!'.format(holidayId, holiday.holidayId))
                         return
@@ -79,7 +79,7 @@ class HolidayManagerAI:
                 holidayMgr = HolidayBaseAI(self.air, holidayId)
             holidayMgr.start()
             self.currentHolidays[holidayId] = holidayMgr
-            self.air.newsManager.d_setHolidayIdList(self.currentHolidays.keys())
+            self.air.newsManager.d_setHolidayIdList(list(self.currentHolidays.keys()))
 
         if task:
             return task.done
@@ -88,4 +88,4 @@ class HolidayManagerAI:
         if holidayId in self.currentHolidays:
             self.currentHolidays[holidayId].stop()
             del self.currentHolidays[holidayId]
-            self.air.newsManager.d_setHolidayIdList(self.currentHolidays.keys())
+            self.air.newsManager.d_setHolidayIdList(list(self.currentHolidays.keys()))

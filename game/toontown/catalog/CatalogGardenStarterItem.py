@@ -1,4 +1,4 @@
-import CatalogItem
+from . import CatalogItem
 import time
 from game.toontown.toonbase import ToontownGlobals
 from game.toontown.toonbase import TTLocalizer
@@ -35,15 +35,15 @@ class CatalogGardenStarterItem(CatalogItem.CatalogItem):
         return TTLocalizer.GardenStarterTypeName
 
     def recordPurchase(self, avatar, optional):
-        print 'rental-- record purchase'
+        print('rental-- record purchase')
         if avatar:
-            print 'starter garden-- has avater'
+            print('starter garden-- has avater')
             estate = simbase.air.estateMgr.estate.get(avatar.doId)
             if estate:
-                print 'starter garden-- has estate'
+                print('starter garden-- has estate')
                 estate.placeStarterGarden(avatar.doId)
             else:
-                print 'starter garden-- something not there'
+                print('starter garden-- something not there')
 
         return ToontownGlobals.P_ItemAvailable
 

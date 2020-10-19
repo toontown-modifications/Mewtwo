@@ -2,7 +2,7 @@ from pandac.PandaModules import *
 from direct.interval.IntervalGlobal import *
 from game.toontown.battle.BattleProps import *
 from direct.directnotify import DirectNotifyGlobal
-import DistributedGoon
+from . import DistributedGoon
 from game.toontown.toonbase import ToontownGlobals
 from game.toontown.coghq import MovingPlatform
 

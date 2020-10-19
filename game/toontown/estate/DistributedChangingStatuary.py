@@ -48,7 +48,7 @@ class DistributedChangingStatuary(DistributedStatuary.DistributedStatuary):
             stage = len(growthThresholds)
 
         self.notify.debug('growth Stage=%d' % stage)
-        for index in xrange(len(growthThresholds) + 1):
+        for index in range(len(growthThresholds) + 1):
             if index != stage:
                 partName = '**/growthStage_%d' % index
                 self.notify.debug('trying to remove %s' % partName)

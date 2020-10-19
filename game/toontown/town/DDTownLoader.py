@@ -1,5 +1,5 @@
-import TownLoader
-import DDStreet
+from . import TownLoader
+from . import DDStreet
 from game.toontown.suit import Suit
 
 

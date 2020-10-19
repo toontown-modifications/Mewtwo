@@ -1,5 +1,5 @@
-import CatalogAtticItem
-import CatalogItem
+from . import CatalogAtticItem
+from . import CatalogItem
 import random
 from game.toontown.toonbase import TTLocalizer
 from game.toontown.toonbase import ToontownGlobals
@@ -43,7 +43,7 @@ BankToMoney = {
     1350: 12000
 }
 MoneyToBank = {}
-for (bankId, maxMoney) in BankToMoney.items():
+for (bankId, maxMoney) in list(BankToMoney.items()):
     MoneyToBank[maxMoney] = bankId
 
 MaxBankId = 1350
@@ -60,7 +60,7 @@ ClosetToClothes = {
     518: 50
 }
 ClothesToCloset = {}
-for (closetId, maxClothes) in ClosetToClothes.items():
+for (closetId, maxClothes) in list(ClosetToClothes.items()):
     if maxClothes not in ClothesToCloset:
         ClothesToCloset[maxClothes] = (closetId, )
     else:
@@ -548,7 +548,7 @@ class CatalogFurnitureItem(CatalogAtticItem.CatalogAtticItem):
         self.applyColor(model, type[FTColor])
         if type[FTColorOptions] is not None:
             if self.colorOption is None:
-                option = random.choice(type[FTColorOptions].values())
+                option = random.choice(list(type[FTColorOptions].values()))
             else:
                 option = type[FTColorOptions].get(self.colorOption)
             self.applyColor(model, option)
@@ -635,7 +635,7 @@ def getMaxClosets():
 
 def getAllClosets():
     list = []
-    for closetId in ClosetToClothes.keys():
+    for closetId in list(ClosetToClothes.keys()):
         list.append(CatalogFurnitureItem(closetId))
 
     return list

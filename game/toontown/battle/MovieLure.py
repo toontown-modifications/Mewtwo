@@ -1,16 +1,16 @@
 from direct.interval.IntervalGlobal import *
-from BattleBase import *
-from BattleProps import *
+from .BattleBase import *
+from .BattleProps import *
 from game.toontown.suit.SuitBase import *
 from game.toontown.toon.ToonDNA import *
-from BattleSounds import *
-import MovieCamera
+from .BattleSounds import *
+from . import MovieCamera
 from direct.directnotify import DirectNotifyGlobal
-import MovieUtil
+from . import MovieUtil
 from game.toontown.toonbase import ToontownBattleGlobals
-import BattleParticles
-import BattleProps
-import MovieNPCSOS
+from . import BattleParticles
+from . import BattleProps
+from . import MovieNPCSOS
 notify = DirectNotifyGlobal.directNotify.newCategory('MovieLures')
 
 

@@ -2,7 +2,7 @@ from direct.directnotify import DirectNotifyGlobal
 from pandac.PandaModules import *
 from direct.interval.IntervalGlobal import *
 from game.toontown.fishing import FishGlobals
-import GardenGlobals
+from . import GardenGlobals
 from direct.actor import Actor
 
 
@@ -50,8 +50,7 @@ class DirectRegion(NodePath):
             ll = render2d.getRelativePoint(card, newBounds[0])
             ur = render2d.getRelativePoint(card, newBounds[1])
             newBounds = [ll.getX(), ur.getX(), ll.getZ(), ur.getZ()]
-            newBounds = map(lambda x: max(0.0, min(1.0, (x + 1.0) / 2.0)),
-                            newBounds)
+            newBounds = [max(0.0, min(1.0, (x + 1.0) / 2.0)) for x in newBounds]
             self.cDr = base.win.makeDisplayRegion(*newBounds)
             self.cDr.setSort(10)
             self.cDr.setClearColor(card.getColor())

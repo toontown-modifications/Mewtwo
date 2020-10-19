@@ -45,9 +45,9 @@ from game.otp.uberdog import OtpAvatarManager
 from game.otp.distributed import OtpDoGlobals
 from game.otp.distributed.TelemetryLimiter import TelemetryLimiter
 from game.otp.ai.GarbageLeakServerEventAggregator import GarbageLeakServerEventAggregator
-from PotentialAvatar import PotentialAvatar
-from DistrictHandle import *
-from OrgMsgTypes import *
+from .PotentialAvatar import PotentialAvatar
+from .DistrictHandle import *
+from .OrgMsgTypes import *
 
 
 class OTPClientRepository(ClientRepositoryBase):
@@ -174,7 +174,7 @@ class OTPClientRepository(ClientRepositoryBase):
             self.DISLToken += '&WL_CHAT_ENABLED=%s' % config.GetString(
                 'fake-DISL-WLChatEnabled', 'YES') + '&valid=true'
             if base.logPrivateInfo:
-                print self.DISLToken
+                print(self.DISLToken)
 
         self.requiredLogin = config.GetString('required-login', 'auto')
         if self.requiredLogin == 'auto':
@@ -907,7 +907,7 @@ class OTPClientRepository(ClientRepositoryBase):
                'deltaStamp'], dConfigParam='teleport')(_wantShardListComplete)
 
     def _shardsAreReady(self):
-        for shard in self.activeDistrictMap.values():
+        for shard in list(self.activeDistrictMap.values()):
             if shard.available:
                 return True
                 continue
@@ -1015,8 +1015,7 @@ class OTPClientRepository(ClientRepositoryBase):
         self.stopHeartbeat()
         self.stopReaderPollTask()
         gameUsername = launcher.getValue('GAME_USERNAME', base.cr.userName)
-        if self.bootedIndex is not None and OTPLocalizer.CRBootedReasons.has_key(
-                self.bootedIndex):
+        if self.bootedIndex is not None and self.bootedIndex in OTPLocalizer.CRBootedReasons:
             message = OTPLocalizer.CRBootedReasons[self.bootedIndex] % {
                 'name': gameUsername
             }
@@ -1390,7 +1389,7 @@ class OTPClientRepository(ClientRepositoryBase):
                 self.stopPeriodTimer()
             else:
                 self.startPeriodTimer()
-            print "sent"
+            print("sent")
 
     sendSetAvatarIdMsg = report(types=['args', 'deltaStamp'],
                                 dConfigParam='teleport')(sendSetAvatarIdMsg)
@@ -1517,12 +1516,12 @@ class OTPClientRepository(ClientRepositoryBase):
                 continue
                 continue
             if hasattr(task, 'debugInitTraceback'):
-                print task.debugInitTraceback
+                print(task.debugInitTraceback)
 
             problems.append(task.name)
 
         if problems:
-            print taskMgr
+            print(taskMgr)
             msg = "You can't leave until you clean up your tasks: {"
             for task in problems:
                 msg += '\n  ' + task
@@ -1574,7 +1573,7 @@ class OTPClientRepository(ClientRepositoryBase):
                     try:
                         value = whoAccepts[obj]
                         callback = value[0]
-                        guiObj = callback.im_self
+                        guiObj = callback.__self__
                         if hasattr(guiObj, 'getCreationStackTraceCompactStr'):
                             msg += '\n   CREATIONSTACKTRACE:%s' % guiObj.getCreationStackTraceCompactStr(
                             )
@@ -1590,7 +1589,7 @@ class OTPClientRepository(ClientRepositoryBase):
     def detectLeakedIntervals(self):
         numIvals = ivalMgr.getNumIntervals()
         if numIvals > 0:
-            print "You can't leave until you clean up your intervals: {"
+            print("You can't leave until you clean up your intervals: {")
             for i in range(ivalMgr.getMaxIndex()):
                 ival = None
                 if i < len(ivalMgr.ivals):
@@ -1600,16 +1599,16 @@ class OTPClientRepository(ClientRepositoryBase):
                     ival = ivalMgr.getCInterval(i)
 
                 if ival:
-                    print ival
+                    print(ival)
                     if hasattr(ival, 'debugName'):
-                        print ival.debugName
+                        print(ival.debugName)
 
                     if hasattr(ival, 'debugInitTraceback'):
-                        print ival.debugInitTraceback
+                        print(ival.debugInitTraceback)
 
                 hasattr(ival, 'debugInitTraceback')
 
-            print '}'
+            print('}')
             self.notify.info(
                 "You can't leave until you clean up your intervals.")
             return numIvals
@@ -1839,7 +1838,7 @@ class OTPClientRepository(ClientRepositoryBase):
             self.removeShardInterest(callback)
 
     def _removeAllOV(self):
-        ownerDoIds = self.doId2ownerView.keys()
+        ownerDoIds = list(self.doId2ownerView.keys())
         for doId in ownerDoIds:
             self.disableDoId(doId, ownerView=True)
 
@@ -2006,7 +2005,7 @@ class OTPClientRepository(ClientRepositoryBase):
     def handlePlayGame(self, msgType, di):
         if self.notify.getDebug():
             self.notify.debug('handle play game got message type: ' +
-                              ` msgType `)
+                              repr( msgType))
 
         if msgType == CLIENT_CREATE_OBJECT_REQUIRED:
             self.handleGenerateWithRequired(di)
@@ -2169,7 +2168,7 @@ class OTPClientRepository(ClientRepositoryBase):
 
     def getStartingDistrict(self):
         district = None
-        if len(self.activeDistrictMap.keys()) == 0:
+        if len(list(self.activeDistrictMap.keys())) == 0:
             self.notify.info('no shards')
             return None
 
@@ -2177,7 +2176,7 @@ class OTPClientRepository(ClientRepositoryBase):
             (lowPop, midPop, highPop) = base.getShardPopLimits()
             self.notify.debug('low: %s mid: %s high: %s' %
                               (lowPop, midPop, highPop))
-            for s in self.activeDistrictMap.values():
+            for s in list(self.activeDistrictMap.values()):
                 if s.available and s.avatarCount < lowPop:
                     self.notify.debug('%s: pop %s' % (s.name, s.avatarCount))
                     if district is None:
@@ -2190,7 +2189,7 @@ class OTPClientRepository(ClientRepositoryBase):
         if district is None:
             self.notify.debug(
                 'all shards over cutoff, picking lowest-population shard')
-            for s in self.activeDistrictMap.values():
+            for s in list(self.activeDistrictMap.values()):
                 if s.available:
                     self.notify.debug('%s: pop %s' % (s.name, s.avatarCount))
                     if district is None or s.avatarCount < district.avatarCount:
@@ -2218,7 +2217,7 @@ class OTPClientRepository(ClientRepositoryBase):
 
     def listActiveShards(self):
         list = []
-        for s in self.activeDistrictMap.values():
+        for s in list(self.activeDistrictMap.values()):
             if s.available:
                 list.append((s.doId, s.name, s.avatarCount, s.newAvatarCount))
                 continue
@@ -2246,7 +2245,7 @@ class OTPClientRepository(ClientRepositoryBase):
         self.loginFSM.request('noConnection')
 
     def waitForDatabaseTimeout(self, extraTimeout=0, requestName='unknown'):
-        print requestName
+        print(requestName)
         OTPClientRepository.notify.debug(
             'waiting for database timeout %s at %s' %
             (requestName, globalClock.getFrameTime()))
@@ -2432,7 +2431,7 @@ class OTPClientRepository(ClientRepositoryBase):
             self.setIsPaid(di.getUint8())
             self.__handleLoginDone({"mode": "success"})
         else:
-            print "UNKNOWN MSG IS %d" % msgType
+            print("UNKNOWN MSG IS %d" % msgType)
             currentLoginState = self.loginFSM.getCurrentState()
             if currentLoginState:
                 currentLoginStateName = currentLoginState.getName()
@@ -2523,7 +2522,7 @@ class OTPClientRepository(ClientRepositoryBase):
 
     def handleDatagram(self, di):
         if self.notify.getDebug():
-            print 'ClientRepository received datagram:'
+            print('ClientRepository received datagram:')
             di.getDatagram().dumpHex(ostream)
 
         msgType = self.getMsgType()

@@ -41,7 +41,7 @@ class NonRepeatableRandomSourceAI(DistributedObjectAI):
         if num is None:
             num = 1
 
-        context = self._contextGen.next()
+        context = next(self._contextGen)
         self._requests[context] = (callback, )
         self.air.sendUpdateToDoId(
             'NonRepeatableRandomSource', 'getRandomSamples',

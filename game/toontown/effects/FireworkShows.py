@@ -1,4 +1,4 @@
-from FireworkGlobals import *
+from .FireworkGlobals import *
 from game.toontown.toonbase import ToontownGlobals
 from game.toontown.parties import PartyGlobals
 shows = {

@@ -320,7 +320,7 @@ class DistributedGolfHole(DistributedPhysicsWorld.DistributedPhysicsWorld, FSM,
         self.crowdBuildupSfx = []
         self.crowdApplauseSfx = []
         self.crowdMissSfx = []
-        for i in xrange(4):
+        for i in range(4):
             self.crowdBuildupSfx.append(
                 loader.loadSfx('phase_6/audio/sfx/Golf_Crowd_Buildup.mp3'))
             self.crowdApplauseSfx.append(
@@ -366,7 +366,7 @@ class DistributedGolfHole(DistributedPhysicsWorld.DistributedPhysicsWorld, FSM,
         camera.setHpr(self.camHprBallFollow)
         if self.holeBottomNodePath.isEmpty():
             holePositions = self.holePositions
-            for index in xrange(len(holePositions)):
+            for index in range(len(holePositions)):
                 holePos = holePositions[index]
                 (targetNodePathGeom, t1, t2) = BuildGeometry.addCircleGeom(
                     self.targets, 16, 1)
@@ -1640,7 +1640,7 @@ class DistributedGolfHole(DistributedPhysicsWorld.DistributedPhysicsWorld, FSM,
 
     def _DistributedGolfHole__updateGolfPower(self, task):
         if not self.powerBar:
-            print '### no power bar!!!'
+            print('### no power bar!!!')
             return Task.done
 
         newPower = self._DistributedGolfHole__getGolfPower(
@@ -1814,7 +1814,7 @@ class DistributedGolfHole(DistributedPhysicsWorld.DistributedPhysicsWorld, FSM,
         flyOverJoint = self.flyOverActor.find('**/camera1')
         children = flyOverJoint.getChildren()
         numChild = children.getNumPaths()
-        for i in xrange(numChild):
+        for i in range(numChild):
             childNodePath = children.getPath(i)
             childNodePath.removeNode()
 

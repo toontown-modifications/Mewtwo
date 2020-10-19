@@ -4,12 +4,12 @@ from pandac.PandaModules import *
 from direct.gui.DirectScrolledList import *
 from game.toontown.toonbase import ToontownGlobals
 from game.toontown.toontowngui import TTDialog
-import CatalogItem
-import CatalogInvalidItem
-import CatalogFurnitureItem
+from . import CatalogItem
+from . import CatalogInvalidItem
+from . import CatalogFurnitureItem
 from game.toontown.toonbase import TTLocalizer
-import CatalogItemPanel
-import CatalogItemTypes
+from . import CatalogItemPanel
+from . import CatalogItemTypes
 from direct.actor import Actor
 import random
 from game.toontown.toon import DistributedToon
@@ -344,7 +344,7 @@ class CatalogScreen(DirectFrame):
                 if pIndex < len(self.visiblePanels):
                     type = self.visiblePanels[pIndex]['item'].getTypeCode()
                     self.squares[i][j].setColor(
-                        CatalogPanelColors.values()[randGen.randint(
+                        list(CatalogPanelColors.values())[randGen.randint(
                             0,
                             len(CatalogPanelColors) - 1)])
                     cs = 0.69999999999999996 + 0.29999999999999999 * randGen.random(
@@ -391,7 +391,7 @@ class CatalogScreen(DirectFrame):
     def adjustForSound(self):
         numEmoteItems = 0
         emotePanels = []
-        for visIndex in xrange(len(self.visiblePanels)):
+        for visIndex in range(len(self.visiblePanels)):
             panel = self.visiblePanels[visIndex]
             item = panel['item']
             catalogType = item.getTypeCode()

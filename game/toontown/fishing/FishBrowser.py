@@ -3,8 +3,8 @@ from direct.directnotify import DirectNotifyGlobal
 from direct.gui.DirectGui import *
 from pandac.PandaModules import *
 from game.toontown.toonbase import TTLocalizer
-import GenusPanel
-import FishGlobals
+from . import GenusPanel
+from . import FishGlobals
 
 
 class FishBrowser(DirectScrolledList):
@@ -40,8 +40,8 @@ class FishBrowser(DirectScrolledList):
                                     0.80000000000000004, 0.5),
                                None), ('numItemsVisible',
                                        1, None), ('items',
-                                                  map(str,
-                                                      FishGlobals.getGenera()),
+                                                  list(map(str,
+                                                      FishGlobals.getGenera())),
                                                   None), ('scrollSpeed', 4,
                                                           None),
                       ('itemMakeFunction', GenusPanel.GenusPanel,

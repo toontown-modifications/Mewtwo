@@ -1,4 +1,4 @@
-from SCTerminal import SCTerminal
+from .SCTerminal import SCTerminal
 from game.otp.otpbase.OTPLocalizer import SpeedChatStaticText
 SCStaticTextMsgEvent = 'SCStaticTextMsg'
 

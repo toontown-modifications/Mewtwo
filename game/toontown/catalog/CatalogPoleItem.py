@@ -1,4 +1,4 @@
-import CatalogItem
+from . import CatalogItem
 from game.toontown.toonbase import ToontownGlobals
 from game.toontown.fishing import FishGlobals
 from direct.actor import Actor

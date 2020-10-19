@@ -1,8 +1,8 @@
 from direct.interval.IntervalGlobal import *
 from direct.showbase.DirectObject import DirectObject
-from RewardPanel import *
-from BattleSounds import *
-import MovieCamera
+from .RewardPanel import *
+from .BattleSounds import *
+from . import MovieCamera
 from direct.directnotify import DirectNotifyGlobal
 import types
 notify = DirectNotifyGlobal.directNotify.newCategory('MovieToonVictory')
@@ -92,7 +92,7 @@ def doToonVictory(localToonActive,
     countToons = 0
     uberListNew = []
     for t in toons:
-        if isinstance(t, types.IntType):
+        if isinstance(t, int):
             t = base.cr.doId2do.get(t)
         if t:
             toonList.append(t)
@@ -110,7 +110,7 @@ def doToonVictory(localToonActive,
     skipper = ToonVictorySkipper(len(toonList), noSkip)
     lastListenIndex = 0
     track.append(skipper.getSetupFunc(lastListenIndex))
-    for tIndex in xrange(len(toonList)):
+    for tIndex in range(len(toonList)):
         t = toonList[tIndex]
         rdict = __findToonReward(rewardDicts, t)
         if rdict != None:

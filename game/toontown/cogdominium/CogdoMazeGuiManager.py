@@ -3,10 +3,10 @@ from direct.interval.MetaInterval import Sequence
 from direct.interval.FunctionInterval import Func
 from game.toontown.toonbase.ToontownTimer import ToontownTimer
 from game.toontown.toonbase import ToontownIntervals
-from CogdoMazeGameGuis import CogdoMazeHud, CogdoMazeMapGui, CogdoMazeBossGui
-from CogdoGameMessageDisplay import CogdoGameMessageDisplay
-import CogdoMazeGameGlobals as Globals
-from CogdoMemoGui import CogdoMemoGui
+from .CogdoMazeGameGuis import CogdoMazeHud, CogdoMazeMapGui, CogdoMazeBossGui
+from .CogdoGameMessageDisplay import CogdoGameMessageDisplay
+from . import CogdoMazeGameGlobals as Globals
+from .CogdoMemoGui import CogdoMemoGui
 
 class CogdoMazeGuiManager:
 

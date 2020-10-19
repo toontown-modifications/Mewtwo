@@ -3,8 +3,8 @@ from direct.directnotify import DirectNotifyGlobal
 from direct.gui.DirectGui import *
 from pandac.PandaModules import *
 from game.toontown.toonbase import TTLocalizer
-import GardenGlobals
-import FlowerPhoto
+from . import GardenGlobals
+from . import FlowerPhoto
 from game.toontown.estate import BeanRecipeGui
 
 

@@ -4,8 +4,8 @@ from direct.gui.DirectGui import *
 from pandac.PandaModules import *
 from game.toontown.toonbase import TTLocalizer
 from direct.interval.IntervalGlobal import *
-import GardenGlobals
-import FlowerPhoto
+from . import GardenGlobals
+from . import FlowerPhoto
 
 
 class FlowerPanel(DirectFrame):

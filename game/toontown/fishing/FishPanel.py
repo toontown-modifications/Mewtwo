@@ -4,8 +4,8 @@ from direct.gui.DirectGui import *
 from pandac.PandaModules import *
 from game.toontown.toonbase import TTLocalizer
 from direct.interval.IntervalGlobal import *
-import FishGlobals
-import FishPhoto
+from . import FishGlobals
+from . import FishPhoto
 
 
 class FishPanel(DirectFrame):

@@ -1,5 +1,5 @@
 from pandac.PandaModules import *
-from DistributedNPCToonBase import *
+from .DistributedNPCToonBase import *
 from game.toontown.quest import QuestParser
 from game.toontown.quest import QuestChoiceGui
 from game.toontown.quest import TrackChoiceGui

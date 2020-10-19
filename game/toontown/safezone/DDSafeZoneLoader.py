@@ -1,6 +1,6 @@
 from pandac.PandaModules import *
-import SafeZoneLoader
-import DDPlayground
+from . import SafeZoneLoader
+from . import DDPlayground
 from direct.fsm import State
 from game.toontown.char import CharDNA
 from game.toontown.char import Char

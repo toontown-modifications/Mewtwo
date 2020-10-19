@@ -6,9 +6,9 @@ from direct.interval.FunctionInterval import Func, Wait
 from game.toontown.toonbase import TTLocalizer
 from game.toontown.suit import Suit, SuitDNA
 from game.toontown.toon import Toon, ToonHead, ToonDNA
-from CogdoUtil import CogdoGameMovie
-import CogdoMazeGameGlobals as Globals
-import CogdoUtil
+from .CogdoUtil import CogdoGameMovie
+from . import CogdoMazeGameGlobals as Globals
+from . import CogdoUtil
 
 class CogdoMazeGameIntro(CogdoGameMovie):
 

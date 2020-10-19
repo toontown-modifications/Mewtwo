@@ -1,5 +1,5 @@
 from direct.directnotify import DirectNotifyGlobal
-import HoodDataAI
+from . import HoodDataAI
 from game.toontown.toonbase import ToontownGlobals
 from game.toontown.safezone import DistributedTrolleyAI
 from game.toontown.safezone import BRTreasurePlannerAI

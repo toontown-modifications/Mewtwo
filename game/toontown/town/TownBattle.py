@@ -3,13 +3,13 @@ import types
 from direct.fsm import StateData
 from direct.fsm import ClassicFSM, State
 from direct.fsm import State
-import TownBattleAttackPanel
-import TownBattleWaitPanel
-import TownBattleChooseAvatarPanel
-import TownBattleSOSPanel
-import TownBattleSOSPetSearchPanel
-import TownBattleSOSPetInfoPanel
-import TownBattleToonPanel
+from . import TownBattleAttackPanel
+from . import TownBattleWaitPanel
+from . import TownBattleChooseAvatarPanel
+from . import TownBattleSOSPanel
+from . import TownBattleSOSPetSearchPanel
+from . import TownBattleSOSPetInfoPanel
+from . import TownBattleToonPanel
 from game.toontown.toontowngui import TTDialog
 from direct.directnotify import DirectNotifyGlobal
 from game.toontown.battle import BattleBase
@@ -137,7 +137,7 @@ class TownBattle(StateData.StateData):
         if not self.isLoaded:
             self.load()
 
-        print 'Battle Event %s' % event
+        print('Battle Event %s' % event)
         self.battleEvent = event
         self.fsm.enterInitialState()
         base.localAvatar.laffMeter.start()
@@ -411,7 +411,7 @@ class TownBattle(StateData.StateData):
         self.notify.debug(
             'adjustCogsAndToons() trappedIndices: %s self.trappedIndices: %s' %
             (trappedIndices, self.trappedIndices))
-        toonIds = map(lambda toon: toon.doId, toons)
+        toonIds = [toon.doId for toon in toons]
         self.notify.debug('adjustCogsAndToons() toonIds: %s self.toons: %s' %
                           (toonIds, self.toons))
         maxSuitLevel = 0

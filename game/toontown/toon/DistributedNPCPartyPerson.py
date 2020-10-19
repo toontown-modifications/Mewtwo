@@ -1,4 +1,4 @@
-from DistributedNPCToonBase import DistributedNPCToonBase
+from .DistributedNPCToonBase import DistributedNPCToonBase
 from direct.distributed.DistributedObject import DistributedObject
 from game.toontown.toon import NPCToons
 from game.toontown.toonbase import TTLocalizer

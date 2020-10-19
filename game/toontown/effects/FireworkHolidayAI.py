@@ -3,8 +3,8 @@ from direct.directnotify.DirectNotifyGlobal import directNotify
 from game.toontown.toonbase import ToontownGlobals
 from game.toontown.ai.HolidayBaseAI import HolidayBaseAI
 
-import FireworkShows
-from DistributedFireworkShowAI import DistributedFireworkShowAI
+from . import FireworkShows
+from .DistributedFireworkShowAI import DistributedFireworkShowAI
 
 import time, datetime, random, sys
 

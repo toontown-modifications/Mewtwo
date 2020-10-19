@@ -1,6 +1,6 @@
 from direct.gui.DirectGui import *
 from pandac.PandaModules import *
-import QuestPoster
+from . import QuestPoster
 from game.toontown.toonbase import ToontownTimer
 from game.toontown.toonbase import ToontownGlobals
 from game.toontown.toonbase import TTLocalizer
@@ -64,8 +64,8 @@ class QuestChoiceGui(DirectFrame):
             self.timer.setPos(-0.20000000000000001, 0, -0.59999999999999998)
         elif len(quests) == 3 * 3:
             self['geom_scale'] = (1.8500000000000001, 1, 0.90000000000000002)
-            map(lambda x: x.setScale(0.94999999999999996),
-                self.questChoicePosters)
+            list(map(lambda x: x.setScale(0.94999999999999996),
+                self.questChoicePosters))
             self.questChoicePosters[0].setPos(0, 0, -0.40000000000000002)
             self.questChoicePosters[1].setPos(0, 0, 0.125)
             self.questChoicePosters[2].setPos(0, 0, 0.65000000000000002)

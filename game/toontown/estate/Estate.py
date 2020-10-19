@@ -16,7 +16,7 @@ from game.toontown.hood import SkyUtil
 from game.toontown.pets import PetTutorial
 from direct.controls.GravityWalker import GravityWalker
 from game.otp.distributed.TelemetryLimiter import RotationLimitToH, TLGatherAllAvs, TLNull
-import HouseGlobals
+from . import HouseGlobals
 
 
 class Estate(Place.Place):

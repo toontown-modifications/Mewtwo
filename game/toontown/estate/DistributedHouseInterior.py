@@ -5,7 +5,7 @@ from direct.interval.IntervalGlobal import *
 from direct.distributed.ClockDelta import *
 from direct.directnotify import DirectNotifyGlobal
 from direct.distributed import DistributedObject
-import HouseGlobals
+from . import HouseGlobals
 from game.toontown.catalog import CatalogItemList
 from game.toontown.catalog import CatalogItem
 from game.toontown.catalog import CatalogSurfaceItem

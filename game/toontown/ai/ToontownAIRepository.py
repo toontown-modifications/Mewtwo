@@ -70,9 +70,9 @@ from game.toontown.ai.DialogueManagerAI import DialogueManagerAI
 from game.otp.uberdog.OtpAvatarManagerAI import OtpAvatarManagerAI
 from game.toontown.uberdog.ServerBase import ServerBase
 
-import __builtin__, time, os, requests
+import builtins, time, os, requests
 
-__builtin__.isClient = lambda: PythonUtil.isClient()
+builtins.isClient = lambda: PythonUtil.isClient()
 
 class ToontownAIRepository(ToontownInternalRepository, ServerBase):
     notify = directNotify.newCategory('ToontownAIRepository')
@@ -448,7 +448,7 @@ class ToontownAIRepository(ToontownInternalRepository, ServerBase):
         # Assign the initial suit buildings.
         self.notify.info('Assigning initial Cog buildings and Field Offices...')
 
-        for suitPlanner in self.suitPlanners.values():
+        for suitPlanner in list(self.suitPlanners.values()):
             suitPlanner.assignInitialSuitBuildings()
 
         if self.districtName == 'Nutty River':
@@ -484,7 +484,7 @@ class ToontownAIRepository(ToontownInternalRepository, ServerBase):
         return 'phase_{0}/dna/{1}_{2}.dna'.format(phase, hood, zoneId)
 
     def lookupDNAFileName(self, dnaFileName):
-        for _ in xrange(3, 13):
+        for _ in range(3, 13):
             if os.path.exists('game/resources/phase_{0}/dna/{1}'.format(_, dnaFileName)):
                 return 'phase_{0}/dna/{1}'.format(_, dnaFileName)
 
@@ -500,7 +500,7 @@ class ToontownAIRepository(ToontownInternalRepository, ServerBase):
             if isinstance(dnaData, DNAVisGroup):
                 zoneId = ZoneUtil.getTrueZoneId(int(dnaData.getName().split(':')[0]), zoneId)
 
-        for i in xrange(dnaData.getNumChildren()):
+        for i in range(dnaData.getNumChildren()):
             foundFishingPonds, foundFishingPondGroups = self.findFishingPonds(dnaData.at(i), zoneId, area)
             fishingPonds.extend(foundFishingPonds)
             fishingPondGroups.extend(foundFishingPondGroups)
@@ -514,7 +514,7 @@ class ToontownAIRepository(ToontownInternalRepository, ServerBase):
             spot = self.fishManager.generateSpots(dnaData, fishingPond)
             fishingSpots.append(spot)
 
-        for i in xrange(dnaData.getNumChildren()):
+        for i in range(dnaData.getNumChildren()):
             foundFishingSpots = self.findFishingSpots(dnaData.at(i), fishingPond)
             fishingSpots.extend(foundFishingSpots)
 
@@ -544,7 +544,7 @@ class ToontownAIRepository(ToontownInternalRepository, ServerBase):
                 racingPads.append(viewPad)
                 racingPadGroups.append(dnaData)
 
-        for i in xrange(dnaData.getNumChildren()):
+        for i in range(dnaData.getNumChildren()):
             foundRacingPads, foundRacingPadGroups = self.findRacingPads(dnaData.at(i), zoneId, area, type, overrideDNAZone)
             racingPads.extend(foundRacingPads)
             racingPadGroups.extend(foundRacingPadGroups)
@@ -554,7 +554,7 @@ class ToontownAIRepository(ToontownInternalRepository, ServerBase):
     def findStartingBlocks(self, dnaData, pad):
         startingBlocks = []
 
-        for i in xrange(dnaData.getNumChildren()):
+        for i in range(dnaData.getNumChildren()):
             groupName = dnaData.getName()
             blockName = dnaData.at(i).getName()
 
@@ -577,7 +577,7 @@ class ToontownAIRepository(ToontownInternalRepository, ServerBase):
             leaderboard = DistributedLeaderBoardAI(self, dnaData.getName(), x, y, z, h, p, r)
             leaderboard.generateWithRequired(zoneId)
             leaderboards.append(leaderboard)
-        for i in xrange(dnaData.getNumChildren()):
+        for i in range(dnaData.getNumChildren()):
             foundLeaderBoards = self.findLeaderBoards(dnaData.at(i), zoneId)
             leaderboards.extend(foundLeaderBoards)
 
@@ -592,7 +592,7 @@ class ToontownAIRepository(ToontownInternalRepository, ServerBase):
             partyHats.append(partyHat)
             self.partyGates.append(partyHat)
 
-        for i in xrange(dnaData.getNumChildren()):
+        for i in range(dnaData.getNumChildren()):
             foundPartyHats = self.findPartyHats(dnaData.at(i), zoneId)
             partyHats.extend(foundPartyHats)
 

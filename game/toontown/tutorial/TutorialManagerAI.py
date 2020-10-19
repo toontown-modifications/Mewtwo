@@ -224,14 +224,14 @@ class TutorialManagerAI(DistributedObjectAI):
         av.d_setExperience(av.experience.makeNetString())
 
     def blackCatStart(self):
-        for fsm in self.playerDict.values():
+        for fsm in list(self.playerDict.values()):
             if fsm.getCurrentOrNextState() == 'Tunnel' and not fsm.blackCatMgr:
                 fsm.blackCatMgr = DistributedBlackCatMgrAI(self.air)
                 fsm.blackCatMgr.setAvId(fsm.avId)
                 fsm.blackCatMgr.generateWithRequired(fsm.zones.STREET)
 
     def blackCatEnd(self):
-        for fsm in self.playerDict.values():
+        for fsm in list(self.playerDict.values()):
             if fsm.blackCatMgr:
                 fsm.blackCatMgr.requestDelete()
                 fsm.blackCatMgr = None

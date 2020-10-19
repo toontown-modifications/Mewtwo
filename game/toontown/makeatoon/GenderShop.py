@@ -5,7 +5,7 @@ from game.toontown.toonbase import TTLocalizer
 from game.toontown.toonbase import ToontownGlobals
 from game.toontown.toon import ToonDNA
 from game.toontown.toon import Toon
-from MakeAToonGlobals import *
+from .MakeAToonGlobals import *
 from direct.directnotify import DirectNotifyGlobal
 import random
 

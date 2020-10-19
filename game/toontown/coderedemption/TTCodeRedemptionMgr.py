@@ -25,7 +25,7 @@ class TTCodeRedemptionMgr(DistributedObject):
         DistributedObject.delete(self)
 
     def redeemCode(self, code, callback):
-        context = self._contextGen.next()
+        context = next(self._contextGen)
         self._context2callback[context] = callback
         self.notify.debug('redeemCode(%s, %s)' % (context, code))
         self.sendUpdate('redeemCode', [context, code])

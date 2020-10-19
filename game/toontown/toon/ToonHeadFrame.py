@@ -1,6 +1,6 @@
 from direct.gui.DirectGui import *
 from pandac.PandaModules import *
-import ToonHead
+from . import ToonHead
 from game.toontown.distributed import DelayDelete
 from game.toontown.toonbase import ToontownGlobals
 

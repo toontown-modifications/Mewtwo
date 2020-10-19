@@ -9,7 +9,7 @@ from pandac.PandaModules import TextNode
 from game.toontown.toonbase import ToontownGlobals
 from game.toontown.toonbase import ToontownIntervals
 from game.toontown.toonbase import TTLocalizer
-import PartyGlobals
+from . import PartyGlobals
 
 class PartyCogTrackerGui:
 

@@ -12,8 +12,8 @@ from game.otp.speedchat import SCDecoders
 from game.otp.chat import ChatGarbler
 from game.otp.chat import ChatManager
 import random
-from Avatar import Avatar
-import AvatarDNA
+from .Avatar import Avatar
+from . import AvatarDNA
 
 class DistributedAvatar(DistributedActor, Avatar):
     HpTextGenerator = TextNode('HpTextGenerator')

@@ -16,42 +16,42 @@ def getLanguage():
     return language
 
 
-print 'TTLocalizer: Running in language: %s' % language
+print('TTLocalizer: Running in language: %s' % language)
 if language == 'english':
     _languageModule = 'toontown.toonbase.TTLocalizer' + \
         string.capitalize(language)
 else:
     checkLanguage = 1
     _languageModule = 'toontown.toonbase.TTLocalizer_' + language
-print 'from ' + _languageModule + ' import *'
+print('from ' + _languageModule + ' import *')
 if checkLanguage:
     l = {}
     g = {}
     englishModule = __import__('toontown.toonbase.TTLocalizerEnglish', g, l)
     foreignModule = __import__(_languageModule, g, l)
-    for (key, val) in englishModule.__dict__.items():
+    for (key, val) in list(englishModule.__dict__.items()):
         if key not in foreignModule.__dict__:
-            print 'WARNING: Foreign module: %s missing key: %s' % (
-                _languageModule, key)
+            print('WARNING: Foreign module: %s missing key: %s' % (
+                _languageModule, key))
             locals()[key] = val
             continue
-        if isinstance(val, types.DictType):
+        if isinstance(val, dict):
             fval = foreignModule.__dict__.get(key)
-            for (dkey, dval) in val.items():
+            for (dkey, dval) in list(val.items()):
                 if dkey not in fval:
-                    print 'WARNING: Foreign module: %s missing key: %s.%s' % (
-                        _languageModule, key, dkey)
+                    print('WARNING: Foreign module: %s missing key: %s.%s' % (
+                        _languageModule, key, dkey))
                     fval[dkey] = dval
                     continue
 
-            for dkey in fval.keys():
+            for dkey in list(fval.keys()):
                 if dkey not in val:
-                    print 'WARNING: Foreign module: %s extra key: %s.%s' % (
-                        _languageModule, key, dkey)
+                    print('WARNING: Foreign module: %s extra key: %s.%s' % (
+                        _languageModule, key, dkey))
                     continue
 
-    for key in foreignModule.__dict__.keys():
+    for key in list(foreignModule.__dict__.keys()):
         if key not in englishModule.__dict__:
-            print 'WARNING: Foreign module: %s extra key: %s' % (
-                _languageModule, key)
+            print('WARNING: Foreign module: %s extra key: %s' % (
+                _languageModule, key))
             continue

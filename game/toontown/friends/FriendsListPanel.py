@@ -284,7 +284,7 @@ class FriendsListPanel(DirectFrame, StateData.StateData):
         if showType == 1 and playerId:
             if not playerName:
                 return None
-                print 'ABORTING!!!'
+                print('ABORTING!!!')
 
             friendName = playerName
             rolloverName = toonName
@@ -628,7 +628,7 @@ class FriendsListPanel(DirectFrame, StateData.StateData):
                         continue
 
         if self.panelType == FLPPets:
-            for (objId, obj) in base.cr.doId2do.items():
+            for (objId, obj) in list(base.cr.doId2do.items()):
                 DistributedPet = DistributedPet
                 import toontown.pets
                 if isinstance(obj, DistributedPet.DistributedPet):
@@ -644,7 +644,7 @@ class FriendsListPanel(DirectFrame, StateData.StateData):
             if base.wantPets and base.localAvatar.hasPet():
                 petFriends.insert(0, (base.localAvatar.getPetId(), 0))
 
-        for friendPair in self.friends.keys():
+        for friendPair in list(self.friends.keys()):
             friendButton = self.friends[friendPair]
             self.scrollList.removeItem(friendButton, refresh=0)
             friendButton.destroy()

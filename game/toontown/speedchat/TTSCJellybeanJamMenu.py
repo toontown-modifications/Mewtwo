@@ -17,7 +17,7 @@ class TTSCJellybeanJamMenu(SCMenu):
         if phase in JellybeanJamPhases:
             self._TTSCJellybeanJamMenu__messagesChanged(phase)
         else:
-            print 'warning: tried to add Jellybean Jam phase %s which does not seem to exist' % phase
+            print('warning: tried to add Jellybean Jam phase %s which does not seem to exist' % phase)
 
     def destroy(self):
         SCMenu.destroy(self)
@@ -37,7 +37,7 @@ class TTSCJellybeanJamMenu(SCMenu):
             if section[0] == -1:
                 for phrase in section[1]:
                     if phrase not in OTPLocalizer.SpeedChatStaticText:
-                        print 'warning: tried to link Jellybean Jam phrase %s which does not seem to exist' % phrase
+                        print('warning: tried to link Jellybean Jam phrase %s which does not seem to exist' % phrase)
                         break
 
                     self.append(SCStaticTextTerminal(phrase))
@@ -45,7 +45,7 @@ class TTSCJellybeanJamMenu(SCMenu):
             menu = SCMenu()
             for phrase in section[1]:
                 if phrase not in OTPLocalizer.SpeedChatStaticText:
-                    print 'warning: tried to link Jellybean Jam phrase %s which does not seem to exist' % phrase
+                    print('warning: tried to link Jellybean Jam phrase %s which does not seem to exist' % phrase)
                     break
 
                 menu.append(SCStaticTextTerminal(phrase))

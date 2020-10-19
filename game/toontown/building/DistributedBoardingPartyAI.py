@@ -2,7 +2,7 @@ from game.otp.otpbase import OTPGlobals
 from game.otp.ai.AIBase import *
 from game.toontown.toonbase import ToontownGlobals
 from direct.distributed.ClockDelta import *
-from ElevatorConstants import *
+from .ElevatorConstants import *
 from direct.distributed import DistributedObjectAI
 from direct.fsm import ClassicFSM, State
 from direct.fsm import State
@@ -148,7 +148,7 @@ class DistributedBoardingPartyAI(DistributedObjectAI.DistributedObjectAI, Boardi
                         reason = BoardingPartyBase.BOARDCODE_PROMOTION
                     self.sendUpdateToAvatarId(inviterId, 'postInviteNotQualify', [inviterId, reason, self.elevatorIdList[0]])
                     return
-        if self.avIdDict.has_key(inviterId):
+        if inviterId in self.avIdDict:
             self.notify.debug('old group')
             leaderId = self.avIdDict[inviterId]
             groupList = self.groupListDict.get(leaderId)
@@ -163,7 +163,7 @@ class DistributedBoardingPartyAI(DistributedObjectAI.DistributedObjectAI, Boardi
                     if inviteeId not in groupList[1]:
                         groupList[1].append(inviteeId)
                     self.groupListDict[leaderId] = groupList
-                    if self.avIdDict.has_key(inviteeId):
+                    if inviteeId in self.avIdDict:
                         self.notify.warning('inviter %s tried to invite %s who already exists in the avIdDict.' % (inviterId, inviteeId))
                         self.air.writeServerEvent('suspicious: inviter', inviterId, ' tried to invite %s who already exists in the avIdDict.' % inviteeId)
                     self.avIdDict[inviteeId] = leaderId
@@ -175,7 +175,7 @@ class DistributedBoardingPartyAI(DistributedObjectAI.DistributedObjectAI, Boardi
                 elif inviterId in groupList[2]:
                     self.sendUpdate('postKickReject', [leaderId, inviterId, inviteeId])
         else:
-            if self.avIdDict.has_key(inviteeId):
+            if inviteeId in self.avIdDict:
                 self.notify.warning('inviter %s tried to invite %s who already exists in avIdDict.' % (inviterId, inviteeId))
                 self.air.writeServerEvent('suspicious: inviter', inviterId, ' tried to invite %s who already exists in the avIdDict.' % inviteeId)
             self.notify.debug('new group')
@@ -188,7 +188,7 @@ class DistributedBoardingPartyAI(DistributedObjectAI.DistributedObjectAI, Boardi
 
     def requestCancelInvite(self, inviteeId):
         inviterId = self.air.getAvatarIdFromSender()
-        if self.avIdDict.has_key(inviterId):
+        if inviterId in self.avIdDict:
             leaderId = self.avIdDict[inviterId]
             groupList = self.groupListDict.get(leaderId)
             if groupList:
@@ -198,11 +198,11 @@ class DistributedBoardingPartyAI(DistributedObjectAI.DistributedObjectAI, Boardi
     def requestAcceptInvite(self, leaderId, inviterId):
         inviteeId = self.air.getAvatarIdFromSender()
         self.notify.debug('requestAcceptInvite leader%s inviter%s invitee%s' % (leaderId, inviterId, inviteeId))
-        if self.avIdDict.has_key(inviteeId):
+        if inviteeId in self.avIdDict:
             if self.hasActiveGroup(inviteeId):
                 self.sendUpdateToAvatarId(inviteeId, 'postAlreadyInGroup', [])
                 return
-            if not self.avIdDict.has_key(leaderId) or not self.isInGroup(inviteeId, leaderId):
+            if leaderId not in self.avIdDict or not self.isInGroup(inviteeId, leaderId):
                 self.sendUpdateToAvatarId(inviteeId, 'postSomethingMissing', [])
                 return
             memberList = self.getGroupMemberList(leaderId)
@@ -231,14 +231,14 @@ class DistributedBoardingPartyAI(DistributedObjectAI.DistributedObjectAI, Boardi
 
     def requestKick(self, kickId):
         leaderId = self.air.getAvatarIdFromSender()
-        if self.avIdDict.has_key(kickId):
+        if kickId in self.avIdDict:
             if self.avIdDict[kickId] == leaderId:
                 self.removeFromGroup(leaderId, kickId, kick=1)
                 self.sendUpdateToAvatarId(kickId, 'postKick', [leaderId])
 
     def requestLeave(self, leaderId):
         memberId = self.air.getAvatarIdFromSender()
-        if self.avIdDict.has_key(memberId):
+        if memberId in self.avIdDict:
             if leaderId == self.avIdDict[memberId]:
                 self.removeFromGroup(leaderId, memberId)
 
@@ -260,7 +260,7 @@ class DistributedBoardingPartyAI(DistributedObjectAI.DistributedObjectAI, Boardi
         if elevatorId in self.elevatorIdList:
             elevator = simbase.air.doId2do.get(elevatorId)
         if elevator:
-            if self.avIdDict.has_key(leaderId):
+            if leaderId in self.avIdDict:
                 if leaderId == self.avIdDict[leaderId]:
                     boardOkay = BoardingPartyBase.BOARDCODE_OKAY
                     for avId in self.getGroupMemberList(leaderId):
@@ -300,7 +300,7 @@ class DistributedBoardingPartyAI(DistributedObjectAI.DistributedObjectAI, Boardi
         if elevatorId in self.elevatorIdList:
             elevator = simbase.air.doId2do.get(elevatorId)
         if elevator:
-            if self.avIdDict.has_key(leaderId):
+            if leaderId in self.avIdDict:
                 if leaderId == self.avIdDict[leaderId]:
                     group = self.groupListDict.get(leaderId)
                     if group:
@@ -325,7 +325,7 @@ class DistributedBoardingPartyAI(DistributedObjectAI.DistributedObjectAI, Boardi
         return
 
     def testGoButtonRequirements(self, leaderId, elevatorId):
-        if self.avIdDict.has_key(leaderId):
+        if leaderId in self.avIdDict:
             if leaderId == self.avIdDict[leaderId]:
                 if elevatorId in self.elevatorIdList:
                     elevator = simbase.air.doId2do.get(elevatorId)
@@ -380,7 +380,7 @@ class DistributedBoardingPartyAI(DistributedObjectAI.DistributedObjectAI, Boardi
 
     def handleAvatarDisco(self, avId):
         self.notify.debug('handleAvatarDisco %s' % avId)
-        if self.avIdDict.has_key(avId):
+        if avId in self.avIdDict:
             leaderId = self.avIdDict[avId]
             self.removeFromGroup(leaderId, avId)
 
@@ -389,12 +389,12 @@ class DistributedBoardingPartyAI(DistributedObjectAI.DistributedObjectAI, Boardi
         if zoneNew in self.visibleZones:
             self.toonInZone(avId)
         else:
-            if self.avIdDict.has_key(avId):
+            if avId in self.avIdDict:
                 leaderId = self.avIdDict[avId]
                 self.removeFromGroup(leaderId, avId)
 
     def toonInZone(self, avId):
-        if self.avIdDict.has_key(avId):
+        if avId in self.avIdDict:
             leaderId = self.avIdDict[avId]
             group = self.groupListDict.get(leaderId)
             if leaderId and group:
@@ -421,9 +421,9 @@ class DistributedBoardingPartyAI(DistributedObjectAI.DistributedObjectAI, Boardi
         self.notify.debug('removeFromGroup leaderId %s memberId %s' % (leaderId, memberId))
         self.notify.debug('Groups %s' % self.groupListDict)
         self.notify.debug('avDict %s' % self.avIdDict)
-        if not self.avIdDict.has_key(leaderId):
+        if leaderId not in self.avIdDict:
             self.sendUpdate('postGroupDissolve', [memberId, leaderId, [], kick])
-            if self.avIdDict.has_key(memberId):
+            if memberId in self.avIdDict:
                 self.avIdDict.pop(memberId)
             return
         self.removeWacthAvStatus(memberId)
@@ -440,16 +440,16 @@ class DistributedBoardingPartyAI(DistributedObjectAI.DistributedObjectAI, Boardi
         else:
             return
         if memberId == leaderId or len(group[0]) < 2:
-            if self.avIdDict.has_key(leaderId):
+            if leaderId in self.avIdDict:
                 self.avIdDict.pop(leaderId)
                 for inviteeId in group[1]:
-                    if self.avIdDict.has_key(inviteeId):
+                    if inviteeId in self.avIdDict:
                         self.avIdDict.pop(inviteeId)
                         self.sendUpdateToAvatarId(inviteeId, 'postInviteCanceled', [])
 
             dgroup = self.groupListDict.pop(leaderId)
             for dMemberId in dgroup[0]:
-                if self.avIdDict.has_key(dMemberId):
+                if dMemberId in self.avIdDict:
                     self.avIdDict.pop(dMemberId)
 
             self.notify.debug('postGroupDissolve')
@@ -460,7 +460,7 @@ class DistributedBoardingPartyAI(DistributedObjectAI.DistributedObjectAI, Boardi
             if post:
                 self.notify.debug('Calling postGroupInfo from removeFromGroup')
                 self.sendUpdate('postGroupInfo', [leaderId, group[0], group[1], group[2]])
-        if self.avIdDict.has_key(memberId):
+        if memberId in self.avIdDict:
             self.avIdDict.pop(memberId)
         self.notify.debug('Remove from group END')
         self.notify.debug('Groups %s' % self.groupListDict)

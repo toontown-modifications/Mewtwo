@@ -196,7 +196,7 @@ class DistributedPartyTeamActivityAI(DistributedPartyActivityAI):
 
     def areTeamsCorrect(self):
         minPlayers = self.getPlayersPerTeam()[0]
-        return all(len(self.avIds[i]) >= minPlayers for i in xrange(2))
+        return all(len(self.avIds[i]) >= minPlayers for i in range(2))
 
     def getToonsPlaying(self):
         return self.avIds

@@ -101,7 +101,7 @@ class TalkAssistant(DirectObject.DirectObject):
             self.lastWhisperDoId = doId
             self.lastWhisper = self.lastWhisperDoId
 
-        if not self.historyByDoId.has_key(doId):
+        if doId not in self.historyByDoId:
             self.historyByDoId[doId] = []
 
         self.historyByDoId[doId].append(message)
@@ -110,7 +110,7 @@ class TalkAssistant(DirectObject.DirectObject):
             self.doWhiteListWarning()
             self.shownWhiteListWarning = 1
 
-        if not self.floodDataByDoId.has_key(doId):
+        if doId not in self.floodDataByDoId:
             self.floodDataByDoId[doId] = [0.0, self.stampTime(), message]
         else:
             oldTime = self.floodDataByDoId[doId][1]
@@ -151,7 +151,7 @@ class TalkAssistant(DirectObject.DirectObject):
             self.lastWhisperPlayerId = dISLId
             self.lastWhisper = self.lastWhisperPlayerId
 
-        if not self.historyByDISLId.has_key(dISLId):
+        if dISLId not in self.historyByDISLId:
             self.historyByDISLId[dISLId] = []
 
         self.historyByDISLId[dISLId].append(message)
@@ -272,26 +272,26 @@ class TalkAssistant(DirectObject.DirectObject):
         self.floodThreshold = hold
 
     def printHistoryComplete(self):
-        print 'HISTORY COMPLETE'
+        print('HISTORY COMPLETE')
         for message in self.historyComplete:
-            print '%s %s %s\n%s\n' % (
+            print('%s %s %s\n%s\n' % (
                 message.getTimeStamp(), message.getSenderAvatarName(),
-                message.getSenderAccountName(), message.getBody())
+                message.getSenderAccountName(), message.getBody()))
 
     def importExecNamespace(self):
         pass
 
     def execMessage(self, message):
-        print 'execMessage %s' % message
+        print('execMessage %s' % message)
         if not TalkAssistant.ExecNamespace:
             TalkAssistant.ExecNamespace = {}
-            exec 'from pandac.PandaModules import *' in globals(
-            ), self.ExecNamespace
+            exec('from pandac.PandaModules import *', globals(
+            ), self.ExecNamespace)
             self.importExecNamespace()
 
         try:
             if not isClient():
-                print 'EXECWARNING TalkAssistant eval: %s' % message
+                print('EXECWARNING TalkAssistant eval: %s' % message)
                 printStack()
 
             return str(eval(message, globals(), TalkAssistant.ExecNamespace))
@@ -299,10 +299,10 @@ class TalkAssistant(DirectObject.DirectObject):
 
             try:
                 if not isClient():
-                    print 'EXECWARNING TalkAssistant exec: %s' % message
+                    print('EXECWARNING TalkAssistant exec: %s' % message)
                     printStack()
 
-                exec message in globals(), TalkAssistant.ExecNamespace
+                exec(message, globals(), TalkAssistant.ExecNamespace)
                 return 'ok'
             except:
                 exception = sys.exc_info()[0]
@@ -469,8 +469,8 @@ class TalkAssistant(DirectObject.DirectObject):
                            message,
                            scrubbed=0):
         error = None
-        print 'receiveWhisperTalk %s %s %s %s %s' % (
-            avatarId, avatarName, accountId, accountName, message)
+        print('receiveWhisperTalk %s %s %s %s %s' % (
+            avatarId, avatarName, accountId, accountName, message))
         if not avatarName and avatarId:
             avatarName = self.findAvatarName(avatarId)
 
@@ -868,7 +868,7 @@ class TalkAssistant(DirectObject.DirectObject):
         if self.checkGuildTypedChat():
             base.cr.guildManager.sendTalk(message)
         else:
-            print 'Guild chat error'
+            print('Guild chat error')
             error = ERROR_NO_GUILD_CHAT
         return error
 
@@ -959,7 +959,7 @@ class TalkAssistant(DirectObject.DirectObject):
         if self.checkGuildSpeedChat():
             base.cr.guildManager.sendSC(msgIndex)
         else:
-            print 'Guild Speedchat error'
+            print('Guild Speedchat error')
             error = ERROR_NO_GUILD_CHAT
         return error
 

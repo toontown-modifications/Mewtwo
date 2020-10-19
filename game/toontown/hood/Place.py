@@ -5,8 +5,8 @@ from direct.fsm import StateData
 from direct.showbase.PythonUtil import PriorityCallbacks
 from game.toontown.safezone import PublicWalk
 from game.toontown.launcher import DownloadForceAcknowledge
-import TrialerForceAcknowledge
-import ZoneUtil
+from . import TrialerForceAcknowledge
+from . import ZoneUtil
 from game.toontown.friends import FriendsListManager
 from game.toontown.toonbase import ToontownGlobals
 from game.toontown.toon.Toon import teleportDebug
@@ -16,7 +16,7 @@ from game.otp.otpbase import OTPLocalizer
 from game.otp.avatar import Emote
 from game.otp.avatar.Avatar import teleportNotify
 from direct.task import Task
-import QuietZoneState
+from . import QuietZoneState
 from game.toontown.distributed import ToontownDistrictStats
 
 
@@ -621,7 +621,7 @@ class Place(StateData.StateData, FriendsListManager.FriendsListManager):
 
     def enterDoorIn(self, requestStatus):
         NametagGlobals.setMasterArrowsOn(0)
-        print requestStatus['doorDoId']
+        print(requestStatus['doorDoId'])
         door = base.cr.doId2do.get(requestStatus['doorDoId'])
         door.readyToExit()
         base.localAvatar.obscureMoveFurnitureButton(1)

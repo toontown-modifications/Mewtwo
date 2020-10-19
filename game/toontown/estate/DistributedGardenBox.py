@@ -1,7 +1,7 @@
-import DistributedLawnDecor
+from . import DistributedLawnDecor
 from direct.directnotify import DirectNotifyGlobal
 from direct.showbase.ShowBase import *
-import GardenGlobals
+from . import GardenGlobals
 from game.toontown.toonbase import TTLocalizer
 from game.toontown.estate import PlantingGUI
 from game.toontown.estate import PlantTreeGUI

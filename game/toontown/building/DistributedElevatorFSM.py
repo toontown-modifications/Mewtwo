@@ -1,8 +1,8 @@
 from pandac.PandaModules import *
 from direct.distributed.ClockDelta import *
 from direct.interval.IntervalGlobal import *
-from ElevatorConstants import *
-from ElevatorUtils import *
+from .ElevatorConstants import *
+from .ElevatorUtils import *
 from direct.showbase import PythonUtil
 from direct.directnotify import DirectNotifyGlobal
 from direct.fsm import ClassicFSM
@@ -104,7 +104,7 @@ class DistributedElevatorFSM(DistributedObject.DistributedObject, FSM):
             self.cr.relatedObjectMgr.abortRequest(self.bldgRequest)
             self.bldgRequest = None
 
-        for request in self.toonRequests.values():
+        for request in list(self.toonRequests.values()):
             self.cr.relatedObjectMgr.abortRequest(request)
 
         self.toonRequests = {}
@@ -272,7 +272,7 @@ class DistributedElevatorFSM(DistributedObject.DistributedObject, FSM):
         if self.cr:
             toon.setAnimState('neutral', 1.0)
             if toon == base.localAvatar:
-                print 'moving the local toon off the elevator'
+                print('moving the local toon off the elevator')
                 doneStatus = {'where': 'exit'}
                 elevator = self.getPlaceElevator()
                 elevator.signalDone(doneStatus)
@@ -282,7 +282,7 @@ class DistributedElevatorFSM(DistributedObject.DistributedObject, FSM):
             return None
 
     def emptySlot(self, index, avId, bailFlag, timestamp):
-        print 'Emptying slot: %d for %d' % (index, avId)
+        print('Emptying slot: %d for %d' % (index, avId))
         if avId == 0:
             pass
         1
@@ -341,8 +341,8 @@ class DistributedElevatorFSM(DistributedObject.DistributedObject, FSM):
 
     def handleEnterSphere(self, collEntry):
         self.notify.debug('Entering Elevator Sphere....')
-        print 'FSMhandleEnterSphere elevator%s avatar%s' % (
-            self.elevatorTripId, localAvatar.lastElevatorLeft)
+        print('FSMhandleEnterSphere elevator%s avatar%s' % (
+            self.elevatorTripId, localAvatar.lastElevatorLeft))
         if self.elevatorTripId and localAvatar.lastElevatorLeft == self.elevatorTripId:
             self.rejectBoard(base.localAvatar.doId, REJECT_SHUFFLE)
         elif base.localAvatar.hp > 0:
@@ -351,7 +351,7 @@ class DistributedElevatorFSM(DistributedObject.DistributedObject, FSM):
             self.sendUpdate('requestBoard', [])
 
     def rejectBoard(self, avId, reason=0):
-        print 'rejectBoard %s' % reason
+        print('rejectBoard %s' % reason)
         if hasattr(base.localAvatar, 'elevatorNotifier'):
             if reason == REJECT_SHUFFLE:
                 base.localAvatar.elevatorNotifier.showMe(
@@ -426,7 +426,7 @@ class DistributedElevatorFSM(DistributedObject.DistributedObject, FSM):
         pass
 
     def onDoorCloseFinish(self):
-        for avId in self.boardedAvIds.keys():
+        for avId in list(self.boardedAvIds.keys()):
             av = self.cr.doId2do.get(avId)
             if av is not None:
                 if av.getParent().compareTo(self.getElevatorModel()) == 0:

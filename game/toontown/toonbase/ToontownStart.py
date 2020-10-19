@@ -1,19 +1,19 @@
 from game.otp.distributed.OtpDoGlobals import *
 from direct.showbase.MessengerGlobal import *
-from ToonBaseGlobal import *
+from .ToonBaseGlobal import *
 from direct.gui.DirectGui import *
-import ToontownLoader
+from . import ToontownLoader
 from game.otp.otpbase import OTPGlobals
-import TTLocalizer
-import ToonBase
-import ToontownGlobals
+from . import TTLocalizer
+from . import ToonBase
+from . import ToontownGlobals
 from direct.gui import DirectGuiGlobals
 from pandac.PandaModules import *
 import random
 import sys
 import os
 import time
-import __builtin__
+import builtins
 
 
 class game:
@@ -21,28 +21,28 @@ class game:
     process = 'client'
 
 
-__builtin__.game = game()
+builtins.game = game()
 
 from game.toontown.launcher.ToontownDummyLauncher import ToontownDummyLauncher
 launcher = ToontownDummyLauncher()
-__builtin__.launcher = launcher
+builtins.launcher = launcher
 
 launcher.setRegistry('EXIT_PAGE', 'normal')
 pollingDelay = 0.5
-print 'ToontownStart: Polling for game2 to finish...'
+print('ToontownStart: Polling for game2 to finish...')
 while not launcher.getGame2Done():
     time.sleep(pollingDelay)
-print 'ToontownStart: Game2 is finished.'
-print 'ToontownStart: Starting the game.'
+print('ToontownStart: Game2 is finished.')
+print('ToontownStart: Starting the game.')
 tempLoader = Loader()
 backgroundNode = tempLoader.loadSync(
     Filename('phase_3/models/gui/loading-background'))
-print 'ToontownStart: setting default font'
+print('ToontownStart: setting default font')
 DirectGuiGlobals.setDefaultFontFunc(ToontownGlobals.getInterfaceFont)
 launcher.setPandaErrorCode(7)
 ToonBase.ToonBase()
 if base.win is None:
-    print 'Unable to open window; aborting.'
+    print('Unable to open window; aborting.')
     sys.exit()
     
 # Moved some imports here since some instances are only defined after ToonBase
@@ -73,7 +73,7 @@ if base.musicManagerIsValid:
         music.setVolume(0.90000000000000002)
         music.play()
 
-    print 'ToontownStart: Loading default gui sounds'
+    print('ToontownStart: Loading default gui sounds')
     DirectGuiGlobals.setDefaultRolloverSound(
         base.loadSfx('phase_3/audio/sfx/GUI_rollover.mp3'))
     DirectGuiGlobals.setDefaultClickSound(
@@ -81,7 +81,7 @@ if base.musicManagerIsValid:
 else:
     music = None
 serverVersion = base.config.GetString('server-version', 'no_version_set')
-print 'ToontownStart: serverVersion: ', serverVersion
+print('ToontownStart: serverVersion: ', serverVersion)
 version = OnscreenText(
     serverVersion,
     pos=(-1.3, -0.97499999999999998),
@@ -109,7 +109,7 @@ del tempLoader
 version.cleanup()
 del version
 base.loader = base.loader
-__builtin__.loader = base.loader
+builtins.loader = base.loader
 
 autoRun = ConfigVariableBool('toontown-auto-run', 1)
 if autoRun and launcher.isDummy():
@@ -120,5 +120,5 @@ if autoRun and launcher.isDummy():
         raise
     except BaseException:
         from direct.showbase import PythonUtil
-        print PythonUtil.describeException()
+        print(PythonUtil.describeException())
         raise

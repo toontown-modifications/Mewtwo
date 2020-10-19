@@ -1,7 +1,7 @@
 from game.otp.ai.AIBase import *
 from game.toontown.toonbase.ToontownGlobals import *
 from direct.distributed.ClockDelta import *
-from TrolleyConstants import *
+from .TrolleyConstants import *
 from game.toontown.toonbase import ToontownGlobals
 from direct.distributed import DistributedObjectAI
 from direct.fsm import ClassicFSM, State

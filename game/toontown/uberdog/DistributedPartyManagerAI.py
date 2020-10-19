@@ -114,7 +114,7 @@ class DistributedPartyManagerAI(DistributedObjectAI):
         self.hostId2partyInfo = partyData['hostId2partyInfo']
         self.zoneId2hostId = partyData['zoneId2hostId']
 
-        for hostId, partyInfo in self.hostId2partyInfo.items():
+        for hostId, partyInfo in list(self.hostId2partyInfo.items()):
             zoneId = self.hostId2zoneId.get(hostId, 0)
             if not zoneId:
                 continue

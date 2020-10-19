@@ -35,7 +35,7 @@ class DistributedFurnitureManager(DistributedObject.DistributedObject):
         if self.ownerId == base.localAvatar.doId:
             self.cr.furnitureManager = self
             if self.cr.objectManager is None:
-                import houseDesign as houseDesign
+                from . import houseDesign as houseDesign
                 self.cr.objectManager = houseDesign.ObjectManager()
 
     def setOwnerName(self, name):

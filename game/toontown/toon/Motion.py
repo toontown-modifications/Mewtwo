@@ -3,7 +3,7 @@ from game.toontown.toonbase import ToontownGlobals
 from direct.directnotify import DirectNotifyGlobal
 from direct.fsm import ClassicFSM, State
 from direct.fsm import State
-import TTEmote
+from . import TTEmote
 from game.otp.avatar import Emote
 
 class Motion(StateData.StateData):

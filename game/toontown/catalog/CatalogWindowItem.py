@@ -1,6 +1,6 @@
 from pandac.PandaModules import *
-import CatalogAtticItem
-import CatalogItem
+from . import CatalogAtticItem
+from . import CatalogItem
 from game.toontown.toonbase import ToontownGlobals
 from game.toontown.toonbase import TTLocalizer
 WVTModelName = 0

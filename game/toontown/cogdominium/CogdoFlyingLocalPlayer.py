@@ -13,14 +13,14 @@ from game.otp.otpbase import OTPGlobals
 from game.toontown.minigame.OrthoDrive import OrthoDrive
 from game.toontown.minigame.OrthoWalk import OrthoWalk
 from game.toontown.toonbase import TTLocalizer
-from CogdoFlyingCollisions import CogdoFlyingCollisions
-from CogdoFlyingPlayer import CogdoFlyingPlayer
-from CogdoFlyingGuiManager import CogdoFlyingGuiManager
-from CogdoFlyingInputManager import CogdoFlyingInputManager
-from CogdoFlyingCameraManager import CogdoFlyingCameraManager
-from CogdoFlyingObjects import CogdoFlyingPlatform, CogdoFlyingGatherable
-from CogdoFlyingLegalEagle import CogdoFlyingLegalEagle
-import CogdoFlyingGameGlobals as Globals
+from .CogdoFlyingCollisions import CogdoFlyingCollisions
+from .CogdoFlyingPlayer import CogdoFlyingPlayer
+from .CogdoFlyingGuiManager import CogdoFlyingGuiManager
+from .CogdoFlyingInputManager import CogdoFlyingInputManager
+from .CogdoFlyingCameraManager import CogdoFlyingCameraManager
+from .CogdoFlyingObjects import CogdoFlyingPlatform, CogdoFlyingGatherable
+from .CogdoFlyingLegalEagle import CogdoFlyingLegalEagle
+from . import CogdoFlyingGameGlobals as Globals
 
 class CogdoFlyingLocalPlayer(CogdoFlyingPlayer):
     notify = DirectNotifyGlobal.directNotify.newCategory('CogdoFlyingLocalPlayer')

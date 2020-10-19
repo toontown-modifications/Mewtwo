@@ -1,6 +1,6 @@
 from game.otp.ai.AIBaseGlobal import *
 from game.otp.avatar import DistributedAvatarAI
-import SuitPlannerBase, SuitBase, SuitDNA
+from . import SuitPlannerBase, SuitBase, SuitDNA
 from direct.directnotify import DirectNotifyGlobal
 from game.toontown.battle import SuitBattleGlobals
 

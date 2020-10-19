@@ -261,7 +261,7 @@ class DistributedPartyManagerUD(DistributedObjectUD):
 
         ourAvId = None
         ourAvIdInvite = None
-        for avId, inviteTuple in self.avId2invites.items():
+        for avId, inviteTuple in list(self.avId2invites.items()):
             if inviteTuple[0][0] == inviteKey:
                 ourAvId = avId
                 ourAvIdInvite = inviteTuple[:]
@@ -500,7 +500,7 @@ class DistributedPartyManagerUD(DistributedObjectUD):
                         self.sendUpdateToAvatar(avId, 'updateReply', [partyInfo.partyId, inviteeId, invite[2]])
 
         partyIds = []
-        for partyId, inviteeIds in self.partyId2inviteeIds.items():
+        for partyId, inviteeIds in list(self.partyId2inviteeIds.items()):
             for inviteeId in inviteeIds:
                 if inviteeId == avId:
                     partyIds.append(partyId)

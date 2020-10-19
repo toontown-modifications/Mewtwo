@@ -106,13 +106,13 @@ class ChatInputNormal(DirectObject.DirectObject):
     def _ChatInputNormal__execMessage(self, message):
         if not ChatInputNormal.ExecNamespace:
             ChatInputNormal.ExecNamespace = {}
-            exec 'from pandac.PandaModules import *' in globals(
-            ), self.ExecNamespace
+            exec('from pandac.PandaModules import *', globals(
+            ), self.ExecNamespace)
             self.importExecNamespace()
 
         try:
             if not isClient():
-                print 'EXECWARNING ChatInputNormal eval: %s' % message
+                print('EXECWARNING ChatInputNormal eval: %s' % message)
                 printStack()
 
             return str(eval(message, globals(), ChatInputNormal.ExecNamespace))
@@ -120,10 +120,10 @@ class ChatInputNormal(DirectObject.DirectObject):
 
             try:
                 if not isClient():
-                    print 'EXECWARNING ChatInputNormal exec: %s' % message
+                    print('EXECWARNING ChatInputNormal exec: %s' % message)
                     printStack()
 
-                exec message in globals(), ChatInputNormal.ExecNamespace
+                exec(message, globals(), ChatInputNormal.ExecNamespace)
                 return 'ok'
             except:
                 exception = sys.exc_info()[0]

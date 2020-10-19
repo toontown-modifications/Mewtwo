@@ -3,14 +3,14 @@ from pandac.PandaModules import *
 from game.toontown.toonbase import ToontownGlobals
 from game.toontown.toontowngui import TTDialog
 from game.toontown.toonbase import TTLocalizer
-import CatalogItemTypes
-import CatalogItem
-from CatalogWallpaperItem import getAllWallpapers
-from CatalogFlooringItem import getAllFloorings
-from CatalogMouldingItem import getAllMouldings
-from CatalogWainscotingItem import getAllWainscotings
-from CatalogFurnitureItem import getAllFurnitures
-from CatalogFurnitureItem import FLTrunk
+from . import CatalogItemTypes
+from . import CatalogItem
+from .CatalogWallpaperItem import getAllWallpapers
+from .CatalogFlooringItem import getAllFloorings
+from .CatalogMouldingItem import getAllMouldings
+from .CatalogWainscotingItem import getAllWainscotings
+from .CatalogFurnitureItem import getAllFurnitures
+from .CatalogFurnitureItem import FLTrunk
 from game.toontown.toontowngui.TeaserPanel import TeaserPanel
 from game.otp.otpbase import OTPGlobals
 from direct.directnotify import DirectNotifyGlobal

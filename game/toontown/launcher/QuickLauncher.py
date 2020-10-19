@@ -33,7 +33,7 @@ class QuickLauncher(LauncherBase):
     PatchExt = 'pch'
 
     def __init__(self):
-        print 'Running: ToontownQuickLauncher'
+        print('Running: ToontownQuickLauncher')
         self.toontownBlueKey = 'TOONTOWN_BLUE'
         self.launcherMessageKey = 'LAUNCHER_MESSAGE'
         self.game1DoneKey = 'GAME1_DONE'
@@ -45,7 +45,7 @@ class QuickLauncher(LauncherBase):
             self.toontownPlayTokenKey = 'LOGIN_TOKEN'
         else:
             self.toontownPlayTokenKey = 'PLAYTOKEN'
-        print 'useTTSpecificLogin=%s' % self.useTTSpecificLogin
+        print('useTTSpecificLogin=%s' % self.useTTSpecificLogin)
         self.contentDir = '/'
         self.serverDbFileHash = HashVal()
         self.launcherFileDbHash = HashVal()
@@ -181,7 +181,7 @@ class QuickLauncher(LauncherBase):
             self.cleanup()
             return None
 
-        raise StandardError, 'Some phases not listed in LauncherPhases: %s' % self.requiredInstallFiles
+        raise Exception('Some phases not listed in LauncherPhases: %s' % self.requiredInstallFiles)
 
     def getDecompressMultifile(self, mfname):
         if not self.DecompressMultifiles:
@@ -281,11 +281,11 @@ class QuickLauncher(LauncherBase):
     def decompressMultifileDone(self):
         self.finalizePhase()
         self.notify.info('Done updating multifiles in phase: ' +
-                         ` self.currentPhase `)
+                         repr( self.currentPhase))
         self.progressSoFar += int(
             round(self.phaseOverallMap[self.currentPhase] * 100))
-        self.notify.info('progress so far ' + ` self.progressSoFar `)
-        messenger.send('phaseComplete-' + ` self.currentPhase `)
+        self.notify.info('progress so far ' + repr( self.progressSoFar))
+        messenger.send('phaseComplete-' + repr( self.currentPhase))
         self.resumeInstall()
 
     def finalizePhase(self):
@@ -334,7 +334,7 @@ class QuickLauncher(LauncherBase):
                 dict[name] = int(value)
                 continue
 
-        if dict.has_key('secretsNeedsParentPassword'):
+        if 'secretsNeedsParentPassword' in dict:
             self.secretNeedsParentPasswordKey = dict[
                 'secretsNeedsParentPassword']
             self.notify.info('secretNeedsParentPassword = %d' %
@@ -342,7 +342,7 @@ class QuickLauncher(LauncherBase):
         else:
             self.notify.warning(
                 'no secretNeedsParentPassword token in webAcctParams')
-        if dict.has_key('chatEligible'):
+        if 'chatEligible' in dict:
             self.chatEligibleKey = dict['chatEligible']
             self.notify.info('chatEligibleKey = %d' % self.chatEligibleKey)
         else:

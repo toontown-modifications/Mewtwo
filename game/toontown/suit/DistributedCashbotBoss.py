@@ -2,10 +2,10 @@ from direct.interval.IntervalGlobal import *
 from direct.task.TaskManagerGlobal import *
 from direct.directnotify import DirectNotifyGlobal
 from game.toontown.toonbase import TTLocalizer
-import DistributedBossCog
+from . import DistributedBossCog
 from direct.task.Task import Task
-import DistributedCashbotBossGoon
-import SuitDNA
+from . import DistributedCashbotBossGoon
+from . import SuitDNA
 from game.toontown.toon import Toon
 from game.toontown.toon import ToonDNA
 from direct.fsm import FSM
@@ -160,7 +160,7 @@ class DistributedCashbotBoss(DistributedBossCog.DistributedBossCog, FSM.FSM):
                 goon.request('Off')
 
     def _DistributedCashbotBoss__showFakeGoons(self, state):
-        print self.fakeGoons
+        print(self.fakeGoons)
         if self.fakeGoons:
             for goon in self.fakeGoons:
                 goon.request(state)
@@ -433,7 +433,7 @@ class DistributedCashbotBoss(DistributedBossCog.DistributedBossCog, FSM.FSM):
                        ]]
         mainGoon = self.fakeGoons[0]
         goonLoop = Parallel()
-        print self.fakeGoons
+        print(self.fakeGoons)
         for i in range(1, self.numFakeGoons):
             goon = self.fakeGoons[i]
             goonLoop.append(
@@ -725,17 +725,17 @@ class DistributedCashbotBoss(DistributedBossCog.DistributedBossCog, FSM.FSM):
                 continue
 
     def deactivateCranes(self):
-        for crane in self.cranes.values():
+        for crane in list(self.cranes.values()):
             crane.demand('Free')
 
     def hideBattleThreeObjects(self):
         for goon in self.goons:
             goon.demand('Off')
 
-        for safe in self.safes.values():
+        for safe in list(self.safes.values()):
             safe.demand('Off')
 
-        for crane in self.cranes.values():
+        for crane in list(self.cranes.values()):
             crane.demand('Off')
 
     def _DistributedCashbotBoss__doPhysics(self, task):

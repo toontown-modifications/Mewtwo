@@ -39,7 +39,7 @@ class ClsendTracker:
             self._trimClsend()
 
     def _trimClsend(self):
-        for i in xrange(self._clsendFlushNum):
+        for i in range(self._clsendFlushNum):
             if self._logClsendOverflow:
                 self._logClsend(*self._clsendMsgs[0])
 

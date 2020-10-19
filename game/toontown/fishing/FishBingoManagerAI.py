@@ -3,8 +3,8 @@ from direct.task import Task
 from direct.distributed import ClockDelta
 
 from game.toontown.fishing.DistributedFishingPondAI import DistributedFishingPondAI
-from DistributedPondBingoManagerAI import DistributedPondBingoManagerAI
-import BingoGlobals
+from .DistributedPondBingoManagerAI import DistributedPondBingoManagerAI
+from . import BingoGlobals
 from game.toontown.ai.HolidayBaseAI import HolidayBaseAI
 
 import random, time, datetime
@@ -26,7 +26,7 @@ class FishBingoManagerAI:
         self.blockoutTimeout = None
 
     def createBingoManagers(self):
-        for do in self.air.doId2do.values():
+        for do in list(self.air.doId2do.values()):
             if isinstance(do, DistributedFishingPondAI):
                 self.newFishingPond(do)
 
@@ -64,7 +64,7 @@ class FishBingoManagerAI:
 
             # There should be a better way of doing this... Sheesh...
             if currentTime.hour == 23 and currentTime.minute in \
-            xrange(BingoGlobals.HOUR_BREAK_MIN - 1, BingoGlobals.HOUR_BREAK_MIN + 2):
+            range(BingoGlobals.HOUR_BREAK_MIN - 1, BingoGlobals.HOUR_BREAK_MIN + 2):
                 # Set the current time to tomorrow.
                 currentTime += datetime.timedelta(1)
 
@@ -96,7 +96,7 @@ class FishBingoManagerAI:
         self.intermission = 0
 
         # Tell all their pond managers to pick up the blockout card.
-        for bingoMgr in self.zoneToPondBingoMgrs.values():
+        for bingoMgr in list(self.zoneToPondBingoMgrs.values()):
             bingoMgr.getNewBingoCard(blockout = True)
             bingoMgr.b_setJackpot(self.blockoutJackpot)
 
@@ -117,7 +117,7 @@ class FishBingoManagerAI:
         self.blockoutWin = True
 
         # Tell the other managers that the game is over.
-        for bingoMgr in self.zoneToPondBingoMgrs.values():
+        for bingoMgr in list(self.zoneToPondBingoMgrs.values()):
             if bingoMgr == winningBingoMgr:
                 continue
             bingoMgr.b_setState('GameOver')

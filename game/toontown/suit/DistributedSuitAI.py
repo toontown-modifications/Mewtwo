@@ -2,13 +2,13 @@ from game.otp.ai.AIBaseGlobal import *
 from pandac.PandaModules import *
 from direct.distributed.ClockDelta import *
 from game.otp.avatar import DistributedAvatarAI
-import SuitTimings
+from . import SuitTimings
 from direct.task import Task
-import SuitPlannerBase, SuitBase, SuitDialog, SuitDNA
+from . import SuitPlannerBase, SuitBase, SuitDialog, SuitDNA
 from direct.directnotify import DirectNotifyGlobal
 from game.toontown.battle import SuitBattleGlobals
 from game.toontown.building import FADoorCodes
-import DistributedSuitBaseAI
+from . import DistributedSuitBaseAI
 from game.toontown.hood import ZoneUtil
 import random
 
@@ -201,7 +201,7 @@ class DistributedSuitAI(DistributedSuitBaseAI.DistributedSuitBaseAI):
         self.makeLegList()
         if self.notify.getDebug():
             self.notify.debug('Leg list:')
-            print self.legList
+            print(self.legList)
         idx1 = self.startPoint.getIndex()
         idx2 = self.endPoint.getIndex()
         self.pathStartTime = globalClock.getFrameTime()

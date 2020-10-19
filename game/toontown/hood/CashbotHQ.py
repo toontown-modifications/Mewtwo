@@ -1,6 +1,6 @@
 from pandac.PandaModules import *
 from direct.directnotify import DirectNotifyGlobal
-import CogHood
+from . import CogHood
 from game.toontown.toonbase import ToontownGlobals, TTLocalizer
 from game.toontown.hood import ZoneUtil
 from game.toontown.coghq import CashbotCogHQLoader

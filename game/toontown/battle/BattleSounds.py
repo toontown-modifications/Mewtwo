@@ -60,7 +60,7 @@ class BattleSounds:
 
             if not found:
                 self.notify.warning('%s not found on:' % name)
-                print self.sfxSearchPath
+                print(self.sfxSearchPath)
             else:
                 return self.mgr.getSound(filename.getFullpath())
 

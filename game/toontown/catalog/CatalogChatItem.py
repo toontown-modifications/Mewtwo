@@ -1,5 +1,5 @@
 from pandac.PandaModules import *
-import CatalogItem
+from . import CatalogItem
 from game.toontown.toonbase import ToontownGlobals
 from game.otp.otpbase import OTPLocalizer
 from game.toontown.toonbase import TTLocalizer
@@ -93,7 +93,7 @@ class CatalogChatItem(CatalogItem.CatalogItem):
     def showMessagePicker(self, phone, callback):
         self.phone = phone
         self.callback = callback
-        import CatalogChatItemPicker as CatalogChatItemPicker
+        from . import CatalogChatItemPicker as CatalogChatItemPicker
         self.messagePicker = CatalogChatItemPicker.CatalogChatItemPicker(
             self._CatalogChatItem__handlePickerDone, self.customIndex)
         self.messagePicker.show()
@@ -102,7 +102,7 @@ class CatalogChatItem(CatalogItem.CatalogItem):
         self.mailbox = mailbox
         self.callback = callback
         self.index = index
-        import CatalogChatItemPicker
+        from . import CatalogChatItemPicker
         self.messagePicker = CatalogChatItemPicker.CatalogChatItemPicker(
             self._CatalogChatItem__handlePickerOnAccept, self.customIndex)
         self.messagePicker.show()
@@ -110,12 +110,12 @@ class CatalogChatItem(CatalogItem.CatalogItem):
     def _CatalogChatItem__handlePickerOnAccept(self,
                                                status,
                                                pickedMessage=None):
-        print 'Picker Status%s' % status
+        print('Picker Status%s' % status)
         if status == 'pick':
             self.mailbox.acceptItem(self, self.index, self.callback,
                                     pickedMessage)
         else:
-            print 'picker canceled'
+            print('picker canceled')
             self.callback(ToontownGlobals.P_UserCancelled, None, self.index)
         self.messagePicker.hide()
         self.messagePicker.destroy()
@@ -156,7 +156,7 @@ def getChatRange(fromIndex, toIndex, *otherRanges):
         froms.append(otherRanges[i])
         tos.append(otherRanges[i + 1])
         i += 2
-    for chatId in OTPLocalizer.CustomSCStrings.keys():
+    for chatId in list(OTPLocalizer.CustomSCStrings.keys()):
         for (fromIndex, toIndex) in zip(froms, tos):
             if chatId >= fromIndex and chatId <= toIndex and chatId not in bannedPhrases:
                 list.append(CatalogChatItem(chatId))

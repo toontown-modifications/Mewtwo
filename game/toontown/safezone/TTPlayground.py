@@ -1,6 +1,6 @@
 from pandac.PandaModules import *
 from game.toontown.toonbase import ToontownGlobals
-import Playground
+from . import Playground
 import random
 from game.toontown.launcher import DownloadForceAcknowledge
 from direct.task.Task import Task

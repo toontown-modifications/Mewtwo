@@ -7,8 +7,8 @@ from direct.fsm import ClassicFSM
 from direct.fsm import State
 from direct.directnotify import DirectNotifyGlobal
 from game.otp.otpbase import OTPLocalizer
-import TTAccount
-import GuiScreen
+from . import TTAccount
+from . import GuiScreen
 from game.otp.otpbase import OTPGlobals
 from direct.distributed.MsgTypes import *
 

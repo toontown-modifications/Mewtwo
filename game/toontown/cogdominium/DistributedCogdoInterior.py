@@ -19,8 +19,8 @@ from game.toontown.cogdominium import CogdoGameConsts
 from game.toontown.cogdominium import CogdoBarrelRoom, CogdoBarrelRoomConsts
 from game.toontown.distributed import DelayDelete
 from game.toontown.toonbase import TTLocalizer
-from CogdoExecutiveSuiteMovies import CogdoExecutiveSuiteIntro
-from CogdoElevatorMovie import CogdoElevatorMovie
+from .CogdoExecutiveSuiteMovies import CogdoExecutiveSuiteIntro
+from .CogdoElevatorMovie import CogdoElevatorMovie
 PAINTING_DICT = {'s': 'tt_m_ara_crg_paintingMoverShaker',
  'l': 'tt_m_ara_crg_paintingLegalEagle',
  'm': 'tt_m_ara_crg_paintingMoverShaker',
@@ -255,13 +255,13 @@ class DistributedCogdoInterior(DistributedObject.DistributedObject):
         self.ignore(toon.uniqueName('disable'))
 
     def __finishInterval(self, name):
-        if self.activeIntervals.has_key(name):
+        if name in self.activeIntervals:
             interval = self.activeIntervals[name]
             if interval.isPlaying():
                 interval.finish()
 
     def __cleanupIntervals(self):
-        for interval in self.activeIntervals.values():
+        for interval in list(self.activeIntervals.values()):
             interval.finish()
 
         self.activeIntervals = {}
@@ -304,7 +304,7 @@ class DistributedCogdoInterior(DistributedObject.DistributedObject):
         self.toons = []
         for toonId in toonIds:
             if toonId != 0:
-                if self.cr.doId2do.has_key(toonId):
+                if toonId in self.cr.doId2do:
                     toon = self.cr.doId2do[toonId]
                     toon.stopSmooth()
                     self.toons.append(toon)
@@ -322,7 +322,7 @@ class DistributedCogdoInterior(DistributedObject.DistributedObject):
         self.suits = []
         self.joiningReserves = []
         for suitId in suitIds:
-            if self.cr.doId2do.has_key(suitId):
+            if suitId in self.cr.doId2do:
                 suit = self.cr.doId2do[suitId]
                 self.suits.append(suit)
                 suit.fsm.request('Battle')
@@ -336,7 +336,7 @@ class DistributedCogdoInterior(DistributedObject.DistributedObject):
         self.reserveSuits = []
         for index in range(len(reserveIds)):
             suitId = reserveIds[index]
-            if self.cr.doId2do.has_key(suitId):
+            if suitId in self.cr.doId2do:
                 suit = self.cr.doId2do[suitId]
                 self.reserveSuits.append((suit, values[index]))
             else:

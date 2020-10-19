@@ -504,7 +504,7 @@ class DistributedVehicle(DistributedSmoothNode.DistributedSmoothNode,
     def stopSparkParticles(self, side=None):
         sides = {0: 'right', 1: 'left'}
         if side is None:
-            for x in sides.keys():
+            for x in list(sides.keys()):
                 self.sparks[x].effect.getParticlesNamed(
                     'particles-1').setBirthRate(1000)
                 taskMgr.doMethodLater(
@@ -1449,7 +1449,7 @@ class DistributedVehicle(DistributedSmoothNode.DistributedSmoothNode,
         self.wipeOut.start()
 
     def hitPie(self):
-        print 'yar, got Me with pi!'
+        print('yar, got Me with pi!')
         self.splatPie()
         if self.wipeOut:
             self.wipeOut.pause()

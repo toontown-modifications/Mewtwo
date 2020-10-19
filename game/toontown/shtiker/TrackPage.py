@@ -1,5 +1,5 @@
 from pandac.PandaModules import *
-import ShtikerPage
+from . import ShtikerPage
 from direct.gui.DirectGui import *
 from pandac.PandaModules import *
 from game.toontown.quest import Quests

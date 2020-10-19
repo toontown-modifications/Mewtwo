@@ -1,5 +1,5 @@
 from game.toontown.toontowngui import TTDialog
-import TTLocalizer
+from . import TTLocalizer
 from game.otp.otpbase.OTPGlobals import *
 from direct.showbase.PythonUtil import Enum, invertDict
 from pandac.PandaModules import BitMask32, Vec4
@@ -316,7 +316,7 @@ factoryId2factoryType = {
     LawbotOfficeInt: FT_FullSuit
 }
 StreetNames = TTLocalizer.GlobalStreetNames
-StreetBranchZones = StreetNames.keys()
+StreetBranchZones = list(StreetNames.keys())
 Hoods = (DonaldsDock, ToontownCentral, TheBrrrgh, MinniesMelodyland,
          DaisyGardens, OutdoorZone, FunnyFarm, GoofySpeedway, DonaldsDreamland,
          BossbotHQ, SellbotHQ, CashbotHQ, LawbotHQ, GolfZone)

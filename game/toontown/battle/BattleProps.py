@@ -151,7 +151,7 @@ class PropPool:
         self.propStrings[propName] = (self.getPath(5, 'half-windsor'), )
         self.propTypes[propName] = 'model'
         splatAnimFileName = self.getPath(3.5, 'splat-chan')
-        for splat in Splats.keys():
+        for splat in list(Splats.keys()):
             propName = 'splat-' + splat
             self.propStrings[propName] = (self.getPath(3.5, 'splat-mod'),
                                           splatAnimFileName)
@@ -277,7 +277,7 @@ class PropPool:
             self.props[name] = self.props[name].find('**/trolley_car')
 
     def unloadProps(self):
-        for p in self.props.values():
+        for p in list(self.props.values()):
             if not isinstance(p, type(())):
                 self._PropPool__delProp(p)
                 continue

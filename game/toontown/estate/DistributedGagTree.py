@@ -6,8 +6,8 @@ from game.toontown.toonbase import ToontownBattleGlobals
 from game.toontown.toontowngui import TTDialog
 from game.toontown.toontowngui.TeaserPanel import TeaserPanel
 from game.toontown.toonbase import TTLocalizer
-import GardenGlobals
-import HouseGlobals
+from . import GardenGlobals
+from . import HouseGlobals
 from direct.task import Task
 from pandac.PandaModules import *
 from game.otp.otpbase import OTPGlobals

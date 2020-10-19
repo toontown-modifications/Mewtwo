@@ -1,7 +1,7 @@
 from game.otp.ai.AIBaseGlobal import *
 from direct.task.Task import Task
 from pandac.PandaModules import *
-from DistributedNPCToonBaseAI import *
+from .DistributedNPCToonBaseAI import *
 from game.toontown.quest import Quests
 
 class DistributedNPCToonAI(DistributedNPCToonBaseAI):

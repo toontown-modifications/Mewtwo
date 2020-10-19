@@ -3,9 +3,9 @@ from direct.directnotify import DirectNotifyGlobal
 from direct.fsm import ClassicFSM
 from direct.fsm import State
 from game.toontown.toonbase import ToontownGlobals
-import DistributedToon
+from . import DistributedToon
 from direct.distributed import DistributedObject
-import NPCToons
+from . import NPCToons
 from game.toontown.quest import Quests
 from direct.distributed import ClockDelta
 from game.toontown.quest import QuestParser
@@ -68,7 +68,7 @@ class DistributedNPCToonBase(DistributedToon.DistributedToon):
 
     def initToonState(self):
         self.setAnimState('neutral', 0.9, None, None)
-        npcOrigin = render.find('**/npc_origin_' + `(self.posIndex)`)
+        npcOrigin = render.find('**/npc_origin_' + repr((self.posIndex)))
         if not npcOrigin.isEmpty():
             self.reparentTo(npcOrigin)
             self.initPos()

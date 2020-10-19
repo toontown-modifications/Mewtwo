@@ -2,7 +2,7 @@ from direct.directnotify import DirectNotifyGlobal
 from direct.fsm import StateData
 from direct.fsm import ClassicFSM, State
 from direct.fsm import State
-import CogHQLobby
+from . import CogHQLobby
 from game.toontown.hood import QuietZoneState
 from game.toontown.hood import ZoneUtil
 from game.toontown.town import TownBattle

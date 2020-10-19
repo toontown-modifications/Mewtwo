@@ -1,5 +1,5 @@
 from game.otp.avatar import DistributedAvatar
-import Char
+from . import Char
 
 
 class DistributedChar(DistributedAvatar.DistributedAvatar, Char.Char):

@@ -1,4 +1,4 @@
-from SpecImports import *
+from .SpecImports import *
 from game.toontown.toonbase import ToontownGlobals
 CogParent = 110400
 BattleCellId = 0

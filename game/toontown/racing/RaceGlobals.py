@@ -432,7 +432,7 @@ Daily = 0
 Weekly = 1
 AllTime = 2
 PeriodDict = {Daily: 10, Weekly: 100, AllTime: 1000}
-PeriodIds = PeriodDict.keys()
+PeriodIds = list(PeriodDict.keys())
 NumRecordPeriods = len(PeriodIds)
 NumRecordsPerPeriod = 10
 Winnings = [3.0, 1.0, 0.5, 0.14999999999999999]
@@ -546,7 +546,7 @@ def getCircuitLoop(startingTrack):
     circuitLoop = [startingTrack]
     for loop in CircuitLoops:
         if startingTrack in loop:
-            print loop
+            print(loop)
             numTracks = len(loop)
             tempLoop = loop * 2
             startingIndex = tempLoop.index(startingTrack)

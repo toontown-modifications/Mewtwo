@@ -1,4 +1,4 @@
-import ClothesGUI
+from . import ClothesGUI
 from game.toontown.toon import ToonDNA
 
 

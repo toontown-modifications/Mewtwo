@@ -1,7 +1,7 @@
 from pandac.PandaModules import *
 from game.toontown.toonbase import ToontownGlobals
 from game.otp.otpbase import OTPGlobals
-import DistributedCashbotBossObjectAI
+from . import DistributedCashbotBossObjectAI
 
 class DistributedCashbotBossSafeAI(DistributedCashbotBossObjectAI.DistributedCashbotBossObjectAI):
     wantsWatchDrift = 0

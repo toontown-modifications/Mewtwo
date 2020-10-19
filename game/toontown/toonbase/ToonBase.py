@@ -2,9 +2,9 @@ from game.otp.otpbase import OTPBase
 from game.otp.otpbase import OTPLauncherGlobals
 from game.otp.otpbase import OTPGlobals
 from direct.showbase.PythonUtil import *
-import ToontownGlobals
+from . import ToontownGlobals
 from direct.directnotify import DirectNotifyGlobal
-import ToontownLoader
+from . import ToontownLoader
 from direct.gui import DirectGuiGlobals
 from direct.gui.DirectGui import *
 from pandac.PandaModules import *
@@ -464,7 +464,7 @@ class ToonBase(OTPBase.OTPBase):
 
     def removeGlitchMessage(self):
         self.ignore('InputState-forward')
-        print 'ignoring InputState-forward'
+        print('ignoring InputState-forward')
 
     def exitShow(self, errorCode=None):
         self.notify.info('Exiting Toontown: errorCode = %s' % errorCode)

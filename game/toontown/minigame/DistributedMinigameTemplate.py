@@ -1,6 +1,6 @@
 from pandac.PandaModules import *
 from game.toontown.toonbase.ToonBaseGlobal import *
-from DistributedMinigame import *
+from .DistributedMinigame import *
 from direct.fsm import ClassicFSM, State
 from direct.fsm import State
 from game.toontown.toonbase import TTLocalizer

@@ -1,13 +1,13 @@
 from direct.interval.IntervalGlobal import *
-from BattleBase import *
-from BattleProps import *
-from BattleSounds import *
-import BattleParticles
-from RewardPanel import *
-import MovieCamera
+from .BattleBase import *
+from .BattleProps import *
+from .BattleSounds import *
+from . import BattleParticles
+from .RewardPanel import *
+from . import MovieCamera
 from direct.directnotify import DirectNotifyGlobal
-import MovieUtil
-import MovieNPCSOS
+from . import MovieUtil
+from . import MovieNPCSOS
 from game.toontown.toonbase import ToontownBattleGlobals
 notify = DirectNotifyGlobal.directNotify.newCategory('MovieSound')
 soundFiles = ('AA_sound_bikehorn.mp3', 'AA_sound_whistle.mp3',

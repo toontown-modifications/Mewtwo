@@ -87,7 +87,7 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
 
         emotes = list(av.getEmoteAccess())
 
-        for emoteId in OTPLocalizer.EmoteFuncDict.values():
+        for emoteId in list(OTPLocalizer.EmoteFuncDict.values()):
            if emoteId >= len(emotes):
               continue
            emotes[emoteId] = 1
@@ -130,11 +130,11 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
         av.b_setRewardHistory(Quests.ELDER_TIER, [])
 
         if simbase.wantPets:
-            av.b_setPetTrickPhrases(xrange(7))
+            av.b_setPetTrickPhrases(range(7))
 
         av.b_setTickets(RaceGlobals.MaxTickets)
         maxTrophies = RaceGlobals.NumTrophies + RaceGlobals.NumCups
-        av.b_setKartingTrophies(xrange(1, maxTrophies + 1))
+        av.b_setKartingTrophies(range(1, maxTrophies + 1))
 
         av.b_setPinkSlips(255)
 
@@ -144,18 +144,18 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
         allFish = TTLocalizer.FishSpeciesNames
         fishLists = [[], [], []]
 
-        for genus in allFish.keys():
-            for species in xrange(len(allFish[genus])):
+        for genus in list(allFish.keys()):
+            for species in range(len(allFish[genus])):
                 fishLists[0].append(genus)
                 fishLists[1].append(species)
                 fishLists[2].append(FishGlobals.getRandomWeight(genus, species))
 
         av.b_setFishCollection(*fishLists)
         av.b_setFishingRod(FishGlobals.MaxRodId)
-        av.b_setFishingTrophies(FishGlobals.TrophyDict.keys())
+        av.b_setFishingTrophies(list(FishGlobals.TrophyDict.keys()))
 
         if not av.hasKart() and simbase.wantKarts:
-            av.b_setKartBodyType(KartDict.keys()[1])
+            av.b_setKartBodyType(list(KartDict.keys())[1])
 
         av.b_setGolfHistory([600] * (GolfGlobals.MaxHistoryIndex * 2))
 
@@ -163,7 +163,7 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
         av.b_setWateringCan(3)
         av.b_setShovelSkill(639)
         av.b_setWateringCanSkill(999)
-        av.b_setGardenTrophies(GardenGlobals.TrophyDict.keys())
+        av.b_setGardenTrophies(list(GardenGlobals.TrophyDict.keys()))
 
         av.b_setMaxHp(ToontownGlobals.MaxHpLimit)
         av.toonUp(av.getMaxHp() - av.hp)
@@ -287,7 +287,7 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
         if message is '':
             return
 
-        for doId, do in simbase.air.doId2do.items():
+        for doId, do in list(simbase.air.doId2do.items()):
             if isinstance(do, DistributedPlayerAI):
                 if str(doId)[0] != str(simbase.air.districtId)[0]:
                     do.d_setSystemMessage(0, message)
@@ -357,7 +357,7 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
 
         boss = None
 
-        for do in simbase.air.doId2do.values():
+        for do in list(simbase.air.doId2do.values()):
             if isinstance(do, DistributedSellbotBossAI):
                 if av.doId in do.involvedToons:
                     boss = do
@@ -690,7 +690,7 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
 
         from game.toontown.cogdominium.DistCogdoMazeGameAI import DistCogdoMazeGameAI
 
-        for do in simbase.air.doId2do.values():
+        for do in list(simbase.air.doId2do.values()):
             if isinstance(do, DistCogdoMazeGameAI):
                 if av.doId in do.getToonIds():
                     mazeGame = do

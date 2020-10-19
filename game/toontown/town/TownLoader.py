@@ -11,7 +11,7 @@ from direct.fsm import StateData
 from direct.fsm import ClassicFSM, State
 from direct.fsm import State
 from direct.task import Task
-import TownBattle
+from . import TownBattle
 from game.toontown.toon import Toon
 from game.toontown.toon.Toon import teleportDebug
 from game.toontown.battle import BattleParticles
@@ -388,7 +388,7 @@ class TownLoader(StateData.StateData):
                 animPropList.append(animatedBuildingObj)
 
     def deleteAnimatedProps(self):
-        for (zoneNode, animPropList) in self.animPropDict.items():
+        for (zoneNode, animPropList) in list(self.animPropDict.items()):
             for animProp in animPropList:
                 animProp.delete()
 

@@ -11,9 +11,9 @@ from direct.fsm import State
 from direct.directnotify import DirectNotifyGlobal
 from game.toontown.toonbase import ToontownGlobals
 from game.toontown.toonbase import ToontownBattleGlobals
-import DistributedBossCog
+from . import DistributedBossCog
 from game.toontown.toonbase import TTLocalizer
-import SuitDNA
+from . import SuitDNA
 from game.toontown.toon import Toon
 from game.toontown.battle import BattleBase
 from direct.directutil import Mopath

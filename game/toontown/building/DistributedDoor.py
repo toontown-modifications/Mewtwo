@@ -1,5 +1,5 @@
-import DoorTypes
-import FADoorCodes
+from . import DoorTypes
+from . import FADoorCodes
 from direct.directnotify import DirectNotifyGlobal
 from direct.distributed import DistributedObject
 from direct.distributed.ClockDelta import *
@@ -408,7 +408,7 @@ class DistributedDoor(DistributedObject.DistributedObject, DelayDeletable):
         self.accept(self.getEnterTriggerEvent(), self.doorTrigger)
 
     def doorTrigger(self, args=None):
-        print "triggeredokOEFKEOFKEFO"
+        print("triggeredokOEFKEOFKEFO")
         self.ignore(self.getEnterTriggerEvent())
         if args == None:
             self.enterDoor()

@@ -4,8 +4,8 @@ from direct.directnotify import DirectNotifyGlobal
 from game.toontown.toonbase import ToontownGlobals
 from game.toontown.toonbase import TTLocalizer
 from direct.task import Task
-import FishBase
-import FishPicker
+from . import FishBase
+from . import FishPicker
 
 
 class FishSellGUI(DirectFrame):

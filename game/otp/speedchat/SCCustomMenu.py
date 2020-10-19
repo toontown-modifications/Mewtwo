@@ -1,5 +1,5 @@
-from SCMenu import SCMenu
-from SCCustomTerminal import SCCustomTerminal
+from .SCMenu import SCMenu
+from .SCCustomTerminal import SCCustomTerminal
 from game.otp.otpbase.OTPLocalizer import CustomSCStrings
 
 

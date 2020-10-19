@@ -81,7 +81,7 @@ class DistributedPartyTrampolineActivityAI(DistributedPartyActivityAI, FSM):
             return
 
     def enterActive(self):
-        self.jellybeans = range(PartyGlobals.TrampolineNumJellyBeans)
+        self.jellybeans = list(range(PartyGlobals.TrampolineNumJellyBeans))
         taskMgr.doMethodLater(PartyGlobals.TrampolineDuration, self.__leaveTrampolineTask,
                               self.uniqueName('leave-trampoline'))
         self.sendUpdate('setState', ['Active', globalClockDelta.getRealNetworkTime()])

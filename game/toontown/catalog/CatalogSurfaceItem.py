@@ -1,8 +1,8 @@
-import CatalogItem
-import CatalogAtticItem
+from . import CatalogItem
+from . import CatalogAtticItem
 from game.toontown.toonbase import ToontownGlobals
 from game.toontown.toonbase import TTLocalizer
-from CatalogSurfaceColors import *
+from .CatalogSurfaceColors import *
 STWallpaper = 0
 STMoulding = 1
 STFlooring = 2

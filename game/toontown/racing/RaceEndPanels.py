@@ -509,7 +509,7 @@ class RaceWinningsPanel(DirectFrame):
         bonusType = None
         if ticBonus > 0:
             if not endOfCircuitRace:
-                bonusType = RaceGlobals.PeriodDict.values().index(ticBonus)
+                bonusType = list(RaceGlobals.PeriodDict.values()).index(ticBonus)
             else:
                 ticBonus = 0
 
@@ -724,7 +724,7 @@ class RaceEndPanel(DirectFrame):
                                   winnings,
                                   bonus,
                                   trophies=()):
-        print 'updateWinningsFromCircuit'
+        print('updateWinningsFromCircuit')
         self.seq.finish()
         totalTickets = winnings + entryFee + bonus
         self.results.updateWinnings(place, totalTickets)

@@ -1,6 +1,6 @@
 from direct.directnotify import DirectNotifyGlobal
 from direct.fsm import StateData
-import CogHQLoader
+from . import CogHQLoader
 from game.toontown.toonbase import ToontownGlobals
 from direct.gui import DirectGui
 from game.toontown.toonbase import TTLocalizer

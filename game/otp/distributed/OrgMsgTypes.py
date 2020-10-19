@@ -86,8 +86,8 @@ MsgName2Id = {
 MsgId2Names = invertDictLossless(MsgName2Id)
 
 # put msg names in module scope, assigned to msg value
-for name, value in MsgName2Id.items():
-    exec '%s = %s' % (name, value)
+for name, value in list(MsgName2Id.items()):
+    exec('%s = %s' % (name, value))
 del name, value
 
 # These messages are ignored when the client is headed to the quiet zone

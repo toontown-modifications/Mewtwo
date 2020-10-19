@@ -1,12 +1,12 @@
 from pandac.PandaModules import *
 from direct.interval.IntervalGlobal import *
-import DistributedCCharBase
-import DistributedDonald
+from . import DistributedCCharBase
+from . import DistributedDonald
 from direct.directnotify import DirectNotifyGlobal
 from direct.fsm import ClassicFSM, State
 from direct.fsm import State
-import CharStateDatas
-import CCharChatter
+from . import CharStateDatas
+from . import CCharChatter
 from game.toontown.toonbase import ToontownGlobals
 from game.toontown.toonbase import TTLocalizer
 from game.toontown.hood import GSHood

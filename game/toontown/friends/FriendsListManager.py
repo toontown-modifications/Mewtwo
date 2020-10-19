@@ -1,8 +1,8 @@
 from pandac.PandaModules import *
-import FriendsListPanel
-import FriendInviter
-import FriendInvitee
-import FriendNotifier
+from . import FriendsListPanel
+from . import FriendInviter
+from . import FriendInvitee
+from . import FriendNotifier
 from direct.directnotify import DirectNotifyGlobal
 from game.toontown.toon import ToonTeleportPanel
 from game.toontown.friends import ToontownFriendSecret
@@ -15,7 +15,7 @@ from game.toontown.toon import ToonAvatarDetailPanel
 from game.toontown.toon import PlayerDetailPanel
 from game.toontown.toonbase import ToontownGlobals
 from game.toontown.toon import Toon
-import FriendHandle
+from . import FriendHandle
 from game.otp.otpbase import OTPGlobals
 
 
@@ -224,7 +224,7 @@ class FriendsListManager:
         else:
             friendToon = base.cr.doId2do.get(avId)
             if friendToon:
-                print 'got toon'
+                print('got toon')
                 dna = friendToon.getStyle()
                 FriendNotifier.FriendNotifier(avId, friendToon.getName(), dna,
                                               None)

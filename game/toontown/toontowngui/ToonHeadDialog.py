@@ -1,7 +1,7 @@
 from pandac.PandaModules import *
 from game.toontown.toonbase.ToontownGlobals import *
 from direct.directnotify import DirectNotifyGlobal
-import TTDialog
+from . import TTDialog
 from game.toontown.toon import ToonHead
 
 

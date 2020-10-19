@@ -57,7 +57,7 @@ async def registerAccount(request):
     }
 
     requestGet = requests.get(regEndpoint, data, headers = headers)
-    print(requestGet.text)
+    print((requestGet.text))
 
 async def checkUsernameAvailability(request):
     args = await request.post()

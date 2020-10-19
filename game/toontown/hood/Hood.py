@@ -8,8 +8,8 @@ from direct.task.Task import Task
 from game.toontown.minigame import Purchase
 from direct.gui import OnscreenText
 from game.toontown.building import SuitInterior
-import QuietZoneState
-import ZoneUtil
+from . import QuietZoneState
+from . import ZoneUtil
 from game.toontown.toonbase import TTLocalizer
 from game.toontown.toon.Toon import teleportDebug
 
@@ -175,7 +175,7 @@ class Hood(StateData.StateData):
         elif loaderName == 'minigame':
             pass
         elif loaderName == 'cogHQLoader':
-            print 'should be loading HQ'
+            print('should be loading HQ')
 
     def handleLeftQuietZone(self):
         status = self.quietZoneStateData.getRequestStatus()

@@ -12,7 +12,7 @@ from game.toontown.toontowngui import TTDialog
 from game.toontown.hood import ZoneUtil
 from game.toontown.toontowngui import TeaserPanel
 from direct.interval.IntervalGlobal import *
-import BoardingGroupShow
+from . import BoardingGroupShow
 
 
 class DistributedBoardingParty(DistributedObject.DistributedObject,

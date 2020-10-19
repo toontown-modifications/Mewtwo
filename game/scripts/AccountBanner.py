@@ -2,8 +2,8 @@ import requests
 
 banEndpoint = 'https://sunrisegames.tech/bans/BanAccount.php'
 
-username = input('Username: ')
-reason = input('Reason for Ban: ')
+username = eval(input('Username: '))
+reason = eval(input('Reason for Ban: '))
 
 # Since you are in this repository.
 # I trust you to not leak this.

@@ -3,7 +3,7 @@ from direct.directnotify import DirectNotifyGlobal
 from direct.showbase import PythonUtil
 from game.toontown.toonbase import TTLocalizer
 from pandac.PandaModules import *
-from KartShopGlobals import *
+from .KartShopGlobals import *
 import types
 if __debug__:
     import pdb
@@ -277,12 +277,12 @@ def checkKartDNAValidity(dna):
     if not checkNumFieldsValidity(len(dna)):
         return 0
 
-    for field in xrange(len(dna)):
+    for field in range(len(dna)):
         if field == KartDNA.bodyType:
-            if dna[field] not in KartDict.keys():
+            if dna[field] not in list(KartDict.keys()):
                 return 0
 
-        dna[field] not in KartDict.keys()
+        dna[field] not in list(KartDict.keys())
         if field == KartDNA.bodyColor or field == KartDNA.accColor:
             accList = [InvalidEntry] + AccessoryTypeDict.get(KartDNA.bodyColor)
             if dna[field] not in accList:
@@ -321,21 +321,21 @@ def getAccessoryItemList(accessoryType):
 
 
 def getKartTypeInfo(type):
-    if type in KartDict.keys():
+    if type in list(KartDict.keys()):
         return KartDict[type]
 
     return InvalidEntry
 
 
 def getAccessoryInfo(index):
-    if index in AccessoryDict.keys():
+    if index in list(AccessoryDict.keys()):
         return AccessoryDict[index]
 
     return InvalidEntry
 
 
 def getAccessoryType(accessoryId):
-    for key in AccessoryTypeDict.keys():
+    for key in list(AccessoryTypeDict.keys()):
         if accessoryId in AccessoryTypeDict[key]:
             return key
             continue
@@ -360,7 +360,7 @@ def getAccessoryDictFromOwned(accessoryOwnedList, pType=-1):
 
 def getAccessDictByType(accessoryOwnedList):
     accessDict = {}
-    if isinstance(accessoryOwnedList, types.ListType):
+    if isinstance(accessoryOwnedList, list):
         for accOwnedId in accessoryOwnedList:
             accType = getAccessoryType(accOwnedId)
             if accType != InvalidEntry:
@@ -371,7 +371,7 @@ def getAccessDictByType(accessoryOwnedList):
                 continue
 
     else:
-        print 'KartDNA: getAccessDictByType: bad accessory list: ', accessoryOwnedList
+        print('KartDNA: getAccessDictByType: bad accessory list: ', accessoryOwnedList)
     return accessDict
 
 

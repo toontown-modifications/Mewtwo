@@ -2,7 +2,7 @@ from direct.gui.DirectGui import *
 from pandac.PandaModules import *
 from direct.gui.DirectScrolledList import *
 from game.toontown.toonbase import ToontownGlobals
-import FireworkItemPanel
+from . import FireworkItemPanel
 from direct.directnotify import DirectNotifyGlobal
 from game.toontown.effects import FireworkGlobals
 from game.toontown.effects import Fireworks
@@ -75,7 +75,7 @@ class FireworksGui(DirectFrame):
         self.bgColor = VBase4(0.80000000000000004, 0.80000000000000004,
                               0.80000000000000004, 1)
         self.colorButtons = []
-        for i in Fireworks.colors.keys():
+        for i in list(Fireworks.colors.keys()):
             color = Fireworks.colors[i]
             height = 0.070000000000000007
             paddedHeight = 0.10000000000000001

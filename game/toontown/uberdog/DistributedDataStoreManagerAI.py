@@ -3,7 +3,7 @@ from direct.distributed.DistributedObjectGlobalAI import DistributedObjectGlobal
 
 from game.otp.distributed import OtpDoGlobals
 
-import cPickle
+import pickle
 
 class DistributedDataStoreManagerAI(DistributedObjectGlobalAI):
     notify = directNotify.newCategory('DistributedDataStoreManagerAI')
@@ -32,7 +32,7 @@ class DistributedDataStoreManagerAI(DistributedObjectGlobalAI):
             self.notify.warning('Got receiveResults with unknown context: {0}'.format(context))
             return
 
-        results = cPickle.loads(results)
+        results = pickle.loads(results)
         callback(results)
         del self.ctx2Callback[context]
 

@@ -1,7 +1,7 @@
 from game.toontown.toonbase.ToontownGlobals import *
 from game.otp.ai.AIBaseGlobal import *
 from direct.distributed.ClockDelta import *
-import cPickle
+import pickle
 from direct.directnotify import DirectNotifyGlobal
 from direct.fsm import ClassicFSM, State
 from direct.distributed import DistributedObjectAI
@@ -40,7 +40,7 @@ class DistributedToonInteriorAI(DistributedObjectAI.DistributedObjectAI):
         return r
 
     def getToonData(self):
-        return cPickle.dumps(self.building.savedBy, 1)
+        return pickle.dumps(self.building.savedBy, 1)
 
     def getState(self):
         r = [

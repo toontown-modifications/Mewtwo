@@ -5,7 +5,7 @@ from game.toontown.ai.DistributedWinterCarolingTargetAI import DistributedWinter
 from game.toontown.ai.HolidayBaseAI import HolidayBaseAI
 from game.toontown.toonbase import ToontownGlobals
 
-import cPickle
+import pickle
 
 TrickOrTreatTargets = [
     2649,  # All Fun And Games Shop (Silly Street)
@@ -73,7 +73,7 @@ class ScavengerHuntHolidayMgrAI(HolidayBaseAI):
                     toon.sendUpdate('winterCarolingTargetMet', [RewardMoney])
 
                 qGoals.append(zoneId)
-                query = cPickle.dumps((ADD_GOAL, (toon.doId, zoneId)))
+                query = pickle.dumps((ADD_GOAL, (toon.doId, zoneId)))
                 self.air.dataStoreManager.queryStore(query, __setGoalCallback)
 
             if set(self.targetZones) == set(qGoals):
@@ -86,7 +86,7 @@ class ScavengerHuntHolidayMgrAI(HolidayBaseAI):
         def __setGoalCallback(results):
             pass
 
-        query = cPickle.dumps((GET_GOALS, (toon.doId, zoneId)))
+        query = pickle.dumps((GET_GOALS, (toon.doId, zoneId)))
         self.air.dataStoreManager.queryStore(query, __getGoalCallback)
 
     def stop(self):

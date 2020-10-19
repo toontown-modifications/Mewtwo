@@ -5,10 +5,10 @@ from game.toontown.catalog import CatalogItem
 from game.toontown.toonbase import ToontownGlobals
 from direct.distributed import DistributedObject
 from game.toontown.toonbase import TTLocalizer
-import DistributedHouseItem
+from . import DistributedHouseItem
 from direct.distributed import DistributedSmoothNode
 from direct.task import Task
-import HouseGlobals
+from . import HouseGlobals
 
 
 class DistributedFurnitureItem(DistributedHouseItem.DistributedHouseItem,

@@ -2,7 +2,7 @@ from game.otp.ai.AIBaseGlobal import *
 from direct.directnotify import DirectNotifyGlobal
 import random
 from game.toontown.suit import SuitDNA
-import CogDisguiseGlobals
+from . import CogDisguiseGlobals
 
 class CogSuitManagerAI:
     notify = DirectNotifyGlobal.directNotify.newCategory('CogSuitManagerAI')

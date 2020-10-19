@@ -6,9 +6,9 @@ from game.toontown.speedchat.TTSCIndexedTerminal import TTSCIndexedTerminal
 from game.otp.otpbase import OTPLocalizer
 from game.toontown.cogdominium import CogdoInterior
 SellbotFieldOfficeMenu = [(OTPLocalizer.SellbotFieldOfficeMenuSections[0],
-                           range(30404, 30409)),
+                           list(range(30404, 30409))),
                           (OTPLocalizer.SellbotFieldOfficeMenuSections[1],
-                           range(30409, 30419))]
+                           list(range(30409, 30419)))]
 
 
 class TTSCSellbotFieldOfficeMenu(SCMenu):
@@ -37,7 +37,7 @@ class TTSCSellbotFieldOfficeMenu(SCMenu):
             if section[0] == -1:
                 for phrase in section[1]:
                     if phrase not in OTPLocalizer.SpeedChatStaticText:
-                        print 'warning: tried to link Winter phrase %s which does not seem to exist' % phrase
+                        print('warning: tried to link Winter phrase %s which does not seem to exist' % phrase)
                         break
 
                     self.append(SCStaticTextTerminal(phrase))
@@ -46,7 +46,7 @@ class TTSCSellbotFieldOfficeMenu(SCMenu):
                 menu = SCMenu()
                 for phrase in section[1]:
                     if phrase not in OTPLocalizer.SpeedChatStaticText:
-                        print 'warning: tried to link Halloween phrase %s which does not seem to exist' % phrase
+                        print('warning: tried to link Halloween phrase %s which does not seem to exist' % phrase)
                         break
 
                     menu.append(SCStaticTextTerminal(phrase))

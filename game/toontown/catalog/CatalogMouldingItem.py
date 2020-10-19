@@ -1,4 +1,4 @@
-from CatalogSurfaceItem import *
+from .CatalogSurfaceItem import *
 MTTextureName = 0
 MTColor = 1
 MTBasePrice = 2
@@ -99,7 +99,7 @@ class CatalogMouldingItem(CatalogSurfaceItem):
             if colorIndex < len(colors):
                 return colors[colorIndex]
             else:
-                print 'Warning: colorIndex not in colors. Returning white.'
+                print('Warning: colorIndex not in colors. Returning white.')
                 return CT_WHITE
         else:
             return CT_WHITE
@@ -150,7 +150,7 @@ def getMouldingRange(fromIndex, toIndex, *otherRanges):
         froms.append(otherRanges[i])
         tos.append(otherRanges[i + 1])
         i += 2
-    for patternIndex in MouldingTypes.keys():
+    for patternIndex in list(MouldingTypes.keys()):
         for (fromIndex, toIndex) in zip(froms, tos):
             if patternIndex >= fromIndex and patternIndex <= toIndex:
                 colors = MouldingTypes[patternIndex][MTColor]

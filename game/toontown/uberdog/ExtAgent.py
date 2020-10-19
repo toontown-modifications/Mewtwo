@@ -377,14 +377,14 @@ class ExtAgent(ServerBase):
 
         zoneVisDict = {}
 
-        for i in xrange(dnaStore.getNumDNAVisGroupsAI()):
+        for i in range(dnaStore.getNumDNAVisGroupsAI()):
             groupFullName = dnaStore.getDNAVisGroupName(i)
             visGroup = dnaStore.getDNAVisGroupAI(i)
             visZoneId = int(extractGroupName(groupFullName))
             visZoneId = ZoneUtil.getTrueZoneId(visZoneId, zoneId)
             visibles = []
 
-            for i in xrange(visGroup.getNumVisibles()):
+            for i in range(visGroup.getNumVisibles()):
                 visibles.append(int(visGroup.getVisibleName(i)))
 
             visibles.append(ZoneUtil.getBranchZone(visZoneId))
@@ -393,7 +393,7 @@ class ExtAgent(ServerBase):
         if not isCogHQ:
             return zoneVisDict[zoneId]
         else:
-            return zoneVisDict.values()[0]
+            return list(zoneVisDict.values())[0]
 
     def getAvatars(self, clientChannel):
         def handleAvRetrieveDone(avList, avatarFields):
@@ -403,7 +403,7 @@ class ExtAgent(ServerBase):
             resp.addUint8(0) # returnCode
             resp.addUint16(len(avatarFields)) # avatarTotal
 
-            for avId, fields in avatarFields.iteritems():
+            for avId, fields in avatarFields.items():
                 # Get the basic avatar fields the client needs.
                 index = avList.index(avId)
                 wishNameState = fields.get('WishNameState', [''])[0]
@@ -553,7 +553,7 @@ class ExtAgent(ServerBase):
             return
 
         if self.wantServerDebug:
-            print('handleDatagram: {0}:{1}'.format(clientChannel, msgType))
+            print(('handleDatagram: {0}:{1}'.format(clientChannel, msgType)))
 
         if msgType == 3: # CLIENT_GET_AVATARS
             self.getAvatars(clientChannel)
@@ -659,7 +659,7 @@ class ExtAgent(ServerBase):
             resp = PyDatagram()
             resp.addUint16(9) # CLIENT_GET_SHARD_LIST_RESP
             resp.addUint16(len(self.shardInfo))
-            for shardId, shardInfo in self.shardInfo.iteritems():
+            for shardId, shardInfo in self.shardInfo.items():
                 resp.addUint32(shardId)
                 resp.addString(shardInfo[0]) # name
                 resp.addUint32(shardInfo[1]) # pop
@@ -1549,7 +1549,7 @@ class ExtAgent(ServerBase):
         resp = None
 
         if self.wantServerDebug:
-            print('Client: {0} requested msgType: {1}.'.format(clientChannel, msgType))
+            print(('Client: {0} requested msgType: {1}.'.format(clientChannel, msgType)))
 
         if msgType == CLIENT_EJECT:
             resp = PyDatagram()

@@ -1,7 +1,7 @@
 from direct.directnotify import DirectNotifyGlobal
 from direct.distributed.ClockDelta import *
 from direct.interval.IntervalGlobal import *
-import HolidayDecorator
+from . import HolidayDecorator
 from game.toontown.toonbase import ToontownGlobals
 from game.toontown.safezone import Playground
 from game.toontown.town import Street

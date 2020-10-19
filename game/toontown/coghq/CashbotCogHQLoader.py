@@ -1,13 +1,13 @@
 from direct.directnotify import DirectNotifyGlobal
 from direct.fsm import StateData
-import CogHQLoader, MintInterior
+from . import CogHQLoader, MintInterior
 from game.toontown.toonbase import ToontownGlobals
 from direct.gui import DirectGui
 from game.toontown.toonbase import TTLocalizer
 from game.toontown.toon import Toon
 from direct.fsm import State
-import CashbotHQExterior
-import CashbotHQBossBattle
+from . import CashbotHQExterior
+from . import CashbotHQBossBattle
 from pandac.PandaModules import DecalEffect
 
 class CashbotCogHQLoader(CogHQLoader.CogHQLoader):

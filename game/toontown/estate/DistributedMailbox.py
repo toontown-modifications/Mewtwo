@@ -1,6 +1,6 @@
 from direct.distributed import DistributedObject
 from game.toontown.toonbase import ToontownGlobals
-import MailboxGlobals
+from . import MailboxGlobals
 from game.toontown.catalog import CatalogItem
 from game.toontown.catalog import CatalogItemList
 from game.toontown.toontowngui import TTDialog
@@ -260,7 +260,7 @@ class DistributedMailbox(DistributedObject.DistributedObject):
     def acceptItemResponse(self, context, retcode):
         DistributedMailbox.notify.debug('acceptItemResponse')
         if retcode == ToontownGlobals.P_UserCancelled:
-            print 'DistributedMailbox User Canceled'
+            print('DistributedMailbox User Canceled')
 
         self.doCallbackContext(context, [retcode])
 

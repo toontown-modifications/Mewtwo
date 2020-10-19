@@ -1,20 +1,20 @@
 from pandac.PandaModules import *
 from game.toontown.toonbase.ToonBaseGlobal import *
-from DistributedMinigame import *
+from .DistributedMinigame import *
 from direct.interval.IntervalGlobal import *
 from direct.fsm import ClassicFSM, State
 from direct.fsm import State
 from game.toontown.safezone import Walk
 from game.toontown.toonbase import ToontownTimer
 from direct.gui import OnscreenText
-import MinigameAvatarScorePanel
+from . import MinigameAvatarScorePanel
 from direct.distributed import DistributedSmoothNode
 import random
 from game.toontown.toonbase import ToontownGlobals
 from game.toontown.toonbase import TTLocalizer
 from game.otp.otpbase import OTPGlobals
-import TagGameGlobals
-import Trajectory
+from . import TagGameGlobals
+from . import Trajectory
 
 class DistributedTagGame(DistributedMinigame):
     DURATION = TagGameGlobals.DURATION

@@ -391,7 +391,7 @@ class DistributedFurnitureManagerAI(DistributedObjectAI):
             CatalogWindowItem.CatalogWindowItem: (self.atticWindows, self.b_setAtticWindows, self.getAtticWindows)
         }
 
-        for itemType in type2attic.keys():
+        for itemType in list(type2attic.keys()):
             if isinstance(item, itemType):
                 attic, setter, getter = type2attic[itemType]
                 attic.append(item)
@@ -512,28 +512,28 @@ class DistributedFurnitureManagerAI(DistributedObjectAI):
             dayId = getDayId()
 
         dayId = str(dayId)
-        if dayId not in self.day2deletedItems.keys():
+        if dayId not in list(self.day2deletedItems.keys()):
             self.day2deletedItems[dayId] = []
 
         self.day2deletedItems[dayId].append(deletedItemBlob)
         self.updateDeletedItemsFile()
 
     def removeDeletedItemBlob(self, deletedItemBlob, dayId=None):
-        if not self.day2deletedItems.keys():
+        if not list(self.day2deletedItems.keys()):
             return
 
         if dayId is None:
             dayId = getDayId()
 
         dayId = str(dayId)
-        if dayId not in self.day2deletedItems.keys():
+        if dayId not in list(self.day2deletedItems.keys()):
             dayId = min(self.day2deletedItems.keys())
         elif not self.day2deletedItems[dayId]:
             del self.day2deletedItems[dayId]
             dayId = min(self.day2deletedItems.keys())
 
         dayId = str(dayId)
-        if dayId in self.day2deletedItems.keys() and deletedItemBlob in self.day2deletedItems[dayId]:
+        if dayId in list(self.day2deletedItems.keys()) and deletedItemBlob in self.day2deletedItems[dayId]:
             self.day2deletedItems[dayId].remove(deletedItemBlob)
 
         if not self.day2deletedItems[dayId]:
@@ -544,7 +544,7 @@ class DistributedFurnitureManagerAI(DistributedObjectAI):
     def __deletedItemsTask(self, task):
         changesMade = False
         dayId = getDayId()
-        for deletedItemDay, deletedItemBlobs in self.day2deletedItems.items():
+        for deletedItemDay, deletedItemBlobs in list(self.day2deletedItems.items()):
             if not deletedItemBlobs or type(deletedItemBlobs) != list:
                 del self.day2deletedItems[deletedItemDay]
                 changesMade = True

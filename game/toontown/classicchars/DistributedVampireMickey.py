@@ -1,13 +1,13 @@
 from pandac.PandaModules import *
-import DistributedCCharBase
+from . import DistributedCCharBase
 from direct.directnotify import DirectNotifyGlobal
 from direct.fsm import ClassicFSM, State
 from direct.fsm import State
 from game.toontown.classicchars import DistributedMickey
-import CharStateDatas
+from . import CharStateDatas
 from game.toontown.toonbase import ToontownGlobals
 from game.toontown.toonbase import TTLocalizer
-import DistributedCCharBase
+from . import DistributedCCharBase
 
 
 class DistributedVampireMickey(DistributedMickey.DistributedMickey):

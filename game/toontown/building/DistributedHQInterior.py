@@ -5,8 +5,8 @@ import random
 from direct.task.Task import Task
 from direct.distributed import DistributedObject
 from direct.directnotify import DirectNotifyGlobal
-import ToonInteriorColors
-import cPickle
+from . import ToonInteriorColors
+import pickle
 from game.toontown.toonbase import TTLocalizer
 
 

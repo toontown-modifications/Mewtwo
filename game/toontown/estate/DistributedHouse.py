@@ -16,7 +16,7 @@ from game.toontown.toonbase import TTLocalizer
 import random
 from direct.showbase import PythonUtil
 from game.toontown.hood import Place
-import HouseGlobals
+from . import HouseGlobals
 from game.toontown.building import ToonInteriorColors
 from direct.showbase.MessengerGlobal import messenger
 

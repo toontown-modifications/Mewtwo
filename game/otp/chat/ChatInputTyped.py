@@ -85,7 +85,7 @@ class ChatInputTyped(DirectObject.DirectObject):
         self.typedChatButton.hide()
         self.typedChatBar.hide()
         if self.whisperId:
-            print 'have id'
+            print('have id')
             if self.toPlayer:
                 if not base.talkAssistant.checkWhisperTypedChatPlayer(
                         self.whisperId):
@@ -136,13 +136,13 @@ class ChatInputTyped(DirectObject.DirectObject):
     def _ChatInputTyped__execMessage(self, message):
         if not ChatInputTyped.ExecNamespace:
             ChatInputTyped.ExecNamespace = {}
-            exec 'from pandac.PandaModules import *' in globals(
-            ), self.ExecNamespace
+            exec('from pandac.PandaModules import *', globals(
+            ), self.ExecNamespace)
             self.importExecNamespace()
 
         try:
             if not isClient():
-                print 'EXECWARNING ChatInputNormal eval: %s' % message
+                print('EXECWARNING ChatInputNormal eval: %s' % message)
                 printStack()
 
             return str(eval(message, globals(), ChatInputTyped.ExecNamespace))
@@ -150,10 +150,10 @@ class ChatInputTyped(DirectObject.DirectObject):
 
             try:
                 if not isClient():
-                    print 'EXECWARNING ChatInputNormal exec: %s' % message
+                    print('EXECWARNING ChatInputNormal exec: %s' % message)
                     printStack()
 
-                exec message in globals(), ChatInputTyped.ExecNamespace
+                exec(message, globals(), ChatInputTyped.ExecNamespace)
                 return 'ok'
             except:
                 exception = sys.exc_info()[0]

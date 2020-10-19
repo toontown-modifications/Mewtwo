@@ -7,8 +7,8 @@ from game.toontown.toonbase import ToontownGlobals
 from game.toontown.toonbase import ToontownBattleGlobals
 from game.toontown.battle import BattleExperience
 from game.toontown.battle import BattleBase
-import BossCog
-import SuitDNA
+from . import BossCog
+from . import SuitDNA
 from game.toontown.coghq import CogDisguiseGlobals
 from direct.showbase import Transitions
 from game.toontown.hood import ZoneUtil
@@ -199,7 +199,7 @@ class DistributedBossCog(DistributedAvatar.DistributedAvatar, BossCog.BossCog):
         self.activeIntervals[name] = interval
 
     def cleanupIntervals(self):
-        for interval in self.activeIntervals.values():
+        for interval in list(self.activeIntervals.values()):
             interval.finish()
             DelayDelete.cleanupDelayDeletes(interval)
 

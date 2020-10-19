@@ -1,9 +1,9 @@
 from game.otp.ai.AIBase import *
-from BattleBase import *
-from BattleCalculatorAI import *
+from .BattleBase import *
+from .BattleCalculatorAI import *
 from game.toontown.toonbase.ToontownBattleGlobals import *
-from SuitBattleGlobals import *
-import DistributedBattleBaseAI
+from .SuitBattleGlobals import *
+from . import DistributedBattleBaseAI
 from direct.task import Task
 from direct.directnotify import DirectNotifyGlobal
 import random

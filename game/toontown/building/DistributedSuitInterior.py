@@ -1,7 +1,7 @@
 from direct.interval.IntervalGlobal import *
 from direct.distributed.ClockDelta import *
-from ElevatorConstants import *
-import ElevatorUtils
+from .ElevatorConstants import *
+from . import ElevatorUtils
 from game.toontown.toonbase import ToontownGlobals
 from game.toontown.toonbase import ToontownBattleGlobals
 from direct.directnotify import DirectNotifyGlobal
@@ -166,7 +166,7 @@ class DistributedSuitInterior(DistributedObject.DistributedObject):
                 interval.finish()
 
     def _DistributedSuitInterior__cleanupIntervals(self):
-        for interval in self.activeIntervals.values():
+        for interval in list(self.activeIntervals.values()):
             interval.finish()
 
         self.activeIntervals = {}

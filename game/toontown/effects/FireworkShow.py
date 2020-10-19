@@ -1163,7 +1163,7 @@ class FireworkShow(NodePath):
     showMusic = {}
 
     def isValidShowType(cls, showType=-1):
-        if showType in cls.showData.keys():
+        if showType in list(cls.showData.keys()):
             return True
         else:
             return False

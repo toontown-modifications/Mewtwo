@@ -7,12 +7,12 @@ from direct.fsm import ClassicFSM, State
 from direct.fsm import State
 from game.toontown.minigame import Purchase
 from game.otp.avatar import DistributedAvatar
-import SkyUtil
+from . import SkyUtil
 from direct.task.Task import Task
-import Hood
+from . import Hood
 from game.toontown.estate import EstateLoader
 from game.toontown.estate import HouseGlobals
-import ZoneUtil
+from . import ZoneUtil
 
 
 class EstateHood(Hood.Hood):

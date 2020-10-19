@@ -3,7 +3,7 @@ from game.toontown.coghq import DistributedCogHQDoorAI
 from game.toontown.building import FADoorCodes, DoorTypes
 from game.toontown.toonbase import ToontownGlobals
 from game.toontown.toonbase import ToontownAccessAI
-import CogDisguiseGlobals
+from . import CogDisguiseGlobals
 from game.otp.otpbase import OTPGlobals
 
 class DistributedSellbotHQDoorAI(DistributedCogHQDoorAI.DistributedCogHQDoorAI):

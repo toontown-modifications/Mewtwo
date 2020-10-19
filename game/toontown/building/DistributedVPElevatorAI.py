@@ -1,5 +1,5 @@
-from ElevatorConstants import *
-import DistributedBossElevatorAI
+from .ElevatorConstants import *
+from . import DistributedBossElevatorAI
 from direct.directnotify import DirectNotifyGlobal
 from game.toontown.toonbase import ToontownGlobals
 

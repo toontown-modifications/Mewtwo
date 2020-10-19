@@ -1,16 +1,16 @@
 from direct.directnotify.DirectNotifyGlobal import directNotify
 from direct.distributed.DistributedObjectUD import DistributedObjectUD
 from direct.showbase import PythonUtil
-from ExtAgent import ExtAgent
+from .ExtAgent import ExtAgent
 from game.otp.distributed.DistributedDirectoryAI import DistributedDirectoryAI
 from game.otp.uberdog.DistributedChatManagerUD import DistributedChatManagerUD
 from game.toontown.parties.ToontownTimeManager import ToontownTimeManager
 from game.otp.distributed import OtpDoGlobals
 from game.toontown.distributed.ToontownInternalRepository import ToontownInternalRepository
 from game.toontown.discord.DiscordIntegrationServer import DiscordIntegrationServer
-import __builtin__, time
+import builtins, time
 
-__builtin__.isClient = lambda: PythonUtil.isClient()
+builtins.isClient = lambda: PythonUtil.isClient()
 
 class ToontownServerRepositoryAgent(ToontownInternalRepository):
     notify = directNotify.newCategory('ToontownServerRepositoryAgent')

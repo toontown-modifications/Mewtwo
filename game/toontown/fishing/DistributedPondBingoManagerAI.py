@@ -5,11 +5,11 @@ from direct.fsm.FSM import FSM
 
 from game.toontown.fishing import BingoGlobals
 from game.toontown.fishing import FishGlobals
-from NormalBingo import NormalBingo
-from FourCornerBingo import FourCornerBingo
-from DiagonalBingo import DiagonalBingo
-from ThreewayBingo import ThreewayBingo
-from BlockoutBingo import BlockoutBingo
+from .NormalBingo import NormalBingo
+from .FourCornerBingo import FourCornerBingo
+from .DiagonalBingo import DiagonalBingo
+from .ThreewayBingo import ThreewayBingo
+from .BlockoutBingo import BlockoutBingo
 from direct.showbase import RandomNumGen
 from game.toontown.toonbase import ToontownTimer
 from game.toontown.toonbase import ToontownGlobals
@@ -61,14 +61,14 @@ class DistributedPondBingoManagerAI(DistributedObjectAI, FSM):
     def sendUpdateToPond(self, field, args=[]):
         # Send a field update to all occupants
         # in the pond.
-        for spot in self.pond.spots.values():
+        for spot in list(self.pond.spots.values()):
             if spot.avId is not None:
                 self.sendUpdateToAvatarId(spot.avId, field, args)
 
     def awardPond(self):
         # Award the bingo money to everybody
         # playing in the pond.
-        for spot in self.pond.spots.values():
+        for spot in list(self.pond.spots.values()):
             if spot.avId is not None:
                 toon = self.air.doId2do.get(spot.avId)
                 if not toon:

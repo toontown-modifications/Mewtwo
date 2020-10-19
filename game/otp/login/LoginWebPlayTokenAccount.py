@@ -1,6 +1,6 @@
 from pandac.PandaModules import *
 from direct.directnotify import DirectNotifyGlobal
-import LoginTTAccount
+from . import LoginTTAccount
 
 
 class LoginWebPlayTokenAccount(LoginTTAccount.LoginTTAccount):

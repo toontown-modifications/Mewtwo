@@ -1,13 +1,13 @@
 from pandac.PandaModules import *
 from direct.interval.IntervalGlobal import *
-from BattleBase import *
+from .BattleBase import *
 from direct.actor import Actor
 from game.toontown.distributed import DelayDelete
 from direct.directnotify import DirectNotifyGlobal
-import DistributedBattleBase
-import MovieUtil
+from . import DistributedBattleBase
+from . import MovieUtil
 from game.toontown.suit import Suit
-import SuitBattleGlobals
+from . import SuitBattleGlobals
 from game.toontown.toonbase import ToontownBattleGlobals
 from game.toontown.toonbase import ToontownGlobals
 from direct.fsm import State

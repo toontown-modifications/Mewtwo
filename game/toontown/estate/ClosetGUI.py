@@ -2,7 +2,7 @@ from direct.showbase.PythonUtil import Functor
 from direct.gui.DirectGui import *
 from pandac.PandaModules import *
 from game.toontown.makeatoon import ClothesGUI
-import ClosetGlobals
+from . import ClosetGlobals
 from game.toontown.toonbase import TTLocalizer
 from game.toontown.toonbase import ToontownGlobals
 from game.toontown.toontowngui import TTDialog

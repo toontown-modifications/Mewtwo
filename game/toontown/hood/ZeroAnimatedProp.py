@@ -32,8 +32,8 @@ class ZeroAnimatedProp(GenericAnimatedProp.GenericAnimatedProp, FSM.FSM):
 
     def loadPhaseAnims(self):
         animDict = {}
-        for (key, info) in self.phaseInfo.iteritems():
-            if isinstance(info[0], types.TupleType):
+        for (key, info) in self.phaseInfo.items():
+            if isinstance(info[0], tuple):
                 for (index, anims) in enumerate(info[0]):
                     fullPath = self.path + '/' + anims
                     animName = 'phase%d_%d' % (key, index)
@@ -51,9 +51,9 @@ class ZeroAnimatedProp(GenericAnimatedProp.GenericAnimatedProp, FSM.FSM):
             return None
 
         self.phaseIvals = []
-        for (key, info) in self.phaseInfo.iteritems():
+        for (key, info) in self.phaseInfo.items():
             self.notify.debug('key=%s' % key)
-            if isinstance(info[0], types.TupleType):
+            if isinstance(info[0], tuple):
                 ival = Sequence()
                 for (index, anims) in enumerate(info[0]):
                     animName = 'phase%d_%d' % (key, index)
@@ -100,7 +100,7 @@ class ZeroAnimatedProp(GenericAnimatedProp.GenericAnimatedProp, FSM.FSM):
         result = self.curPhase
         if base.config.GetBool('anim-props-randomized', True):
             pairs = []
-            for i in xrange(self.curPhase + 1):
+            for i in range(self.curPhase + 1):
                 pairs.append((math.pow(2, i), i))
 
             sum = math.pow(2, self.curPhase + 1) - 1
