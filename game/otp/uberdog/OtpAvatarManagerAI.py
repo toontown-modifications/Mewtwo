@@ -4,6 +4,12 @@ from direct.distributed.DistributedObjectAI import DistributedObjectAI
 class OtpAvatarManagerAI(DistributedObjectAI):
     notify = directNotify.newCategory('OtpAvatarManagerAI')
 
+    def __init__(self, air):
+        DistributedObjectAI.__init__(self, air)
+
+    def delete(self):
+        DistributedObjectAI.delete(self)
+
     def online(self):
         pass
 

@@ -526,7 +526,7 @@ class ExtAgent(ServerBase):
             self.sendSystemMessage(avClientChannel, message)
             self.sendKick(doId, 'Language')
 
-            if self.isProdServer() and playToken:
+            if self.isProdServer() or self.isPartialProd() and playToken:
                 self.banAccount(playToken, message)
 
             del self.chatOffenses[doId]
@@ -1107,7 +1107,8 @@ class ExtAgent(ServerBase):
 
                 # Tell the friends manager that an avatar is coming online.
                 for x, y in fields['setFriendsList'][0]:
-                    self.air.netMessenger.send('avatarOnline', [avId, x])
+                    #self.air.netMessenger.send('avatarOnline', [avId, x])
+                    self.friendsManager.comingOnline(avId, x)
 
                 # Assign a POST_REMOVE for an avatar that disconnects unexpectedly.
                 cleanupDatagram = self.air.netMessenger.prepare('avatarOffline', [avId])
