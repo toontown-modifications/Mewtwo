@@ -104,7 +104,7 @@ class DistributedSuitPlannerAI(DistributedObjectAI.DistributedObjectAI, SuitPlan
                 self.hoodInfoIdx = index
 
         self.currDesired = None
-        self.baseNumSuits = (self.SuitHoodInfo[self.hoodInfoIdx][self.SUIT_HOOD_INFO_MIN] + self.SuitHoodInfo[self.hoodInfoIdx][self.SUIT_HOOD_INFO_MAX]) / 2
+        self.baseNumSuits = (self.SuitHoodInfo[self.hoodInfoIdx][self.SUIT_HOOD_INFO_MIN] + self.SuitHoodInfo[self.hoodInfoIdx][self.SUIT_HOOD_INFO_MAX]) // 2
         self.targetNumCogdos = 0
         if simbase.air.wantCogdominiums:
             self.targetNumCogdos = int(0.5 + self.SuitHoodInfo[self.hoodInfoIdx][self.SUIT_HOOD_INFO_BMIN] * self.CogdoRatio)
@@ -185,7 +185,7 @@ class DistributedSuitPlannerAI(DistributedObjectAI.DistributedObjectAI, SuitPlan
         self.buildingSideDoors = {}
         for p in self.frontdoorPointList:
             blockNumber = p.getLandmarkBuildingIndex()
-            if p < 0:
+            if p.getPointType() < 0:
                 self.notify.warning('No landmark building for (%s) in zone %d' % (repr(p), self.zoneId))
             elif blockNumber in self.buildingFrontDoors:
                 self.notify.warning('Multiple front doors for building %d in zone %d' % (blockNumber, self.zoneId))
@@ -194,7 +194,7 @@ class DistributedSuitPlannerAI(DistributedObjectAI.DistributedObjectAI, SuitPlan
 
         for p in self.sidedoorPointList:
             blockNumber = p.getLandmarkBuildingIndex()
-            if p < 0:
+            if p.getPointType() < 0:
                 self.notify.warning('No landmark building for (%s) in zone %d' % (repr(p), self.zoneId))
             elif blockNumber in self.buildingSideDoors:
                 self.buildingSideDoors[blockNumber].append(p)
@@ -588,7 +588,7 @@ class DistributedSuitPlannerAI(DistributedObjectAI.DistributedObjectAI, SuitPlan
         targetFlyInNum = self.calcDesiredNumFlyInSuits()
         targetFlyInNum = min(targetFlyInNum, self.TOTAL_MAX_SUITS - self.numBuildingSuits)
         streetPoints = self.streetPointList[:]
-        flyInDeficit = (targetFlyInNum - self.numFlyInSuits + 3) / 4
+        flyInDeficit = (targetFlyInNum - self.numFlyInSuits + 3) // 4
         while flyInDeficit > 0:
             if not self.createNewSuit([], streetPoints):
                 break
@@ -604,7 +604,7 @@ class DistributedSuitPlannerAI(DistributedObjectAI.DistributedObjectAI, SuitPlan
             targetBuildingNum = int(len(suitBuildings) * self.SUIT_BUILDING_NUM_SUITS)
         targetBuildingNum += flyInDeficit
         targetBuildingNum = min(targetBuildingNum, self.TOTAL_MAX_SUITS - self.numFlyInSuits)
-        buildingDeficit = (targetBuildingNum - self.numBuildingSuits + 3) / 4
+        buildingDeficit = (targetBuildingNum - self.numBuildingSuits + 3) // 4
         while buildingDeficit > 0:
             if not self.createNewSuit(suitBuildings, streetPoints):
                 break

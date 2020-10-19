@@ -236,13 +236,13 @@ class FriendsManagerUD:
         for field in friendsDetails:
             resp.addUint32(field[0])
             resp.addString(field[1])
-            resp.addString(field[2])
+            resp.addBlob(field[2])
             resp.addUint32(field[3])
 
         # Send it.
         dg = PyDatagram()
         dg.addServerHeader(clientChannel, self.air.air.ourChannel, CLIENTAGENT_SEND_DATAGRAM)
-        dg.addString(resp.getMessage())
+        dg.addBlob(resp.getMessage())
         self.air.air.send(dg)
 
         if not onlineFriends:
@@ -260,7 +260,7 @@ class FriendsManagerUD:
          # Send it.
         dgTwo = PyDatagram()
         dgTwo.addServerHeader(clientChannel, self.air.air.ourChannel, CLIENTAGENT_SEND_DATAGRAM)
-        dgTwo.addString(datagram.getMessage())
+        dgTwo.addBlob(datagram.getMessage())
         self.air.air.send(dgTwo)
 
     def removeFriend(self, avId, friendId):
@@ -332,7 +332,7 @@ class FriendsManagerUD:
          # Send it.
         dgTwo = PyDatagram()
         dgTwo.addServerHeader(clientChannel, self.air.air.ourChannel, CLIENTAGENT_SEND_DATAGRAM)
-        dgTwo.addString(datagram.getMessage())
+        dgTwo.addBlob(datagram.getMessage())
         self.air.air.send(dgTwo)
 
     def comingOnline(self, avId, friendId):
@@ -369,7 +369,7 @@ class FriendsManagerUD:
          # Send it.
         dgTwo = PyDatagram()
         dgTwo.addServerHeader(clientChannel, self.air.air.ourChannel, CLIENTAGENT_SEND_DATAGRAM)
-        dgTwo.addString(datagram.getMessage())
+        dgTwo.addBlob(datagram.getMessage())
         self.air.air.send(dgTwo)
 
     def goingOffline(self, avId):
@@ -409,7 +409,7 @@ class FriendsManagerUD:
          # Send it.
         dgTwo = PyDatagram()
         dgTwo.addServerHeader(clientChannel, self.air.air.ourChannel, CLIENTAGENT_SEND_DATAGRAM)
-        dgTwo.addString(datagram.getMessage())
+        dgTwo.addBlob(datagram.getMessage())
         self.air.air.send(dgTwo)
 
     def clearList(self, avId):

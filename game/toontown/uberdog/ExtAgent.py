@@ -184,7 +184,7 @@ class ExtAgent(ServerBase):
         # Send it.
         dg = PyDatagram()
         dg.addServerHeader(clientChannel, self.air.ourChannel, CLIENTAGENT_SEND_DATAGRAM)
-        dg.addString(resp.getMessage())
+        dg.addBlob(resp.getMessage())
         self.air.send(dg)
 
     def sendSystemMessage(self, clientChannel, message):
@@ -196,7 +196,7 @@ class ExtAgent(ServerBase):
         # Send it.
         dg = PyDatagram()
         dg.addServerHeader(clientChannel, self.air.ourChannel, CLIENTAGENT_SEND_DATAGRAM)
-        dg.addString(resp.getMessage())
+        dg.addBlob(resp.getMessage())
         self.air.send(dg)
 
     def banAccount(self, playToken, message, banReason = 'Chat Filter', silent = False):
@@ -311,7 +311,7 @@ class ExtAgent(ServerBase):
         resp.addString('YES')
         resp.addString('YES')
         resp.addUint32(int(time.time()))
-        resp.addUint32(int(time.clock()))
+        resp.addUint32(int(time.process_time()))
 
         if self.isProdServer() or self.isPartialProd():
             if isPaid == '1':
@@ -341,7 +341,7 @@ class ExtAgent(ServerBase):
         # Dispatch the response to the client.
         dg = PyDatagram()
         dg.addServerHeader(clientChannel, self.air.ourChannel, CLIENTAGENT_SEND_DATAGRAM)
-        dg.addString(resp.getMessage())
+        dg.addBlob(resp.getMessage())
         self.air.send(dg)
 
         self.accId2playToken[accountId] = playToken
@@ -428,13 +428,13 @@ class ExtAgent(ServerBase):
                 resp.addString(names[2]) # approvedName
                 resp.addString(names[3]) # rejectedName
 
-                resp.addString(fields['setDNAString'][0]) # avDNA
+                resp.addBlob(fields['setDNAString'][0]) # avDNA
                 resp.addUint8(index) # avPosition
                 resp.addUint8(allowedName) # aName
 
             dg = PyDatagram()
             dg.addServerHeader(clientChannel, self.air.ourChannel, CLIENTAGENT_SEND_DATAGRAM)
-            dg.addString(resp.getMessage())
+            dg.addBlob(resp.getMessage())
             self.air.send(dg)
 
         def handleRetrieve(dclass, fields):
@@ -584,7 +584,7 @@ class ExtAgent(ServerBase):
 
                 dg = PyDatagram()
                 dg.addServerHeader(clientChannel, self.air.ourChannel, CLIENTAGENT_SEND_DATAGRAM)
-                dg.addString(resp.getMessage())
+                dg.addBlob(resp.getMessage())
                 self.air.send(dg)
 
             def handleCreate(oldAvList, newAvList, avId):
@@ -666,7 +666,7 @@ class ExtAgent(ServerBase):
 
             dg = PyDatagram()
             dg.addServerHeader(clientChannel, self.air.ourChannel, CLIENTAGENT_SEND_DATAGRAM)
-            dg.addString(resp.getMessage())
+            dg.addBlob(resp.getMessage())
             self.air.send(dg)
         elif msgType == 10: # CLIENT_GET_FRIEND_LIST
             avId = self.air.getAvatarIdFromSender()
@@ -756,7 +756,6 @@ class ExtAgent(ServerBase):
             if self.isProdServer() or self.isPartialProd():
                 # To prevent skids trying to auth without the stock Disney launcher.
                 # We check if the account is banned here too.
-                # TODO: Find a way to enable TLS 1.3 on Cloudflare once again.
                 endpoint = self.banEndpointBase.format('?username={0}'.format(playToken))
                 banCheck = requests.post(endpoint, headers = self.requestHeaders)
 
@@ -786,9 +785,11 @@ class ExtAgent(ServerBase):
                 return
 
             # Check the client DC hash against the server's DC hash.
-            if hashVal != self.air.hashVal:
+            # Unfortunately, due to Python 3 we have to hardcode the hashVal.
+            correctHashVal = 2308474396
+            if hashVal != correctHashVal:
                 # DC hash mismatch.
-                reason = 'Client DC hash mismatch: client=%s, server=%s' % (hashVal, self.air.hashVal)
+                reason = 'Client DC hash mismatch: client=%s, server=%s' % (hashVal, correctHashVal)
                 self.sendEject(clientChannel, 122, reason)
                 return
 
@@ -963,7 +964,7 @@ class ExtAgent(ServerBase):
 
             dg = PyDatagram()
             dg.addServerHeader(clientChannel, self.air.ourChannel, CLIENTAGENT_SEND_DATAGRAM)
-            dg.addString(resp.getMessage())
+            dg.addBlob(resp.getMessage())
             self.air.send(dg)
 
             # This is the Toontown server equivalent of setting interest on a zone.
@@ -998,7 +999,7 @@ class ExtAgent(ServerBase):
 
             dg = PyDatagram()
             dg.addServerHeader(clientChannel, self.air.ourChannel, CLIENTAGENT_SEND_DATAGRAM)
-            dg.addString(resp.getMessage())
+            dg.addBlob(resp.getMessage())
             self.air.send(dg)
         elif msgType == 32: # CLIENT_SET_AVATAR
             avId = dgi.getUint32()
@@ -1114,7 +1115,7 @@ class ExtAgent(ServerBase):
 
                 datagram = PyDatagram()
                 datagram.addServerHeader(channel, self.air.ourChannel, CLIENTAGENT_ADD_POST_REMOVE)
-                datagram.addString(cleanupDatagram.getMessage())
+                datagram.addBlob(cleanupDatagram.getMessage())
                 self.air.send(datagram)
 
                 # Tell the Party manager as well.
@@ -1217,7 +1218,7 @@ class ExtAgent(ServerBase):
                 # Send it.
                 dg = PyDatagram()
                 dg.addServerHeader(clientChannel, self.air.ourChannel, CLIENTAGENT_SEND_DATAGRAM)
-                dg.addString(resp.getMessage())
+                dg.addBlob(resp.getMessage())
                 self.air.send(dg)
 
             # Query the avatar.
@@ -1272,7 +1273,7 @@ class ExtAgent(ServerBase):
             # Send it.
             dg = PyDatagram()
             dg.addServerHeader(clientChannel, self.air.ourChannel, CLIENTAGENT_SEND_DATAGRAM)
-            dg.addString(resp.getMessage())
+            dg.addBlob(resp.getMessage())
             self.air.send(dg)
         elif msgType == 97: # CLIENT_ADD_INTEREST
             # Reformat the packets for the CA.
@@ -1407,7 +1408,7 @@ class ExtAgent(ServerBase):
                 # Send it.
                 dg = PyDatagram()
                 dg.addServerHeader(clientChannel, self.air.ourChannel, CLIENTAGENT_SEND_DATAGRAM)
-                dg.addString(resp.getMessage())
+                dg.addBlob(resp.getMessage())
                 self.air.send(dg)
 
             self.air.dbInterface.queryObject(self.air.dbId, doId, handleRetrieve)
@@ -1500,7 +1501,7 @@ class ExtAgent(ServerBase):
             # Dispatch the response to the client.
             dg = PyDatagram()
             dg.addServerHeader(clientChannel, self.air.ourChannel, CLIENTAGENT_SEND_DATAGRAM)
-            dg.addString(resp.getMessage())
+            dg.addBlob(resp.getMessage())
             self.air.send(dg)
         elif msgType == 72: # CLIENT_SET_WISHNAME_CLEAR
             avatarId = dgi.getUint32()
@@ -1645,5 +1646,5 @@ class ExtAgent(ServerBase):
 
         dg = PyDatagram()
         dg.addServerHeader(clientChannel, self.air.ourChannel, CLIENTAGENT_SEND_DATAGRAM)
-        dg.addString(resp.getMessage())
+        dg.addBlob(resp.getMessage())
         self.air.send(dg)
