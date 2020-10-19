@@ -4,7 +4,6 @@ from direct.showbase import PythonUtil
 from direct.gui.DirectGui import *
 from game.toontown.toonbase import ToontownGlobals
 
-
 class CatalogAtticItem(CatalogItem.CatalogItem):
     def storedInAttic(self):
         return 1

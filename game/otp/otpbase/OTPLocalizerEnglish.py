@@ -202,7 +202,8 @@ CRBootedReasons = {
     153:
     'The district you were playing on has been reset.  Everyone who was playing on that district has been disconnected.  However, you should be able to connect again and go right back into the game.',
     288: 'Sorry, you have used up all of your available minutes this month.',
-    349: 'Sorry, you have used up all of your available minutes this month.'
+    349: 'Sorry, you have used up all of your available minutes this month.',
+    154: 'Toontown is temporarily closing for maintenance. Everyone has been logged out.'
 }
 CRBootedReasonUnknownCode = 'An unexpected problem has occurred (error code %s).  Your connection has been lost, but you should be able to connect again and go right back into the game.'
 CRTryConnectAgain = '\n\nTry to connect again?'
@@ -2761,3 +2762,6 @@ def timeElapsedString(timeDelta):
         return '1 minute ago'
     else:
         return '%s minutes ago' % timeDelta.seconds / 60
+
+CRMaintenanceCountdownMessage = 'Attention, all Toons! Toontown will be going down for maintenance in {0} minutes.'
+CRMaintenanceMessage = 'Toontown is going down for maintenance. Check our Discord for details, or try logging in again later.'

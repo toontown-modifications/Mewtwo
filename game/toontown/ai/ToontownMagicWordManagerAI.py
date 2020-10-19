@@ -1,8 +1,10 @@
 from direct.directnotify.DirectNotifyGlobal import directNotify
 from direct.task import Task
+from direct.distributed.PyDatagram import PyDatagram
+from direct.distributed import MsgTypes
 
 from game.otp.ai.MagicWordManagerAI import MagicWordManagerAI
-from game.otp.otpbase import OTPLocalizer
+from game.otp.otpbase import OTPLocalizer, OTPGlobals
 from game.otp.avatar.DistributedPlayerAI import DistributedPlayerAI
 from game.otp.distributed import OtpDoGlobals
 
@@ -837,6 +839,50 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
         av.b_setMaxHp(ToontownGlobals.MaxHpLimit - laughminus)
         av.b_setHp(ToontownGlobals.MaxHpLimit - laughminus)
 
+    def d_setSuperChat(self, av):
+        if not av:
+            return
+
+        av.d_setCommonChatFlags(OTPGlobals.SuperChat)
+
+        self.sendResponseMessage(av.doId, 'Enabled Super Chat!')
+
+    def d_setMaintenance(self, av, minutes):
+        if not av:
+            return
+
+        def disconnect(task):
+            dg = PyDatagram()
+            dg.addServerHeader(10, simbase.air.ourChannel, MsgTypes.CLIENTAGENT_EJECT)
+            dg.addUint16(154)
+            dg.addString('Toontown is now closed for maintenance.')
+            simbase.air.send(dg)
+            return Task.done
+
+        def countdown(minutes):
+            if minutes > 0:
+                self.d_sendSystemMessage(OTPLocalizer.CRMaintenanceCountdownMessage.format(minutes))
+            else:
+                self.d_sendSystemMessage(OTPLocalizer.CRMaintenanceMessage)
+                taskMgr.doMethodLater(10, disconnect, 'maintenance-disconnection')
+
+            if minutes <= 5:
+                next = 60
+                minutes -= 1
+            elif minutes % 5:
+                next = 60 * (minutes % 5)
+                minutes -= minutes % 5
+            else:
+                next = 300
+                minutes -= 5
+
+            if minutes >= 0:
+                taskMgr.doMethodLater(next, countdown, 'maintenance-task', extraArgs = [minutes])
+
+        countdown(minutes)
+
+        self.sendResponseMessage(av.doId, 'Started maintenance!')
+
     def setMagicWordExt(self, magicWord, avId, playToken):
         av = self.air.doId2do.get(avId)
 
@@ -1013,6 +1059,15 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
             self.d_setAutoRestock(avId)
         elif magicWord == 'regulartoon':
             self.d_setRegularToon(avId)
+        elif magicWord == 'superchat':
+            self.d_setSuperChat(av)
+        elif magicWord == 'maintenance':
+            if not validation:
+                return
+            try:
+                self.d_setMaintenance(av, int(args[0]))
+            except ValueError:
+                self.sendResponseMessage(avId, 'Invalid parameters.')
         else:
             if magicWord not in disneyCmds:
                 self.sendResponseMessage(avId, '{0} is not a valid Magic Word.'.format(magicWord))

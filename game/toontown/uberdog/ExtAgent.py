@@ -17,6 +17,7 @@ from game.toontown.uberdog.ServerBase import ServerBase
 from game.toontown.discord.Webhook import Webhook
 from Crypto.Cipher import AES
 from Crypto.Util.Padding import unpad
+from datetime import datetime
 import json, time, os, random, requests, binascii, base64
 
 class JSONBridge:
@@ -264,17 +265,40 @@ class ExtAgent(ServerBase):
     def registerShard(self, shardId, shardName):
         self.shardInfo[shardId] = (shardName, 0)
 
-    def loginAccount(self, fields, clientChannel, accountId, playToken, openChat, isPaid):
+    def loginAccount(self, fields, clientChannel, accountId, playToken, openChat, isPaid, dislId):
         # If somebody is logged into this account, disconnect them.
         errorCode = 100
         self.sendEject(self.air.GetAccountConnectionChannel(accountId), errorCode, OTPLocalizer.CRBootedReasons.get(errorCode))
 
         # Wait half a second before continuing to avoid a race condition.
         taskMgr.doMethodLater(0.5,
-                              lambda x: self.finishLoginAccount(fields, clientChannel, accountId, playToken, openChat, isPaid),
+                              lambda x: self.finishLoginAccount(fields, clientChannel, accountId, playToken, openChat, isPaid, dislId),
                               self.air.uniqueName('wait-acc-%s' % accountId), appendTask=False)
 
-    def finishLoginAccount(self, fields, clientChannel, accountId, playToken, openChat, isPaid):
+    def getCreationDate(self, fields):
+        # Grab the account creation date from our fields.
+        creationDate = fields.get('CREATED', '')
+
+        try:
+            creationDate = datetime.fromtimestamp(time.mktime(time.strptime(creationDate)))
+        except ValueError:
+            creationDate = ''
+
+        return creationDate
+
+    def getAccountDays(self, fields):
+        # Retrieve the creation date.
+        creationDate = self.getCreationDate(fields)
+
+        accountDays = -1
+
+        if creationDate:
+            now = datetime.fromtimestamp(time.mktime(time.strptime(time.ctime())))
+            accountDays = abs((now - creationDate).days)
+
+        return accountDays
+
+    def finishLoginAccount(self, fields, clientChannel, accountId, playToken, openChat, isPaid, dislId):
         # If there's anybody on the account, kill them for redundant login:
         errorCode = 100
 
@@ -302,41 +326,41 @@ class ExtAgent(ServerBase):
         # Prepare the login response.
         resp = PyDatagram()
         resp.addUint16(126) # CLIENT_LOGIN_TOONTOWN_RESP
-        resp.addUint8(0)
-        resp.addString('All Ok')
-        resp.addUint32(1)
-        resp.addString(playToken)
-        resp.addUint8(1)
-        resp.addString('YES')
-        resp.addString('YES')
-        resp.addString('YES')
-        resp.addUint32(int(time.time()))
-        resp.addUint32(int(time.clock()))
+        resp.addUint8(0) # returnCode
+        resp.addString('All Ok') # respString
+        resp.addUint32(int(dislId)) # accountNumber
+        resp.addString(playToken) # accountName
+        resp.addUint8(1) # accountNameApproved
+        resp.addString('YES') # openChatEnabled
+        resp.addString('YES') # createFriendsWithChat
+        resp.addString('YES') # chatCodeCreationRule
+        resp.addUint32(int(time.time())) # sec
+        resp.addUint32(int(time.clock())) # usec
 
         if self.isProdServer() or self.isPartialProd():
             if isPaid == '1':
-                resp.addString('FULL')
+                resp.addString('FULL') # access
                 self.memberInfo[accountId] = playToken
             else:
                 resp.addString('unpaid')
         else:
             if self.wantMembership:
-                resp.addString('FULL')
+                resp.addString('FULL') # access
             else:
-                resp.addString('unpaid')
+                resp.addString('unpaid') # access
 
         if self.isProdServer() or self.isPartialProd():
             if openChat == '1':
-                resp.addString('YES')
+                resp.addString('YES') # WhiteListResponse
             else:
-                resp.addString('NO')
+                resp.addString('NO') # WhiteListResponse
         else:
-            resp.addString('YES')
+            resp.addString('YES') # WhiteListResponse
 
-        resp.addString(time.strftime('%Y-%m-%d %I:%M:%S'))
-        resp.addInt32(1000 * 60 * 60)
-        resp.addString('NO_PARENT_ACCOUNT')
-        resp.addString(playToken)
+        resp.addString(time.strftime('%Y-%m-%d %I:%M:%S')) # lastLoggedInStr
+        resp.addInt32(self.getAccountDays(fields)) # accountDays
+        resp.addString('NO_PARENT_ACCOUNT') # toonAccountType
+        resp.addString(playToken) # userName
 
         # Dispatch the response to the client.
         dg = PyDatagram()
@@ -696,10 +720,12 @@ class ExtAgent(ServerBase):
                     data = unpad(cipher.decrypt(encryptedData), AES.block_size)
                     jsonData = json.loads(data)
 
+                    # Retrieve data from the API response.
                     playToken = jsonData['playToken']
                     openChat = jsonData['OpenChat']
                     isPaid = jsonData['Member']
                     tokenTimestamp = jsonData['Timestamp']
+                    dislId = jsonData['dislId']
                 except:
                     # Bad play token.
                     errorCode = 122
@@ -742,18 +768,12 @@ class ExtAgent(ServerBase):
                 message.setColor(1127128)
                 message.setWebhook(config.GetString('discord-logins-webhook'))
                 message.finalize()
-            else:
-                # Prod/Partial prod is not enabled.
-                # We need these dummy variables.
-                openChat = False
-                isPaid = False
 
-            def callback(remoteIp, remotePort, localIp, localPort):
-                print(remoteIp)
+                def callback(remoteIp, remotePort, localIp, localPort):
+                    print(remoteIp)
 
-            self.air.getNetworkAddress(self.air.getMsgSender(), callback)
+                self.air.getNetworkAddress(self.air.getMsgSender(), callback)
 
-            if self.isProdServer() or self.isPartialProd():
                 # To prevent skids trying to auth without the stock Disney launcher.
                 # We check if the account is banned here too.
                 # TODO: Find a way to enable TLS 1.3 on Cloudflare once again.
@@ -768,6 +788,12 @@ class ExtAgent(ServerBase):
                     self.sendBoot(clientChannel, errorCode, message)
                     self.sendEject(clientChannel, errorCode, message)
                     return
+            else:
+                # Prod/Partial prod is not enabled.
+                # We need these dummy variables.
+                openChat = False
+                isPaid = False
+                dislId = 1
 
             if self.wantServerMaintenance and playToken not in self.getWhitelistedAccounts():
                 errorCode = 151
@@ -803,7 +829,7 @@ class ExtAgent(ServerBase):
                         return
 
                     # Log in the account.
-                    self.loginAccount(fields, clientChannel, accountId, playToken, openChat, isPaid)
+                    self.loginAccount(fields, clientChannel, accountId, playToken, openChat, isPaid, dislId)
 
                 # Query the Account object.
                 self.air.dbInterface.queryObject(self.air.dbId, accountId, queryLoginResponse)
@@ -827,7 +853,7 @@ class ExtAgent(ServerBase):
                 self.bridge.put(playToken, accountId)
 
                 # Log in the account.
-                self.loginAccount(account, clientChannel, accountId, playToken, openChat, isPaid)
+                self.loginAccount(account, clientChannel, accountId, playToken, openChat, isPaid, dislId)
 
             # Create the Account in the database.
             self.air.dbInterface.createObject(self.air.dbId,
