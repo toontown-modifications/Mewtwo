@@ -1402,8 +1402,8 @@ class ExtAgent(ServerBase):
 
                 resp.addUint32(doId)
                 resp.addUint8(0)
-                resp.appendData(requiredPacker.getString())
-                resp.appendData(otherPacker.getString())
+                resp.appendData(requiredPacker.getBytes())
+                resp.appendData(otherPacker.getBytes())
 
                 # Send it.
                 dg = PyDatagram()

@@ -9,7 +9,7 @@ from game.toontown.battle import BattleExperienceAI
 from game.toontown.chat import ResistanceChat
 from direct.fsm import FSM
 from . import DistributedBossCogAI, SuitDNA
-import random, math
+import random, math, functools
 
 class DistributedCashbotBossAI(DistributedBossCogAI.DistributedBossCogAI, FSM.FSM):
     notify = DirectNotifyGlobal.directNotify.newCategory('DistributedCashbotBossAI')
@@ -69,7 +69,7 @@ class DistributedCashbotBossAI(DistributedBossCogAI.DistributedBossCogAI, FSM.FS
         def compareJoinChance(a, b):
             return cmp(a[1], b[1])
 
-        reserveSuits.sort(compareJoinChance)
+        reserveSuits.sort(key=functools.cmp_to_key(compareJoinChance))
         return {'activeSuits': activeSuits, 'reserveSuits': reserveSuits}
 
     def removeToon(self, avId):
