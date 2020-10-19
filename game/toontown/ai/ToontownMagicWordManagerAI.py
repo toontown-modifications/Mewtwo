@@ -284,7 +284,7 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
         self.sendResponseMessage(avId, msg)
 
     def d_sendSystemMessage(self, message):
-        if message is '':
+        if message == '':
             return
 
         for doId, do in list(simbase.air.doId2do.items()):

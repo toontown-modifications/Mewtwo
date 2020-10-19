@@ -3,7 +3,8 @@ from direct.distributed.ClockDelta import *
 from direct.directnotify import DirectNotifyGlobal
 from game.toontown.battle import SuitBattleGlobals
 from game.toontown.toonbase import ToontownGlobals
-import DistributedSuitBaseAI, random
+from . import DistributedSuitBaseAI
+import random
 from direct.fsm import ClassicFSM, State
 from direct.fsm import State
 

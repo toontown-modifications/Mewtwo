@@ -12,7 +12,8 @@ from game.toontown.toonbase import TTLocalizer
 from game.toontown.battle import BattleBase
 from game.toontown.toon import NPCToons
 from game.toontown.building import SuitBuildingGlobals
-import SuitDNA, random
+from . import SuitDNA
+import random
 from game.toontown.coghq import DistributedLawbotBossGavelAI
 from game.toontown.suit import DistributedLawbotBossSuitAI
 from game.toontown.coghq import DistributedLawbotCannonAI

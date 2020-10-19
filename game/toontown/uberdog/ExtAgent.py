@@ -553,7 +553,7 @@ class ExtAgent(ServerBase):
             return
 
         if self.wantServerDebug:
-            print(('handleDatagram: {0}:{1}'.format(clientChannel, msgType)))
+            print('handleDatagram: {0}:{1}'.format(clientChannel, msgType))
 
         if msgType == 3: # CLIENT_GET_AVATARS
             self.getAvatars(clientChannel)
@@ -1549,7 +1549,7 @@ class ExtAgent(ServerBase):
         resp = None
 
         if self.wantServerDebug:
-            print(('Client: {0} requested msgType: {1}.'.format(clientChannel, msgType)))
+            print('Client: {0} requested msgType: {1}.'.format(clientChannel, msgType))
 
         if msgType == CLIENT_EJECT:
             resp = PyDatagram()

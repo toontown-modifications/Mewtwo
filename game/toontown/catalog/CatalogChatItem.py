@@ -5,7 +5,6 @@ from game.otp.otpbase import OTPLocalizer
 from game.toontown.toonbase import TTLocalizer
 bannedPhrases = [11009]
 
-
 class CatalogChatItem(CatalogItem.CatalogItem):
     def makeNewItem(self, customIndex):
         self.customIndex = customIndex
@@ -15,7 +14,7 @@ class CatalogChatItem(CatalogItem.CatalogItem):
         return 1
 
     def reachedPurchaseLimit(self, avatar):
-        if self in avatar.onOrder and self in avatar.mailboxContents and self in avatar.onGiftOrder and self in avatar.awardMailboxContents or self in avatar.onAwardOrder:
+        if self in avatar.onOrder or self in avatar.mailboxContents or self in avatar.onGiftOrder or self in avatar.awardMailboxContents or self in avatar.onAwardOrder:
             return 1
 
         return avatar.customMessages.count(self.customIndex) != 0
@@ -148,7 +147,7 @@ class CatalogChatItem(CatalogItem.CatalogItem):
 
 
 def getChatRange(fromIndex, toIndex, *otherRanges):
-    list = []
+    chatItems = []
     froms = [fromIndex]
     tos = [toIndex]
     i = 0
@@ -159,7 +158,7 @@ def getChatRange(fromIndex, toIndex, *otherRanges):
     for chatId in list(OTPLocalizer.CustomSCStrings.keys()):
         for (fromIndex, toIndex) in zip(froms, tos):
             if chatId >= fromIndex and chatId <= toIndex and chatId not in bannedPhrases:
-                list.append(CatalogChatItem(chatId))
+                chatItems.append(CatalogChatItem(chatId))
                 continue
 
-    return list
+    return chatItems

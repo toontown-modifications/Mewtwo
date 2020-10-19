@@ -4,7 +4,8 @@ from game.toontown.toonbase import ToontownGlobals, TTLocalizer
 from game.toontown.coghq import MintLayout
 from game.toontown.ai import HolidayBaseAI
 from direct.showbase import DirectObject
-import RaceGlobals, random, os, pickle
+from . import RaceGlobals
+import random, os, pickle
 
 class RaceManagerAI(DirectObject.DirectObject):
     notify = DirectNotifyGlobal.directNotify.newCategory('RaceManagerAI')

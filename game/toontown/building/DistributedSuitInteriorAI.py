@@ -9,7 +9,8 @@ from direct.fsm import State
 from game.toontown.battle import DistributedBattleBldgAI
 from game.toontown.battle import BattleBase
 from direct.task import Timer
-import DistributedElevatorIntAI, copy
+from . import DistributedElevatorIntAI
+import copy
 
 class DistributedSuitInteriorAI(DistributedObjectAI.DistributedObjectAI):
 

@@ -419,7 +419,7 @@ if ACCELERATOR_USED_FROM_SHTIKER_BOOK:
 
 
 def getTreeTrackAndLevel(typeIndex):
-    track = typeIndex / 7
+    track = typeIndex // 7
     level = typeIndex % 7
     return (track, level)
 

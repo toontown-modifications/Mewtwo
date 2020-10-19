@@ -8,7 +8,8 @@ from game.toontown.coghq import DistributedCashbotBossTreasureAI
 from game.toontown.battle import BattleExperienceAI
 from game.toontown.chat import ResistanceChat
 from direct.fsm import FSM
-import DistributedBossCogAI, SuitDNA, random, math
+from . import DistributedBossCogAI, SuitDNA
+import random, math
 
 class DistributedCashbotBossAI(DistributedBossCogAI.DistributedBossCogAI, FSM.FSM):
     notify = DirectNotifyGlobal.directNotify.newCategory('DistributedCashbotBossAI')

@@ -1,6 +1,7 @@
 from game.otp.level import DistributedLevelAI
 from direct.directnotify import DirectNotifyGlobal
-import pickle, LevelSuitPlannerAI, FactoryBase
+import pickle
+from . import LevelSuitPlannerAI, FactoryBase
 from direct.task import Task
 from . import FactoryEntityCreatorAI, FactorySpecs
 from game.otp.level import LevelSpec

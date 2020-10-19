@@ -5,7 +5,6 @@ from game.toontown.toonbase import TTLocalizer
 from game.otp.otpbase import OTPLocalizer
 from direct.interval.IntervalGlobal import *
 
-
 class CatalogPetTrickItem(CatalogItem.CatalogItem):
     sequenceNumber = 0
     petPicture = None
@@ -18,7 +17,7 @@ class CatalogPetTrickItem(CatalogItem.CatalogItem):
         return 1
 
     def reachedPurchaseLimit(self, avatar):
-        if self in avatar.onOrder and self in avatar.mailboxContents and self in avatar.onGiftOrder and self in avatar.awardMailboxContents or self in avatar.onAwardOrder:
+        if self in avatar.onOrder or self in avatar.mailboxContents or self in avatar.onGiftOrder or self in avatar.awardMailboxContents or self in avatar.onAwardOrder:
             return 1
 
         return self.trickId in avatar.petTrickPhrases
@@ -103,8 +102,8 @@ class CatalogPetTrickItem(CatalogItem.CatalogItem):
 
 
 def getAllPetTricks():
-    list = []
+    petTricks = []
     for trickId in list(PetTricks.TrickId2scIds.keys()):
-        list.append(CatalogPetTrickItem(trickId))
+        petTricks.append(CatalogPetTrickItem(trickId))
 
-    return list
+    return petTricks

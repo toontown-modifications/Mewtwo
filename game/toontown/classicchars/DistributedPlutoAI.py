@@ -4,7 +4,8 @@ from direct.directnotify import DirectNotifyGlobal
 from direct.fsm import ClassicFSM, State
 from direct.fsm import State
 from direct.task import Task
-import random, CharStateDatasAI, CCharChatter
+import random
+from . import CharStateDatasAI, CCharChatter
 from game.toontown.toonbase import ToontownGlobals
 from game.toontown.toonbase import TTLocalizer
 
