@@ -30,7 +30,7 @@ class SuitInvasionManagerAI:
             'sc', # Short Change
             'pp', # Penny Pincher
             'bf', # Bottom Feeder
-            'p': # Pencil Pusher
+            'p' # Pencil Pusher
         ]
 
         cogType = random.choice(suitTypes)

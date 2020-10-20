@@ -327,8 +327,6 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
             self.notify.info('Failed to find building!')
             return # No building was found.
 
-        self.notify.info('Found a building: {0}!'.format(building))
-
         foTypes = ['s']
 
         if foType.lower() not in foTypes:
@@ -336,6 +334,8 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
             return
 
         building.cogdoTakeOver(foType, 2, 5)
+
+        self.sendResponseMessage(avId, 'Spawned a Field Office!')
 
     def d_setGM(self, avId, gmType):
         av = self.air.doId2do.get(avId)
