@@ -22,7 +22,6 @@ want-membership true
 want-cogdominiums true
 want-coderedemption true
 want-do-live-updates true
-want-delivery-manager false
 want-discord-integration true
 want-parties false
 want-instant-parties true

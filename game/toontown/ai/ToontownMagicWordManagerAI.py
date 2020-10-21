@@ -25,7 +25,7 @@ from game.toontown.effects import FireworkShows
 from game.toontown.effects.DistributedFireworkShowAI import DistributedFireworkShowAI
 from game.toontown.pets.DistributedPetAI import DistributedPetAI
 
-import random, time, os, traceback
+import random, time, os, traceback, requests
 
 class ToontownMagicWordManagerAI(MagicWordManagerAI):
     notify = directNotify.newCategory('ToontownMagicWordManagerAI')
