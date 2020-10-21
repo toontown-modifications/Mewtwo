@@ -120,56 +120,36 @@ class ToontownAIRepository(ToontownInternalRepository, ServerBase):
 
         return False
 
-    def sendToAPI(self, districtPopulation, decrease = False):
-        if config.GetBool('want-localhost-api-testing', False):
-            baseEndpoint = 'http://127.0.0.1:19135/api/{0}'
-        else:
-            baseEndpoint = 'http://otp-gs.sunrisegames.tech:19135/api/{0}'
-
+    def sendPopulation(self, districtPopulation):
         apiToken = config.GetString('api-token', '')
 
-        if not decrease:
-            endpoint = baseEndpoint.format('setPopulation')
+        data = {
+            'token': config.GetString('api-token'),
+            'population': districtPopulation
+        }
 
-            data = {
-                'token': apiToken,
-                'districtPopulation': districtPopulation
-            }
-
-            try:
-                req = requests.post(endpoint, json = data)
-            except:
-                self.notify.warning('Failed to send district population to API!')
-        else:
-            endpoint = baseEndpoint.format('decreasePopulation')
-
-            data = {
-                'token': apiToken,
-                'decreaseValue': districtPopulation
-            }
-
-            try:
-                req = requests.post(endpoint, json = data)
-            except:
-                self.notify.warning('Failed to send district population decrease to API!')
+        try:
+            requests.post('http://otp-gs.sunrisegames.tech:19135/api/setPopulation', json = data)
+        except:
+            self.notify.warning('Failed to send district population!')
 
     def incrementPopulation(self):
         self.districtPopulation += 1
         self.districtStats.b_setAvatarCount(self.districtStats.getAvatarCount() + 1)
 
-        if self.isProdServer() or self.isPartialProd():
+        if self.isProdServer():
             # This is the production server.
-            # Send our district population increase.
-            self.sendToAPI(self.districtPopulation, False)
+            # Send our population increase.
+            self.sendPopulation(self.districtPopulation)
 
     def decrementPopulation(self):
         self.districtPopulation -= 1
         self.districtStats.b_setAvatarCount(self.districtStats.getAvatarCount() - 1)
 
-        if self.isProdServer() or self.isPartialProd():
+        if self.isProdServer():
             # This is the production server.
-            # Send our district population decrease.
-            self.sendToAPI(self.districtPopulation, True)
+            # Send our population decrease.
+            self.sendPopulation(self.districtPopulation)
 
     def sendQueryToonMaxHp(self, doId, checkResult):
         if self.notify.getDebug():
@@ -280,7 +260,10 @@ class ToontownAIRepository(ToontownInternalRepository, ServerBase):
             self.welcomeValleyManager = WelcomeValleyManagerAI(self)
             self.welcomeValleyManager.generateWithRequired(OtpDoGlobals.OTP_ZONE_ID_MANAGEMENT)
 
+        latestIssue = time.strftime('-%m-%d %H:%M:%S')
+
         self.inGameNewsMgr = DistributedInGameNewsMgrAI(self)
+        self.inGameNewsMgr.setLatestIssueStr(latestIssue)
         self.inGameNewsMgr.generateWithRequired(OtpDoGlobals.OTP_ZONE_ID_MANAGEMENT)
 
         self.trophyMgr = DistributedTrophyMgrAI(self)

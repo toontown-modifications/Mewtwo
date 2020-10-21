@@ -89,6 +89,7 @@ class ExtAgent(ServerBase):
         self.chatOffenses = {}
         self.accId2playToken = {}
         self.memberInfo = {}
+        self.staffMembers = {}
 
         self.friendsManager = FriendsManagerUD(self)
 
@@ -110,20 +111,13 @@ class ExtAgent(ServerBase):
             ToontownGlobals.CashbotLobby,
             ToontownGlobals.WelcomeValleyEnd]
 
-        self.wantServerDebug = config.GetBool('want-server-debugging', False)
-        self.wantServerMaintenance = config.GetBool('want-server-maintenance', False)
         self.wantMembership = config.GetBool('want-membership', False)
-        self.wantBlacklistWarnings = config.GetBool('want-blacklist-warnings', False)
 
         self.databasePath = 'otpd/databases/otpdb'
 
         if not os.path.exists(self.databasePath):
+            # Create our database folder.
             os.makedirs(self.databasePath)
-
-        if self.isProdServer() or self.isPartialProd():
-            # This is the production server.
-            # Send our status.
-            self.sendAvailabilityToAPI()
 
         self.banEndpointBase = 'https://sunrisegames.tech/bans/{0}'
 
@@ -133,28 +127,16 @@ class ExtAgent(ServerBase):
 
         self.playTokenDecryptKey = 'eee39eae6e156222a460e240496876f00623ae6b5ad08701209de12ae298fac4'
 
+        # Enable information logging.
         self.notify.setInfo(True)
 
-    def getWhitelistedAccounts(self):
-        with open('data/whitelistedAccounts.json') as data:
-            accounts = json.load(data)
-            return accounts
-
-    def sendAvailabilityToAPI(self):
-        if config.GetBool('want-localhost-api-testing', False):
-            apiBase = '127.0.0.1'
-        else:
-            apiBase = 'otp-gs.sunrisegames.tech'
-
-        data = {
-            'token': config.GetString('api-token', ''),
-            'setter': self.wantServerMaintenance
-        }
-
+    def getStatus(self):
         try:
-            req = requests.post('http://{0}:19135/api/setMaintenanceMode'.format(apiBase), json = data)
+            request = request.get('http://otp-gs.sunrisegames.tech/api/getStatusForServer')
+            return request.text
         except:
-            self.notify.warning('Failed to send availability to API!')
+            self.notify.warning('Failed to get status!')
+            return True
 
     def postAddFriend(self, avId, friendId):
         self.friendsManager.postAddFriend(avId, friendId)
@@ -328,7 +310,7 @@ class ExtAgent(ServerBase):
         resp.addUint16(126) # CLIENT_LOGIN_TOONTOWN_RESP
         resp.addUint8(0) # returnCode
         resp.addString('All Ok') # respString
-        resp.addUint32(int(dislId)) # accountNumber
+        resp.addUint32(dislId) # accountNumber
         resp.addString(playToken) # accountName
         resp.addUint8(1) # accountNameApproved
         resp.addString('YES') # openChatEnabled
@@ -337,27 +319,26 @@ class ExtAgent(ServerBase):
         resp.addUint32(int(time.time())) # sec
         resp.addUint32(int(time.clock())) # usec
 
-        if self.isProdServer() or self.isPartialProd():
-            if isPaid == '1':
+        if self.isProdServer():
+            if isPaid:
                 resp.addString('FULL') # access
                 self.memberInfo[accountId] = playToken
             else:
                 resp.addString('unpaid')
+
+            if openChat:
+                resp.addString('YES') # WhiteListResponse
+            else:
+                resp.addString('NO') # WhiteListResponse
         else:
             if self.wantMembership:
                 resp.addString('FULL') # access
             else:
                 resp.addString('unpaid') # access
 
-        if self.isProdServer() or self.isPartialProd():
-            if openChat == '1':
-                resp.addString('YES') # WhiteListResponse
-            else:
-                resp.addString('NO') # WhiteListResponse
-        else:
             resp.addString('YES') # WhiteListResponse
 
-        resp.addString(time.strftime('%Y-%m-%d %I:%M:%S')) # lastLoggedInStr
+        resp.addString(time.strftime('%Y-%m-%d %H:%M:%S')) # lastLoggedInStr
         resp.addInt32(self.getAccountDays(fields)) # accountDays
         resp.addString('NO_PARENT_ACCOUNT') # toonAccountType
         resp.addString(playToken) # userName
@@ -550,7 +531,7 @@ class ExtAgent(ServerBase):
             self.sendSystemMessage(avClientChannel, message)
             self.sendKick(doId, 'Language')
 
-            if self.isProdServer() or self.isPartialProd() and playToken:
+            if self.isProdServer() and playToken:
                 self.banAccount(playToken, message)
 
             del self.chatOffenses[doId]
@@ -575,9 +556,6 @@ class ExtAgent(ServerBase):
             self.sendBoot(clientChannel, errorCode, message)
             self.sendEject(clientChannel, errorCode, message)
             return
-
-        if self.wantServerDebug:
-            print('handleDatagram: {0}:{1}'.format(clientChannel, msgType))
 
         if msgType == 3: # CLIENT_GET_AVATARS
             self.getAvatars(clientChannel)
@@ -709,7 +687,7 @@ class ExtAgent(ServerBase):
                 self.sendEject(clientChannel, 122, message)
                 return
 
-            if self.isProdServer() or self.isPartialProd():
+            if self.isProdServer():
                 try:
                     # Decrypt the play token.
                     key = binascii.unhexlify(self.playTokenDecryptKey)
@@ -721,11 +699,12 @@ class ExtAgent(ServerBase):
                     jsonData = json.loads(data)
 
                     # Retrieve data from the API response.
-                    playToken = jsonData['playToken']
-                    openChat = jsonData['OpenChat']
-                    isPaid = jsonData['Member']
+                    playToken = str(jsonData['playToken'])
+                    openChat = int(jsonData['OpenChat'])
+                    isPaid = int(jsonData['Member'])
                     tokenTimestamp = jsonData['Timestamp']
-                    dislId = jsonData['dislId']
+                    dislId = int(jsonData['dislId'])
+                    accountType = str(jsonData['accountType'])
                 except:
                     # Bad play token.
                     errorCode = 122
@@ -776,7 +755,6 @@ class ExtAgent(ServerBase):
 
                 # To prevent skids trying to auth without the stock Disney launcher.
                 # We check if the account is banned here too.
-                # TODO: Find a way to enable TLS 1.3 on Cloudflare once again.
                 endpoint = self.banEndpointBase.format('?username={0}'.format(playToken))
                 banCheck = requests.post(endpoint, headers = self.requestHeaders)
 
@@ -788,20 +766,24 @@ class ExtAgent(ServerBase):
                     self.sendBoot(clientChannel, errorCode, message)
                     self.sendEject(clientChannel, errorCode, message)
                     return
+
+                if accountType in ('Administrator', 'Developer', 'Moderator'):
+                    # This is a staff member.
+                    self.staffMembers[playToken] = accountType
+
+                if self.getStatus() and playToken not in self.staffMembers:
+                    errorCode = 151
+                    message = 'You have been logged out by an administrator working on the servers.'
+
+                    self.sendBoot(clientChannel, errorCode, message)
+                    self.sendEject(clientChannel, errorCode, message)
+                    return
             else:
-                # Prod/Partial prod is not enabled.
+                # Production is not enabled.
                 # We need these dummy variables.
                 openChat = False
                 isPaid = False
                 dislId = 1
-
-            if self.wantServerMaintenance and playToken not in self.getWhitelistedAccounts():
-                errorCode = 151
-                message = 'You have been logged out by an administrator working on the servers.'
-
-                self.sendBoot(clientChannel, errorCode, message)
-                self.sendEject(clientChannel, errorCode, message)
-                return
 
             # Check the server version against the real one.
             ourVersion = config.GetString('server-version', '')
@@ -886,12 +868,17 @@ class ExtAgent(ServerBase):
                 if not message:
                     return
 
-                if message[0] in ('~', '@'):
-                    # Route this to the Magic Word manager.
-                    accId = int(self.air.getAccountIdFromSender())
-                    playToken = self.accId2playToken.get(accId, '')
+                accId = int(self.air.getAccountIdFromSender())
+                playToken = self.accId2playToken.get(accId, '')
 
-                    self.air.netMessenger.send('magicWord', [message, doId, playToken])
+                if playToken in self.staffMembers:
+                    if message[0] in ('~', '@'):
+                        # Route this to the Magic Word manager.
+                        self.air.netMessenger.send('magicWord', [message, doId])
+                        return
+                else:
+                    avClientChannel = self.air.GetPuppetConnectionChannel(doId)
+                    self.sendSystemMessage(avClientChannel, 'You do not have sufficient access to execute Magic Words!')
                     return
 
                 blacklisted = self.filterBlacklist(doId, int(self.air.getAccountIdFromSender()), message)
@@ -1089,7 +1076,7 @@ class ExtAgent(ServerBase):
                 # Save the account ID.
                 self.loadAvProgress.add(target)
 
-                if self.isProdServer() or self.isPartialProd():
+                if self.isProdServer():
                     playToken = self.memberInfo.get(target, '')
 
                     if playToken:
@@ -1267,7 +1254,7 @@ class ExtAgent(ServerBase):
             if avId:
                 self.air.dbInterface.updateObject(self.air.dbId, avId, self.air.dclassesByName['DistributedToonUD'], fields)
 
-                if self.isProdServer() or self.isPartialProd():
+                if self.isProdServer():
                     fields = [{
                         'name': 'Avatar Id',
                         'value': avId,
@@ -1574,9 +1561,6 @@ class ExtAgent(ServerBase):
         msgType = dgi.getUint16()
         resp = None
 
-        if self.wantServerDebug:
-            print('Client: {0} requested msgType: {1}.'.format(clientChannel, msgType))
-
         if msgType == CLIENT_EJECT:
             resp = PyDatagram()
             resp.addUint16(4) # CLIENT_GO_GET_LOST
@@ -1661,7 +1645,7 @@ class ExtAgent(ServerBase):
             doId = dgi.getUint32()
 
             resp = PyDatagram()
-            resp.addUint16(CLIENT_OBJECT_DISABLE_OWNER)
+            resp.addUint16(msgType)
             resp.addUint32(doId)
         else:
             self.notify.warning('Received unknown message type %s from Astron' % msgType)

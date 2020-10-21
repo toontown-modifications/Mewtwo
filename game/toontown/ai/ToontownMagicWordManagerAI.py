@@ -25,7 +25,7 @@ from game.toontown.effects import FireworkShows
 from game.toontown.effects.DistributedFireworkShowAI import DistributedFireworkShowAI
 from game.toontown.pets.DistributedPetAI import DistributedPetAI
 
-import random, time, os, traceback, json
+import random, time, os, traceback
 
 class ToontownMagicWordManagerAI(MagicWordManagerAI):
     notify = directNotify.newCategory('ToontownMagicWordManagerAI')
@@ -53,11 +53,6 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
 
     def delete(self):
         MagicWordManagerAI.delete(self)
-
-    def getTrustedUsers(self):
-        with open('data/trustedUsers.json') as data:
-            users = json.load(data)
-            return users
 
     def d_setAvatarRich(self, avId):
         if avId not in self.air.doId2do:
@@ -847,6 +842,17 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
 
         self.sendResponseMessage(av.doId, 'Enabled Super Chat!')
 
+    def closeServer(self):
+        data = {
+            'token': config.GetString('api-token', ''),
+            'setter': True
+        }
+
+        try:
+            requests.post('http://otp-gs.sunrisegames.tech:19135/api/setStatus', json = data)
+        except:
+            self.notify.warning('Failed to close server!')
+
     def d_setMaintenance(self, av, minutes):
         if not av:
             return
@@ -865,6 +871,7 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
             else:
                 self.d_sendSystemMessage(OTPLocalizer.CRMaintenanceMessage)
                 taskMgr.doMethodLater(10, disconnect, 'maintenance-disconnection')
+                self.closeServer()
 
             if minutes <= 5:
                 next = 60
@@ -883,17 +890,13 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
 
         self.sendResponseMessage(av.doId, 'Started maintenance!')
 
-    def setMagicWordExt(self, magicWord, avId, playToken):
+    def setMagicWordExt(self, magicWord, avId):
         av = self.air.doId2do.get(avId)
 
         if not av:
             return
 
         self.sentFromExt = True
-
-        if playToken not in self.getTrustedUsers():
-            av.d_setSystemMessage(0, 'You do not have sufficient access to execute Magic Words!')
-            return
 
         self.setMagicWord(magicWord, avId, av.zoneId, '')
 

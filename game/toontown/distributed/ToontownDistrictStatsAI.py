@@ -9,7 +9,7 @@ class ToontownDistrictStatsAI(DistributedObjectAI):
     newAvatarCount = 0
 
     def delete(self):
-        if self.air.isProdServer() or self.air.isPartialProd():
+        if self.air.isProdServer():
             # This is the production server.
             # We need to tell the population service we are being deleted.
             self.air.sendToAPI(0, True)

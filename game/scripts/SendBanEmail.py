@@ -10,7 +10,7 @@ chatMessages = input('Chat messages: ')
 secretKey = 'jzYEqAZkEP'
 
 headers = {
-    'User-Agent': 'Sunrise Games - ExtAgent'
+    'User-Agent': 'Sunrise Games - SendBanEmail'
 }
 
 data = {

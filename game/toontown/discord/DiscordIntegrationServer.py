@@ -33,7 +33,7 @@ class DiscordIntegrationServer:
 
             if signature != actualSignature:
                 # Skid, log the attempt.
-                self.notify.warning('Client {0} sent invalid signature: {0}!'.format(ipAddress, signature))
+                self.notify.warning('Client {0} sent invalid signature: {1}!'.format(ipAddress, signature))
                 return
 
             if whatToDo == 'kickRequest':
