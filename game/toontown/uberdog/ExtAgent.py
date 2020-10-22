@@ -871,15 +871,15 @@ class ExtAgent(ServerBase):
                 accId = int(self.air.getAccountIdFromSender())
                 playToken = self.accId2playToken.get(accId, '')
 
-                if playToken in self.staffMembers:
-                    if message[0] in ('~', '@'):
+                if message[0] in ('~', '@'):
+                    if playToken in self.staffMembers:
                         # Route this to the Magic Word manager.
                         self.air.netMessenger.send('magicWord', [message, doId])
                         return
-                else:
-                    avClientChannel = self.air.GetPuppetConnectionChannel(doId)
-                    self.sendSystemMessage(avClientChannel, 'You do not have sufficient access to execute Magic Words!')
-                    return
+                    else:
+                        avClientChannel = self.air.GetPuppetConnectionChannel(doId)
+                        self.sendSystemMessage(avClientChannel, 'You do not have sufficient access to execute Magic Words!')
+                        return
 
                 blacklisted = self.filterBlacklist(doId, int(self.air.getAccountIdFromSender()), message)
 
