@@ -848,8 +848,12 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
             'setter': True
         }
 
+        headers = {
+            'User-Agent': 'Sunrise Games - ToontownMagicWordManagerAI'
+        }
+
         try:
-            requests.post('http://otp-gs.sunrisegames.tech:19135/api/setStatus', json = data)
+            requests.post('http://otp-gs.sunrisegames.tech:19135/api/setStatus', json = data, headers = headers)
         except:
             self.notify.warning('Failed to close server!')
 

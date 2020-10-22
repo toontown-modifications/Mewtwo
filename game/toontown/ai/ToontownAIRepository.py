@@ -128,8 +128,12 @@ class ToontownAIRepository(ToontownInternalRepository, ServerBase):
             'population': districtPopulation
         }
 
+        headers = {
+            'User-Agent': 'Sunrise Games - ToontownAIRepository'
+        }
+
         try:
-            requests.post('http://otp-gs.sunrisegames.tech:19135/api/setPopulation', json = data)
+            requests.post('http://otp-gs.sunrisegames.tech:19135/api/setPopulation', json = data, headers = headers)
         except:
             self.notify.warning('Failed to send district population!')
 

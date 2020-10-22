@@ -132,7 +132,7 @@ class ExtAgent(ServerBase):
 
     def getStatus(self):
         try:
-            request = requests.get('http://otp-gs.sunrisegames.tech:19135/api/getStatusForServer')
+            request = requests.get('http://otp-gs.sunrisegames.tech:19135/api/getStatusForServer', headers = self.requestHeaders)
             return request.text
         except:
             self.notify.warning('Failed to get status!')
