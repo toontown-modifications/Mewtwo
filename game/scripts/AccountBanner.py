@@ -10,7 +10,7 @@ reason = eval(input('Reason for Ban: '))
 secretKey = 'jzYEqAZkEP'
 
 headers = {
-    'User-Agent': 'Sunrise Games - ExtAgent'
+    'User-Agent': 'Sunrise Games - AccountBanner'
 }
 
 data = {

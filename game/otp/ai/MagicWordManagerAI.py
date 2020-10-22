@@ -18,8 +18,6 @@ class MagicWordManagerAI(DistributedObjectAI):
             self.sendUpdateToAvatarId(invokerId, 'setMagicWordResponse', ['Missing target!'])
             return
 
-        self.notify.info('{0} with avId of {1} succesfully executed Magic Word: {2}!'.format(invoker.getName(), invokerId, magicWord))
-
     def setWho(self, avIds = []):
         avId = self.air.getAvatarIdFromSender()
         av = self.air.doId2do.get(avId)

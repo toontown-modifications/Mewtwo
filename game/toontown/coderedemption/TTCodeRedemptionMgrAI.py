@@ -31,12 +31,6 @@ class TTCodeRedemptionMgrAI(DistributedObjectAI):
         self.failedAttempts = 0
         self.maxCodeAttempts = config.GetInt('max-code-redemption-attempts', 5)
 
-    def announceGenerate(self):
-        DistributedObjectAI.announceGenerate(self)
-
-    def delete(self):
-        DistributedObjectAI.delete(self)
-
     def giveAwardToToonResult(self, todo0, todo1):
         pass
 
@@ -47,21 +41,25 @@ class TTCodeRedemptionMgrAI(DistributedObjectAI):
         avId = self.air.getAvatarIdFromSender()
 
         if not avId:
+            # Invalid avatar id.
             self.air.writeServerEvent('suspicious', avId = avId, issue = 'Tried to redeem a code from an invalid avId')
             return
 
         av = self.air.doId2do.get(avId)
 
         if not av:
+            # Invalid avatar.
             self.air.writeServerEvent('suspicious', avId = avId, issue = 'Invalid avatar tried to redeem a code')
             return
 
-        # Do we want coderedemption?
+        # Check to see if redemption is enabled.
         if not self.air.wantCodeRedemption:
             result = TTCodeRedemptionConsts.RedeemErrors.SystemUnavailable
             awardMgrResult = 0
 
+        # Check to see if this avatar has attempted redemption too many times.
         if self.failedAttempts > self.maxCodeAttempts:
+            # We have attempted to redeem too many times.
             result = TTCodeRedemptionConsts.RedeemErrors.TooManyAttempts
             awardMgrResult = 0
             self.failedAttempts = 0
@@ -77,51 +75,51 @@ class TTCodeRedemptionMgrAI(DistributedObjectAI):
             self.d_redeemCodeResult(avId, context, result, awardMgrResult)
             return
 
-        # This code is valid.
+        # Check to see if the items in the code are valid.
         for item in items:
-            if isinstance(item, CatalogInvalidItem): # Invalid item.
+            if isinstance(item, CatalogInvalidItem):
+                # This item is invalid.
                 self.air.writeServerEvent('suspicious', avId = avId, issue = 'Invalid CatalogItem\'s for code: %s' % code)
                 result = TTCodeRedemptionConsts.RedeemErrors.CodeDoesntExist
                 awardMgrResult = 0
                 break
 
-        if len(av.mailboxContents) + len(av.onGiftOrder) >= ToontownGlobals.MaxMailboxContents:
-            # Mailbox is full
-            result = TTCodeRedemptionConsts.RedeemErrors.AwardCouldntBeGiven
-            awardMgrResult = AwardManagerConsts.GiveAwardErrors.FullMailbox
-        else:
-            limited = item.reachedPurchaseLimit(av)
-            notOfferedTo = item.notOfferedTo(av)
+            if len(av.mailboxContents) + len(av.onGiftOrder) >= ToontownGlobals.MaxMailboxContents:
+                # Our mailbox is full.
+                result = TTCodeRedemptionConsts.RedeemErrors.AwardCouldntBeGiven
+                awardMgrResult = AwardManagerConsts.GiveAwardErrors.FullMailbox
+            else:
+                # Check to see if the avatar can use this code.
+                limited = item.reachedPurchaseLimit(av)
+                notOfferedTo = item.notOfferedTo(av)
 
-            if notOfferedTo:
-                # Toon is not the correct gender for this item.
-                result = TTCodeRedemptionConsts.RedeemErrors.AwardCouldntBeGiven
-                awardMgrResult = AwardManagerConsts.GiveAwardErrors.WrongGender
+                if notOfferedTo:
+                    # Toon is not the correct gender for this item.
+                    result = TTCodeRedemptionConsts.RedeemErrors.AwardCouldntBeGiven
+                    awardMgrResult = AwardManagerConsts.GiveAwardErrors.WrongGender
 
-            elif limited == 0:
-                 # Success, lets deliver the item.
-                item.deliveryDate = int(time.time() / 60) + 1 # Let's just deliver the item right away.
-                av.onOrder.append(item)
-                av.b_setDeliverySchedule(av.onOrder)
-                result = TTCodeRedemptionConsts.RedeemErrors.Success
-                awardMgrResult = AwardManagerConsts.GiveAwardErrors.Success
-                self.air.writeServerEvent('code-redeemed', avId = avId, issue = 'Successfuly redeemed code: {0}'.format(code))
-            elif limited == 1:
-                result = TTCodeRedemptionConsts.RedeemErrors.AwardCouldntBeGiven
-                awardMgrResult = AwardManagerConsts.GiveAwardErrors.AlreadyInOrderedQueue
-                self.air.writeServerEvent('code-redeemed', avId = avId, issue = 'Could not deliver items for code: {0}'.format(code))
-            elif limited == 2:
-                result = TTCodeRedemptionConsts.RedeemErrors.AwardCouldntBeGiven
-                awardMgrResult = AwardManagerConsts.GiveAwardErrors.AlreadyInMailbox
-                self.air.writeServerEvent('code-redeemed', avId = avId, issue = 'Could not deliver items for code: {0}'.format(code))
-            elif limited == 3:
-                result = TTCodeRedemptionConsts.RedeemErrors.AwardCouldntBeGiven
-                awardMgrResult = AwardManagerConsts.GiveAwardErrors.AlreadyBeingWorn
-                self.air.writeServerEvent('code-redeemed', avId = avId, issue = 'Could not deliver items for code: {0}'.format(code))
-            elif limited == 4:
-                result = TTCodeRedemptionConsts.RedeemErrors.AwardCouldntBeGiven
-                awardMgrResult = AwardManagerConsts.GiveAwardErrors.AlreadyInCloset
-                self.air.writeServerEvent('code-redeemed', avId = avId, issue = 'Could not deliver items for code: {0}'.format(code))
+                elif limited == 0:
+                    # Success, lets deliver the item right away.
+                    item.deliveryDate = int(time.time() / 60) + 1
+                    av.onOrder.append(item)
+                    av.b_setDeliverySchedule(av.onOrder)
+                    result = TTCodeRedemptionConsts.RedeemErrors.Success
+                    awardMgrResult = AwardManagerConsts.GiveAwardErrors.Success
+                elif limited == 1:
+                    result = TTCodeRedemptionConsts.RedeemErrors.AwardCouldntBeGiven
+                    awardMgrResult = AwardManagerConsts.GiveAwardErrors.AlreadyInOrderedQueue
+                elif limited == 2:
+                    result = TTCodeRedemptionConsts.RedeemErrors.AwardCouldntBeGiven
+                    awardMgrResult = AwardManagerConsts.GiveAwardErrors.AlreadyInMailbox
+                elif limited == 3:
+                    result = TTCodeRedemptionConsts.RedeemErrors.AwardCouldntBeGiven
+                    awardMgrResult = AwardManagerConsts.GiveAwardErrors.AlreadyBeingWorn
+                elif limited == 4:
+                    result = TTCodeRedemptionConsts.RedeemErrors.AwardCouldntBeGiven
+                    awardMgrResult = AwardManagerConsts.GiveAwardErrors.AlreadyInCloset
+
+        # Log this redeem using the eventlogger.
+        self.air.writeServerEvent('code-redeemed', avId = avId, limited = limited, issue = 'Code attempted to be redeemed: {0}'.format(code))
 
         # Send our response.
         self.d_redeemCodeResult(avId, context, result, awardMgrResult)
@@ -130,12 +128,14 @@ class TTCodeRedemptionMgrAI(DistributedObjectAI):
         avId = self.air.getAvatarIdFromSender()
 
         if not avId:
+            # Invalid avatar id.
             self.air.writeServerEvent('suspicious', avId = avId, issue = 'Could not parse the gender of an invalid avId')
             return
 
         av = self.air.doId2do.get(avId)
 
         if not av:
+            # Invalid avatar.
             self.air.writeServerEvent('suspicious', avId = avId, issue = 'Could not parse the gender of an invalid avatar')
             return
 
@@ -152,7 +152,8 @@ class TTCodeRedemptionMgrAI(DistributedObjectAI):
             return [shirt]
         '''
 
-        code = code.lower() # Anti-frustration features, activate!
+        # Make the code lowercase.
+        code = code.lower()
 
         # Our codes.
         if code == 'gadzooks':
@@ -211,9 +212,11 @@ class TTCodeRedemptionMgrAI(DistributedObjectAI):
             shirt = CatalogClothingItem(1799, 0)
             return [shirt]
 
-        if code == 'doodle':
-            shirt = CatalogClothingItem(1746, 0)
-            return [shirt]
+        if code == 'spooky-october':
+            shirt = CatalogClothingItem(1001, 0)
+            shorts = CatalogClothingItem(1746, 0)
+            beans = CatalogBeanItem(12000, tagCode = 2)
+            return [shirt, shorts, beans]
 
         if code == 'trunk':
             if av.getStyle().getGender() == 'm':

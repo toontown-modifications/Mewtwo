@@ -1,8 +1,10 @@
 from direct.directnotify.DirectNotifyGlobal import directNotify
 from direct.task import Task
+from direct.distributed.PyDatagram import PyDatagram
+from direct.distributed import MsgTypes
 
 from game.otp.ai.MagicWordManagerAI import MagicWordManagerAI
-from game.otp.otpbase import OTPLocalizer
+from game.otp.otpbase import OTPLocalizer, OTPGlobals
 from game.otp.avatar.DistributedPlayerAI import DistributedPlayerAI
 from game.otp.distributed import OtpDoGlobals
 
@@ -23,7 +25,7 @@ from game.toontown.effects import FireworkShows
 from game.toontown.effects.DistributedFireworkShowAI import DistributedFireworkShowAI
 from game.toontown.pets.DistributedPetAI import DistributedPetAI
 
-import random, time, os, traceback, json
+import random, time, os, traceback, requests
 
 class ToontownMagicWordManagerAI(MagicWordManagerAI):
     notify = directNotify.newCategory('ToontownMagicWordManagerAI')
@@ -36,6 +38,13 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
 
         self.wantSystemResponses = config.GetBool('want-system-responses', False)
         self.sentFromExt = False
+        self.staffMembers = []
+
+        self.backupDir = 'backups/magic-words'
+
+        if not os.path.exists(self.backupDir):
+            # Create our backup directory.
+            os.mkdir(self.backupDir)
 
     def generate(self):
         MagicWordManagerAI.generate(self)
@@ -44,18 +53,16 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
         MagicWordManagerAI.announceGenerate(self)
 
         self.air.netMessenger.register(1, 'magicWord')
+        self.air.netMessenger.register(5, 'magicWordApproved')
+
         self.air.netMessenger.accept('magicWord', self, self.setMagicWordExt)
+        self.air.netMessenger.accept('magicWordApproved', self, self.setMagicWordApproved)
 
     def disable(self):
         MagicWordManagerAI.disable(self)
 
     def delete(self):
         MagicWordManagerAI.delete(self)
-
-    def getTrustedUsers(self):
-        with open('data/trustedUsers.json') as data:
-            users = json.load(data)
-            return users
 
     def d_setAvatarRich(self, avId):
         if avId not in self.air.doId2do:
@@ -306,8 +313,12 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
 
         if av.ghostMode == 1:
             av.b_setGhostMode(0)
+            response = 'Enabled ghost mode!'
         else:
             av.b_setGhostMode(1)
+            response = 'Disabled ghost mode!'
+
+        self.sendResponseMessage(avId, response)
 
     def d_spawnFO(self, avId, zoneId, foType):
         av = self.air.doId2do.get(avId)
@@ -325,8 +336,6 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
             self.notify.info('Failed to find building!')
             return # No building was found.
 
-        self.notify.info('Found a building: {0}!'.format(building))
-
         foTypes = ['s']
 
         if foType.lower() not in foTypes:
@@ -334,6 +343,8 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
             return
 
         building.cogdoTakeOver(foType, 2, 5)
+
+        self.sendResponseMessage(avId, 'Spawned a Field Office!')
 
     def d_setGM(self, avId, gmType):
         av = self.air.doId2do.get(avId)
@@ -837,7 +848,67 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
         av.b_setMaxHp(ToontownGlobals.MaxHpLimit - laughminus)
         av.b_setHp(ToontownGlobals.MaxHpLimit - laughminus)
 
-    def setMagicWordExt(self, magicWord, avId, playToken):
+    def d_setSuperChat(self, av):
+        if not av:
+            return
+
+        av.d_setCommonChatFlags(OTPGlobals.SuperChat)
+
+        self.sendResponseMessage(av.doId, 'Enabled Super Chat!')
+
+    def closeServer(self):
+        data = {
+            'token': config.GetString('api-token', ''),
+            'setter': True
+        }
+
+        headers = {
+            'User-Agent': 'Sunrise Games - ToontownMagicWordManagerAI'
+        }
+
+        try:
+            requests.post('http://otp-gs.sunrisegames.tech:19135/api/setStatus', json = data, headers = headers)
+        except:
+            self.notify.warning('Failed to close server!')
+
+    def d_setMaintenance(self, av, minutes):
+        if not av:
+            return
+
+        def disconnect(task):
+            dg = PyDatagram()
+            dg.addServerHeader(10, simbase.air.ourChannel, MsgTypes.CLIENTAGENT_EJECT)
+            dg.addUint16(154)
+            dg.addString('Toontown is now closed for maintenance.')
+            simbase.air.send(dg)
+            return Task.done
+
+        def countdown(minutes):
+            if minutes > 0:
+                self.d_sendSystemMessage(OTPLocalizer.CRMaintenanceCountdownMessage.format(minutes))
+            else:
+                self.d_sendSystemMessage(OTPLocalizer.CRMaintenanceMessage)
+                taskMgr.doMethodLater(10, disconnect, 'maintenance-disconnection')
+                self.closeServer()
+
+            if minutes <= 5:
+                next = 60
+                minutes -= 1
+            elif minutes % 5:
+                next = 60 * (minutes % 5)
+                minutes -= minutes % 5
+            else:
+                next = 300
+                minutes -= 5
+
+            if minutes >= 0:
+                taskMgr.doMethodLater(next, countdown, 'maintenance-task', extraArgs = [minutes])
+
+        countdown(minutes)
+
+        self.sendResponseMessage(av.doId, 'Started maintenance!')
+
+    def setMagicWordExt(self, magicWord, avId):
         av = self.air.doId2do.get(avId)
 
         if not av:
@@ -845,11 +916,10 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
 
         self.sentFromExt = True
 
-        if playToken not in self.getTrustedUsers():
-            av.d_setSystemMessage(0, 'You do not have sufficient access to execute Magic Words!')
-            return
-
         self.setMagicWord(magicWord, avId, av.zoneId, '')
+
+    def setMagicWordApproved(self, accountId):
+        self.staffMembers.append(accountId)
 
     def setMagicWord(self, magicWord, avId, zoneId, signature):
         if not self.sentFromExt:
@@ -857,7 +927,20 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
 
         av = self.air.doId2do.get(avId)
 
-        # Chop off the ~ at the start as its not needed, split the Magic Word and make the Magic Word case insensitive.
+        if self.air.isProdServer() and av.getDISLid() not in self.staffMembers:
+            av.d_setSystemMessage(0, 'You do not have sufficient access to execute Magic Words!')
+            return
+
+        # Log this attempt.
+        self.notify.info('{0} with avId of {1} executed Magic Word: {2}!'.format(av.getName(), avId, magicWord))
+
+        # Write this attempt to disk.
+        # We may need to view this later.
+        with open(self.backupDir + '/log.txt', 'a') as logFile:
+            timestamp = time.strftime('%c')
+            logFile.write('{0} | {1} ({2}): {3}\n'.format(timestamp, av.getName(), avId, magicWord))
+
+        # Chop off the prefix at the start as its not needed, split the Magic Word and make the Magic Word case insensitive.
         magicWord = magicWord[1:]
         splitWord = magicWord.split(' ')
         args = splitWord[1:]
@@ -1013,6 +1096,15 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
             self.d_setAutoRestock(avId)
         elif magicWord == 'regulartoon':
             self.d_setRegularToon(avId)
+        elif magicWord == 'superchat':
+            self.d_setSuperChat(av)
+        elif magicWord == 'maintenance':
+            if not validation:
+                return
+            try:
+                self.d_setMaintenance(av, int(args[0]))
+            except ValueError:
+                self.sendResponseMessage(avId, 'Invalid parameters.')
         else:
             if magicWord not in disneyCmds:
                 self.sendResponseMessage(avId, '{0} is not a valid Magic Word.'.format(magicWord))

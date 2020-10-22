@@ -1,7 +1,6 @@
 from direct.directnotify.DirectNotifyGlobal import directNotify
 
 from game.toontown.toonbase import ToontownGlobals
-from game.toontown.suit import SuitDNA
 
 import random
 
@@ -23,7 +22,18 @@ class SuitInvasionManagerAI:
             self.invading = False
 
     def generateInitialInvasion(self, task = None):
-        cogType = random.choice(SuitDNA.suitHeadTypes)
+        suitTypes = [
+            'f', # Flunky
+            'cc', # Cold Caller
+            'nd', # Name Dropper
+            'b', # Bloodsuckers
+            'sc', # Short Change
+            'pp', # Penny Pincher
+            'bf', # Bottom Feeder
+            'p' # Pencil Pusher
+        ]
+
+        cogType = random.choice(suitTypes)
         numCogs = random.randint(1000, 3000)
 
         skeleton = 0

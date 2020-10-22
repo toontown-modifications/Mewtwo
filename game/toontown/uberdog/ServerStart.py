@@ -1,9 +1,11 @@
 from panda3d.core import loadPrcFile
 import builtins, sys, os, traceback
 
+# Load our base configuration.
 loadPrcFile(''.join(sys.argv[1:]))
 
 if os.path.exists('config/local.prc'):
+    # A local configuration exists, load it.
     loadPrcFile('config/local.prc')
 
 class game:
@@ -14,11 +16,13 @@ builtins.game = game
 from game.otp.ai.AIBaseGlobal import *
 
 if os.getenv('USE_EXT_AGENT') != 0:
-    from .ToontownServerRepositoryAgent import ToontownServerRepositoryAgent
+    # We want to use ExtAgent for messages.
+    from ToontownServerRepositoryAgent import ToontownServerRepositoryAgent
     simbase.air = ToontownServerRepositoryAgent()
 
 elif os.getenv('NO_EXT_AGENT'):
-    from .ToontownServerRepository import ToontownServerRepository
+    # We want to use the OTP itself for messages.
+    from ToontownServerRepository import ToontownServerRepository
     simbase.air = ToontownServerRepository()
 
 host = config.GetString('air-connect', '127.0.0.1')
@@ -33,7 +37,8 @@ try:
     run()
 except Exception:
     info = traceback.format_exc()
+    logFile = 'data/tracebacks/server/traceback.txt'
 
-    with open('data/ud-traceback.txt', 'w+') as log:
+    with open(logFile, 'w+') as log:
         log.write(info + '\n')
     raise

@@ -10,8 +10,8 @@ otpd/databases/bak/*
 .idea/*
 venv/*
 backups/*
-data/ai-traceback.txt
-data/ud-traceback.txt
+data/tracebacks/server/*.txt
+data/tracebacks/ai/*.txt
 trickOrTreat-anydbm
 .DS_Store
 config/local.prc

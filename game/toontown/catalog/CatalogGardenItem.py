@@ -7,7 +7,6 @@ from game.toontown.estate import GardenGlobals
 from direct.actor import Actor
 from pandac.PandaModules import NodePath
 
-
 class CatalogGardenItem(CatalogItem.CatalogItem):
     sequenceNumber = 0
 
@@ -24,7 +23,7 @@ class CatalogGardenItem(CatalogItem.CatalogItem):
             return 100
 
     def reachedPurchaseLimit(self, avatar):
-        if self in avatar.onOrder and self in avatar.mailboxContents and self in avatar.onGiftOrder and self in avatar.awardMailboxContents or self in avatar.onAwardOrder:
+        if self in avatar.onOrder or self in avatar.mailboxContents or self in avatar.onGiftOrder or self in avatar.awardMailboxContents or self in avatar.onAwardOrder:
             return 1
 
         return 0

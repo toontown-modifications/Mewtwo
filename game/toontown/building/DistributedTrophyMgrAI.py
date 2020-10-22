@@ -39,10 +39,10 @@ class DistributedTrophyMgrAI(DistributedObjectAI.DistributedObjectAI):
         """
         # Make a copy so we can manipulate it
         i = map(lambda t: list(t), self.trophyDict.items())
-            
+
         # Recompute only if the score is greater than the lowest score
         # or if there are less than 10 players in the list
-        if ((score > self.__minLeaderScore) or (len(i) < 10)):        
+        if ((score > self.__minLeaderScore) or (len(i) < 10)):
             # Reverse the items so we have score first
             map(lambda r: r.reverse(),i)
             # Sort by score
@@ -52,20 +52,20 @@ class DistributedTrophyMgrAI(DistributedObjectAI.DistributedObjectAI):
             # Truncate the leaders to the max
             # TODO: what about a tie?
             self.__leaders = i[:self.maxLeaders]
-            
+
             # Keep some side tracking variables as an optimization so we
             # do not need to compute them every time.
             self.__leaderScores = map(lambda t: t[0], self.__leaders)
             self.__minLeaderScore = min(self.__leaderScores)
             self.__leaderAvIds = map(lambda t: t[1], self.__leaders)
             self.__leaderNames = map(lambda avId: self.nameDict[avId], self.__leaderAvIds)
-    
+
             self.notify.debug("recomputed leaders:\n leaderScores: %s\n leaderAvIds: %s\n leaderNames: %s" %
                               (self.__leaderScores, self.__leaderAvIds, self.__leaderNames))
-            
+
             # Yep, it changed (well, most likely changed)
             return True
-        
+
         else:
             return False
 
@@ -109,7 +109,7 @@ class DistributedTrophyMgrAI(DistributedObjectAI.DistributedObjectAI):
             if av:
                 av.d_setSystemMessage(0, TTLocalizer.RemoveTrophy)
                 av.d_setTrophyScore(self.trophyDict[avId])
-            
+
             if self.trophyDict[avId] <= 0:
                 del self.trophyDict[avId]
                 del self.nameDict[avId]

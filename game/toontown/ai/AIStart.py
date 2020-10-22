@@ -7,9 +7,11 @@ builtins.DNAStorage = DNAStorage
 builtins.SuitLeg = SuitLeg
 builtins.SuitLegList = SuitLegList
 
+# Load our base configuration.
 loadPrcFile(''.join(sys.argv[1:]))
 
 if os.path.exists('config/local.prc'):
+    # A local configuration exists, load it.
     loadPrcFile('config/local.prc')
 
 class game:
@@ -22,7 +24,9 @@ from game.otp.ai.AIBaseGlobal import *
 
 from .ToontownAIRepository import ToontownAIRepository
 
-simbase.air = ToontownAIRepository(int(os.getenv('BASE_CHANNEL')), os.getenv('DISTRICT_NAME'))
+districtName = os.getenv('DISTRICT_NAME')
+
+simbase.air = ToontownAIRepository(int(os.getenv('BASE_CHANNEL')), districtName)
 
 host = config.GetString('air-connect', '127.0.0.1')
 port = 7100
@@ -36,7 +40,8 @@ try:
     run()
 except Exception:
     info = traceback.format_exc()
+    logName = 'data/tracebacks/ai/{0}.txt'.format(districtName)
 
-    with open('data/ai-traceback.txt', 'w+') as log:
+    with open(logName, 'w+') as log:
         log.write(info + '\n')
     raise
