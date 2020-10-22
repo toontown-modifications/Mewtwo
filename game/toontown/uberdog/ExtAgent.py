@@ -771,7 +771,7 @@ class ExtAgent(ServerBase):
                     # This is a staff member.
                     self.staffMembers[playToken] = accountType
 
-                if self.getStatus() and playToken not in self.staffMembers:
+                if self.getStatus() == 1 and playToken not in self.staffMembers:
                     errorCode = 151
                     message = 'You have been logged out by an administrator working on the servers.'
 
