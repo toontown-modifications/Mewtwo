@@ -71,6 +71,7 @@ class ExtAgent(ServerBase):
         self.air.netMessenger.register(0, 'registerShard')
         self.air.netMessenger.register(1, 'magicWord')
         self.air.netMessenger.register(2, 'postAddFriend')
+        self.air.netMessenger.register(5, 'magicWordApproved')
 
         self.air.netMessenger.accept('registerShard', self, self.registerShard)
         self.air.netMessenger.accept('postAddFriend', self, self.postAddFriend)
@@ -770,6 +771,12 @@ class ExtAgent(ServerBase):
                 if accountType in ('Administrator', 'Developer', 'Moderator'):
                     # This is a staff member.
                     self.staffMembers[playToken] = accountType
+
+                    accountId = self.bridge.query(playToken)
+
+                    if accountId:
+                        # This account is allowed to use Magic Words.
+                        self.air.netMessenger.send('magicWordApproved', [accountId])
 
                 if self.getStatus() == 1 and playToken not in self.staffMembers:
                     errorCode = 151

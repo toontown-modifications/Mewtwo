@@ -264,10 +264,7 @@ class ToontownAIRepository(ToontownInternalRepository, ServerBase):
             self.welcomeValleyManager = WelcomeValleyManagerAI(self)
             self.welcomeValleyManager.generateWithRequired(OtpDoGlobals.OTP_ZONE_ID_MANAGEMENT)
 
-        latestIssue = time.strftime('-%m-%d %H:%M:%S')
-
         self.inGameNewsMgr = DistributedInGameNewsMgrAI(self)
-        self.inGameNewsMgr.setLatestIssueStr(latestIssue)
         self.inGameNewsMgr.generateWithRequired(OtpDoGlobals.OTP_ZONE_ID_MANAGEMENT)
 
         self.trophyMgr = DistributedTrophyMgrAI(self)

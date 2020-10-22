@@ -38,6 +38,7 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
 
         self.wantSystemResponses = config.GetBool('want-system-responses', False)
         self.sentFromExt = False
+        self.staffMembers = []
 
     def generate(self):
         MagicWordManagerAI.generate(self)
@@ -46,7 +47,10 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
         MagicWordManagerAI.announceGenerate(self)
 
         self.air.netMessenger.register(1, 'magicWord')
+        self.air.netMessenger.register(5, 'magicWordApproved')
+
         self.air.netMessenger.accept('magicWord', self, self.setMagicWordExt)
+        self.air.netMessenger.accept('magicWordApproved', self, self.setMagicWordApproved)
 
     def disable(self):
         MagicWordManagerAI.disable(self)
@@ -904,11 +908,18 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
 
         self.setMagicWord(magicWord, avId, av.zoneId, '')
 
+    def setMagicWordApproved(self, accountId):
+        self.staffMembers.append(accountId)
+
     def setMagicWord(self, magicWord, avId, zoneId, signature):
         if not self.sentFromExt:
             avId = self.air.getAvatarIdFromSender()
 
         av = self.air.doId2do.get(avId)
+
+        if av.getDISLid() not in self.staffMembers:
+            av.d_setSystemMessage(0, 'You do not have sufficient access to execute Magic Words!')
+            return
 
         # Chop off the ~ at the start as its not needed, split the Magic Word and make the Magic Word case insensitive.
         magicWord = magicWord[1:]
