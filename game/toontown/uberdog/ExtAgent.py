@@ -1104,7 +1104,6 @@ class ExtAgent(ServerBase):
                 }
 
                 # Activate the avatar on the DBSS.
-                print('setDefaultShard', fields['setDefaultShard'][0])
                 self.air.sendActivate(avId, 0, 0, self.air.dclassesByName['DistributedToonUD'], activateFields)
 
                 # Add the client to the avatar channel.
