@@ -136,7 +136,7 @@ class ExtAgent(ServerBase):
             return request.text
         except:
             self.notify.warning('Failed to get status!')
-            return True
+            return False
 
     def postAddFriend(self, avId, friendId):
         self.friendsManager.postAddFriend(avId, friendId)
