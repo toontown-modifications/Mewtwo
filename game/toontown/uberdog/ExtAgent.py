@@ -879,7 +879,7 @@ class ExtAgent(ServerBase):
                 playToken = self.accId2playToken.get(accId, '')
 
                 if message[0] in ('~', '@'):
-                    if playToken in self.staffMembers:
+                    if playToken in self.staffMembers or not self.isProdServer():
                         # Route this to the Magic Word manager.
                         self.air.netMessenger.send('magicWord', [message, doId])
                         return
@@ -1104,8 +1104,8 @@ class ExtAgent(ServerBase):
                 }
 
                 # Activate the avatar on the DBSS.
-                self.air.sendActivate(avId, fields['setDefaultShard'][0], 1,
-                    self.air.dclassesByName['DistributedToonUD'], activateFields)
+                print('setDefaultShard', fields['setDefaultShard'][0])
+                self.air.sendActivate(avId, 0, 0, self.air.dclassesByName['DistributedToonUD'], activateFields)
 
                 # Add the client to the avatar channel.
                 dg = PyDatagram()

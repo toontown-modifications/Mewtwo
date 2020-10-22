@@ -40,6 +40,12 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
         self.sentFromExt = False
         self.staffMembers = []
 
+        self.backupDir = 'backups/magic-words'
+
+        if not os.path.exists(self.backupDir):
+            # Create our backup directory.
+            os.mkdir(self.backupDir)
+
     def generate(self):
         MagicWordManagerAI.generate(self)
 
@@ -307,8 +313,12 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
 
         if av.ghostMode == 1:
             av.b_setGhostMode(0)
+            response = 'Enabled ghost mode!'
         else:
             av.b_setGhostMode(1)
+            response = 'Disabled ghost mode!'
+
+        self.sendResponseMessage(avId, response)
 
     def d_spawnFO(self, avId, zoneId, foType):
         av = self.air.doId2do.get(avId)
@@ -917,11 +927,20 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
 
         av = self.air.doId2do.get(avId)
 
-        if av.getDISLid() not in self.staffMembers:
+        if self.air.isProdServer() and av.getDISLid() not in self.staffMembers:
             av.d_setSystemMessage(0, 'You do not have sufficient access to execute Magic Words!')
             return
 
-        # Chop off the ~ at the start as its not needed, split the Magic Word and make the Magic Word case insensitive.
+        # Log this attempt.
+        self.notify.info('{0} with avId of {1} executed Magic Word: {2}!'.format(av.getName(), avId, magicWord))
+
+        # Write this attempt to disk.
+        # We may need to view this later.
+        with open(self.backupDir + '/log.txt', 'a') as logFile:
+            timestamp = time.strftime('%c')
+            logFile.write('{0} | {1} ({2}): {3}\n'.format(timestamp, av.getName(), avId, magicWord))
+
+        # Chop off the prefix at the start as its not needed, split the Magic Word and make the Magic Word case insensitive.
         magicWord = magicWord[1:]
         splitWord = magicWord.split(' ')
         args = splitWord[1:]
