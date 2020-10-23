@@ -18,6 +18,7 @@ class ttPartyDb:
     """Based on sbMaildb.py in $OTP/src/switchboard."""
 
     notify = DirectNotifyGlobal.directNotify.newCategory("ttPartyDb")
+    notify.setDebug(True)
 
     def __init__(self,host,port,user,passwd,db):
         self.sqlAvailable = True
