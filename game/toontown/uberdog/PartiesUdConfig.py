@@ -29,6 +29,6 @@ elif language == "french":
 else:
 	ttDbName = "toontownTopDb"
 
-ttDbUser = "ttDb_user"
-ttDbPasswd = "toontastic2008"
+ttDbUser = "root"
+ttDbPasswd = "klnbZS9Jca4PLaWIMEED77zwQzL0EfaX"
 
