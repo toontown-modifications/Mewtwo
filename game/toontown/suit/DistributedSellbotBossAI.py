@@ -12,6 +12,7 @@ from game.toontown.toonbase import TTLocalizer
 from game.toontown.battle import BattleBase
 from game.toontown.toon import NPCToons
 from game.toontown.suit import SellbotBossGlobals
+from game.toontown.toon.ToonDNA import ToonDNA
 import SuitDNA, random
 
 class DistributedSellbotBossAI(DistributedBossCogAI.DistributedBossCogAI, FSM.FSM):
@@ -381,6 +382,24 @@ class DistributedSellbotBossAI(DistributedBossCogAI.DistributedBossCogAI, FSM.FS
                     self.sendUpdateToAvatarId(toonId, 'toonPromoted', [1])
                 else:
                     self.sendUpdateToAvatarId(toonId, 'toonPromoted', [0])
+
+            if self.nerfed:
+                # Give the toon their reward.
+                toon.d_setSystemMessage(0, 'Toon Resistance: As a reward, you now have your Cog Crusher outfit! Thank YOU for being Toon Enough!')
+
+                dna = ToonDNA()
+                dna.makeFromNetString(toon.getDNAString())
+
+                dna.topTex = 111
+                dna.topTexColor = 27
+
+                dna.sleeveTex = 98
+                dna.sleeveTexColor = 27
+
+                dna.botTex = 41
+                dna.botTexColor = 27
+
+                toon.b_setDNAString(dna.makeNetString())
 
     def __shouldPromoteToon(self, toon):
         if not toon.readyForPromotion(self.deptIndex):
