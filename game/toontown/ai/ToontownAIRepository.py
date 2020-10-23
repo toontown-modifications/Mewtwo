@@ -69,6 +69,7 @@ from game.toontown.estate.DistributedBankMgrAI import DistributedBankMgrAI
 from game.toontown.ai.DialogueManagerAI import DialogueManagerAI
 from game.otp.uberdog.OtpAvatarManagerAI import OtpAvatarManagerAI
 from game.toontown.uberdog.ServerBase import ServerBase
+from game.otp.otpbase import OTPGlobals
 from game.toontown.ai import ToontownAIMsgTypes
 
 import __builtin__, time, os, requests

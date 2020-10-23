@@ -1120,9 +1120,6 @@ class ExtAgent(ServerBase):
                 datagram.addString(cleanupDatagram.getMessage())
                 self.air.send(datagram)
 
-                # Tell the Party manager as well.
-                self.air.partyManager.avatarOnline(avId)
-
             def handleAccountRetrieve(dclass, fields):
                 if dclass != self.air.dclassesByName['AccountUD']:
                     # This is not an Account object.

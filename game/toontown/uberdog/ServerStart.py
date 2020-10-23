@@ -1,4 +1,5 @@
 from panda3d.core import loadPrcFile
+from direct.showbase import PythonUtil
 import __builtin__, sys, os, traceback
 
 # Load our base configuration.
@@ -12,6 +13,7 @@ class game:
     name = 'server'
     process = 'server'
 __builtin__.game = game
+__builtin__.isClient = lambda: PythonUtil.isClient()
 
 from game.otp.uberdog.UberDogGlobal import *
 from game.toontown.uberdog import PartiesUdConfig

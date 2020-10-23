@@ -1,5 +1,6 @@
 from panda3d.core import loadPrcFile
 from panda3d.toontown import DNAStorage, SuitLeg, SuitLegList
+from direct.showbase import PythonUtil
 import __builtin__, sys, os, traceback
 
 __builtin__.isClient = lambda: PythonUtil.isClient()
