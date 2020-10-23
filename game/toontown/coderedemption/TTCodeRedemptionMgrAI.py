@@ -225,6 +225,10 @@ class TTCodeRedemptionMgrAI(DistributedObjectAI):
                 shirt = CatalogFurnitureItem(4010, 0)
             return [trunk]
 
+        if code == 'party-fun':
+            beans = CatalogBeanItem(12000, tagCode = 2)
+            return [beans]
+
         return False
 
     def requestCodeRedeem(self, todo0, todo1):
