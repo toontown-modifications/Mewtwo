@@ -218,8 +218,6 @@ class ExtAgent(ServerBase):
             if dclass != toonDC:
                 return
 
-            pendingName = fields['WishName'][0]
-
             fields = {
                 'WishNameState': ('APPROVED',)
                 }
