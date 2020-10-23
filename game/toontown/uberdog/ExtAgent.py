@@ -214,34 +214,20 @@ class ExtAgent(ServerBase):
     def approveName(self, avId):
         toonDC = simbase.air.dclassesByName['DistributedToonUD']
 
-        def handleAvatar(dclass, fields):
-            if dclass != toonDC:
-                return
+        fields = {
+            'WishNameState': ('APPROVED',)
+        }
 
-            fields = {
-                'WishNameState': ('APPROVED',)
-                }
-
-            simbase.air.dbInterface.updateObject(simbase.air.dbId, avId, toonDC, fields)
-
-        # Query the avatar to get the pending name.
-        simbase.air.dbInterface.queryObject(simbase.air.dbId, avId, handleAvatar)
+        simbase.air.dbInterface.updateObject(simbase.air.dbId, avId, toonDC, fields)
 
     def rejectName(self, avId):
         toonDC = simbase.air.dclassesByName['DistributedToonUD']
 
-        def handleAvatar(dclass, fields):
-            if dclass != toonDC:
-                return
+        fields = {
+            'WishNameState': ('REJECTED',)
+        }
 
-            fields = {
-                'WishNameState': ('REJECTED',)
-                }
-
-            simbase.air.dbInterface.updateObject(simbase.air.dbId, avId, toonDC, fields)
-
-        # Query the avatar to get the pending name.
-        simbase.air.dbInterface.queryObject(simbase.air.dbId, avId, handleAvatar)
+        simbase.air.dbInterface.updateObject(simbase.air.dbId, avId, toonDC, fields)
 
     def registerShard(self, shardId, shardName):
         self.shardInfo[shardId] = (shardName, 0)
