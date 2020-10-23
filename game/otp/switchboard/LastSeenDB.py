@@ -2,8 +2,8 @@ import MySQLdb
 import _mysql_exceptions
 import MySQLdb.constants.CR
 import datetime
-from otp.friends.FriendInfo import FriendInfo
-import otp.switchboard.sbSQL as sbSQL
+from game.otp.friends.FriendInfo import FriendInfo
+import game.otp.switchboard.sbSQL as sbSQL
 
 SERVER_GONE_ERROR = MySQLdb.constants.CR.SERVER_GONE_ERROR
 SERVER_LOST = MySQLdb.constants.CR.SERVER_LOST

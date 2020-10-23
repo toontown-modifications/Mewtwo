@@ -1,7 +1,7 @@
 import MySQLdb
 import _mysql_exceptions
 import datetime
-#from otp.distributed import OtpDoGlobals
+#from game.otp.distributed import OtpDoGlobals
 #from direct.directnotify.DirectNotifyGlobal import directNotify
 import FriendManagerService_services
 

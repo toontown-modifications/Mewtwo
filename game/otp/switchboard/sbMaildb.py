@@ -7,9 +7,9 @@ import MySQLdb
 import MySQLdb.constants.CR
 import _mysql_exceptions
 
-from otp.switchboard.sbLog import sbLog
-import otp.switchboard.sbConfig as sbConfig
-import otp.switchboard.sbSQL as sbSQL
+from game.otp.switchboard.sbLog import sbLog
+import game.otp.switchboard.sbConfig as sbConfig
+import game.otp.switchboard.sbSQL as sbSQL
 
 SERVER_GONE_ERROR = MySQLdb.constants.CR.SERVER_GONE_ERROR
 SERVER_LOST = MySQLdb.constants.CR.SERVER_LOST
