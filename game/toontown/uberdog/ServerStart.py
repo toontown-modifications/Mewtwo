@@ -13,17 +13,20 @@ class game:
     process = 'server'
 __builtin__.game = game
 
-from game.otp.ai.AIBaseGlobal import *
+from game.otp.uberdog.UberDogGlobal import *
+from game.toontown.uberdog import PartiesUdConfig
+
+uber.mysqlhost = uber.config.GetString("mysql-host", PartiesUdConfig.ttDbHost)
 
 if os.getenv('USE_EXT_AGENT') != 0:
     # We want to use ExtAgent for messages.
     from ToontownServerRepositoryAgent import ToontownServerRepositoryAgent
-    simbase.air = ToontownServerRepositoryAgent()
+    uber.air = ToontownServerRepositoryAgent()
 
 elif os.getenv('NO_EXT_AGENT'):
     # We want to use the OTP itself for messages.
     from ToontownServerRepository import ToontownServerRepository
-    simbase.air = ToontownServerRepository()
+    uber.air = ToontownServerRepository()
 
 host = config.GetString('air-connect', '127.0.0.1')
 port = 7100
@@ -31,7 +34,7 @@ if ':' in host:
     host, port = host.split(':', 1)
     port = int(port)
 
-simbase.air.connect(host, port)
+uber.air.connect(host, port)
 
 try:
     run()

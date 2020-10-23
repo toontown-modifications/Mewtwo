@@ -144,9 +144,9 @@ class DataStore:
             if os.path.exists(self.filepath):
                 try:
                     os.rename(self.filepath, self.serverDataFolder + newFileName)
-                    simbase.air.writeServerEvent('Uberdog data store Info', 0, 'Creating backup of file: %s saving as: %s' % (tail, newFileName))
+                    uber.air.writeServerEvent('Uberdog data store Info', 0, 'Creating backup of file: %s saving as: %s' % (tail, newFileName))
                 except:
-                    simbase.air.writeServerEvent('Uberdog data store Info', 0, 'Unable to create backup of file: %s ' % tail)
+                    uber.air.writeServerEvent('Uberdog data store Info', 0, 'Unable to create backup of file: %s ' % tail)
 
             else:
                 files = os.listdir(head)
@@ -155,9 +155,9 @@ class DataStore:
                         filename, ext = os.path.splitext(file)
                         try:
                             os.rename(file, newFileName + ext)
-                            simbase.air.writeServerEvent('Uberdog data store Info', 0, 'Creating backup of file: %s saving as: %s' % (file, newFileName + ext))
+                            uber.air.writeServerEvent('Uberdog data store Info', 0, 'Creating backup of file: %s saving as: %s' % (file, newFileName + ext))
                         except:
-                            simbase.air.writeServerEvent('Uberdog data store Info', 0, 'Unable to create backup of file: %s ' % newFileName + ext)
+                            uber.air.writeServerEvent('Uberdog data store Info', 0, 'Unable to create backup of file: %s ' % newFileName + ext)
 
         else:
             if os.path.exists(self.filepath + '.bu'):
