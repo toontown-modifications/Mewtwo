@@ -376,6 +376,9 @@ class FriendsManagerUD:
         newOperation = GetAvatarInfoOperation(self, avId, avId, self.__handleGoingOffline)
         newOperation.start()
 
+        # Tell the party manager we are going offline.
+        self.air.air.partyManager.avatarOffline(avId)
+
     def __handleGoingOffline(self, success, avId, fields, isPet):
         if not success:
             return

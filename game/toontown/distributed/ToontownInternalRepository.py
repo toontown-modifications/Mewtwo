@@ -118,3 +118,6 @@ class ToontownInternalRepository(AstronInternalRepository):
 
         datagram.addString(themessage.getMessage())
         self.send(datagram)
+
+    def getSenderReturnChannel(self):
+        return self.getMsgSender()

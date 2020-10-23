@@ -28,7 +28,7 @@ ActivityIdsToClasses = {
     PartyGlobals.ActivityIds.PartyTrampoline : DistributedPartyTrampolineActivityAI,
     PartyGlobals.ActivityIds.PartyVictoryTrampoline : DistributedPartyVictoryTrampolineActivityAI,
     PartyGlobals.ActivityIds.PartyCatch : DistributedPartyCatchActivityAI,
-    PartyGlobals.ActivityIds.PartyDance : DistributedPartyDanceActivityAI, 
+    PartyGlobals.ActivityIds.PartyDance : DistributedPartyDanceActivityAI,
     PartyGlobals.ActivityIds.PartyTugOfWar : DistributedPartyTugOfWarActivityAI,
     PartyGlobals.ActivityIds.PartyFireworks : DistributedPartyFireworksActivityAI,
     PartyGlobals.ActivityIds.PartyClock : None,
@@ -50,7 +50,7 @@ class DistributedPartyAI(DistributedObjectAI):
         self.inviteeIds = inviteeIds
         self.partyStartedTime = self.air.toontownTimeManager.getCurServerDateTime()
         self.partyClockInfo = (0,0,0)
-        
+
         # For the party clock, we need to set aside the x, y, and h
         for activity in self.partyInfo.activityList:
             if activity.activityId == PartyGlobals.ActivityIds.PartyClock:
@@ -60,25 +60,25 @@ class DistributedPartyAI(DistributedObjectAI):
         # try to get the host name at this point here
         toon = simbase.air.doId2do.get(self.partyInfo.hostId)
         if toon:
-            self.hostName = toon.getName()            
-                                                
+            self.hostName = toon.getName()
+
         # Keep track of the parties state for toon's coming in to the party
         self.isPartyEnding = False
         self.activityObjects = []
-                
-    def getPartyState(self):    
-        return self.isPartyEnding        
-        
-    def b_setPartyState(self, partyState):    
-        self.isPartyEnding = partyState 
-        self.sendUpdate("setPartyState", [partyState])       
-    
+
+    def getPartyState(self):
+        return self.isPartyEnding
+
+    def b_setPartyState(self, partyState):
+        self.isPartyEnding = partyState
+        self.sendUpdate("setPartyState", [partyState])
+
     def generate(self):
         DistributedPartyAI.notify.debug("DistParty generate: %s" % self.doId)
         DistributedObjectAI.generate(self)
 
         self.air.writeServerEvent("party_generate",self.partyInfo.partyId, "%d|%d" % (self.doId,self.partyInfo.hostId))
-        
+
         # Log that a GM party has been generated.
         try:
             host = simbase.air.doId2do.get(self.partyInfo.hostId)
@@ -119,7 +119,7 @@ class DistributedPartyAI(DistributedObjectAI):
             newAct = actClass(self.air, self.doId, x, y ,h)
             newAct.generateWithRequired(self.zoneId)
             self.activityObjects.append(newAct)
-                
+
     def getCannonActivity(self):
         result = None
         for act in self.activityObjects:
@@ -161,7 +161,7 @@ class DistributedPartyAI(DistributedObjectAI):
             formattedDecors.append(oneDecor)
         isPrivate = self.partyInfo.isPrivate
         inviteTheme = self.partyInfo.inviteTheme
-            
+
         return (
             self.partyInfo.partyId,
             self.partyInfo.hostId,
@@ -196,7 +196,7 @@ class DistributedPartyAI(DistributedObjectAI):
                 activityObj.requestDelete()
             self.activityObjects = []
             DistributedObjectAI.delete(self)
-            
+
 
     def unload(self):
         self.notify.debug("unload")
@@ -213,7 +213,7 @@ class DistributedPartyAI(DistributedObjectAI):
                 toonName = toon.getName()
                 if toonName:
                     self.b_setHostName(toonName)
-            
+
         self.sendUpdate("setAvIdsAtParty", [self.air.partyManager.zoneIdToGuestAvIds[self.zoneId]])
         totalMoney = -1
         av = simbase.air.doId2do.get(avId)
@@ -246,8 +246,8 @@ class DistributedPartyAI(DistributedObjectAI):
 
     def d_setHostName(self, newName):
         """Send the host name to the client."""
-        self.sendUpdate("setHostName", [newName])        
-    
+        self.sendUpdate("setHostName", [newName])
+
     def isInActivity(self, avId):
         """Return true if the avId is busy with an activity."""
         result = False
@@ -256,6 +256,6 @@ class DistributedPartyAI(DistributedObjectAI):
                 result = True
                 break
         return result
-        
-    
-    
+
+
+

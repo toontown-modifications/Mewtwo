@@ -1120,6 +1120,10 @@ class ExtAgent(ServerBase):
                 datagram.addString(cleanupDatagram.getMessage())
                 self.air.send(datagram)
 
+                # Tell the Party manager that we are online.
+                # [avatarId, accountId, playerName, playerNameApproved, openChatEnabled, createFriendsWithChat, chatCodeCreation]
+                self.air.partyManager.avatarOnlinePlusAccountInfo(avId, target, '', 1, 1, 1, 1)
+
             def handleAccountRetrieve(dclass, fields):
                 if dclass != self.air.dclassesByName['AccountUD']:
                     # This is not an Account object.

@@ -15,9 +15,10 @@ class DistributedMailboxAI(DistributedObjectAI):
         self.houseId = self.house.doId
         self.housePos = self.house.housePos
         self.name = self.house.name
-        self.busy = False
+        self.busy = 0
         self.user = None
         self.fullIndicator = 0
+        self.av = None
 
     def generate(self):
         DistributedObjectAI.generate(self)
@@ -63,7 +64,8 @@ class DistributedMailboxAI(DistributedObjectAI):
         if len(av.mailboxContents) != 0 or av.numMailItems or av.getNumInvitesToShowInMailbox() or len(av.awardMailboxContents) != 0:
             self.d_setMovie(MailboxGlobals.MAILBOX_MOVIE_READY, avId)
             self.user = avId
-            self.busy = True
+            self.busy = avId
+            self.av = av
         elif len(av.onOrder):
             self.d_setMovie(MailboxGlobals.MAILBOX_MOVIE_WAITING, avId)
         else:
@@ -77,7 +79,8 @@ class DistributedMailboxAI(DistributedObjectAI):
             return
 
         self.user = None
-        self.busy = False
+        self.busy = 0
+        self.av = None
         self.updateIndicatorFlag()
         self.d_setMovie(MailboxGlobals.MAILBOX_MOVIE_EXIT, avId)
         self.d_freeAvatar(avId)

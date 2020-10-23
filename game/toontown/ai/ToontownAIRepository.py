@@ -606,5 +606,4 @@ class ToontownAIRepository(ToontownInternalRepository, ServerBase):
                 self.notify.error('__handlePartyManagerUdToAllAi globalId=%d not equal to %d' %
                                   (globalId, OtpDoGlobals.OTP_DO_ID_TOONTOWN_PARTY_MANAGER))
             # Let the dclass finish the job
-            print(do.dclass.getName())
             do.dclass.receiveUpdate(do, di)

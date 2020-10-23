@@ -28,7 +28,7 @@ class DistributedPartyGateAI(DistributedObjectAI.DistributedObjectAI):
             self.air.writeServerEvent('suspicious', senderId, 'someone else trying to get a list of public parties for: avId = %d' % avId)
             return
         self.sendUpdateToAvatarId(avId, "listAllPublicParties", [self.air.partyManager.getAllPublicParties()])
-    
+
     def partyChoiceRequest(self, avId, shardId, zoneId):
         # A toon would like to go to this party.
         # We need to check if the party still has room and is still going (since
@@ -36,13 +36,13 @@ class DistributedPartyGateAI(DistributedObjectAI.DistributedObjectAI):
         # options).
         DistributedPartyGateAI.notify.debug("partyChoiceRequest : avId = %d, shardId = %d, zoneId = %d " % (avId, shardId, zoneId))
         senderId = self.air.getAvatarIdFromSender()
-        
+
         if avId != senderId:
             self.air.writeServerEvent('suspicious', senderId, 'someone else trying to choose a public party for: avId = %d' % avId)
             return
 
         allPublicPartyInfo = self.air.partyManager.getAllPublicParties()
-        
+
         if len(allPublicPartyInfo) == 0:
             # there are no parties at all
             DistributedPartyGateAI.notify.debug("partyChoiceRequest denied as no parties exist")
@@ -62,7 +62,7 @@ class DistributedPartyGateAI(DistributedObjectAI.DistributedObjectAI):
                 # the desired party was not found
                 DistributedPartyGateAI.notify.debug("partyChoiceRequest denied as party could not be found")
                 self.sendUpdateToAvatarId(avId, "partyRequestDenied", [PartyGlobals.PartyGateDenialReasons.Unavailable])
-        
+
         # We might want to also send a lane for the toon to use when he walks
         # through the hat...  if so, we should do a wait of like 3 seconds, and
         # then free the lane we just sent...
