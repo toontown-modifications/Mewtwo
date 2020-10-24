@@ -874,16 +874,38 @@ class ExtAgent(ServerBase):
 
                 blacklisted = self.filterBlacklist(doId, int(self.air.getAccountIdFromSender()), message)
 
-                if blacklisted:
-                    cleanMessage, modifications = '', []
-                else:
-                    cleanMessage, modifications = self.filterWhiteList(message)
+                avId = self.air.getAvatarIdFromSender()
 
-                # Construct a new aiFormatUpdate.
-                resp = toon.aiFormatUpdate('setTalk', doId, doId,
-                                           self.air.ourChannel,
-                                           [0, 0, '', cleanMessage, modifications, 0])
-                self.air.send(resp)
+                def handleAvatar(dclass, fields):
+                    if dclass != self.air.dclassesByName['DistributedToonUD']:
+                        return
+
+                    senderName = fields['setName'][0]
+                    senderFriendsList = fields['setFriendsList'][0]
+
+                    trueFriends = 0
+                    sfTargets = []
+
+                    for friend in senderFriendsList:
+                        if friend[1]:
+                            trueFriends += 1
+                            sfTargets.append(friend[0])
+
+                    if trueFriends or blacklisted:
+                        # We have true friends or used a blacklisted word; just pass an empty array
+                        # in place of any necessary modifications.
+                        cleanMessage, modifications = message, []
+                    else:
+                        # No true friends here; pass any existing modifications.
+                        cleanMessage, modifications = self.filterWhiteList(message)
+
+                    # Construct a new aiFormatUpdate.
+                    resp = toon.aiFormatUpdate('setTalk', doId, doId, self.air.ourChannel, [avId, 0, senderName, cleanMessage, modifications, 0])
+                    self.air.send(resp)
+                    return
+
+                # Retrieve to see if this avatar has true friends.
+                self.air.dbInterface.queryObject(self.air.dbId, avId, handleAvatar)
                 return
             elif fieldNumber == 104: # setTalkWhisper field
                 # We'll have to unpack the data and send our own datagrams.
@@ -1084,6 +1106,7 @@ class ExtAgent(ServerBase):
 
                 activateFields = {
                     'setCommonChatFlags': [0],
+                    'setWhitelistChatFlags': [1],
                     'setAccess': [access]
                 }
 
