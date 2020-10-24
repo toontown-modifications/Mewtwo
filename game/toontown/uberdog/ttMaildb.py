@@ -44,7 +44,7 @@ class ttMaildb:
         #temp hack for initial dev, create DB structure if it doesn't exist already
         cursor = self.db.cursor()
         try:
-            cursor.execute("CREATE DATABASE `%s`"%self.dbname)
+            cursor.execute("CREATE DATABASE IF NOT EXISTS `%s`"%self.dbname)
             if __debug__:
                 self.notify.info("Database '%s' did not exist, created a new one!"%self.dbname)
         except _mysql_exceptions.ProgrammingError, e:
