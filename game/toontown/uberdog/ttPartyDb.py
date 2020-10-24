@@ -49,7 +49,7 @@ class ttPartyDb:
             if __debug__:
                 ttPartyDb.notify.info("Database '%s' did not exist, created a new one!"%self.dbname)
         except _mysql_exceptions.ProgrammingError, e:
-            ttPartyDb.notify.info('%s' % str(e))
+            # ttPartyDb.notify.info('%s' % str(e))
             pass
         except _mysql_exceptions.OperationalError, e:
             ttPartyDb.notify.info('%s' % str(e))
