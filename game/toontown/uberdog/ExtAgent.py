@@ -1552,12 +1552,7 @@ class ExtAgent(ServerBase):
         msgType = dgi.getUint16()
         resp = None
 
-        if msgType == CLIENT_EJECT:
-            resp = PyDatagram()
-            resp.addUint16(4) # CLIENT_GO_GET_LOST
-            resp.addUint16(dgi.getUint16())
-            resp.addString(dgi.getString())
-        elif msgType == CLIENT_DONE_INTEREST_RESP:
+        if msgType == CLIENT_DONE_INTEREST_RESP:
             contextId = dgi.getUint32()
             handle = dgi.getUint16()
 

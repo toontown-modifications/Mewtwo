@@ -20,12 +20,11 @@ from game.toontown.uberdog import PartiesUdConfig
 
 uber.mysqlhost = uber.config.GetString("mysql-host", PartiesUdConfig.ttDbHost)
 
-if os.getenv('USE_EXT_AGENT') != 0:
+if os.getenv('USE_EXT_AGENT') == '1':
     # We want to use ExtAgent for messages.
     from ToontownServerRepositoryAgent import ToontownServerRepositoryAgent
     uber.air = ToontownServerRepositoryAgent()
-
-elif os.getenv('NO_EXT_AGENT'):
+else:
     # We want to use the OTP itself for messages.
     from ToontownServerRepository import ToontownServerRepository
     uber.air = ToontownServerRepository()
