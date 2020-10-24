@@ -67,7 +67,7 @@ class ttInviteDb:
                 """)
 
                 cursor.execute("""
-                CREATE TABLE ttInviteStatus(
+                CREATE TABLE IF NOT EXISTS ttInviteStatus(
                   statusId      TINYINT NOT NULL,
                   description   VARCHAR(20) NOT NULL,
                   lastupdate    TIMESTAMP  NOT NULL
@@ -87,7 +87,7 @@ class ttInviteDb:
 
             # TODO is it better to do a show tables than to do a try create Table except block?
             cursor.execute("""
-            CREATE TABLE ttInvite (
+            CREATE TABLE IF NOT EXISTS ttInvite (
               inviteId           BIGINT     NOT NULL AUTO_INCREMENT,
               partyId            BIGINT     NOT NULL,
               guestId            BIGINT     NOT NULL,
@@ -167,7 +167,6 @@ class ttInviteDb:
             self.notify.warning("Unknown error in getInvites, giving up:\n%s" % str(e))
             return ()
 
-
     def putInvite(self, partyId, inviteeId,isRetry=False):
         if not self.sqlAvailable:
             return
@@ -195,7 +194,6 @@ class ttInviteDb:
         except Exception,e:
             self.notify.warning("Unknown error in putInvite, giving up:\n%s" % str(e))
             return
-
 
     def deleteInviteByParty(self,partyId,isRetry=False):
         if not self.sqlAvailable:
@@ -255,13 +253,11 @@ class ttInviteDb:
             self.notify.warning("Unknown error in getReplies, giving up:\n%s" % str(e))
             return ()
 
-
     def dumpInviteTable(self):
         cursor = MySQLdb.cursors.DictCursor(self.db)
         cursor.execute("USE `%s`"%self.dbname)
         cursor.execute("SELECT * FROM ttInviteDb")
         return cursor.fetchall()
-
 
     def getOneInvite(self, inviteKey, isRetry = False):
         if not self.sqlAvailable:
@@ -319,7 +315,6 @@ class ttInviteDb:
         except Exception,e:
             self.notify.warning("Unknown error in updateInvite, giving up:\n%s" % str(e))
             return ()
-
 
     def getInviteesOfParty(self, inviteKey, isRetry = False):
         if not self.sqlAvailable:

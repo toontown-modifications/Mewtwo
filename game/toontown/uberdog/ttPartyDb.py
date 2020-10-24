@@ -68,7 +68,7 @@ class ttPartyDb:
                 """)
 
                 cursor.execute("""
-                CREATE TABLE ttPartyStatus(
+                CREATE TABLE IF NOT EXISTS ttPartyStatus(
                   statusId      TINYINT NOT NULL,
                   description   VARCHAR(20) NOT NULL,
                   lastupdate    TIMESTAMP  NOT NULL
@@ -88,7 +88,7 @@ class ttPartyDb:
 
             # TODO is it better to do a show tables than to do a try create Table except block?
             cursor.execute("""
-            CREATE TABLE ttParty (
+            CREATE TABLE IF NOT EXISTS ttParty (
               partyId             BIGINT     NOT NULL AUTO_INCREMENT,
               hostId              BIGINT     NOT NULL,
               startTime           TIMESTAMP     NOT NULL  default '0000-00-00 00:00:00',
