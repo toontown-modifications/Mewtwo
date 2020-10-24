@@ -1,6 +1,6 @@
 from panda3d.core import loadPrcFile
 from direct.showbase import PythonUtil
-import __builtin__, sys, os, traceback, pymysql
+import __builtin__, sys, os, traceback
 
 # Load our base configuration.
 loadPrcFile(''.join(sys.argv[1:]))
@@ -14,9 +14,6 @@ class game:
     process = 'server'
 __builtin__.game = game
 __builtin__.isClient = lambda: PythonUtil.isClient()
-
-# Replacement libary used for parties.
-pymysql.install_as_MySQLdb()
 
 from game.otp.uberdog.UberDogGlobal import *
 from game.toontown.uberdog import PartiesUdConfig
