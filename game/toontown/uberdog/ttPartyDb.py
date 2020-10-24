@@ -316,7 +316,6 @@ class ttPartyDb:
             self.notify.warning("Unknown error in getPartiesAvailableToStart, giving up:\n%s" % str(e))
             return ()
 
-
     def _setPartyStatusToCanStart(self, tupleOfResultDictionaries):
         """ Set the status on the following parties to CanStart """
         for resDict in tupleOfResultDictionaries:
@@ -674,7 +673,6 @@ class ttPartyDb:
         except Exception,e:
             self.notify.warning("Unknown error in forceNeverStartedForCanStart, giving up:\n%s" % str(e))
             return ()
-
 
     def changeMultiplePartiesStatus(self, partyIds, newPartyStatus, isRetry=False):
         """
