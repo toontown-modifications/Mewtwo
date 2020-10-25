@@ -102,15 +102,12 @@ class ExtAgent(ServerBase):
                            ToontownGlobals.DonaldsDreamland,
                            ToontownGlobals.SellbotHQ,
                            ToontownGlobals.CashbotHQ,
-                           ToontownGlobals.LawbotHQ,
-                           ToontownGlobals.WelcomeValleyBegin,
-                           23000]
+                           ToontownGlobals.LawbotHQ]
         self.blacklistZones = [
             ToontownGlobals.SellbotLobby,
             ToontownGlobals.LawbotOfficeExt,
             ToontownGlobals.LawbotLobby,
-            ToontownGlobals.CashbotLobby,
-            ToontownGlobals.WelcomeValleyEnd]
+            ToontownGlobals.CashbotLobby]
 
         self.wantMembership = config.GetBool('want-membership', False)
 
@@ -171,10 +168,15 @@ class ExtAgent(ServerBase):
         dg.addString(resp.getMessage())
         self.air.send(dg)
 
-    def sendSystemMessage(self, clientChannel, message):
+    def sendSystemMessage(self, clientChannel, message, aknowledge = False):
         # Prepare the System Message response.
         resp = PyDatagram()
-        resp.addUint16(78) # CLIENT_SYSTEM_MESSAGE
+
+        if aknowledge:
+            resp.addUint16(123) # CLIENT_SYSTEMMESSAGE_AKNOWLEDGE
+        else:
+            resp.addUint16(78) # CLIENT_SYSTEM_MESSAGE
+
         resp.addString(message)
 
         # Send it.
@@ -202,14 +204,8 @@ class ExtAgent(ServerBase):
 
         banRequest = requests.post(endpoint, banData, headers = self.requestHeaders)
 
-        if banRequest.text == 'Banned account!':
-            self.notify.info('Successfully banned account: {0}.'.format(playToken))
-
         if not silent:
             emailRequest = requests.post(emailDispatchEndpoint, emailData, headers = self.requestHeaders)
-
-            if emailRequest.text == 'Successfully dispatched email!':
-                self.notify.info('Successfully sent ban email!')
 
     def approveName(self, avId):
         toonDC = simbase.air.dclassesByName['DistributedToonUD']
@@ -228,6 +224,9 @@ class ExtAgent(ServerBase):
         }
 
         simbase.air.dbInterface.updateObject(simbase.air.dbId, avId, toonDC, fields)
+
+    def warnPlayer(self, clientChannel, reason):
+        self.sendSystemMessage(clientChannel, reason, True)
 
     def registerShard(self, shardId, shardName):
         self.shardInfo[shardId] = (shardName, 0)

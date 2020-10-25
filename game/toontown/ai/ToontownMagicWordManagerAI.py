@@ -908,6 +908,18 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
 
         self.sendResponseMessage(av.doId, 'Started maintenance!')
 
+    def d_setTeleportAllSBHQ(self, av):
+        for doId in self.air.doId2do.keys()[:]:
+            do = self.air.doId2do.get(doId)
+
+            # Make sure the DO is actually a toon.
+            if isinstance(do, DistributedPlayerAI) and do.isPlayerControlled():
+                if do.zoneId == av.zoneId:
+                    # This toon is our zone.
+                    # Teleport them to Sellbot HQ.
+                    self.sendUpdateToAvatarId(doId, 'requestTeleport', ['cogHQLoader', 'cogHQExterior', ToontownGlobals.SellbotHQ, ToontownGlobals.SellbotHQ, 0])
+                    self.sendResponseMessage(av.doId, 'Sent toons to Sellbot HQ!')
+
     def setMagicWordExt(self, magicWord, avId):
         av = self.air.doId2do.get(avId)
 
@@ -1105,6 +1117,8 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
                 self.d_setMaintenance(av, int(args[0]))
             except ValueError:
                 self.sendResponseMessage(avId, 'Invalid parameters.')
+        elif magicWord == 'tpallsbhq':
+            self.d_setTeleportAllSBHQ(av)
         else:
             if magicWord not in disneyCmds:
                 self.sendResponseMessage(avId, '{0} is not a valid Magic Word.'.format(magicWord))
