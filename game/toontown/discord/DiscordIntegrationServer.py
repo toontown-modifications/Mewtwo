@@ -71,7 +71,7 @@ class DiscordIntegrationServer:
                 simbase.air.extAgent.rejectName(avId)
             elif whatToDo == 'warnPlayer':
                 avId = int(data['avId'])
-                reason = data['warnReason']
+                reason = str(data['warnReason'])
 
                 avClientChannel = simbase.air.GetPuppetConnectionChannel(avId)
 
