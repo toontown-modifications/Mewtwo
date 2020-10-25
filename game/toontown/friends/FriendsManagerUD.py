@@ -345,6 +345,7 @@ class FriendsManagerUD:
         clientChannel = self.air.air.GetPuppetConnectionChannel(avId)
 
         if not (otherId and activated):
+            print('No otherId and activated')
             return
 
         # Declare our avatar to their friend.
