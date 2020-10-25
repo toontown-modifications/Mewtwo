@@ -735,7 +735,6 @@ class DistributedPartyManagerAI(DistributedObjectAI):
                 self.__sendNoPartyZoneToClient(senderId)
                 return
 
-
         # We have a toon visiting another toon's party or a host visiting an
         # already started party, update dicts
         else:

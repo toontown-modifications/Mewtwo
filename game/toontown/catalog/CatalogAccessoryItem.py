@@ -9,7 +9,6 @@ from direct.showbase import PythonUtil
 from direct.gui.DirectGui import *
 from pandac.PandaModules import *
 
-
 class CatalogAccessoryItem(CatalogItem.CatalogItem):
     def makeNewItem(self, accessoryType, loyaltyDays=0):
         self.accessoryType = accessoryType
@@ -440,7 +439,6 @@ class CatalogAccessoryItem(CatalogItem.CatalogItem):
             return 0
         else:
             return 1
-
 
 def getAllAccessories(*accessoryTypes):
     list = []

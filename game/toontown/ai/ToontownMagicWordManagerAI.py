@@ -313,10 +313,10 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
 
         if av.ghostMode == 1:
             av.b_setGhostMode(0)
-            response = 'Enabled ghost mode!'
+            response = 'Disabled ghost mode!'
         else:
             av.b_setGhostMode(1)
-            response = 'Disabled ghost mode!'
+            response = 'Enabled ghost mode!'
 
         self.sendResponseMessage(avId, response)
 

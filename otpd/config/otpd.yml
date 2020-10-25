@@ -35,7 +35,6 @@ roles:
           extagent_id: 5536
           send_hash: false
           send_version: false
-          heartbeat_timeout: 70000
       channels:
           min: 1000000000
           max: 1009999999

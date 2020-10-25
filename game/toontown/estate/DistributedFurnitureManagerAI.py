@@ -159,6 +159,11 @@ class DistributedFurnitureManagerAI(DistributedObjectAI):
             return
 
         av = self.air.doId2do.get(avId)
+
+        if not av:
+            # Somehow, this avatar doesn't exist.
+            return
+
         director = self.air.doId2do.get(self.director)
         if director:
             director.b_setGhostMode(0)
