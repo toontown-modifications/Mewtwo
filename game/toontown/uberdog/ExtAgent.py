@@ -714,20 +714,6 @@ class ExtAgent(ServerBase):
 
                 self.air.getNetworkAddress(self.air.getMsgSender(), callback)
 
-                # To prevent skids trying to auth without the stock Disney launcher.
-                # We check if the account is banned here too.
-                endpoint = self.banEndpointBase.format('?username={0}'.format(playToken))
-                banCheck = requests.post(endpoint, headers = self.requestHeaders)
-
-                if 'Your account was banned' in banCheck.text:
-                    # Yup, this account is banned.
-                    errorCode = 120
-                    message = 'Banned account {0} attempted to login!'.format(playToken)
-
-                    self.sendBoot(clientChannel, errorCode, message)
-                    self.sendEject(clientChannel, errorCode, message)
-                    return
-
                 if accountType in ('Administrator', 'Developer', 'Moderator'):
                     # This is a staff member.
                     self.staffMembers[playToken] = accountType
