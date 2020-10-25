@@ -614,15 +614,6 @@ class ExtAgent(ServerBase):
                 animalType = TTLocalizer.AnimalToSpecies[dna.getAnimal()]
                 name = colorString + ' ' + animalType
 
-                # Pick a default shard.
-                shardKeys = list(self.shardInfo.keys())
-                if not shardKeys:
-                    # There aren't available shards...
-                    self.sendEject(clientChannel, 122, 'No Districts are available right now.')
-                    return
-
-                defaultShard = random.choice(shardKeys)
-
                 # Put together the fields the avatar needs.
                 # We don't need to put all of the DB
                 # default values here as they are set in the DC file.
@@ -630,9 +621,7 @@ class ExtAgent(ServerBase):
                               'WishNameState': ('OPEN',),
                               'WishName': ('',),
                               'setDNAString': (dnaString,),
-                              'setFriendsList': ([],),
-                              'setDISLid': (target,),
-                              'setDefaultShard': (defaultShard,),}
+                              'setDISLid': (target,)}
 
                 # Create the Toon object.
                 self.air.dbInterface.createObject(self.air.dbId,
@@ -642,19 +631,6 @@ class ExtAgent(ServerBase):
 
             # Query the account.
             self.air.dbInterface.queryObject(self.air.dbId, clientChannel >> 32, handleRetrieve)
-        elif msgType == 8: # CLIENT_GET_SHARD_LIST
-            resp = PyDatagram()
-            resp.addUint16(9) # CLIENT_GET_SHARD_LIST_RESP
-            resp.addUint16(len(self.shardInfo))
-            for shardId, shardInfo in self.shardInfo.iteritems():
-                resp.addUint32(shardId)
-                resp.addString(shardInfo[0]) # name
-                resp.addUint32(shardInfo[1]) # pop
-
-            dg = PyDatagram()
-            dg.addServerHeader(clientChannel, self.air.ourChannel, CLIENTAGENT_SEND_DATAGRAM)
-            dg.addString(resp.getMessage())
-            self.air.send(dg)
         elif msgType == 10: # CLIENT_GET_FRIEND_LIST
             avId = self.air.getAvatarIdFromSender()
 
@@ -737,20 +713,6 @@ class ExtAgent(ServerBase):
                     print(remoteIp)
 
                 self.air.getNetworkAddress(self.air.getMsgSender(), callback)
-
-                # To prevent skids trying to auth without the stock Disney launcher.
-                # We check if the account is banned here too.
-                endpoint = self.banEndpointBase.format('?username={0}'.format(playToken))
-                banCheck = requests.post(endpoint, headers = self.requestHeaders)
-
-                if 'Your account was banned' in banCheck.text:
-                    # Yup, this account is banned.
-                    errorCode = 120
-                    message = 'Banned account {0} attempted to login!'.format(playToken)
-
-                    self.sendBoot(clientChannel, errorCode, message)
-                    self.sendEject(clientChannel, errorCode, message)
-                    return
 
                 if accountType in ('Administrator', 'Developer', 'Moderator'):
                     # This is a staff member.
@@ -962,70 +924,6 @@ class ExtAgent(ServerBase):
             resp.addUint16(fieldNumber)
             resp.appendData(dcData)
             self.air.send(resp)
-        elif msgType == 29: # CLIENT_SET_ZONE
-            zoneId = dgi.getUint16()
-
-            # Make sure we have an active shard.
-            shardId = self.clientChannel2shardId.get(clientChannel)
-            if not shardId:
-                return
-
-            # Prepare a context.
-            if clientChannel not in self.clientChannel2context:
-                self.clientChannel2context[clientChannel] = 0
-            if clientChannel not in self.clientChannel2contextZone:
-                self.clientChannel2contextZone[clientChannel] = {}
-
-            context = self.clientChannel2context[clientChannel]
-
-            # Save the zone according to the context.
-            self.clientChannel2contextZone[clientChannel][context] = zoneId
-
-            # Send a get state response back to the client.
-            resp = PyDatagram()
-            resp.addUint16(47) # CLIENT_GET_STATE_RESP
-            resp.padBytes(12)
-            resp.addUint16(zoneId)
-
-            dg = PyDatagram()
-            dg.addServerHeader(clientChannel, self.air.ourChannel, CLIENTAGENT_SEND_DATAGRAM)
-            dg.addString(resp.getMessage())
-            self.air.send(dg)
-
-            # This is the Toontown server equivalent of setting interest on a zone.
-            # We'll transform it into a set interest request.
-
-            resp = PyDatagram()
-            resp.addServerHeader(clientChannel, self.air.ourChannel, 97)
-            resp.addUint32(context)
-            resp.addUint16(context)
-            resp.addUint32(shardId)
-            resp.addUint32(zoneId)
-            self.air.send(resp)
-
-            # Increment the context/handle.
-            self.clientChannel2context[clientChannel] += 1
-        elif msgType == 31: # CLIENT_SET_SHARD
-            shardId = dgi.getUint32()
-            if shardId not in self.shardInfo:
-                # This is not a valid shard.
-                self.sendEject(clientChannel, 122, 'Attempted to join an invalid District.')
-                return
-
-            # Increment the shard's population.
-            self.shardInfo[shardId] = (self.shardInfo[shardId][0],
-                                       self.shardInfo[shardId][1] + 1)
-
-            # Keep track of the client's presence on this shard.
-            self.clientChannel2shardId[clientChannel] = shardId
-
-            resp = PyDatagram()
-            resp.addUint16(47) # CLIENT_GET_STATE_RESP
-
-            dg = PyDatagram()
-            dg.addServerHeader(clientChannel, self.air.ourChannel, CLIENTAGENT_SEND_DATAGRAM)
-            dg.addString(resp.getMessage())
-            self.air.send(dg)
         elif msgType == 32: # CLIENT_SET_AVATAR
             avId = dgi.getUint32()
 

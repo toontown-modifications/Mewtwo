@@ -252,6 +252,10 @@ class DistributedToonAI(DistributedPlayerAI.DistributedPlayerAI, DistributedSmoo
             if self.isPlayerControlled():
                 self.b_setHat(random.randint(0, 56), 0, 0)
 
+        from game.toontown.toon.DistributedNPCToonBaseAI import DistributedNPCToonBaseAI
+        if not isinstance(self, DistributedNPCToonBaseAI):
+            self.sendUpdate('setDefaultShard', [self.air.districtId])
+
     def setLocation(self, parentId, zoneId):
         DistributedPlayerAI.DistributedPlayerAI.setLocation(self, parentId, zoneId)
 
