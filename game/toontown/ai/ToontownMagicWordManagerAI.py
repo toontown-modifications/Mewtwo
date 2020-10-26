@@ -920,6 +920,41 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
                     self.sendUpdateToAvatarId(doId, 'requestTeleport', ['cogHQLoader', 'cogHQExterior', ToontownGlobals.SellbotHQ, ToontownGlobals.SellbotHQ, 0])
                     self.sendResponseMessage(av.doId, 'Sent toons to Sellbot HQ!')
 
+    def d_doParty(self, av, command):
+        response = 'You did not specify a command!'
+
+        if command == 'update':
+            # simulate this avatarLogging in, which forces invites
+            # and party updates from the dbs
+            self.air.partyManager.partyUpdate(av.doId)
+
+        elif command == 'checkStart':
+            # force an immediate check of which parties can start
+            self.air.partyManager.forceCheckStart()
+
+        elif command == 'unreleasedServer':
+            newVal = self.air.partyManager.toggleAllowUnreleasedServer()
+            response = 'Allow Unreleased Server= %s' % newVal
+
+        elif command == 'canBuy':
+            newVal = self.air.partyManager.toggleCanBuyParties()
+            response = 'can buy parties= %s' % newVal
+
+        elif command == 'end':
+            response = self.air.partyManager.magicWordEnd(av.doId)
+
+        elif command == 'plan':
+            response = 'Going to party grounds to plan'
+
+            # hoodId determines the loading
+            hoodId = ToontownGlobals.PartyHood
+
+            self.sendUpdateToAvatarId(av.doId, 'requestTeleport',
+                          ['safeZoneLoader', 'party',
+                           hoodId, 0, 0])
+
+        self.sendResponseMessage(av.doId, response)
+
     def setMagicWordExt(self, magicWord, avId):
         av = self.air.doId2do.get(avId)
 
@@ -1119,6 +1154,10 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
                 self.sendResponseMessage(avId, 'Invalid parameters.')
         elif magicWord == 'tpallsbhq':
             self.d_setTeleportAllSBHQ(av)
+        elif magicWord == 'party':
+            if not validation:
+                return
+            self.d_doParty(av, string)
         else:
             if magicWord not in disneyCmds:
                 self.sendResponseMessage(avId, '{0} is not a valid Magic Word.'.format(magicWord))
