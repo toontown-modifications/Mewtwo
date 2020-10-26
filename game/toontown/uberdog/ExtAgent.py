@@ -1229,6 +1229,8 @@ class ExtAgent(ServerBase):
                     else:
                         # Save the handle for later.
                         self.clientChannel2handle[clientChannel] = handle
+                else:
+                    print('Did not send CLIENT_OBJECT_LOCATION for', zoneId)
 
             resp = PyDatagram()
             resp.addServerHeader(clientChannel, self.air.ourChannel, CLIENT_ADD_INTEREST_MULTIPLE)
