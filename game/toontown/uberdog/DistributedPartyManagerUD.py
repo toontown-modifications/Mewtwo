@@ -497,7 +497,6 @@ class DistributedPartyManagerUD(DistributedObjectGlobalUD):
 
         return prioritizedPartyIds, prioritizedPartyInfo
 
-
     def _updateHostedParties(self, avatarId):
         """
         Push information about parties that avatarId is hosting across to the DistributedToon.
@@ -613,7 +612,6 @@ class DistributedPartyManagerUD(DistributedObjectGlobalUD):
                 [party[0]['hostId'], partyId, newPrivateStatus, errorCode ],
             )
             return
-
 
         # TODO updateResult is always empty, do we need to verify the update took?
         updateResult = self.partyDb.changePrivate(partyId, newPrivateStatus)

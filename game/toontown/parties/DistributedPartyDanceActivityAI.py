@@ -12,7 +12,7 @@ from game.toontown.parties import PartyGlobals
 # original classic 10 move dance floor
 class DistributedPartyDanceActivityAI(DistributedPartyDanceActivityBaseAI):
     notify = directNotify.newCategory("DistributedPartyDanceActivityAI")
-    
+
     def __init__(self, air, partyDoId, x, y, h):
         self.notify.debug("Intializing.")
         DistributedPartyDanceActivityBaseAI.__init__(self,
