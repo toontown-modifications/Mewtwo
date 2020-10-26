@@ -379,6 +379,10 @@ class ExtAgent(ServerBase):
             visibles.append(ZoneUtil.getBranchZone(visZoneId))
             zoneVisDict[visZoneId] = visibles
 
+        if zoneId not in zoneVisDict:
+            # Potential injector skid.
+            return []
+
         if not isCogHQ:
             return zoneVisDict[zoneId]
         else:
