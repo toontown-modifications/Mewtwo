@@ -11,7 +11,7 @@ from game.toontown.parties import PartyGlobals
 
 class DistributedPartyDanceActivityBaseAI(DistributedPartyActivityAI):
     notify = directNotify.newCategory("DistributedPartyDanceActivityBaseAI")
-    
+
     def __init__(self, air, partyDoId, x, y, h, activityId, dancePatternToAnims):
         self.notify.debug("Intializing.")
         DistributedPartyActivityAI.__init__(self,
@@ -22,12 +22,12 @@ class DistributedPartyDanceActivityBaseAI(DistributedPartyActivityAI):
                                             PartyGlobals.ActivityTypes.Continuous)
         self.toonIdsToHeadings = {} # toon's heading when it joined
         self.dancePatternToAnims = dancePatternToAnims
-        
+
     def delete(self):
         pass
-    
+
     # Distributed (clsend airecv)
-    def toonJoinRequest(self):    
+    def toonJoinRequest(self):
         """Gets from client when a toon enters the dance floor."""
         senderId = self.air.getAvatarIdFromSender()
         self.notify.debug("Request enter %s" % senderId)
@@ -52,7 +52,7 @@ class DistributedPartyDanceActivityBaseAI(DistributedPartyActivityAI):
                 "Party Dance Activity AI Join Request: Sender already in Party Dance Activity"
                 )
             self.notify.warning("toonJoinRequest() - Sender already in Activity")
-        
+
     def sendToonJoinResponse(self, toonId, joined=True, h=0.0):
         if joined:
             self._addToon(toonId)
@@ -77,12 +77,14 @@ class DistributedPartyDanceActivityBaseAI(DistributedPartyActivityAI):
             # this case is possible when a toon lands on dance floor from the cannon
             # joinRequest is never sent by client but exitRequest is sent
             self.sendToonExitResponse(senderId, exited = False, denialReason=PartyGlobals.DenialReasons.SilentFail)
-            
 
     def sendToonExitResponse(self, toonId, exited, denialReason=PartyGlobals.DenialReasons.Default):
         if exited:
             self._removeToon(toonId)
-            del self.toonIdsToHeadings[toonId]
+
+            if toonId in self.toonIdsToHeadings:
+                del self.toonIdsToHeadings[toonId]
+
             self.sendUpdate("setToonsPlaying", [self.toonIds, self.getHeadingList()])
         else:
             self.sendUpdateToAvatarId(toonId, "exitRequestDenied", [denialReason])
@@ -108,11 +110,11 @@ class DistributedPartyDanceActivityBaseAI(DistributedPartyActivityAI):
             return
         self.d_setDancingToonState(senderId, state, anim)
         self.notify.debug("Request dance move %s" % senderId)
-      
-    # Distributed (broadcast)  
+
+    # Distributed (broadcast)
     def d_setDancingToonState(self, toonId, state, anim):
         self.sendUpdate("setDancingToonState", [toonId, state, anim])
-        
+
     def _handleUnexpectedToonExit(self, toonId):
         """
         An avatar bailed out because he lost his connection or quit
