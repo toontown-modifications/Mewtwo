@@ -236,16 +236,19 @@ class FriendsManagerUD:
         if not success:
             return
 
-        datagram = PyDatagram()
-        datagram.addUint16(53) # CLIENT_FRIEND_ONLINE
+        if onlineFriends:
+            # We have online friends.
+            # Send to the client.
+            datagram = PyDatagram()
+            datagram.addUint16(53) # CLIENT_FRIEND_ONLINE
 
-        for friendId in onlineFriends:
-            datagram.addUint32(friendId)
+            for friendId in onlineFriends:
+                datagram.addUint32(friendId)
 
-        datagram.addUint8(1)
-        datagram.addUint8(1)
+            datagram.addUint8(1)
+            datagram.addUint8(1)
 
-        self.sendDatagram(avId, datagram)
+            self.sendDatagram(avId, datagram)
 
         resp = PyDatagram()
 
