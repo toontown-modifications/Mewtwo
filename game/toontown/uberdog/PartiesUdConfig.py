@@ -31,8 +31,8 @@ else:
 
 if config.GetString('server-type') == 'prod':
 	# This is the production server.
-	ttDbUser = "web"
-	ttDbPasswd = "zHRyZo5hebU2uhjBuKt9PsPAGiswV9K8"
+	ttDbUser = "sunrise"
+	ttDbPasswd = "689A5A6342DA27EE1BD2562425342A!!#aa"
 else:
 	# This is a development environment.
 	ttDbUser = "root"
