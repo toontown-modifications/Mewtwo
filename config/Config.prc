@@ -29,8 +29,6 @@ want-welcome-valley false
 want-fireworks-cannons false
 want-loyalty-requirement true
 
-active-holidays 96
-
 # Code Redemption
 max-code-redemption-attempts 5
 
