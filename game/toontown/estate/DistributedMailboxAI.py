@@ -101,13 +101,20 @@ class DistributedMailboxAI(DistributedObjectAI):
         if not av:
             return
 
-        if index >= len(av.mailboxContents):
+        isAward = index < len(av.awardMailboxContents)
+        if not isAward and index >= len(av.mailboxContents):
             self.sendUpdateToAvatarId(avId, 'acceptItemResponse', [context, ToontownGlobals.P_InvalidIndex])
             return
 
-        item = av.mailboxContents[index]
-        del av.mailboxContents[index]
-        av.b_setMailboxContents(av.mailboxContents)
+        if isAward:
+            item = av.awardMailboxContents[index]
+            del av.awardMailboxContents[index]
+            av.b_setAwardMailboxContents(av.awardMailboxContents)
+        else:
+            item = av.mailboxContents[index]
+            del av.mailboxContents[index]
+            av.b_setMailboxContents(av.mailboxContents)
+
         self.sendUpdateToAvatarId(avId, 'acceptItemResponse', [context, item.recordPurchase(av, optional)])
 
     def discardItemMessage(self, context, item, index, optional):
@@ -119,12 +126,18 @@ class DistributedMailboxAI(DistributedObjectAI):
         if not av:
             return
 
-        if index >= len(av.mailboxContents):
+        isAward = index < len(av.awardMailboxContents)
+        if not isAward and index >= len(av.mailboxContents):
             self.sendUpdateToAvatarId(avId, 'discardItemResponse', [context, ToontownGlobals.P_InvalidIndex])
             return
 
-        del av.mailboxContents[index]
-        av.b_setMailboxContents(av.mailboxContents)
+        if isAward:
+            del av.awardMailboxContents[index]
+            av.b_setAwardMailboxContents(av.awardMailboxContents)
+        else:
+            del av.mailboxContents[index]
+            av.b_setMailboxContents(av.mailboxContents)
+
         self.sendUpdateToAvatarId(avId, 'discardItemResponse', [context, ToontownGlobals.P_ItemAvailable])
 
     def acceptInviteMessage(self, context, inviteKey):

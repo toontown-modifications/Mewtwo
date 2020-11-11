@@ -31,9 +31,6 @@ class TTCodeRedemptionMgrAI(DistributedObjectAI):
         self.failedAttempts = 0
         self.maxCodeAttempts = config.GetInt('max-code-redemption-attempts', 5)
 
-    def giveAwardToToonResult(self, todo0, todo1):
-        pass
-
     def d_redeemCodeResult(self, avId, context, result, awardMgrResult):
         self.sendUpdateToAvatarId(avId, 'redeemCodeResult', [context, result, awardMgrResult])
 
@@ -101,8 +98,9 @@ class TTCodeRedemptionMgrAI(DistributedObjectAI):
                 elif limited == 0:
                     # Success, lets deliver the item right away.
                     item.deliveryDate = int(time.time() / 60) + 1
-                    av.onOrder.append(item)
-                    av.b_setDeliverySchedule(av.onOrder)
+                    item.specialEventId = 1
+                    av.onAwardOrder.append(item)
+                    av.b_setAwardSchedule(av.onAwardOrder)
                     result = TTCodeRedemptionConsts.RedeemErrors.Success
                     awardMgrResult = AwardManagerConsts.GiveAwardErrors.Success
                 elif limited == 1:
@@ -160,15 +158,15 @@ class TTCodeRedemptionMgrAI(DistributedObjectAI):
             shirt = CatalogClothingItem(1807, 0)
             return [shirt]
 
-        if code == 'sillymeter' or code == 'silly meter' or code == 'silly-meter':
+        if code in ('sillymeter', 'silly meter', 'silly-meter'):
             shirt = CatalogClothingItem(1753, 0)
             return [shirt]
 
-        if code == 'gc-sbfo' or code == 'gc sbfo' or code == 'gcsbfo':
+        if code in ('gc-sbfo', 'gc sbfo', 'gcsbfo'):
             shirt = CatalogClothingItem(1788, 0)
             return [shirt]
 
-        if code == 'getconnected' or code == 'get connected' or code == 'get_connected':
+        if code in ('getconnected', 'get connected', 'get_connected'):
             shirt = CatalogClothingItem(1752, 0)
             return [shirt]
 
@@ -230,9 +228,3 @@ class TTCodeRedemptionMgrAI(DistributedObjectAI):
             return [beans]
 
         return False
-
-    def requestCodeRedeem(self, todo0, todo1):
-        pass
-
-    def redeemCodeResult(self, todo0, todo1, todo2):
-        pass
