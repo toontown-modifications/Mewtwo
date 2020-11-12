@@ -1,6 +1,6 @@
 import requests
 
-terminateEndpoint = 'https://sunrisegames.tech/bans/TerminateAccount.php'
+terminateEndpoint = 'https://sunrise.games/bans/TerminateAccount.php'
 
 username = input('Username: ')
 reason = 'Violated rules multiple times.'
