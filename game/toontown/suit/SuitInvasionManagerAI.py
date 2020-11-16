@@ -46,7 +46,7 @@ class SuitInvasionManagerAI:
         if self.air.isProdServer():
             # Send our invasion to the Discord channel.
             self.sendInitialInvasion()
-            taskMgr.doMethodLater(30, self.updateDiscord, 'Update Invasion')
+            #taskMgr.doMethodLater(30, self.updateDiscord, 'Update Invasion')
 
         if task:
             return task.done
