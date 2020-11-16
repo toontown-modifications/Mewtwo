@@ -135,7 +135,7 @@ class ToontownAIRepository(ToontownInternalRepository, ServerBase):
         }
 
         try:
-            requests.post('http://otp-gs.sunrisegames.tech:19135/api/setPopulation', json = data, headers = headers)
+            requests.post('http://otp-gs.sunrise.games:19135/api/setPopulation', json = data, headers = headers)
         except:
             self.notify.warning('Failed to send district population!')
 

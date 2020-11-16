@@ -5,7 +5,7 @@ from direct.directnotify import DirectNotifyGlobal
 
 class BanManagerAI:
     notify = DirectNotifyGlobal.directNotify.newCategory('BanManagerAI')
-    BanUrl = simbase.config.GetString('ban-base-url', 'https://sunrisegames.tech/api/dis-hold/action/event')
+    BanUrl = simbase.config.GetString('ban-base-url', 'https://sunrise.games/api/dis-hold/action/event')
     App = simbase.config.GetString('ban-app-name', 'TTWorldAI')
     Product = simbase.config.GetString('ban-product', 'Toontown')
     EventName = simbase.config.GetString('ban-event-name', 'tthackattempt')
