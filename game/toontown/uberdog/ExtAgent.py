@@ -526,6 +526,62 @@ class ExtAgent(ServerBase):
 
         return True
 
+    def checkBadName(self, name):
+        divide = name.split(' ')
+        lenStr = len(divide)
+        s = 0
+
+        while s != lenStr:
+            name = divide[s]
+            s += 1
+
+        # Read our blacklist data.
+        with open('game/resources/server/blacklist.txt', 'r') as badWordFile:
+            data = badWordFile.readlines()
+
+            for word in data:
+                chrList = list(word)
+
+                if chrList.count('\n') == 1:
+                    chrList.remove('\n')
+
+                badWord = ''.join(chrList)
+
+                if name.lower() == badWord:
+                    # This name is filthy.
+                    return True
+
+        # This name is not filthy.
+        return False
+
+    def checkWhitelistedName(self, name):
+        divide = name.split(' ')
+        lenStr = len(divide)
+        s = 0
+
+        while s != lenStr:
+            name = divide[s]
+            s += 1
+
+        # Read our blacklist data.
+        with open('game/resources/server/whitelist.txt', 'r') as wordFile:
+            data = wordFile.readlines()
+
+            for word in data:
+                chrList = list(word)
+
+                if chrList.count('\n') == 1:
+                    chrList.remove('\n')
+
+                whitelistedName = ''.join(chrList)
+
+                if name.lower() == whitelistedName:
+                    # This name is whitelisted.
+                    return True
+
+        # This name is not whitelisted.
+        return False
+
     def handleDatagram(self, dgi):
         """
         This handles datagrams coming directly from the Toontown 2013 client.
@@ -1165,14 +1221,34 @@ class ExtAgent(ServerBase):
                     message.setWebhook(config.GetString('discord-approvals-webhook'))
                     message.finalize()
 
+            pendingName = name
+            approvedName = ''
+            rejectedName = ''
+
+            # Check our name for any blacklisted words.
+            isNameBlacklisted = self.checkBadName(name)
+
+            if isNameBlacklisted:
+                # This name has blacklisted words.
+                pendingName = ''
+                rejectedName = name
+
+            # Check to see if this name is whitelisted.
+            isNameWhitelisted = self.checkWhitelistedName(name)
+
+            if isNameWhitelisted:
+                # This name is whitelisted.
+                pendingName = ''
+                approvedName = name
+
             # Prepare the wish name response.
             resp = PyDatagram()
             resp.addUint16(71) # CLIENT_SET_WISHNAME_RESP
             resp.addUint32(avId)
             resp.addUint16(0) # returnCode
-            resp.addString(name) # pendingName
-            resp.addString('') # approvedName
-            resp.addString('') # rejectedName
+            resp.addString(pendingName) # pendingName
+            resp.addString(approvedName) # approvedName
+            resp.addString(rejectedName) # rejectedName
 
             # Send it.
             dg = PyDatagram()
