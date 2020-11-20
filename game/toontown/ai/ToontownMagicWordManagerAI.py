@@ -1161,7 +1161,7 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
         else:
             if magicWord not in disneyCmds:
                 self.sendResponseMessage(avId, '{0} is not a valid Magic Word.'.format(magicWord))
-                self.notify.info('Unknown Magic Word: {0} from avId: {1}!'.format(magicWord, avId))
+                self.notify.info('{0} ({1}) has executed a unknown Magic Word {2}!'.format(av.getName(), avId, magicWord))
                 return
 
         # Call our main class:
