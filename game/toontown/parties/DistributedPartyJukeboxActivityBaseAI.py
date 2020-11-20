@@ -14,7 +14,7 @@ from random import randint
 
 class DistributedPartyJukeboxActivityBaseAI(DistributedPartyActivityAI):
     notify = directNotify.newCategory("DistributedPartyJukeboxActivityAI")
-    
+
     def __init__(self, air, partyDoId, x, y, h, actId, phaseToMusicData):
         self.notify.debug("Intializing.")
         DistributedPartyActivityAI.__init__(self,
@@ -24,37 +24,37 @@ class DistributedPartyJukeboxActivityBaseAI(DistributedPartyActivityAI):
                                             actId,
                                             PartyGlobals.ActivityTypes.Continuous
                                             )
-    
+
         # Holds the list of songs requested by each avatar.
         # Format: { toonId : (phase, filename), ... }
         self.phaseToMusicData = phaseToMusicData
         self.toonIdToSongData = {}
         # Holds the queue of songs to be played by avatarId
         self.toonIdQueue = []
-        
+
         self.songPlaying = False
         self.songTimerTask = None
-        
+
         self.timeoutTask = None
-        
+
         # listen for fireworks show starting and stopping
         self.accept( PartyGlobals.FireworksStartedEvent, self.__handleFireworksStarted )
         self.accept( PartyGlobals.FireworksFinishedEvent, self.__handleFireworksFinished )
 
         # this ensure the first song we hear is one of the new ones
         self.randomSongPhase = 13
-        
+
     def delete(self):
         self.ignoreAll()
         self.__stopTimeout()
         DistributedPartyActivityAI.delete(self)
-        
+
     def generate(self):
         DistributedPartyActivityAI.generate(self)
         self.__playNextSong()
-        
+
     # Distributed (clsend airecv)
-    def toonJoinRequest(self):    
+    def toonJoinRequest(self):
         """
         Gets from client when a toon requests to use the jukebox.
         only one toon can use the jukebox.
@@ -68,7 +68,7 @@ class DistributedPartyJukeboxActivityBaseAI(DistributedPartyActivityAI):
             self.__startTimeout(PartyGlobals.JUKEBOX_TIMEOUT)
             self.sendToonJoinResponse(senderId, joined)
         #TODO: Add suspicious behavior case?
-        
+
     # Distributed (clsend airecv)
     def toonExitRequest(self):
         """
@@ -81,20 +81,20 @@ class DistributedPartyJukeboxActivityBaseAI(DistributedPartyActivityAI):
             self.sendToonExitResponse(senderId, True)
         else:
             self.sendToonExitResponse(senderId, False)
-        
+
     def toonExitResponse(self, senderId, exited):
         if exited:
             self.__stopTimeout()
         DistributedPartyActivityAI.sendToonExitResponse(self, senderId, exited)
-        
+
 #===============================================================================
 # Song addition, playing, etc.
 #===============================================================================
-  
+
     # Distributed (clsend airecv)
     def queuedSongsRequest(self):
         senderId = self.air.getAvatarIdFromSender()
-        
+
         songInfoList = []
         index = -1
         for i in range(len(self.toonIdQueue)):
@@ -109,7 +109,7 @@ class DistributedPartyJukeboxActivityBaseAI(DistributedPartyActivityAI):
         self.sendUpdateToAvatarId(senderId,
                                   "queuedSongsResponse",
                                   [songInfoList, index])
-        
+
     # Distributed (clsend airecv)
     def setNextSong(self, nextSongInfo):
         """
@@ -118,7 +118,7 @@ class DistributedPartyJukeboxActivityBaseAI(DistributedPartyActivityAI):
         phase = PartyGlobals.sanitizePhase(nextSongInfo[0])
         filename = nextSongInfo[1]
         self.notify.debug("setNextSong %d/%s" % (phase, filename))
-        
+
         senderId = self.air.getAvatarIdFromSender()
         data = self.getMusicData(phase, filename)
         if data:
@@ -126,19 +126,19 @@ class DistributedPartyJukeboxActivityBaseAI(DistributedPartyActivityAI):
             if senderId not in self.toonIdQueue:
                 self.toonIdQueue.append(senderId)
             self.d_setSongInQueue(senderId, nextSongInfo)
-    
-    # Distributed (required broadcast ram)  
+
+    # Distributed (required broadcast ram)
     def d_setSongPlaying(self, phase, filename, toonId=0):
         self.sendUpdate("setSongPlaying", [(phase, filename), toonId])
-    
+
     # Distributed
     def d_setSongInQueue(self, toonId, songInfo):
         self.sendUpdateToAvatarId(toonId, "setSongInQueue", [songInfo])
-            
+
 #===============================================================================
 # Host Toon only
 #===============================================================================
-   
+
     # Distributed (clsend airecv)
     def moveHostSongToTopRequest(self):
         self.notify.debug("moveHostSongToTopRequest")
@@ -146,19 +146,19 @@ class DistributedPartyJukeboxActivityBaseAI(DistributedPartyActivityAI):
         # TODO: Check to see if senderId is in fact party host
         if senderId in self.toonIdQueue:
             self.b_moveHostSongToTop(senderId)
-        
+
     def moveHostSongToTop(self, hostId):
         self.toonIdQueue.remove(hostId)
         self.toonIdQueue.insert(0, hostId)
-    
+
     def d_moveHostSongToTop(self, hostId):
         self.notify.debug("d_moveHostSongToTop")
         self.sendUpdateToAvatarId(hostId, "moveHostSongToTop", [])
-        
+
     def b_moveHostSongToTop(self, hostId):
         self.moveHostSongToTop(hostId)
         self.d_moveHostSongToTop(hostId)
-    
+
 #===============================================================================
 # Song scheduling
 #===============================================================================
@@ -177,14 +177,14 @@ class DistributedPartyJukeboxActivityBaseAI(DistributedPartyActivityAI):
             songInfo = self.toonIdToSongData.get(toonId, None)
             del self.toonIdToSongData[toonId]
             self.toonIdQueue.remove(toonId)
-            
+
         # No song in the queue? Pick a random song!
         else:
             songInfo = self.getRandomMusicInfo(self.randomSongPhase)
             # every other random song is one of the new party songs
             self.randomSongPhase = -1
             self.notify.debug("random songInfo=%s" % str(songInfo))
-            
+
         if songInfo is not None:
             phase = songInfo[0]
             filename = songInfo[1]
@@ -194,26 +194,26 @@ class DistributedPartyJukeboxActivityBaseAI(DistributedPartyActivityAI):
                 self.d_setSongPlaying(phase, filename, toonId)
                 self.__startTimerForNextSong(self.__getTimeUntilNextSong(data[1]))
                 self.songPlaying = True
-        
+
     def __getTimeUntilNextSong(self, duration):
         return (PartyGlobals.getMusicRepeatTimes(duration) * duration) + PartyGlobals.MUSIC_GAP
-        
+
     def __playNextSongTask(self, task):
         self.__playNextSong()
         return Task.done
-    
+
     def __startTimerForNextSong(self, seconds):
         self.notify.debug("Playing next song in %d seconds." % seconds)
         self.__stopTimerForNextSong()
         self.songTimerTask = taskMgr.doMethodLater(seconds,
                                                    self.__playNextSongTask,
                                                    self.taskName("playNextSong"))
-    
+
     def __stopTimerForNextSong(self):
         if self.songTimerTask != None:
             taskMgr.remove(self.songTimerTask)
             self.songTimerTask = None
-    
+
 #===============================================================================
 # Timeout
 #===============================================================================
@@ -246,7 +246,6 @@ class DistributedPartyJukeboxActivityBaseAI(DistributedPartyActivityAI):
             self.toonExitResponse(self.toonIds[0], True)
         return Task.done
 
-
     def getRandomMusicInfo(self, phase=13):
         if phase == -1:
             # Get random phase
@@ -256,11 +255,10 @@ class DistributedPartyJukeboxActivityBaseAI(DistributedPartyActivityAI):
             phase = random.choice(keys) # this is random.choice
 
         # From that phase, get random filename
-        values = self.phaseToMusicData[phase].keys()
+        values = list(self.phaseToMusicData[phase].keys())
         filename = values[randint(0, len(values) - 1)]
 
         return (phase, filename)
-
 
     def getMusicData(self, phase, filename):
         data = []
@@ -268,17 +266,17 @@ class DistributedPartyJukeboxActivityBaseAI(DistributedPartyActivityAI):
         phase = self.phaseToMusicData.get(phase)
         if phase:
             data = phase.get(filename, [])
-        return data    
-    
+        return data
+
 #===============================================================================
 # React to fireworks show
 #===============================================================================
-    
+
     def __handleFireworksStarted(self):
         self.notify.debug("__handleFireworksStarted")
         self.__stopTimerForNextSong()
         self.d_setSongPlaying(0, "", 0)
-    
+
     def __handleFireworksFinished(self):
         self.notify.debug("__handleFireworksFinished")
         self.__playNextSong()
