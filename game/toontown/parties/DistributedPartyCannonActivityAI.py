@@ -27,7 +27,7 @@ class DistributedPartyCannonActivityAI(DistributedPartyActivityAI):
         self.flyingToons = {}
         self.flyingToonCloudsHit = {}
         self.toonIdsToJellybeanRewards = {}
-        
+
         # Map of cloudNumber to rgb info
         self.cloudColors = {}
 
@@ -45,13 +45,13 @@ class DistributedPartyCannonActivityAI(DistributedPartyActivityAI):
 
         # Listen for when a party cannon has been lit
         self.accept(DistributedPartyCannonAI.CANNON_LIT_EVENT, self.__handleFireCannon)
-        
+
 
     def spawnCannonAt(self, x, y, h):
         cannon = DistributedPartyCannonAI(self.air, self.doId, x, y, 0, h, 0, 0)
         cannon.generateWithRequired(self.zoneId)
         self.cannons[cannon.doId] = cannon
-        
+
     def delete(self):
         self.ignoreAll()
         for cannon in self.cannons.values():
@@ -61,18 +61,18 @@ class DistributedPartyCannonActivityAI(DistributedPartyActivityAI):
         self.flyingToonCloudsHit.clear()
         self.toonIdsToJellybeanRewards.clear()
         DistributedPartyActivityAI.delete(self)
-               
+
     def __handleFireCannon(self, cannonId, timeEnteredCannon):
         """
         Event handler triggered when a cannon is "lit"
         Sets cannon to fire
         """
         # Confirm that cannon is lit, otherwise ignore and report suspicious behavior
-        if self.cannons.has_key(cannonId) and self.cannons[cannonId].isReadyToFire():
+        if cannonId in self.cannons and self.cannons[cannonId].isReadyToFire():
             cannon = self.cannons[cannonId]
             toonId = cannon.getToonInsideId()
-            
-            if toonId and not self.flyingToons.has_key(toonId):
+
+            if toonId and not toonId in self.flyingToons:
                 self.flyingToons[toonId] = cannon.doId
                 self.flyingToonCloudsHit[toonId] = 0
                 self.toonIdsToJellybeanRewards[toonId] = 0
@@ -80,7 +80,7 @@ class DistributedPartyCannonActivityAI(DistributedPartyActivityAI):
                 # we override toonId2Join times and start it from the time he entered the cannon
                 self.notify.debug("changing join time from %s to %s" % (self.toonId2joinTime[toonId], timeEnteredCannon))
                 self.toonId2joinTime[toonId] = timeEnteredCannon
-            else:                
+            else:
                 self.notify.warning("Trying to fire toon %s who is already flying." % toonId)
                 toonId = cannon.getToonInsideId()
                 if toonId:
@@ -90,40 +90,40 @@ class DistributedPartyCannonActivityAI(DistributedPartyActivityAI):
 
             self.d_setCannonWillFire(cannonId, cannon.rotation, cannon.angle)
         else:
-            if self.cannons.has_key(cannonId):
+            if cannonId in self.cannons:
                 self.notify.warning("__handleFireCannon failed self.cannons[%d].isReadyToFire() = False" % cannonId)
                 cannon = self.cannons[cannonId]
                 toonId = cannon.getToonInsideId()
                 if toonId:
                     self.notify.warning("Cannon is not lit, forcing him out")
                     cannon.forceInsideToonToExit()
-            else:                
+            else:
                 self.notify.warning("__handleFireCannon failed self.cannons.has_key(%d) = False" % cannonId)
-            
+
         # TODO: Write case for suspicious cannon lit call
-        
+
     def _handleUnexpectedToonExit(self, toonId):
         """
         Flying toon client exits, request cleanup.
         """
-        if self.flyingToons.has_key(toonId):
+        if toonId in self.flyingToons:
             self.notify.warning("Avatar %s has exited unexpectedly." % toonId)
-            
+
             # cannon_movie_force_exit will clean up the avatar on the client
             # and eventually call setLanded to complete the cleanup on AI
             self.d_setMovie(PartyGlobals.CANNON_MOVIE_FORCE_EXIT, toonId)
             self.__cleanupFlyingToon(toonId)
             DistributedPartyActivityAI._handleUnexpectedToonExit(self, toonId)
-            
+
     def __cleanupFlyingToon(self, toonId):
-        if self.flyingToons.has_key(toonId):
+        if toonId in self.flyingToons:
             self.ignore(self.air.getAvatarExitEvent(toonId))
             del self.flyingToons[toonId]
             del self.flyingToonCloudsHit[toonId]
             self._removeToon(toonId)
-            if self.toonIdsToJellybeanRewards.has_key(toonId):
+            if toonId in self.toonIdsToJellybeanRewards:
                 del self.toonIdsToJellybeanRewards[toonId]
-        
+
 #===============================================================================
 # Attributes
 #===============================================================================
@@ -135,19 +135,19 @@ class DistributedPartyCannonActivityAI(DistributedPartyActivityAI):
         cloudColorList = []
         for key, value in self.cloudColors.items():
             cloudColorList.append([key, value[0], value[1], value[2]])
-            
+
         self.d_cloudsColorResponse(senderId, cloudColorList)
-        
+
     def d_cloudsColorResponse(self, avId, cloudColorList):
         self.notify.debug("cloudsColorResponse %s" % cloudColorList)
         self.sendUpdateToAvatarId(avId, "cloudsColorResponse", [cloudColorList])
-        
+
     # Distributed (airecv clsend)
     def requestCloudHit(self, cloudNumber, r, g, b):
         self.notify.debug("requestCloudHit %d (%d, %d, %d)" % (cloudNumber, r, g, b))
         senderId = self.air.getAvatarIdFromSender()
-        
-        if self.flyingToonCloudsHit.has_key(senderId):
+
+        if senderId in self.flyingToonCloudsHit:
             self.flyingToonCloudsHit[senderId] += 1
             addedJellyBeans = PartyGlobals.CannonJellyBeanReward
             if self.air.holidayManager.isHolidayRunning(ToontownGlobals.JELLYBEAN_DAY):
@@ -156,11 +156,11 @@ class DistributedPartyCannonActivityAI(DistributedPartyActivityAI):
             if self.toonIdsToJellybeanRewards[senderId] > PartyGlobals.CannonMaxTotalReward:
                 # put a cap so we don't go beyond uint8
                 self.toonIdsToJellybeanRewards[senderId] = PartyGlobals.CannonMaxTotalReward
-            
-            
+
+
             self.cloudColors[cloudNumber] = (r, g, b)
             self.d_setCloudHit(cloudNumber, r, g, b)
-        
+
     # Distributed (broadcast)
     def d_setCloudHit(self, cloudNumber, r, g, b):
         self.sendUpdate('setCloudHit', [cloudNumber, r, g, b])
@@ -178,15 +178,15 @@ class DistributedPartyCannonActivityAI(DistributedPartyActivityAI):
         Broadcasts that a cannon is ready to fire a toon
         """
         self.sendUpdate("setCannonWillFire", [cannonId, zRot, angle])
-        
+
     # Distributed (clsend airecv)
     def setLanded(self, toonId):
         """
         From the client, a toon has landed. Cleanup the toon and inform all clients.
         """
         self.notify.debug("%s setLanded %s" % (self.doId, toonId))
-        if self.flyingToons.has_key(toonId):
-            
+        if toonId in self.flyingToons:
+
             cloudsHit = self.flyingToonCloudsHit[toonId]
             if cloudsHit:
                 jellybeansWon = self.toonIdsToJellybeanRewards[toonId]
@@ -197,7 +197,7 @@ class DistributedPartyCannonActivityAI(DistributedPartyActivityAI):
                     [jellybeansWon, self.air.doId2do[toonId].getMoney(), resultsMessage]
                     )
                 self.issueJellybeanRewardToToonId(toonId)
-            
+
             self.d_setMovie(PartyGlobals.CANNON_MOVIE_LANDED, toonId)
             self.__cleanupFlyingToon(toonId)
 
@@ -210,5 +210,5 @@ class DistributedPartyCannonActivityAI(DistributedPartyActivityAI):
             for cannon in self.cannons.values():
                 if cannon.getToonInsideId() == avId:
                     result = True
-                    break;        
+                    break;
         return result
