@@ -63,7 +63,7 @@ class TTCodeRedemptionMgrAI(DistributedObjectAI):
 
         if code == 'reload':
             result = TTCodeRedemptionConsts.RedeemErrors.CodeIsExpired
-            awardMgrResult = AwardManagerConsts.GiveAwardErrors.UnknownError
+            awardMgrResult = 0
             self.d_redeemCodeResult(avId, context, result, awardMgrResult)
             return
 
