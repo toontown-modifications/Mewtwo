@@ -301,7 +301,7 @@ class ExtAgent(ServerBase):
         resp.addString('YES') # createFriendsWithChat
         resp.addString('YES') # chatCodeCreationRule
         resp.addUint32(int(time.time())) # sec
-        resp.addUint32(int(time.clock())) # usec
+        resp.addUint32(int(time.process_time())) # usec
 
         if self.isProdServer():
             if isPaid:

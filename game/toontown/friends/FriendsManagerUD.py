@@ -203,7 +203,7 @@ class FriendsManagerUD:
         # Send our datagram to the OTP ClientAgent.
         dg = PyDatagram()
         dg.addServerHeader(clientChannel, self.air.ourChannel, CLIENTAGENT_SEND_DATAGRAM)
-        dg.addString(datagram.getMessage())
+        dg.addBlob(datagram.getMessage())
         self.air.send(dg)
 
     def deleteOperation(self, avId):
