@@ -209,7 +209,7 @@ class DistributedPartyCatchActivityAI(DistributedPartyActivityAI, DistributedPar
     def sendToonJoinResponse(self, toonId, joined):
         # since toons can join mid-activity, make sure to add to scores dictionary if needed
         if joined:
-            if not self.toonIdsToScores.has_key(toonId):
+            if not toonId in self.toonIdsToScores:
                 self.toonIdsToScores[toonId] = 0
         DistributedPartyActivityAI.sendToonJoinResponse(self, toonId, joined)
         # number of players changed, start a new generation of drops
@@ -224,7 +224,7 @@ class DistributedPartyCatchActivityAI(DistributedPartyActivityAI, DistributedPar
         DistributedPartyActivityAI._handleUnexpectedToonExit(self, toonId)
         if toonId in self._playerIds:
             self._playerIds.remove(toonId)
-        if self.toonIdsToScores.has_key(toonId):
+        if toonId in self.toonIdsToScores:
             del self.toonIdsToScores[toonId]
         # number of players changed, start a new generation of drops
         self._setUpNextGenScheduleTask(globalClock.getRealTime() - self.activityStartTime)

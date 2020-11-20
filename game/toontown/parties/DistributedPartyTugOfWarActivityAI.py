@@ -86,7 +86,7 @@ class DistributedPartyTugOfWarActivityAI(DistributedPartyTeamActivityAI):
         toonId = self.air.getAvatarIdFromSender()
         self.toonIdsToKeyRates[toonId] = keyRate
         # sometimes the game has cleaned up and we get an old update from a client
-        if self.toonIdsToTeams.has_key(toonId):
+        if toonId in self.toonIdsToTeams:
             self.forceDictList[self.toonIdsToTeams[toonId]][toonId] = force
 
             # send the keyrate for this toonId to the clients so they can update

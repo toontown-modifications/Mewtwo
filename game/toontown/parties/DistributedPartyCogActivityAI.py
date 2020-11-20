@@ -102,7 +102,7 @@ class DistributedPartyCogActivityAI(DistributedPartyTeamActivityAI):
         self.score = [0, 0]
 
     def _addToToonScore(self, toonId, points):
-        if self.toonScore.has_key(toonId):
+        if toonId in self.toonScore:
             self.toonScore[toonId] += points
 
     def _addToonToTeam(self, toonId, team):
@@ -111,7 +111,7 @@ class DistributedPartyCogActivityAI(DistributedPartyTeamActivityAI):
 
     def _removeToonFromTeam(self, toonId, team):
         if DistributedPartyTeamActivityAI._removeToonFromTeam(self, toonId, team) and \
-            self.toonScore.has_key(toonId):
+            toonId in self.toonScore:
             del self.toonScore[toonId]
 
     def _findNewHighScore(self):
