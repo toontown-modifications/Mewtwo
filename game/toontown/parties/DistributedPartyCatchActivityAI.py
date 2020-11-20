@@ -101,7 +101,7 @@ class DistributedPartyCatchActivityAI(DistributedPartyActivityAI, DistributedPar
         tCutoff = (globalClock.getFrameTime() - self.activityStartTime) - self.generationDuration
         # add a minute of wiggle room for laggy client connections
         tCutoff -= 60.
-        genIndices = self._id2gen.keys()
+        genIndices = list(self._id2gen.keys())
         genIndices.sort()
         for genIndex in genIndices:
             timestamp = self._id2gen[genIndex].startTime
@@ -134,7 +134,7 @@ class DistributedPartyCatchActivityAI(DistributedPartyActivityAI, DistributedPar
             timestamp = self._id2gen[genIndex].startTime + self.activityStartTime
             numPlayers = self._id2gen[genIndex].numPlayers
             generations.append([genIndex, globalClockDelta.localToNetworkTime(timestamp, bits=32), numPlayers])
-        
+
         self.sendUpdate('setGenerations', [generations])
 
         nextStartT = curGenStartTime + self.generationDuration
@@ -185,11 +185,11 @@ class DistributedPartyCatchActivityAI(DistributedPartyActivityAI, DistributedPar
             return
         if toonId in self.toonIdsToScores:
             reward = self.toonIdsToScores[toonId]
-            
+
             # if it's jelly bean day give us more jelly beans!
             if self.air.holidayManager.isHolidayRunning(ToontownGlobals.JELLYBEAN_DAY):
                 reward *= PartyGlobals.JellyBeanDayMultiplier
-            
+
             if reward > PartyGlobals.CatchMaxTotalReward:
                 # put a cap so we don't go beyond something ridiculous
                 reward = PartyGlobals.CatchMaxTotalReward
@@ -209,7 +209,7 @@ class DistributedPartyCatchActivityAI(DistributedPartyActivityAI, DistributedPar
     def sendToonJoinResponse(self, toonId, joined):
         # since toons can join mid-activity, make sure to add to scores dictionary if needed
         if joined:
-            if not self.toonIdsToScores.has_key(toonId): 
+            if not self.toonIdsToScores.has_key(toonId):
                 self.toonIdsToScores[toonId] = 0
         DistributedPartyActivityAI.sendToonJoinResponse(self, toonId, joined)
         # number of players changed, start a new generation of drops
@@ -289,10 +289,10 @@ class DistributedPartyCatchActivityAI(DistributedPartyActivityAI, DistributedPar
                 0,
             ]
         )
-    
+
     def finishIdle(self):
         DistributedPartyCatchActivityAI.notify.debug("finishIdle")
-        
+
     def startActive(self):
         DistributedPartyCatchActivityAI.notify.debug("startActive")
         self.activityStartTime = globalClock.getRealTime()
@@ -338,7 +338,7 @@ class DistributedPartyCatchActivityAI(DistributedPartyActivityAI, DistributedPar
                 0,
             ]
         )
-    
+
     def finishConclusion(self):
         DistributedPartyCatchActivityAI.notify.debug("finishIdle")
 
