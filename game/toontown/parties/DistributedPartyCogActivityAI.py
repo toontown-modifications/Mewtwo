@@ -119,7 +119,7 @@ class DistributedPartyCogActivityAI(DistributedPartyTeamActivityAI):
         highScoreFound = False
 
         for toonId, score in self.toonScore.items():
-            if score > self.highScore[1] and self.air.doId2do.has_key(toonId):
+            if score > self.highScore[1] and toonId in self.air.doId2do:
                 self.highScore = (self.air.doId2do[toonId].getName(), score)
                 highScoreFound = True
 

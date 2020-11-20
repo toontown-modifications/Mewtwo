@@ -165,7 +165,7 @@ class CatalogManagerAI(DistributedObjectAI.DistributedObjectAI):
                         itemType, numSticky = item.getBackSticky()
                         #print ("type %s numSticky %s" % (itemType, numSticky))
                         if numSticky > 0:
-                            if stickDict.has_key(itemType):
+                            if itemType in stickDict:
                                 #print("has Key")
                                 if (len(stickDict[itemType]) < numSticky):
                                     stickDict[itemType].append(item)

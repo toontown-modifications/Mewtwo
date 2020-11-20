@@ -94,7 +94,7 @@ class DistributedTrophyMgrAI(DistributedObjectAI.DistributedObjectAI):
             'trophy', avId, "%s|%s" % (score, addedScore))
 
     def removeTrophy(self, avId, numFloors):
-        if self.trophyDict.has_key(avId):
+        if avId in self.trophyDict:
             removedScore = self.getScoreFromNumFloors(numFloors)
             score = self.getTrophyScore(avId) - removedScore
             self.trophyDict[avId] = score
