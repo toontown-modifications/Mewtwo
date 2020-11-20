@@ -128,7 +128,7 @@ class DistributedPartyCatchActivityAI(DistributedPartyActivityAI, DistributedPar
 
         # create the data list for the network
         generations = []
-        genIndices = self._id2gen.keys()
+        genIndices = list(self._id2gen.keys())
         genIndices.sort()
         for genIndex in genIndices:
             timestamp = self._id2gen[genIndex].startTime + self.activityStartTime
