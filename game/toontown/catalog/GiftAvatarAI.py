@@ -1,4 +1,4 @@
-import time
+import time, base64
 
 from game.toontown.catalog import CatalogItem
 from game.toontown.catalog import CatalogItemList
@@ -47,26 +47,26 @@ class GiftAvatarAI:
 
     def setDNAString(self, dnaString):
         self.style = ToonDNA.ToonDNA()
-        self.style.makeFromNetString(dnaString.decode('base64'))
+        self.style.makeFromNetString(base64.b64decode(dnaString))
 
     def setMailboxContents(self, mailboxContents):
-        self.mailboxContents = CatalogItemList.CatalogItemList(mailboxContents.decode('base64'),
+        self.mailboxContents = CatalogItemList.CatalogItemList(base64.b64decode(mailboxContents),
                                                                store=CatalogItem.Customization)
 
     def setAwardMailboxContents(self, awardMailboxContents):
-        self.awardMailboxContents = CatalogItemList.CatalogItemList(awardMailboxContents.decode('base64'),
+        self.awardMailboxContents = CatalogItemList.CatalogItemList(base64.b64decode(awardMailboxContents),
                                                                     store=CatalogItem.Customization)
 
     def setGiftSchedule(self, onOrder):
-        self.onGiftOrder = CatalogItemList.CatalogItemList(onOrder.decode('base64'),
+        self.onGiftOrder = CatalogItemList.CatalogItemList(base64.b64decode(onOrder),
                                                            store=CatalogItem.Customization | CatalogItem.DeliveryDate)
 
     def setDeliverySchedule(self, onOrder):
-        self.onOrder = CatalogItemList.CatalogItemList(onOrder.decode('base64'),
+        self.onOrder = CatalogItemList.CatalogItemList(base64.b64decode(onOrder),
                                                        store=CatalogItem.Customization | CatalogItem.DeliveryDate)
 
     def setAwardSchedule(self, onOrder):
-        self.onAwardOrder = CatalogItemList.CatalogItemList(onOrder.decode('base64'),
+        self.onAwardOrder = CatalogItemList.CatalogItemList(base64.b64decode(onOrder),
                                                             store=CatalogItem.Customization | CatalogItem.DeliveryDate)
 
     def setHat(self, hat):

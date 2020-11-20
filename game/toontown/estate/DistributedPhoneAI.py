@@ -1,4 +1,4 @@
-import time
+import time, base64
 from datetime import datetime
 
 from direct.directnotify import DirectNotifyGlobal
@@ -35,7 +35,7 @@ class LoadGiftAvatar:
         for key in (
                 'setDNAString', 'setMailboxContents', 'setAwardMailboxContents', 'setGiftSchedule',
                 'setDeliverySchedule', 'setAwardSchedule'):
-            fields[key] = fields[key][0].encode('base64')
+            fields[key] = base64.b64encode(fields[key][0])
 
         newDict = self.copyDict(fields, 'setDNAString', 'setMailboxContents', 'setAwardMailboxContents',
                                 'setGiftSchedule', 'setDeliverySchedule', 'setAwardSchedule', 'setHat', 'setGlasses',
