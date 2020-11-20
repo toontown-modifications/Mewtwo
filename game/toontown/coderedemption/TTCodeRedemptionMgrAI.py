@@ -61,6 +61,12 @@ class TTCodeRedemptionMgrAI(DistributedObjectAI):
             awardMgrResult = 0
             self.failedAttempts = 0
 
+        if code == 'reload':
+            result = TTCodeRedemptionConsts.RedeemErrors.CodeIsExpired
+            awardMgrResult = AwardManagerConsts.GiveAwardErrors.UnknownError
+            self.d_redeemCodeResult(avId, context, result, awardMgrResult)
+            return
+
         # Iterate over these items and deliver item to player.
         items = self.getItemsForCode(code)
 
