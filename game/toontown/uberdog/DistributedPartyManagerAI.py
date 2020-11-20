@@ -526,7 +526,7 @@ class DistributedPartyManagerAI(DistributedObjectAI):
         return newCost
 
     def getAllPublicParties(self):
-        allParties = self.hostAvIdToAllPartiesInfo.values()
+        allParties = list(self.hostAvIdToAllPartiesInfo.values())
         allParties.sort()
         returnParties = []
         curGmTime = time.time()
