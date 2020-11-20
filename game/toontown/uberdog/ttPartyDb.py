@@ -80,7 +80,7 @@ class ttPartyDb:
                 DEFAULT CHARSET=utf8;
                 """)
                 # this ensure that the table values come directly from PartyGlobals.PartyStatus
-                for index in xrange(len(PartyGlobals.PartyStatus)):
+                for index in range(len(PartyGlobals.PartyStatus)):
                     cursor.execute(\
                         "INSERT INTO ttPartyStatus(statusId, description) VALUES (%d, '%s')" %
                     (index, PartyGlobals.PartyStatus.getString(index)))
@@ -455,7 +455,7 @@ class ttPartyDb:
         """Convert a list of integers to a string sql recognizes."""
         # string version of partyIds is so close to what we need, but it adds the L
         inClause = "("
-        for index in xrange(len(partyIds)):
+        for index in range(len(partyIds)):
             inClause += "%d" % partyIds[index]
             if index < len(partyIds) - 1:
                 inClause += ","
