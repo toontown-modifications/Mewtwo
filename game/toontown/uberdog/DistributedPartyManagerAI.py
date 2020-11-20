@@ -329,12 +329,14 @@ class DistributedPartyManagerAI(DistributedObjectAI):
         if size == 1:
             result = [centerGridY]
         else:
-            result =  range(int(centerGridY + size/2.0),
+            result = list(range(int(centerGridY + size/2.0),
                             int(centerGridY - round(size/2.0)),
-                            -1)
+                            -1))
 
         # The result list should be the same size as given.
-        assert len(result) == size, "Bad result range: c=%s s=%s result=%s" % (centerGridY, size, result)
+        if len(result) < size:
+           del result[-1]
+        #assert len(result) == size, "Bad result range: c=%s s=%s result=%s" % (centerGridY, size, result)
 
         return result
 
@@ -343,16 +345,17 @@ class DistributedPartyManagerAI(DistributedObjectAI):
         if size == 1:
             result = [centerGridX]
         else:
-            result = range(int(centerGridX + size/2.0),
+            result = list(range(int(centerGridX + size/2.0),
                            int(centerGridX - round(size/2.0)),
                            -1
-                           )
+                           ))
 
         # The result list should be the same size as given.
-        assert len(result) == size, "Bad result range: c=%s s=%s result=%s" % (centerGridX, size, result)
+        if len(result) < size:
+           del result[-1]
+        #assert len(result) == size, "Bad result range: c=%s s=%s result=%s" % (centerGridX, size, result)
 
         return result
-
 
     def sendAddPartyResponse(self, hostId, errorCode):
         """Tell the client if he's add party request got accepted."""
