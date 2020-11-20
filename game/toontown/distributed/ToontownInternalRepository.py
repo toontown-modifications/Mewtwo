@@ -116,7 +116,7 @@ class ToontownInternalRepository(AstronInternalRepository):
         datagram.addChannel(AIMsgTypes.CONTROL_MESSAGE)
         datagram.addUint16(MsgTypes.CONTROL_ADD_POST_REMOVE)
 
-        datagram.addString(themessage.getMessage())
+        datagram.addBlob(themessage.getMessage())
         self.send(datagram)
 
     def getSenderReturnChannel(self):

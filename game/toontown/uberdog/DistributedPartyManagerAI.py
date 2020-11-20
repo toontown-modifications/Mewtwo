@@ -1,7 +1,6 @@
 import random
 import sys
 import time
-from sets import Set
 
 from direct.showbase.PythonUtil import Functor
 from direct.distributed.DistributedObjectAI import DistributedObjectAI
@@ -167,7 +166,7 @@ class DistributedPartyManagerAI(DistributedObjectAI):
         costOfParty = 0
         activitiesUsedDict = {}
         usedGridSquares = {} # key is a tuple (x,y), value isn't that important
-        actSet = Set([])
+        actSet = set([])
         for activityTuple in activities:
             if activityTuple[0] not in PartyGlobals.ActivityIds:
                 return (False,"Invalid activity id %s"%activityTuple[0])
@@ -234,7 +233,7 @@ class DistributedPartyManagerAI(DistributedObjectAI):
 
         # Check for mutually exclusive activities
         for mutuallyExclusiveTuples in PartyGlobals.MutuallyExclusiveActivities:
-            mutSet = Set(mutuallyExclusiveTuples)
+            mutSet = set(mutuallyExclusiveTuples)
             inter = mutSet.intersection(actSet)
             if len(inter) > 1:
                 return (False, "Mutuallly exclusive activites %s" % str(inter))

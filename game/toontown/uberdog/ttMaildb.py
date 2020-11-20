@@ -32,7 +32,7 @@ class ttMaildb:
                                       user=user,
                                       passwd=passwd,
                                       )
-        except MySQLdb.OperationalError,e:
+        except MySQLdb.OperationalError as e:
             self.notify.warning("Failed to connect to MySQL db=%s at %s:%d.  ttMaildb DB is disabled."%(db,host,port))
             self.notify.warning("Error detail: %s"%str(e))
             self.sqlAvailable = False
@@ -46,10 +46,10 @@ class ttMaildb:
             cursor.execute("CREATE DATABASE IF NOT EXISTS `%s`"%self.dbname)
             if __debug__:
                 self.notify.info("Database '%s' did not exist, created a new one!"%self.dbname)
-        except MySQLdb.ProgrammingError, e:
+        except MySQLdb.ProgrammingError as e:
             # self.notify.info('%s' % str(e))
             pass
-        except MySQLdb.OperationalError, e:
+        except MySQLdb.OperationalError as e:
             self.notify.info('%s' % str(e))
             pass
 
@@ -77,7 +77,7 @@ class ttMaildb:
             """)
             if __debug__:
                 self.notify.info("Table ttrecipientmail did not exist, created a new one!")
-        except MySQLdb.OperationalError,e:
+        except MySQLdb.OperationalError as e:
             pass
 
         try:
@@ -120,7 +120,7 @@ class ttMaildb:
             #self.notify.debug("Select was successful in ttMaildb, returning %s" % str(res))
             return res
 
-        except MySQLdb.OperationalError,e:
+        except MySQLdb.OperationalError as e:
             if isRetry == True:
                 self.notify.warning("Error on getMail retry, giving up:\n%s" % str(e))
                 return ()
@@ -131,7 +131,7 @@ class ttMaildb:
                 self.notify.warning("Unknown error in getMail, retrying:\n%s" % str(e))
                 self.reconnect()
                 return self.getMail(recipientId,True)
-        except Exception,e:
+        except Exception as e:
             self.notify.warning("Unknown error in getMail, giving up:\n%s" % str(e))
             return ()
 
@@ -155,7 +155,7 @@ class ttMaildb:
                            (recipientId,senderId,message))
             self.db.commit()
 
-        except MySQLdb.OperationalError,e:
+        except MySQLdb.OperationalError as e:
             if isRetry == True:
                 self.notify.warning("Error on putMail retry, giving up:\n%s" % str(e))
                 return
@@ -166,7 +166,7 @@ class ttMaildb:
                 self.notify.warning("Unknown error in putMail, retrying:\n%s" % str(e))
                 self.reconnect()
                 self.putMail(recipientId,senderId,message,True)
-        except Exception,e:
+        except Exception as e:
             self.notify.warning("Unknown error in putMail, giving up:\n%s" % str(e))
             return
 
@@ -186,7 +186,7 @@ class ttMaildb:
 
             self.db.commit()
 
-        except MySQLdb.OperationalError,e:
+        except MySQLdb.OperationalError as e:
             if isRetry == True:
                 self.notify.warning("Error in deleteMail retry, giving up:\n%s" % str(e))
                 return
@@ -197,7 +197,7 @@ class ttMaildb:
                 self.notify.warning("Unnown error in deleteMail, retrying:\n%s" % str(e))
                 self.reconnect()
                 self.deleteMail(accountId,messageId,True)
-        except Exception,e:
+        except Exception as e:
             self.notify.warning("Unknown error in deleteMail, giving up:\n%s" % str(e))
             return
 
@@ -207,6 +207,3 @@ class ttMaildb:
         cursor.execute("USE `%s`"%self.dbname)
         cursor.execute("SELECT * FROM recipientmail")
         return cursor.fetchall()
-
-
-

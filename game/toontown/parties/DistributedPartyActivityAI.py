@@ -14,11 +14,11 @@ class DistributedPartyActivityAI(DistributedObjectAI.DistributedObjectAI):
     This is the base class for all Distributed Party Activities on the AI. A distributed
     party activity constitutes of any game or area at a party that involves multiple toons
     interacting with it at the same time.
-    
+
     Note that a new notify category is not created here as this class expects
     subclasses to create it.
     """
-    
+
     def __init__(self, air, partyDoId, x, y, h, activityId, activityType):
         """
         x, y and h are in Panda space, not Party Grid space.
@@ -57,8 +57,8 @@ class DistributedPartyActivityAI(DistributedObjectAI.DistributedObjectAI):
         Subclasses should override this and call sendToonExitResponse.
         """
         self.notify.error("BASE: toonExitRequest should be overridden")
-    
-    
+
+
     def toonReady(self):
         """
         Clients call this over the wire when they are done reading the rules
@@ -67,25 +67,25 @@ class DistributedPartyActivityAI(DistributedObjectAI.DistributedObjectAI):
         self.notify.error("BASE: toonReady should be overridden")
 
 #-------------------------------------------------------------------------------
-    
+
     def toonExitDemand(self):
         """
         Clients call this over the wire to inform the server that the sender
         has left the activity. Use this for activities where server permission
         is not required for leaving the activity.
-        
+
         A default implementation is provided, which may be extended or
-        overridden by subclasses. 
+        overridden by subclasses.
         """
         senderId = self.air.getAvatarIdFromSender()
         self.sendToonExitResponse(senderId, True)
-        
-        
+
+
     def sendToonJoinResponse(self, toonId, joined, denialReason=PartyGlobals.DenialReasons.Default):
         """
         Subclasses should call this in response to recieving a toonJoinRequest
         call.
-        
+
         Parameters:
             toonId- id of the avatar that is being accepted/rejected
             joined- True if the avatar can join this activity, False otherwise
@@ -95,8 +95,8 @@ class DistributedPartyActivityAI(DistributedObjectAI.DistributedObjectAI):
             self.sendUpdate("setToonsPlaying", [self.toonIds])
         else:
             self.sendUpdateToAvatarId(toonId, "joinRequestDenied", [denialReason])
-    
-    
+
+
     def sendToonExitResponse(self, toonId, exited, denialReason=PartyGlobals.DenialReasons.Default):
         """
         Broadcast to all clients whether or not this toonId has left the activity.
@@ -112,11 +112,11 @@ class DistributedPartyActivityAI(DistributedObjectAI.DistributedObjectAI):
         else:
             self.sendUpdateToAvatarId(toonId, "exitRequestDenied", [denialReason])
 
-    
+
     def isToonPlaying(self, toonId):
         return(toonId in self.toonIds)
-    
-    
+
+
     def removeAllToons(self):
         """
         Base classes should call this when an activity is over and all toons
@@ -126,7 +126,7 @@ class DistributedPartyActivityAI(DistributedObjectAI.DistributedObjectAI):
         while len(self.toonIds):
             self._removeToon(self.toonIds[0])
         self.sendUpdate("setToonsPlaying", [self.toonIds])
-        
+
 
     def _addToon(self, toonId):
         """
@@ -145,8 +145,8 @@ class DistributedPartyActivityAI(DistributedObjectAI.DistributedObjectAI):
                 self._handleUnexpectedToonExit,
                 extraArgs=[toonId],
             )
-    
-    
+
+
     def _handleUnexpectedToonExit(self, toonId):
         """
         An avatar bailed out because he lost his connection or quit
@@ -158,7 +158,7 @@ class DistributedPartyActivityAI(DistributedObjectAI.DistributedObjectAI):
         self._removeToon(toonId)
         self.sendUpdate("setToonsPlaying", [self.toonIds])
 
-    
+
     def _removeToon(self, toonId):
         """
         Utility function for removing an avatar from the list of playing avatars.
@@ -175,17 +175,17 @@ class DistributedPartyActivityAI(DistributedObjectAI.DistributedObjectAI):
             self.ignore(self.air.getAvatarExitEvent(toonId))
             # don't delete scores here, as we may want to display score info
             # for dropped players.
-            
-    
+
+
     def generate(self):
         DistributedObjectAI.DistributedObjectAI.generate(self)
         self.notify.debug("BASE: generate")
-        
-        
+
+
     def announceGenerate(self):
         DistributedObjectAI.DistributedObjectAI.announceGenerate(self)
         self.notify.debug("BASE: announceGenerate")
-        
+
 
     def delete(self):
         self.notify.debug("BASE: delete: deleting AI PartyActivity object")
@@ -195,8 +195,8 @@ class DistributedPartyActivityAI(DistributedObjectAI.DistributedObjectAI):
 
     def getPartyDoId(self):
         return self.partyDoId
-        
-        
+
+
     def getX(self):
         return self.x
 
@@ -216,7 +216,7 @@ class DistributedPartyActivityAI(DistributedObjectAI.DistributedObjectAI):
         now = globalClock.getFrameTime()
         while len(self.toonIdsToJellybeanRewards):
             self.issueJellybeanRewardToToonId(self.toonIdsToJellybeanRewards.keys()[0], now=now)
-                
+
     def issueJellybeanRewardToToonId(self, toonId, now=None):
         """
         Give a specific toon a their jellybean reward.
@@ -230,7 +230,7 @@ class DistributedPartyActivityAI(DistributedObjectAI.DistributedObjectAI):
             self.toonId2joinTime[toonId] = now
             self.__issueJellybeanReward(toonId, reward, timePlayed)
             del self.toonIdsToJellybeanRewards[toonId]
-            
+
     def __issueJellybeanReward(self, toonId, reward, timePlayed):
         """
         Issue a toon a jellybean reward.

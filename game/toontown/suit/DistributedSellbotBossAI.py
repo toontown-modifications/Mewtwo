@@ -13,7 +13,8 @@ from game.toontown.battle import BattleBase
 from game.toontown.toon import NPCToons
 from game.toontown.suit import SellbotBossGlobals
 from game.toontown.toon.ToonDNA import ToonDNA
-import SuitDNA, random
+from . import SuitDNA
+import random
 
 class DistributedSellbotBossAI(DistributedBossCogAI.DistributedBossCogAI, FSM.FSM):
     notify = DirectNotifyGlobal.directNotify.newCategory('DistributedSellbotBossAI')

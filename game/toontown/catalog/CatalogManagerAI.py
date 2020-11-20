@@ -6,8 +6,8 @@
 
 from direct.distributed import DistributedObjectAI
 from direct.directnotify import DirectNotifyGlobal
-import CatalogGenerator
-import CatalogItem
+from . import CatalogGenerator
+from . import CatalogItem
 from game.toontown.toonbase import ToontownGlobals
 import time
 import math

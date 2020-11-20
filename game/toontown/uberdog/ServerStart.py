@@ -1,6 +1,6 @@
 from panda3d.core import loadPrcFile
 from direct.showbase import PythonUtil
-import __builtin__, sys, os, traceback
+import builtins, sys, os, traceback
 
 # Load our base configuration.
 loadPrcFile(''.join(sys.argv[1:]))
@@ -12,8 +12,8 @@ if os.path.exists('config/local.prc'):
 class game:
     name = 'server'
     process = 'server'
-__builtin__.game = game
-__builtin__.isClient = lambda: PythonUtil.isClient()
+builtins.game = game
+builtins.isClient = lambda: PythonUtil.isClient()
 
 from game.otp.uberdog.UberDogGlobal import *
 from game.toontown.uberdog import PartiesUdConfig
@@ -22,11 +22,11 @@ uber.mysqlhost = uber.config.GetString("mysql-host", PartiesUdConfig.ttDbHost)
 
 if os.getenv('USE_EXT_AGENT') == '1':
     # We want to use ExtAgent for messages.
-    from ToontownServerRepositoryAgent import ToontownServerRepositoryAgent
+    from .ToontownServerRepositoryAgent import ToontownServerRepositoryAgent
     uber.air = ToontownServerRepositoryAgent()
 else:
     # We want to use the OTP itself for messages.
-    from ToontownServerRepository import ToontownServerRepository
+    from .ToontownServerRepository import ToontownServerRepository
     uber.air = ToontownServerRepository()
 
 host = config.GetString('air-connect', '127.0.0.1')

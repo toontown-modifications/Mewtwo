@@ -14,14 +14,14 @@ from direct.task import Task
 from game.toontown.effects.FireworkShow import FireworkShow
 
 # parties imports
-import PartyGlobals
-from DistributedPartyActivityAI import DistributedPartyActivityAI
-from activityFSMs import FireworksActivityFSM
+from . import PartyGlobals
+from .DistributedPartyActivityAI import DistributedPartyActivityAI
+from .activityFSMs import FireworksActivityFSM
 
 class DistributedPartyFireworksActivityAI(DistributedPartyActivityAI):
 
     notify = directNotify.newCategory("DistributedPartyFireworksActivityAI")
-    
+
     def __init__(self, air, partyDoId, x, y, h, eventId=PartyGlobals.FireworkShows.Summer, showStyle=0):
         """
         air: instance of ToontownAIRepository
@@ -42,19 +42,19 @@ class DistributedPartyFireworksActivityAI(DistributedPartyActivityAI):
         self.eventId = eventId
         self.showStyle = showStyle
         self.activityFSM = FireworksActivityFSM(self)
-    
+
     def generate(self):
         DistributedPartyFireworksActivityAI.notify.debug("generate")
         self.activityFSM.request("Idle")
-        
+
     def getEventId(self):
         DistributedPartyFireworksActivityAI.notify.debug("getEventId")
         return self.eventId
-    
+
     def getShowStyle(self):
         DistributedPartyFireworksActivityAI.notify.debug("getShowStyle")
         return self.showStyle
-    
+
     def toonJoinRequest(self):
         """
         The supposed host is requesting the fireworks to start.
@@ -65,27 +65,27 @@ class DistributedPartyFireworksActivityAI(DistributedPartyActivityAI):
             self.air.writeServerEvent('suspicious', senderId, 'A non-host with avId=%d tried to start a host activated activity.' % senderId)
             return
         self.activityFSM.request("Active")
-    
+
     def showComplete(self, task):
         DistributedPartyFireworksActivityAI.notify.debug("showComplete")
         self.activityFSM.request("Disabled")
-        
+
         return Task.done
-        
+
     def delete(self):
         DistributedPartyFireworksActivityAI.notify.debug("delete")
         if hasattr(self, 'activityFSM'):
             self.activityFSM.request('Disabled')
             del self.activityFSM
         DistributedPartyActivityAI.delete(self)
-    
+
     # FSM transition methods
     def startIdle(self):
         DistributedPartyFireworksActivityAI.notify.debug("startIdle")
-    
+
     def finishIdle(self):
         DistributedPartyFireworksActivityAI.notify.debug("finishIdle")
-        
+
     def startActive(self):
         DistributedPartyFireworksActivityAI.notify.debug("startActive")
         messenger.send( PartyGlobals.FireworksStartedEvent )
@@ -108,13 +108,13 @@ class DistributedPartyFireworksActivityAI(DistributedPartyActivityAI):
             self.taskName("waitForShowComplete"),
         )
         del throwAwayShow
-        
+
     def finishActive(self):
         DistributedPartyFireworksActivityAI.notify.debug("finishActive")
         messenger.send( PartyGlobals.FireworksFinishedEvent )
         # clean up doMethodLater
         taskMgr.removeTasksMatching(self.taskName("waitForShowComplete"))
-        
+
     def startDisabled(self):
         DistributedPartyFireworksActivityAI.notify.debug("startDisabled")
         # put clients into this state
@@ -125,7 +125,6 @@ class DistributedPartyFireworksActivityAI(DistributedPartyActivityAI):
                 0 # dummy timestamp
             ]
         )
-    
+
     def finishDisabled(self):
         DistributedPartyFireworksActivityAI.notify.debug("finishDisabled")
-    

@@ -51,7 +51,7 @@ class PetManagerAI:
     def updatePetSeedCache(self):
         self.seeds['day'] = getDayId()
 
-        with open(self.cacheFile, 'wb') as f:
+        with open(self.cacheFile, 'w') as f:
             f.write(json.dumps(self.seeds))
 
     def createNewPetFromSeed(self, avId, seed, nameIndex, gender, safeZoneId):
