@@ -605,7 +605,7 @@ class ExtAgent(ServerBase):
             self.getAvatars(clientChannel)
         elif msgType == 6: # CLIENT_CREATE_AVATAR
             echoContext = dgi.getUint16()
-            dnaString = dgi.getString()
+            dnaString = dgi.getBlob()
             index = dgi.getUint8()
 
             dna = ToonDNA()
