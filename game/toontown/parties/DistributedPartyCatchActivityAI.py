@@ -87,7 +87,7 @@ class DistributedPartyCatchActivityAI(DistributedPartyActivityAI, DistributedPar
             delay, Functor(self._scheduleNextGeneration, startT),
             'schedNextGen-%s-%s' % (self.doId, nextGen))
         # cancel any pending generations that start after this one
-        for gen, item in self._schedTasks.items():
+        for gen, item in list(self._schedTasks.items()):
             if item[0] > self._lastGenerationStartTime:
                 taskMgr.remove(item[1])
             del self._schedTasks[gen]
