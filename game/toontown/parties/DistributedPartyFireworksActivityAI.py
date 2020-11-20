@@ -1,87 +1,131 @@
-import random
+#-------------------------------------------------------------------------------
+# Contact: Rob Gordon
+# Created: Oct 2008
+#
+# Purpose: AI control of fireworks in a party.
+#
+#-------------------------------------------------------------------------------
 
-from direct.directnotify.DirectNotifyGlobal import directNotify
-from direct.distributed.ClockDelta import globalClockDelta
-from direct.fsm.FSM import FSM
+# Panda imports
+from direct.distributed import ClockDelta
+from direct.task import Task
 
-from game.toontown.effects import FireworkShows
-from game.toontown.parties import PartyGlobals
-from game.toontown.parties.DistributedPartyActivityAI import DistributedPartyActivityAI
+# Toontown imports
+from game.toontown.effects.FireworkShow import FireworkShow
 
-class DistributedPartyFireworksActivityAI(DistributedPartyActivityAI, FSM):
-    notify = directNotify.newCategory('DistributedPartyFireworksActivityAI')
+# parties imports
+import PartyGlobals
+from DistributedPartyActivityAI import DistributedPartyActivityAI
+from activityFSMs import FireworksActivityFSM
 
-    def __init__(self, air, parent, activity):
-        DistributedPartyActivityAI.__init__(self, air, parent, activity)
-        FSM.__init__(self, 'DistributedPartyFireworksActivityAI')
+class DistributedPartyFireworksActivityAI(DistributedPartyActivityAI):
 
-        self.state = 'Idle'
-        self.eventId = PartyGlobals.FireworkShows.Summer
-        self.showStyle = random.randint(0, len(FireworkShows.shows[self.eventId]) - 1)
-
-    def delete(self):
-        taskMgr.remove(self.uniqueName('disable-party-fireworks'))
-        DistributedPartyActivityAI.delete(self)
-
-    def setEventId(self, eventId):
+    notify = directNotify.newCategory("DistributedPartyFireworksActivityAI")
+    
+    def __init__(self, air, partyDoId, x, y, h, eventId=PartyGlobals.FireworkShows.Summer, showStyle=0):
+        """
+        air: instance of ToontownAIRepository
+        eventId: a PartyGlobals.FireworkShows value that tells us which show
+                 to run
+        """
+        DistributedPartyFireworksActivityAI.notify.debug("__init__")
+        DistributedPartyActivityAI.__init__(
+            self,
+            air,
+            partyDoId,
+            x,
+            y,
+            h,
+            PartyGlobals.ActivityIds.PartyFireworks,
+            PartyGlobals.ActivityTypes.HostInitiated,
+        )
         self.eventId = eventId
-
-    def d_setEventId(self, eventId):
-        self.sendUpdate('setEventId', [eventId])
-
-    def b_setEventId(self, eventId):
-        self.setEventId(eventId)
-        self.d_setEventId(eventId)
-
-    def getEventId(self):
-        return self.eventId
-
-    def setShowStyle(self, showStyle):
         self.showStyle = showStyle
-
-    def d_setShowStyle(self, showStyle):
-        self.sendUpdate('setShowStyle', [showStyle])
-
-    def b_setShowStyle(self, showStyle):
-        self.setShowStyle(showStyle)
-        self.d_setShowStyle(showStyle)
-
+        self.activityFSM = FireworksActivityFSM(self)
+    
+    def generate(self):
+        DistributedPartyFireworksActivityAI.notify.debug("generate")
+        self.activityFSM.request("Idle")
+        
+    def getEventId(self):
+        DistributedPartyFireworksActivityAI.notify.debug("getEventId")
+        return self.eventId
+    
     def getShowStyle(self):
+        DistributedPartyFireworksActivityAI.notify.debug("getShowStyle")
         return self.showStyle
-
+    
     def toonJoinRequest(self):
-        avId = self.air.getAvatarIdFromSender()
-        if not avId:
+        """
+        The supposed host is requesting the fireworks to start.
+        """
+        # check that the host sent this message
+        senderId = self.air.getAvatarIdFromSender()
+        if senderId != self.party.partyInfo.hostId:
+            self.air.writeServerEvent('suspicious', senderId, 'A non-host with avId=%d tried to start a host activated activity.' % senderId)
             return
-
-        party = self.air.doId2do.get(self.parent)
-        if not party:
-            return
-
-        hostId = party.hostId
-        if not hostId:
-            return
-
-        if avId == hostId and self.state == 'Idle':
-            self.request('Active')
-            duration = (FireworkShows.getShowDuration(self.getEventId(),
-                                                      self.getShowStyle()) + PartyGlobals.FireworksPostLaunchDelay)
-            taskMgr.doMethodLater(duration, self.showEnded, self.uniqueName('disable-party-fireworks'))
-            return
-
-        self.sendUpdateToAvatarId(avId, 'joinRequestDenied', [PartyGlobals.DenialReasons.Default])
-
-    def showEnded(self, task):
-        self.request('Disabled')
-        return task.done
-
-    def enterActive(self):
-        self.sendUpdate('setState', ['Active', globalClockDelta.getRealNetworkTime()])
-        messenger.send('fireworks-started-%s' % self.getPartyDoId())
-
-    def enterIdle(self):
-        self.sendUpdate('setState', ['Idle', globalClockDelta.getRealNetworkTime()])
-
-    def enterDisabled(self):
-        self.sendUpdate('setState', ['Disabled', globalClockDelta.getRealNetworkTime()])
-        messenger.send('fireworks-finished-%s' % self.getPartyDoId())
+        self.activityFSM.request("Active")
+    
+    def showComplete(self, task):
+        DistributedPartyFireworksActivityAI.notify.debug("showComplete")
+        self.activityFSM.request("Disabled")
+        
+        return Task.done
+        
+    def delete(self):
+        DistributedPartyFireworksActivityAI.notify.debug("delete")
+        if hasattr(self, 'activityFSM'):
+            self.activityFSM.request('Disabled')
+            del self.activityFSM
+        DistributedPartyActivityAI.delete(self)
+    
+    # FSM transition methods
+    def startIdle(self):
+        DistributedPartyFireworksActivityAI.notify.debug("startIdle")
+    
+    def finishIdle(self):
+        DistributedPartyFireworksActivityAI.notify.debug("finishIdle")
+        
+    def startActive(self):
+        DistributedPartyFireworksActivityAI.notify.debug("startActive")
+        messenger.send( PartyGlobals.FireworksStartedEvent )
+        showStartTimestamp = ClockDelta.globalClockDelta.getRealNetworkTime()
+        # put clients into this state
+        self.sendUpdate(
+            "setState",
+            [
+                "Active", # new state
+                showStartTimestamp # when the show starts
+            ]
+        )
+        # setup to transition to Disabled after the show is over
+        throwAwayShow = FireworkShow()
+        showDuration = throwAwayShow.getShowDuration( self.eventId)
+        showDuration += 20.0
+        taskMgr.doMethodLater(
+            PartyGlobals.FireworksPostLaunchDelay + showDuration + PartyGlobals.FireworksTransitionToDisabledDelay,
+            self.showComplete,
+            self.taskName("waitForShowComplete"),
+        )
+        del throwAwayShow
+        
+    def finishActive(self):
+        DistributedPartyFireworksActivityAI.notify.debug("finishActive")
+        messenger.send( PartyGlobals.FireworksFinishedEvent )
+        # clean up doMethodLater
+        taskMgr.removeTasksMatching(self.taskName("waitForShowComplete"))
+        
+    def startDisabled(self):
+        DistributedPartyFireworksActivityAI.notify.debug("startDisabled")
+        # put clients into this state
+        self.sendUpdate(
+            "setState",
+            [
+                "Disabled", # new state
+                0 # dummy timestamp
+            ]
+        )
+    
+    def finishDisabled(self):
+        DistributedPartyFireworksActivityAI.notify.debug("finishDisabled")
+    

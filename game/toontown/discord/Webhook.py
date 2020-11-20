@@ -41,13 +41,16 @@ class Webhook:
     def getWebhook(self):
         return self.webhook
 
-    def send(self, data):
-        request = requests.post(self.getWebhook(), json = data)
+    def send(self, data, patch = False):
+        if patch:
+            request = requests.patch(self.getWebhook(), json = data)
+        else:
+            request = requests.post(self.getWebhook(), json = data)
 
         if request.status_code == 204:
             self.notify.info('Successfully sent webhook!')
 
-    def finalize(self):
+    def finalize(self, patch = False):
         data = {}
 
         data['embeds'] = []
@@ -61,4 +64,7 @@ class Webhook:
 
         data['embeds'].append(embed)
 
-        webhookThread = _thread.start_new_thread(self.send, (data,))
+        if patch:
+            webhookThread = thread.start_new_thread(self.send, (data, True,))
+        else:
+            webhookThread = thread.start_new_thread(self.send, (data, False,))

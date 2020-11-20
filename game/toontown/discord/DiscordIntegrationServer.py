@@ -36,7 +36,7 @@ class DiscordIntegrationServer:
                 self.notify.warning('Client {0} sent invalid signature: {1}!'.format(ipAddress, signature))
                 return
 
-            if whatToDo == 'kickRequest':
+            if whatToDo == 'kick':
                 avId = int(data['avId'])
                 reason = data['reason']
                 simbase.air.extAgent.sendKick(avId, reason)
@@ -69,6 +69,13 @@ class DiscordIntegrationServer:
                 avId = int(data['avId'])
 
                 simbase.air.extAgent.rejectName(avId)
+            elif whatToDo == 'warnPlayer':
+                avId = int(data['avId'])
+                reason = str(data['warnReason'])
+
+                avClientChannel = simbase.air.GetPuppetConnectionChannel(avId)
+
+                simbase.air.extAgent.warnPlayer(avClientChannel, reason)
 
     def startServer(self):
         serverThread = _thread.start_new_thread(self.setupServer, ())

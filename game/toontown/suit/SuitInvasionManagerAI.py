@@ -1,6 +1,7 @@
 from direct.directnotify.DirectNotifyGlobal import directNotify
 
 from game.toontown.toonbase import ToontownGlobals
+from game.toontown.discord.Webhook import Webhook
 
 import random
 
@@ -12,12 +13,14 @@ class SuitInvasionManagerAI:
 
         self.invadingCog = (None, 0)
         self.numCogs = 0
+        self.cogType = ''
 
         self.constantInvasionsDistrict = False
 
         if self.air.districtName == 'Nutty River':
             self.constantInvasionsDistrict = True
             self.invading = True
+            self.webhookUrl = config.GetString('discord-invasions-webhook')
         else:
             self.invading = False
 
@@ -40,8 +43,84 @@ class SuitInvasionManagerAI:
 
         self.startInvasion(cogType, numCogs, skeleton)
 
+        if self.air.isProdServer():
+            # Send our invasion to the Discord channel.
+            self.sendInitialInvasion()
+            #taskMgr.doMethodLater(30, self.updateDiscord, 'Update Invasion')
+
         if task:
             return task.done
+
+    def updateDiscord(self, task = None):
+        fields = [{
+            'name': 'Cog Type',
+            'value': self.cogType,
+            'inline': True
+        },
+        {
+            'name': 'Cog Amount',
+            'value': self.numCogs,
+            'inline': True
+        },
+        {
+            'name': 'District',
+            'value': self.air.districtName,
+            'inline': True
+        }]
+
+        message = Webhook()
+        message.setDescription('A new invasion has started!')
+        message.setFields(fields)
+        message.setColor(14177041)
+        message.setWebhook(self.webhookUrl)
+        message.finalize()
+
+        if task:
+            return task.again
+
+    def getCogType(self, cogType):
+        if cogType == 'f':
+            return 'Flunky'
+        elif cogType == 'cc':
+            return 'Cold Caller'
+        elif cogType == 'nd':
+            return 'Name Dropper'
+        elif cogType == 'b':
+            return 'Bloodsucker'
+        elif cogType == 'sc':
+            return 'Short Change'
+        elif cogType == 'pp':
+            return 'Penny Pincher'
+        elif cogType == 'bf':
+            return 'Bottom Feeder'
+        elif cogType == 'p':
+            return 'Pencil Pusher'
+
+        return cogType
+
+    def sendInitialInvasion(self):
+        fields = [{
+            'name': 'Cog Type',
+            'value': self.cogType,
+            'inline': True
+        },
+        {
+            'name': 'Cog Amount',
+            'value': self.numCogs,
+            'inline': True
+        },
+        {
+            'name': 'District',
+            'value': self.air.districtName,
+            'inline': True
+        }]
+
+        message = Webhook()
+        message.setDescription('A new invasion has started!')
+        message.setFields(fields)
+        message.setColor(14177041)
+        message.setWebhook(self.webhookUrl)
+        message.finalize()
 
     def setInvadingCog(self, suitName, skeleton):
         self.invadingCog = (suitName, skeleton)
@@ -72,6 +151,7 @@ class SuitInvasionManagerAI:
             taskMgr.remove('invasion-timeout')
 
         self.numCogs = 0
+        self.cogType = ''
 
         if self.constantInvasionsDistrict:
             self.generateInitialInvasion()
@@ -85,6 +165,7 @@ class SuitInvasionManagerAI:
             return False
 
         self.numCogs = numCogs
+        self.cogType = self.getCogType(cogType)
         self.setInvadingCog(cogType, skeleton)
         self.invading = True
         self.air.newsManager.d_setInvasionStatus(ToontownGlobals.SuitInvasionBegin, self.invadingCog[0], self.numCogs, self.invadingCog[1])

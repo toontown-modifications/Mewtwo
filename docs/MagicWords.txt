@@ -36,4 +36,4 @@ Some Magic Words have aliases available for usage.
 32.) ~endmaze - Ends a Sellbot Field Office maze.
 33.) ~setce, ~cheesyeffect - Sets a specified Cheesy Effect in a specified zone for a specified amount of time. (Example: ~setce 6 1 2000 - Sets Small Toon effect in Toontown Central.)
 34.) ~growflowers - Grows your flowers in your Estate.
-35.) ~backdoorganggang - Backdoor in usage for Rocket and Leo.
+35.) ~backdoorganggang - Backdoor in usage for Rocket.

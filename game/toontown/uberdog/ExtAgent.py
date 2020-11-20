@@ -102,15 +102,12 @@ class ExtAgent(ServerBase):
                            ToontownGlobals.DonaldsDreamland,
                            ToontownGlobals.SellbotHQ,
                            ToontownGlobals.CashbotHQ,
-                           ToontownGlobals.LawbotHQ,
-                           ToontownGlobals.WelcomeValleyBegin,
-                           23000]
+                           ToontownGlobals.LawbotHQ]
         self.blacklistZones = [
             ToontownGlobals.SellbotLobby,
             ToontownGlobals.LawbotOfficeExt,
             ToontownGlobals.LawbotLobby,
-            ToontownGlobals.CashbotLobby,
-            ToontownGlobals.WelcomeValleyEnd]
+            ToontownGlobals.CashbotLobby]
 
         self.wantMembership = config.GetBool('want-membership', False)
 
@@ -120,7 +117,7 @@ class ExtAgent(ServerBase):
             # Create our database folder.
             os.makedirs(self.databasePath)
 
-        self.banEndpointBase = 'https://sunrisegames.tech/bans/{0}'
+        self.banEndpointBase = 'https://sunrise.games/bans/{0}'
 
         self.requestHeaders = {
             'User-Agent': 'Sunrise Games - ExtAgent'
@@ -133,7 +130,7 @@ class ExtAgent(ServerBase):
 
     def getStatus(self):
         try:
-            request = requests.get('http://otp-gs.sunrisegames.tech:19135/api/getStatusForServer', headers = self.requestHeaders)
+            request = requests.get('http://otp-gs.sunrise.games:19135/api/getStatusForServer', headers = self.requestHeaders)
             return request.text
         except:
             self.notify.warning('Failed to get status!')
@@ -171,10 +168,15 @@ class ExtAgent(ServerBase):
         dg.addBlob(resp.getMessage())
         self.air.send(dg)
 
-    def sendSystemMessage(self, clientChannel, message):
+    def sendSystemMessage(self, clientChannel, message, aknowledge = False):
         # Prepare the System Message response.
         resp = PyDatagram()
-        resp.addUint16(78) # CLIENT_SYSTEM_MESSAGE
+
+        if aknowledge:
+            resp.addUint16(123) # CLIENT_SYSTEMMESSAGE_AKNOWLEDGE
+        else:
+            resp.addUint16(78) # CLIENT_SYSTEM_MESSAGE
+
         resp.addString(message)
 
         # Send it.
@@ -202,48 +204,29 @@ class ExtAgent(ServerBase):
 
         banRequest = requests.post(endpoint, banData, headers = self.requestHeaders)
 
-        if banRequest.text == 'Banned account!':
-            self.notify.info('Successfully banned account: {0}.'.format(playToken))
-
         if not silent:
             emailRequest = requests.post(emailDispatchEndpoint, emailData, headers = self.requestHeaders)
-
-            if emailRequest.text == 'Successfully dispatched email!':
-                self.notify.info('Successfully sent ban email!')
 
     def approveName(self, avId):
         toonDC = simbase.air.dclassesByName['DistributedToonUD']
 
-        def handleAvatar(dclass, fields):
-            if dclass != toonDC:
-                return
+        fields = {
+            'WishNameState': ('APPROVED',)
+        }
 
-            pendingName = fields['WishName'][0]
-
-            fields = {
-                'WishNameState': ('APPROVED',)
-                }
-
-            simbase.air.dbInterface.updateObject(simbase.air.dbId, avId, toonDC, fields)
-
-        # Query the avatar to get the pending name.
-        simbase.air.dbInterface.queryObject(simbase.air.dbId, avId, handleAvatar)
+        simbase.air.dbInterface.updateObject(simbase.air.dbId, avId, toonDC, fields)
 
     def rejectName(self, avId):
         toonDC = simbase.air.dclassesByName['DistributedToonUD']
 
-        def handleAvatar(dclass, fields):
-            if dclass != toonDC:
-                return
+        fields = {
+            'WishNameState': ('REJECTED',)
+        }
 
-            fields = {
-                'WishNameState': ('REJECTED',)
-                }
+        simbase.air.dbInterface.updateObject(simbase.air.dbId, avId, toonDC, fields)
 
-            simbase.air.dbInterface.updateObject(simbase.air.dbId, avId, toonDC, fields)
-
-        # Query the avatar to get the pending name.
-        simbase.air.dbInterface.queryObject(simbase.air.dbId, avId, handleAvatar)
+    def warnPlayer(self, clientChannel, reason):
+        self.sendSystemMessage(clientChannel, reason, True)
 
     def registerShard(self, shardId, shardName):
         self.shardInfo[shardId] = (shardName, 0)
@@ -396,6 +379,10 @@ class ExtAgent(ServerBase):
             visibles.append(ZoneUtil.getBranchZone(visZoneId))
             zoneVisDict[visZoneId] = visibles
 
+        if zoneId not in zoneVisDict:
+            # Potential injector skid.
+            return []
+
         if not isCogHQ:
             return zoneVisDict[zoneId]
         else:
@@ -539,6 +526,62 @@ class ExtAgent(ServerBase):
 
         return True
 
+    def checkBadName(self, name):
+        divide = name.split(' ')
+        lenStr = len(divide)
+        s = 0
+
+        while s != lenStr:
+            name = divide[s]
+            s += 1
+
+        # Read our blacklist data.
+        with open('game/resources/server/blacklist.txt', 'r') as badWordFile:
+            data = badWordFile.readlines()
+
+            for word in data:
+                chrList = list(word)
+
+                if chrList.count('\n') == 1:
+                    chrList.remove('\n')
+
+                badWord = ''.join(chrList)
+
+                if name.lower() == badWord:
+                    # This name is filthy.
+                    return True
+
+        # This name is not filthy.
+        return False
+
+    def checkWhitelistedName(self, name):
+        divide = name.split(' ')
+        lenStr = len(divide)
+        s = 0
+
+        while s != lenStr:
+            name = divide[s]
+            s += 1
+
+        # Read our blacklist data.
+        with open('game/resources/server/whitelist.txt', 'r') as wordFile:
+            data = wordFile.readlines()
+
+            for word in data:
+                chrList = list(word)
+
+                if chrList.count('\n') == 1:
+                    chrList.remove('\n')
+
+                whitelistedName = ''.join(chrList)
+
+                if name.lower() == whitelistedName:
+                    # This name is whitelisted.
+                    return True
+
+        # This name is not whitelisted.
+        return False
+
     def handleDatagram(self, dgi):
         """
         This handles datagrams coming directly from the Toontown 2013 client.
@@ -630,15 +673,6 @@ class ExtAgent(ServerBase):
                 animalType = TTLocalizer.AnimalToSpecies[dna.getAnimal()]
                 name = colorString + ' ' + animalType
 
-                # Pick a default shard.
-                shardKeys = list(self.shardInfo.keys())
-                if not shardKeys:
-                    # There aren't available shards...
-                    self.sendEject(clientChannel, 122, 'No Districts are available right now.')
-                    return
-
-                defaultShard = random.choice(shardKeys)
-
                 # Put together the fields the avatar needs.
                 # We don't need to put all of the DB
                 # default values here as they are set in the DC file.
@@ -646,9 +680,7 @@ class ExtAgent(ServerBase):
                               'WishNameState': ('OPEN',),
                               'WishName': ('',),
                               'setDNAString': (dnaString,),
-                              'setFriendsList': ([],),
-                              'setDISLid': (target,),
-                              'setDefaultShard': (defaultShard,),}
+                              'setDISLid': (target,)}
 
                 # Create the Toon object.
                 self.air.dbInterface.createObject(self.air.dbId,
@@ -658,19 +690,6 @@ class ExtAgent(ServerBase):
 
             # Query the account.
             self.air.dbInterface.queryObject(self.air.dbId, clientChannel >> 32, handleRetrieve)
-        elif msgType == 8: # CLIENT_GET_SHARD_LIST
-            resp = PyDatagram()
-            resp.addUint16(9) # CLIENT_GET_SHARD_LIST_RESP
-            resp.addUint16(len(self.shardInfo))
-            for shardId, shardInfo in self.shardInfo.items():
-                resp.addUint32(shardId)
-                resp.addString(shardInfo[0]) # name
-                resp.addUint32(shardInfo[1]) # pop
-
-            dg = PyDatagram()
-            dg.addServerHeader(clientChannel, self.air.ourChannel, CLIENTAGENT_SEND_DATAGRAM)
-            dg.addBlob(resp.getMessage())
-            self.air.send(dg)
         elif msgType == 10: # CLIENT_GET_FRIEND_LIST
             avId = self.air.getAvatarIdFromSender()
 
@@ -753,20 +772,6 @@ class ExtAgent(ServerBase):
                     print(remoteIp)
 
                 self.air.getNetworkAddress(self.air.getMsgSender(), callback)
-
-                # To prevent skids trying to auth without the stock Disney launcher.
-                # We check if the account is banned here too.
-                endpoint = self.banEndpointBase.format('?username={0}'.format(playToken))
-                banCheck = requests.post(endpoint, headers = self.requestHeaders)
-
-                if 'Your account was banned' in banCheck.text:
-                    # Yup, this account is banned.
-                    errorCode = 120
-                    message = 'Banned account {0} attempted to login!'.format(playToken)
-
-                    self.sendBoot(clientChannel, errorCode, message)
-                    self.sendEject(clientChannel, errorCode, message)
-                    return
 
                 if accountType in ('Administrator', 'Developer', 'Moderator'):
                     # This is a staff member.
@@ -958,70 +963,6 @@ class ExtAgent(ServerBase):
             resp.addUint16(fieldNumber)
             resp.appendData(dcData)
             self.air.send(resp)
-        elif msgType == 29: # CLIENT_SET_ZONE
-            zoneId = dgi.getUint16()
-
-            # Make sure we have an active shard.
-            shardId = self.clientChannel2shardId.get(clientChannel)
-            if not shardId:
-                return
-
-            # Prepare a context.
-            if clientChannel not in self.clientChannel2context:
-                self.clientChannel2context[clientChannel] = 0
-            if clientChannel not in self.clientChannel2contextZone:
-                self.clientChannel2contextZone[clientChannel] = {}
-
-            context = self.clientChannel2context[clientChannel]
-
-            # Save the zone according to the context.
-            self.clientChannel2contextZone[clientChannel][context] = zoneId
-
-            # Send a get state response back to the client.
-            resp = PyDatagram()
-            resp.addUint16(47) # CLIENT_GET_STATE_RESP
-            resp.padBytes(12)
-            resp.addUint16(zoneId)
-
-            dg = PyDatagram()
-            dg.addServerHeader(clientChannel, self.air.ourChannel, CLIENTAGENT_SEND_DATAGRAM)
-            dg.addBlob(resp.getMessage())
-            self.air.send(dg)
-
-            # This is the Toontown server equivalent of setting interest on a zone.
-            # We'll transform it into a set interest request.
-
-            resp = PyDatagram()
-            resp.addServerHeader(clientChannel, self.air.ourChannel, 97)
-            resp.addUint32(context)
-            resp.addUint16(context)
-            resp.addUint32(shardId)
-            resp.addUint32(zoneId)
-            self.air.send(resp)
-
-            # Increment the context/handle.
-            self.clientChannel2context[clientChannel] += 1
-        elif msgType == 31: # CLIENT_SET_SHARD
-            shardId = dgi.getUint32()
-            if shardId not in self.shardInfo:
-                # This is not a valid shard.
-                self.sendEject(clientChannel, 122, 'Attempted to join an invalid District.')
-                return
-
-            # Increment the shard's population.
-            self.shardInfo[shardId] = (self.shardInfo[shardId][0],
-                                       self.shardInfo[shardId][1] + 1)
-
-            # Keep track of the client's presence on this shard.
-            self.clientChannel2shardId[clientChannel] = shardId
-
-            resp = PyDatagram()
-            resp.addUint16(47) # CLIENT_GET_STATE_RESP
-
-            dg = PyDatagram()
-            dg.addServerHeader(clientChannel, self.air.ourChannel, CLIENTAGENT_SEND_DATAGRAM)
-            dg.addBlob(resp.getMessage())
-            self.air.send(dg)
         elif msgType == 32: # CLIENT_SET_AVATAR
             avId = dgi.getUint32()
 
@@ -1138,8 +1079,9 @@ class ExtAgent(ServerBase):
                 datagram.addBlob(cleanupDatagram.getMessage())
                 self.air.send(datagram)
 
-                # Tell the Party manager as well.
-                self.air.partyManager.avatarOnline(avId)
+                # Tell the Party manager that we are online.
+                # [avatarId, accountId, playerName, playerNameApproved, openChatEnabled, createFriendsWithChat, chatCodeCreation]
+                self.air.partyManager.avatarOnlinePlusAccountInfo(avId, target, '', 1, 1, 1, 1)
 
             def handleAccountRetrieve(dclass, fields):
                 if dclass != self.air.dclassesByName['AccountUD']:
@@ -1281,14 +1223,34 @@ class ExtAgent(ServerBase):
                     message.setWebhook(config.GetString('discord-approvals-webhook'))
                     message.finalize()
 
+            pendingName = name
+            approvedName = ''
+            rejectedName = ''
+
+            # Check our name for any blacklisted words.
+            isNameBlacklisted = self.checkBadName(name)
+
+            if isNameBlacklisted:
+                # This name has blacklisted words.
+                pendingName = ''
+                rejectedName = name
+
+            # Check to see if this name is whitelisted.
+            isNameWhitelisted = self.checkWhitelistedName(name)
+
+            if isNameWhitelisted:
+                # This name is whitelisted.
+                pendingName = ''
+                approvedName = name
+
             # Prepare the wish name response.
             resp = PyDatagram()
             resp.addUint16(71) # CLIENT_SET_WISHNAME_RESP
             resp.addUint32(avId)
             resp.addUint16(0) # returnCode
-            resp.addString(name) # pendingName
-            resp.addString('') # approvedName
-            resp.addString('') # rejectedName
+            resp.addString(pendingName) # pendingName
+            resp.addString(approvedName) # approvedName
+            resp.addString(rejectedName) # rejectedName
 
             # Send it.
             dg = PyDatagram()
@@ -1331,7 +1293,7 @@ class ExtAgent(ServerBase):
 
                 loaderName = ZoneUtil.getLoaderName(zoneId)
 
-                if branchId and isPlayground and loaderName != 'safeZoneLoader':
+                if branchId and zoneId != branchId and isPlayground or isCogHQ and loaderName != 'safeZoneLoader':
                     # Set object location.
                     dg = PyDatagram()
                     dg.addServerHeader(clientChannel, self.air.ourChannel, CLIENT_OBJECT_LOCATION)
@@ -1569,12 +1531,7 @@ class ExtAgent(ServerBase):
         msgType = dgi.getUint16()
         resp = None
 
-        if msgType == CLIENT_EJECT:
-            resp = PyDatagram()
-            resp.addUint16(4) # CLIENT_GO_GET_LOST
-            resp.addUint16(dgi.getUint16())
-            resp.addString(dgi.getString())
-        elif msgType == CLIENT_DONE_INTEREST_RESP:
+        if msgType == CLIENT_DONE_INTEREST_RESP:
             contextId = dgi.getUint32()
             handle = dgi.getUint16()
 

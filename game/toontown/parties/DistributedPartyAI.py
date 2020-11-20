@@ -1,246 +1,261 @@
-from direct.directnotify.DirectNotifyGlobal import directNotify
+#-------------------------------------------------------------------------------
+# Contact: Shawn Patton
+# Created: Sep 2008
+#
+# Purpose: DistributedPartyAI controls message passing to the client for parties
+#
+#-------------------------------------------------------------------------------
 from direct.distributed.DistributedObjectAI import DistributedObjectAI
 
 from game.toontown.parties import PartyGlobals
 from game.toontown.parties import PartyUtils
-from game.toontown.parties.DistributedPartyCannonAI import DistributedPartyCannonAI
+
+from game.toontown.parties.DistributedPartyJukeboxActivityAI import DistributedPartyJukeboxActivityAI
 from game.toontown.parties.DistributedPartyCannonActivityAI import DistributedPartyCannonActivityAI
+from game.toontown.parties.DistributedPartyTrampolineActivityAI import DistributedPartyTrampolineActivityAI
+from game.toontown.parties.DistributedPartyVictoryTrampolineActivityAI import DistributedPartyVictoryTrampolineActivityAI
 from game.toontown.parties.DistributedPartyCatchActivityAI import DistributedPartyCatchActivityAI
-from game.toontown.parties.DistributedPartyCogActivityAI import DistributedPartyCogActivityAI
-from game.toontown.parties.DistributedPartyDance20ActivityAI import DistributedPartyDance20ActivityAI
 from game.toontown.parties.DistributedPartyDanceActivityAI import DistributedPartyDanceActivityAI
+from game.toontown.parties.DistributedPartyTugOfWarActivityAI import DistributedPartyTugOfWarActivityAI
 from game.toontown.parties.DistributedPartyFireworksActivityAI import DistributedPartyFireworksActivityAI
 from game.toontown.parties.DistributedPartyJukebox40ActivityAI import DistributedPartyJukebox40ActivityAI
-from game.toontown.parties.DistributedPartyJukeboxActivityAI import DistributedPartyJukeboxActivityAI
-from game.toontown.parties.DistributedPartyTrampolineActivityAI import DistributedPartyTrampolineActivityAI
-from game.toontown.parties.DistributedPartyTugOfWarActivityAI import DistributedPartyTugOfWarActivityAI
-from game.toontown.parties.DistributedPartyValentineDance20ActivityAI import DistributedPartyValentineDance20ActivityAI
-from game.toontown.parties.DistributedPartyValentineDanceActivityAI import DistributedPartyValentineDanceActivityAI
-from game.toontown.parties.DistributedPartyValentineJukebox40ActivityAI import DistributedPartyValentineJukebox40ActivityAI
-from game.toontown.parties.DistributedPartyValentineJukeboxActivityAI import DistributedPartyValentineJukeboxActivityAI
-from game.toontown.parties.DistributedPartyValentineTrampolineActivityAI import DistributedPartyValentineTrampolineActivityAI
-from game.toontown.parties.DistributedPartyWinterCatchActivityAI import DistributedPartyWinterCatchActivityAI
-from game.toontown.parties.DistributedPartyWinterCogActivityAI import DistributedPartyWinterCogActivityAI
-from game.toontown.parties.DistributedPartyWinterTrampolineActivityAI import DistributedPartyWinterTrampolineActivityAI
-from game.toontown.parties.DistributedPartyVictoryTrampolineActivityAI import DistributedPartyVictoryTrampolineActivityAI
+from game.toontown.parties.DistributedPartyDance20ActivityAI import DistributedPartyDance20ActivityAI
+from game.toontown.parties.DistributedPartyCogActivityAI import DistributedPartyCogActivityAI
+
+ActivityIdsToClasses = {
+    PartyGlobals.ActivityIds.PartyJukebox : DistributedPartyJukeboxActivityAI,
+    PartyGlobals.ActivityIds.PartyCannon : DistributedPartyCannonActivityAI,
+    PartyGlobals.ActivityIds.PartyTrampoline : DistributedPartyTrampolineActivityAI,
+    PartyGlobals.ActivityIds.PartyVictoryTrampoline : DistributedPartyVictoryTrampolineActivityAI,
+    PartyGlobals.ActivityIds.PartyCatch : DistributedPartyCatchActivityAI,
+    PartyGlobals.ActivityIds.PartyDance : DistributedPartyDanceActivityAI,
+    PartyGlobals.ActivityIds.PartyTugOfWar : DistributedPartyTugOfWarActivityAI,
+    PartyGlobals.ActivityIds.PartyFireworks : DistributedPartyFireworksActivityAI,
+    PartyGlobals.ActivityIds.PartyClock : None,
+    PartyGlobals.ActivityIds.PartyJukebox40 : DistributedPartyJukebox40ActivityAI,
+    PartyGlobals.ActivityIds.PartyDance20 : DistributedPartyDance20ActivityAI,
+    PartyGlobals.ActivityIds.PartyCog : DistributedPartyCogActivityAI,
+    }
 
 class DistributedPartyAI(DistributedObjectAI):
-    notify = directNotify.newCategory('DistributedPartyAI')
+    notify = directNotify.newCategory("DistributedPartyAI")
 
-    def __init__(self, air, hostId, zoneId, partyInfo):
+    def __init__(self, air, avId, zoneId, partyInfo, inviteeIds):
         DistributedObjectAI.__init__(self, air)
-        self.hostId = hostId
+
+        self.notify.debug("created with avId = %s, zoneId = %s, and partyInfo=%s" % (avId, zoneId, partyInfo))
+        self.avId = avId
         self.zoneId = zoneId
-        self.partyId = partyInfo.partyId
         self.partyInfo = partyInfo
-        self.partyClockInfo = (0, 0, 0)
-        self.inviteeIds = []
-        self.partyState = False
-        self.partyInfoTuple = (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, [], [], 0)
-        self.avIdsAtParty = []
-        self.partyStartedTime = ''
-        self.hostName = ''
-        self.activities = set()
-        self.cannonActivity = None
+        self.inviteeIds = inviteeIds
+        self.partyStartedTime = self.air.toontownTimeManager.getCurServerDateTime()
+        self.partyClockInfo = (0,0,0)
 
-    def announceGenerate(self):
-        DistributedObjectAI.announceGenerate(self)
-        activityId2class = {
-            PartyGlobals.ActivityIds.PartyCog: DistributedPartyCogActivityAI,
-            PartyGlobals.ActivityIds.PartyWinterCog: DistributedPartyWinterCogActivityAI,
-            PartyGlobals.ActivityIds.PartyJukebox: DistributedPartyJukeboxActivityAI,
-            PartyGlobals.ActivityIds.PartyValentineJukebox: DistributedPartyValentineJukeboxActivityAI,
-            PartyGlobals.ActivityIds.PartyJukebox40: DistributedPartyJukebox40ActivityAI,
-            PartyGlobals.ActivityIds.PartyValentineJukebox40: DistributedPartyValentineJukebox40ActivityAI,
-            PartyGlobals.ActivityIds.PartyTrampoline: DistributedPartyTrampolineActivityAI,
-            PartyGlobals.ActivityIds.PartyValentineTrampoline: DistributedPartyValentineTrampolineActivityAI,
-            PartyGlobals.ActivityIds.PartyVictoryTrampoline: DistributedPartyVictoryTrampolineActivityAI,
-            PartyGlobals.ActivityIds.PartyWinterTrampoline: DistributedPartyWinterTrampolineActivityAI,
-            PartyGlobals.ActivityIds.PartyCatch: DistributedPartyCatchActivityAI,
-            PartyGlobals.ActivityIds.PartyWinterCatch: DistributedPartyWinterCatchActivityAI,
-            PartyGlobals.ActivityIds.PartyDance: DistributedPartyDanceActivityAI,
-            PartyGlobals.ActivityIds.PartyValentineDance: DistributedPartyValentineDanceActivityAI,
-            PartyGlobals.ActivityIds.PartyDance20: DistributedPartyDance20ActivityAI,
-            PartyGlobals.ActivityIds.PartyValentineDance20: DistributedPartyValentineDance20ActivityAI,
-            PartyGlobals.ActivityIds.PartyTugOfWar: DistributedPartyTugOfWarActivityAI,
-            PartyGlobals.ActivityIds.PartyFireworks: DistributedPartyFireworksActivityAI
-        }
-
+        # For the party clock, we need to set aside the x, y, and h
         for activity in self.partyInfo.activityList:
-            activityId = activity.activityId
-            if activityId in activityId2class:
-                activityObj = activityId2class[activityId](self.air, self.getDoId(), activity)
-                activityObj.generateWithRequired(self.zoneId)
-                self.activities.add(activityObj)
-            elif activityId == PartyGlobals.ActivityIds.PartyCannon:
-                if not self.cannonActivity:
-                    self.cannonActivity = DistributedPartyCannonActivityAI(self.air, self.getDoId(), activity)
-                    self.cannonActivity.generateWithRequired(self.zoneId)
+            if activity.activityId == PartyGlobals.ActivityIds.PartyClock:
+                self.partyClockInfo = (activity.x, activity.y, activity.h)
 
-                activityObj = DistributedPartyCannonAI(self.air)
-                activityObj.setActivityDoId(self.cannonActivity.getDoId())
-                x = PartyUtils.convertDistanceFromPartyGrid(activity.x, 0)
-                y = PartyUtils.convertDistanceFromPartyGrid(activity.y, 1)
-                h = activity.h * PartyGlobals.PartyGridHeadingConverter
-                activityObj.setPosHpr(x, y, 0, h, 0, 0)
-                activityObj.generateWithRequired(self.zoneId)
-                self.activities.add(activityObj)
+        self.hostName = ""
+        # try to get the host name at this point here
+        toon = simbase.air.doId2do.get(self.partyInfo.hostId)
+        if toon:
+            self.hostName = toon.getName()
 
-    def delete(self):
-        for activity in self.activities:
-            activity.requestDelete()
+        # Keep track of the parties state for toon's coming in to the party
+        self.isPartyEnding = False
+        self.activityObjects = []
 
-        self.activities.clear()
-        if self.cannonActivity:
-            self.cannonActivity.requestDelete()
-            self.cannonActivity = None
+    def getPartyState(self):
+        return self.isPartyEnding
 
-        self.ignoreAll()
-        DistributedObjectAI.delete(self)
+    def b_setPartyState(self, partyState):
+        self.isPartyEnding = partyState
+        self.sendUpdate("setPartyState", [partyState])
 
-    def setPartyClockInfo(self, x, y, h):
-        self.partyClockInfo = (x, y, h)
+    def generate(self):
+        DistributedPartyAI.notify.debug("DistParty generate: %s" % self.doId)
+        DistributedObjectAI.generate(self)
 
-    def d_setPartyClockInfo(self, x, y, h):
-        self.sendUpdate('setPartyClockInfo', [x, y, h])
+        self.air.writeServerEvent("party_generate",self.partyInfo.partyId, "%d|%d" % (self.doId,self.partyInfo.hostId))
 
-    def b_setPartyClockInfo(self, x, y, h):
-        self.setPartyClockInfo(x, y, h)
-        self.d_setPartyClockInfo(x, y, h)
+        # Log that a GM party has been generated.
+        try:
+            host = simbase.air.doId2do.get(self.partyInfo.hostId)
+            if host.hasGMName():
+                self.air.writeServerEvent("party_generate_gm", self.partyInfo.partyId, "%s" % self.partyInfo.hostId)
+                assert self.notify.debug("GM-%s's party has started." % self.partyInfo.hostId)
+        except:
+            pass
+
+        # We want to initialize all the activities that are at this party.
+        # We'll loop through the activityList and see if we can import, create,
+        # and generate the relevant AI class.  This code assumes that the
+        # activity classes are named according to the enum
+        # PartyGlobals.ActivityIds
+        # for example:
+        #     PartyGlobals.ActivityIds.PartyCatch would load
+        #     DistributedPartyCatchActivityAI
+        for activity in self.partyInfo.activityList:
+            # Location and heading in the activityList is in party space, so
+            # we convert them to Panda space before passing them into the
+            # activities
+            #activityName = PartyGlobals.ActivityIds.getString(activity.activityId)
+            x = PartyUtils.convertDistanceFromPartyGrid(activity.x, 0)
+            y = PartyUtils.convertDistanceFromPartyGrid(activity.y, 1)
+            h = PartyUtils.convertDegreesFromPartyGrid(activity.h)
+            # Skip the party clock...
+            if activity.activityId == PartyGlobals.ActivityIds.PartyClock:
+                continue
+
+            # Special case for cannon, add another cannon instead of creating
+            # a new instance of the cannon activity
+            if activity.activityId == PartyGlobals.ActivityIds.PartyCannon and \
+               self.getCannonActivity():
+                self.getCannonActivity().spawnCannonAt(x, y, h)
+                continue
+
+            actClass = ActivityIdsToClasses[activity.activityId]
+            newAct = actClass(self.air, self.doId, x, y ,h)
+            newAct.generateWithRequired(self.zoneId)
+            self.activityObjects.append(newAct)
+
+    def getCannonActivity(self):
+        result = None
+        for act in self.activityObjects:
+            if "DistributedPartyCannonActivityAI" in str(act.__class__):
+                result = act
+                break
+        return result
 
     def getPartyClockInfo(self):
         return self.partyClockInfo
 
-    def setInviteeIds(self, inviteeIds):
-        self.inviteeIds = inviteeIds
+    def getAvIdsAtParty(self):
+        return self.air.partyManager.zoneIdToGuestAvIds[self.zoneId]
 
-    def d_setInviteeIds(self, inviteeIds):
-        self.sendUpdate('setInviteeIds', [inviteeIds])
-
-    def b_setInviteeIds(self, inviteeIds):
-        self.setInviteeIds(inviteeIds)
-        self.d_setInviteeIds(inviteeIds)
+    def getPartyStartedTime(self):
+        return self.partyStartedTime.strftime("%Y-%m-%d %H:%M:%S")
 
     def getInviteeIds(self):
         return self.inviteeIds
 
-    def setPartyState(self, partyState):
-        self.partyState = partyState
-
-    def d_setPartyState(self, partyState):
-        self.sendUpdate('setPartyState', [partyState])
-
-    def b_setPartyState(self, partyState):
-        self.setPartyState(partyState)
-        self.d_setPartyState(partyState)
-
-    def getPartyState(self):
-        return self.partyState
-
-    def setPartyInfoTuple(self, partyInfoTuple):
-        self.partyInfoTuple = partyInfoTuple
-
-    def d_setPartyInfoTuple(self, partyInfoTuple):
-        self.sendUpdate('setPartyInfoTuple', [partyInfoTuple])
-
-    def b_setPartyInfoTuple(self, partyInfoTuple):
-        self.setPartyInfoTuple(partyInfoTuple)
-        self.d_setPartyInfoTuple(partyInfoTuple)
-
     def getPartyInfoTuple(self):
-        return self.partyInfoTuple
+        startTime = self.partyInfo.startTime
+        endTime = self.partyInfo.endTime
+        formattedActivities = []
+        for activity in self.partyInfo.activityList:
+            oneActivity = (activity.activityId,
+                           activity.x,
+                           activity.y,
+                           activity.h,
+                           )
+            formattedActivities.append(oneActivity)
+        formattedDecors = []
+        for decor in self.partyInfo.decors:
+            oneDecor = (decor.decorId,
+                        decor.x,
+                        decor.y,
+                        decor.h,
+                        )
+            formattedDecors.append(oneDecor)
+        isPrivate = self.partyInfo.isPrivate
+        inviteTheme = self.partyInfo.inviteTheme
 
-    def setAvIdsAtParty(self, avIdsAtParty):
-        self.avIdsAtParty = avIdsAtParty
+        return (
+            self.partyInfo.partyId,
+            self.partyInfo.hostId,
+            startTime.year,
+            startTime.month,
+            startTime.day,
+            startTime.hour,
+            startTime.minute,
+            endTime.year,
+            endTime.month,
+            endTime.day,
+            endTime.hour,
+            endTime.minute,
+            isPrivate,
+            inviteTheme,
+            formattedActivities,
+            formattedDecors,
+            self.partyInfo.status,
+        )
 
-    def d_setAvIdsAtParty(self, avIdsAtParty):
-        self.sendUpdate('setAvIdsAtParty', [avIdsAtParty])
+    def delete(self):
+        DistributedPartyAI.notify.debug("DistParty delete: %s" % self.doId)
+        self.ignoreAll()
+        try:
+            self.Party_deleted
+            DistributedPartyAI.notify.debug("party already deleted: %s" % self.Party_deleted)
+        except:
+            DistributedPartyAI.notify.debug("completing party delete: %s" % self.__dict__.get("zoneId"))
+            self.air.writeServerEvent("party_delete",self.partyInfo.partyId, "%d|%d" % (self.doId,self.partyInfo.hostId))
+            self.Party_deleted = self.zoneId
+            for activityObj in self.activityObjects:
+                activityObj.requestDelete()
+            self.activityObjects = []
+            DistributedObjectAI.delete(self)
 
-    def b_setAvIdsAtParty(self, avIdsAtParty):
-        self.setAvIdsAtParty(avIdsAtParty)
-        self.d_setAvIdsAtParty(avIdsAtParty)
 
-    def getAvIdsAtParty(self):
-        return self.avIdsAtParty
-
-    def setPartyStartedTime(self, partyStartedTime):
-        self.partyStartedTime = partyStartedTime
-
-    def d_setPartyStartedTime(self, partyStartedTime):
-        self.sendUpdate('setPartyStartedTime', [partyStartedTime])
-
-    def b_setPartyStartedTime(self, partyStartedTime):
-        self.setPartyStartedTime(partyStartedTime)
-        self.d_setPartyStartedTime(partyStartedTime)
-
-    def getPartyStartedTime(self):
-        return self.partyStartedTime
-
-    def setHostName(self, hostName):
-        self.hostName = hostName
-
-    def d_setHostName(self, hostName):
-        self.sendUpdate('setHostName', [hostName])
-
-    def b_setHostName(self, hostName):
-        self.setHostName(hostName)
-        self.d_setHostName(hostName)
-
-    def getHostName(self):
-        return self.hostName
+    def unload(self):
+        self.notify.debug("unload")
 
     def avIdEnteredParty(self, avId):
-        realAvId = self.air.getAvatarIdFromSender()
-
-        if avId != realAvId:
-            self.air.writeServerEvent('suspicious', tissuekleenex = 'Avatar provided is not the same as the received avatar.', avId = realAvId)
+        senderId = self.air.getAvatarIdFromSender()
+        if senderId != avId:
+            self.air.writeServerEvent('suspicious', senderId, 'someone else trying to enter a party for this avatar: avId = %d' % avId)
             return
+        if not self.hostName and self.avId == self.partyInfo.hostId:
+            # if we don't have a hostname yet try again
+            toon = simbase.air.doId2do.get(self.partyInfo.hostId)
+            if toon:
+                toonName = toon.getName()
+                if toonName:
+                    self.b_setHostName(toonName)
 
-        av = self.air.doId2do.get(avId)
-        if not av:
+        self.sendUpdate("setAvIdsAtParty", [self.air.partyManager.zoneIdToGuestAvIds[self.zoneId]])
+        totalMoney = -1
+        av = simbase.air.doId2do.get(avId)
+        if av:
+            totalMoney = av.getTotalMoney()
+        self.air.writeServerEvent("party_enter",self.partyInfo.partyId, "%d|%d" % (avId,totalMoney))
+
+    def initPartyData(self):
+        pass
+
+    def destroyPartyData(self):
+        if hasattr(self, "Party_deleted"):
+            DistributedPartyAI.notify.debug("destroyPartyData: party already deleted: %s" % self.Party_deleted)
             return
+        DistributedPartyAI.notify.debug("destroyPartyData: %s" % self.__dict__.get("zoneId"))
+        self.releaseZoneData()
 
-        if avId in self.avIdsAtParty:
-            return
+    def getHostName(self):
+        """Return the host name."""
+        return self.hostName
 
-        # Update the party manager's party info shit ( fan time ).
-        # (hit the power button during the meeting)
-        self.air.partyManager.addAvIdToParty(self.partyId, avId)
-        self.air.partyManager.partyInfo[self.partyId][5] += 1
+    def setHostName(self, newName):
+        """Set the hostname on the AI only."""
+        self.hostName = self.hostName
 
-        self.avIdsAtParty.append(avId)
-        self.b_setAvIdsAtParty(self.avIdsAtParty)
-        self.acceptOnce(av.getZoneChangeEvent(), self.avIdExitedParty, extraArgs=[avId])
-        self.acceptOnce(self.air.getAvatarExitEvent(avId), self.__handleUnexpectedExit, extraArgs=[avId])
+    def b_setHostName(self, newName):
+        """Set the hostname on the ai and client"""
+        self.setHostName(newName)
+        self.d_setHostName(newName)
 
-    def avIdExitedParty(self, avId, zoneId, oldZoneId):
-        realAvId = self.air.getAvatarIdFromSender()
+    def d_setHostName(self, newName):
+        """Send the host name to the client."""
+        self.sendUpdate("setHostName", [newName])
 
-        if avId != realAvId:
-            self.air.writeServerEvent('suspicious', tissuekleenex = 'Avatar provided is not the same as the received avatar.', avId = realAvId)
-            return
+    def isInActivity(self, avId):
+        """Return true if the avId is busy with an activity."""
+        result = False
+        for actObj in self.activityObjects:
+            if actObj.isInActivity(avId):
+                result = True
+                break
+        return result
 
-        # We don't actually care about zoneId or oldZoneId, we only care about avId.
-        av = self.air.doId2do.get(avId)
-        if not av:
-            return
 
-        if avId not in self.avIdsAtParty:
-            return
 
-        # Update the party manager's party info shit.
-        self.air.partyManager.partyInfo[self.partyId][5] -= 1
-
-        self.avIdsAtParty.remove(avId)
-        self.b_setAvIdsAtParty(self.avIdsAtParty)
-        self.ignore(av.getZoneChangeEvent())
-        self.ignore(self.air.getAvatarExitEvent(avId))
-
-    def __handleUnexpectedExit(self, avId):
-        if avId not in self.avIdsAtParty:
-            return
-
-        self.avIdsAtParty.remove(avId)
-        self.b_setAvIdsAtParty(self.avIdsAtParty)
-        self.ignore('DOChangeZone-%s' % avId)
-        self.ignore(self.air.getAvatarExitEvent(avId))

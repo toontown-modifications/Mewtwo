@@ -1,7 +1,7 @@
 @echo off
 cd ../..
 
-set NO_EXT_AGENT=1
+set USE_EXT_AGENT=0
 
 :main
 python -m game.toontown.uberdog.ServerStart config/Config.prc

@@ -69,6 +69,8 @@ from game.toontown.estate.DistributedBankMgrAI import DistributedBankMgrAI
 from game.toontown.ai.DialogueManagerAI import DialogueManagerAI
 from game.otp.uberdog.OtpAvatarManagerAI import OtpAvatarManagerAI
 from game.toontown.uberdog.ServerBase import ServerBase
+from game.otp.otpbase import OTPGlobals
+from game.toontown.ai import ToontownAIMsgTypes
 
 import builtins, time, os, requests
 
@@ -133,7 +135,7 @@ class ToontownAIRepository(ToontownInternalRepository, ServerBase):
         }
 
         try:
-            requests.post('http://otp-gs.sunrisegames.tech:19135/api/setPopulation', json = data, headers = headers)
+            requests.post('http://otp-gs.sunrise.games:19135/api/setPopulation', json = data, headers = headers)
         except:
             self.notify.warning('Failed to send district population!')
 
@@ -296,7 +298,7 @@ class ToontownAIRepository(ToontownInternalRepository, ServerBase):
         self.centralLogger = self.generateGlobalObject(OtpDoGlobals.OTP_DO_ID_CENTRAL_LOGGER, 'CentralLogger')
 
         self.partyManager = DistributedPartyManagerAI(self)
-        self.partyManager.generateWithRequired(OtpDoGlobals.OTP_ZONE_ID_MANAGEMENT)
+        self.partyManager.generateOtpObject(self.district.getDoId(), OTPGlobals.UberZone)
 
         self.dataStoreManager = self.generateGlobalObject(OtpDoGlobals.OTP_DO_ID_TOONTOWN_TEMP_STORE_MANAGER, 'DistributedDataStoreManager')
 
@@ -581,3 +583,27 @@ class ToontownAIRepository(ToontownInternalRepository, ServerBase):
             partyHats.extend(foundPartyHats)
 
         return partyHats
+
+    def handleDatagram(self, di):
+        msgType = self.getMsgType()
+
+        if msgType == ToontownAIMsgTypes.PARTY_MANAGER_UD_TO_ALL_AI:
+            self.__handlePartyManagerUdToAllAi(di)
+            return
+
+        ToontownInternalRepository.handleDatagram(self, di)
+
+    def __handlePartyManagerUdToAllAi(self,di):
+        """Send all msgs of this type to the party manager on our district."""
+        # we know the format is STATE_SERVER_OBJECT_UPDATE_FIELD
+        # we just changed the msg type to PARTY_MANAGER_UD_TO_ALL_AI
+        # so that it gets handled here
+        # otherwise it just gets dropped on the floor
+        do = self.partyManager
+        if do:
+            globalId = di.getUint32()
+            if globalId != OtpDoGlobals.OTP_DO_ID_TOONTOWN_PARTY_MANAGER:
+                self.notify.error('__handlePartyManagerUdToAllAi globalId=%d not equal to %d' %
+                                  (globalId, OtpDoGlobals.OTP_DO_ID_TOONTOWN_PARTY_MANAGER))
+            # Let the dclass finish the job
+            do.dclass.receiveUpdate(do, di)

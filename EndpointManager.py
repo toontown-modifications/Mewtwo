@@ -4,9 +4,9 @@
 from aiohttp import web
 import asyncio, requests, lxml.etree as et, random
 
-deleteEndpoint = 'https://sunrisegames.tech/api/authDelete'
-usernameAvailabilityEndpoint = 'https://sunrisegames.tech/api/checkUsernameAvailability'
-regEndpoint = 'https://sunrisegames.tech/register'
+deleteEndpoint = 'https://sunrise.games/api/authDelete'
+usernameAvailabilityEndpoint = 'https://sunrise.games/api/checkUsernameAvailability'
+regEndpoint = 'https://sunrise.games/register'
 
 headers = {
     'User-Agent': 'Sunrise Games - EndpointManager'
@@ -57,7 +57,6 @@ async def registerAccount(request):
     }
 
     requestGet = requests.get(regEndpoint, data, headers = headers)
-    print(requestGet.text)
 
 async def checkUsernameAvailability(request):
     args = await request.post()

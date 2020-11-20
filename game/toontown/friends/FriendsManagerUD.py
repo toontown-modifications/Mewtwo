@@ -18,14 +18,14 @@ class GetAvatarInfoOperation(FSM):
         self.demand('GetAvatarInfo')
 
     def enterGetAvatarInfo(self):
-        self.mgr.air.air.dbInterface.queryObject(self.mgr.air.air.dbId, self.avId, self.__gotAvatarInfo)
+        self.mgr.air.dbInterface.queryObject(self.mgr.air.dbId, self.avId, self.__gotAvatarInfo)
 
     def __gotAvatarInfo(self, dclass, fields):
-        if dclass not in (self.mgr.air.air.dclassesByName['DistributedToonUD'], self.mgr.air.air.dclassesByName['DistributedPetAI']):
+        if dclass not in (self.mgr.air.dclassesByName['DistributedToonUD'], self.mgr.air.dclassesByName['DistributedPetAI']):
             self.demand('Failure', 'Invalid dclass for avId %d' % self.avId)
             return
 
-        self.isPet = dclass == self.mgr.air.air.dclassesByName['DistributedPetAI']
+        self.isPet = dclass == self.mgr.air.dclassesByName['DistributedPetAI']
         self.fields = fields
         self.fields['avId'] = self.avId
         self.demand('Finished')
@@ -58,14 +58,14 @@ class GetFriendsListOperation(FSM):
         self.demand('GetFriendsList')
 
     def enterGetFriendsList(self):
-        self.mgr.air.air.dbInterface.queryObject(self.mgr.air.air.dbId, self.avId, self.__gotFriendsList)
+        self.mgr.air.dbInterface.queryObject(self.mgr.air.dbId, self.avId, self.__gotFriendsList)
 
     def __gotFriendsList(self, dclass, fields):
         if self.state != 'GetFriendsList':
             self.demand('Failure', '__gotFriendsList called when looking for friends list, avId %d' % self.avId)
             return
 
-        if dclass != self.mgr.air.air.dclassesByName['DistributedToonUD']:
+        if dclass != self.mgr.air.dclassesByName['DistributedToonUD']:
             self.demand('Failure', 'Invalid dclass for avId %d' % self.avId)
             return
 
@@ -122,7 +122,7 @@ class GetFriendsListOperation(FSM):
     def enterCheckFriendsOnline(self):
         self.iterated = 0
         for friendId, trueFriend in self.friendsList:
-            self.mgr.air.air.getActivated(friendId, self.__gotActivatedResp)
+            self.mgr.air.getActivated(friendId, self.__gotActivatedResp)
 
     def __gotActivatedResp(self, avId, activated):
         self.iterated += 1
@@ -159,7 +159,7 @@ class UpdateAvatarFieldOperation(FSM):
         self.demand('GetAvatarOnline')
 
     def enterGetAvatarOnline(self):
-        self.mgr.air.air.getActivated(self.avId, self.__avatarOnlineResp)
+        self.mgr.air.getActivated(self.avId, self.__avatarOnlineResp)
 
     def __avatarOnlineResp(self, avId, activated):
         if self.state != 'GetAvatarOnline':
@@ -171,10 +171,10 @@ class UpdateAvatarFieldOperation(FSM):
 
     def enterUpdateAvatarField(self):
         if self.online:
-            dg = self.mgr.air.air.dclassesByName['DistributedToonUD'].aiFormatUpdate(self.field, self.avId, self.avId, self.mgr.air.air.ourChannel, [self.value])
-            self.mgr.air.air.send(dg)
+            dg = self.mgr.air.dclassesByName['DistributedToonUD'].aiFormatUpdate(self.field, self.avId, self.avId, self.mgr.air.ourChannel, [self.value])
+            self.mgr.air.send(dg)
         else:
-            self.mgr.air.air.dbInterface.updateObject(self.mgr.air.air.dbId, self.avId, self.mgr.air.air.dclassesByName['DistributedToonUD'], {self.field: [self.value]})
+            self.mgr.air.dbInterface.updateObject(self.mgr.air.dbId, self.avId, self.mgr.air.dclassesByName['DistributedToonUD'], {self.field: [self.value]})
 
         self.demand('Finished')
 
@@ -189,13 +189,22 @@ class FriendsManagerUD:
     notify = directNotify.newCategory('FriendsManagerUD')
 
     def __init__(self, air):
-        self.air = air
+        self.air = air.air
 
         self.operations = {}
         self.avBasicInfoCache = {}
 
-        self.air.air.netMessenger.accept('avatarOnline', self, self.comingOnline)
-        self.air.air.netMessenger.accept('avatarOffline', self, self.goingOffline)
+        self.air.netMessenger.accept('avatarOnline', self, self.comingOnline)
+        self.air.netMessenger.accept('avatarOffline', self, self.goingOffline)
+
+    def sendDatagram(self, avId, datagram):
+        clientChannel = self.air.GetPuppetConnectionChannel(avId)
+
+        # Send our datagram to the OTP ClientAgent.
+        dg = PyDatagram()
+        dg.addServerHeader(clientChannel, self.air.ourChannel, CLIENTAGENT_SEND_DATAGRAM)
+        dg.addString(datagram.getMessage())
+        self.air.send(dg)
 
     def deleteOperation(self, avId):
         operation = self.operations.get(avId)
@@ -222,10 +231,24 @@ class FriendsManagerUD:
     def __gotFriendsList(self, success, avId, friendsDetails, onlineFriends):
         self.deleteOperation(avId)
 
-        clientChannel = self.air.air.GetPuppetConnectionChannel(avId)
+        clientChannel = self.air.GetPuppetConnectionChannel(avId)
 
         if not success:
             return
+
+        if onlineFriends:
+            # We have online friends.
+            # Send to the client.
+            datagram = PyDatagram()
+            datagram.addUint16(53) # CLIENT_FRIEND_ONLINE
+
+            for friendId in onlineFriends:
+                datagram.addUint32(friendId)
+
+            datagram.addUint8(1)
+            datagram.addUint8(1)
+
+            self.sendDatagram(avId, datagram)
 
         resp = PyDatagram()
 
@@ -305,22 +328,23 @@ class FriendsManagerUD:
             newOperation = GetAvatarInfoOperation(self, avId, friendId, functools.partial(self.__handleRemoveFriend, friendId = friendId, final = True))
             newOperation.start()
             self.operations[avId] = newOperation
+
+        '''
         else:
             # Undeclare to the friend.
             friendDg = PyDatagram()
-            friendDg.addServerHeader(self.air.air.GetPuppetConnectionChannel(friendId), self.air.air.ourChannel, CLIENTAGENT_UNDECLARE_OBJECT)
+            friendDg.addServerHeader(self.air.GetPuppetConnectionChannel(friendId), self.air.ourChannel, CLIENTAGENT_UNDECLARE_OBJECT)
             friendDg.addUint32(avId)
-            self.air.air.send(friendDg)
+            self.air.send(friendDg)
 
             # Undeclare to the avatar.
             avatarDg = PyDatagram()
-            avatarDg.addServerHeader(self.air.air.GetAccountConnectionChannel(avId), self.air.air.ourChannel, CLIENTAGENT_UNDECLARE_OBJECT)
+            avatarDg.addServerHeader(self.air.GetAccountConnectionChannel(avId), self.air.ourChannel, CLIENTAGENT_UNDECLARE_OBJECT)
             avatarDg.addUint32(friendId)
-            self.air.air.send(avatarDg)
+            self.air.send(avatarDg)
+            '''
 
     def postAddFriend(self, avId, friendId):
-        clientChannel = self.air.air.GetPuppetConnectionChannel(avId)
-
         # Tell the client that their friend is online.
         datagram = PyDatagram()
         datagram.addUint16(53) # CLIENT_FRIEND_ONLINE
@@ -329,34 +353,28 @@ class FriendsManagerUD:
         datagram.addUint8(1)
         datagram.addUint8(1)
 
-         # Send it.
-        dgTwo = PyDatagram()
-        dgTwo.addServerHeader(clientChannel, self.air.air.ourChannel, CLIENTAGENT_SEND_DATAGRAM)
-        dgTwo.addBlob(datagram.getMessage())
-        self.air.air.send(dgTwo)
+        self.sendDatagram(avId, datagram)
 
     def comingOnline(self, avId, friendId):
-        self.air.air.getActivated(friendId, functools.partial(self.__comingOnlineFriendOnline, otherId = avId))
+        self.air.getActivated(friendId, functools.partial(self.__comingOnlineFriendOnline, otherId = avId))
 
     def __comingOnlineFriendOnline(self, avId, activated, otherId = None):
-        clientChannel = self.air.air.GetPuppetConnectionChannel(avId)
-
         if not (otherId and activated):
             return
 
         # Declare our avatar to their friend.
         dg = PyDatagram()
-        dg.addServerHeader(self.air.air.GetPuppetConnectionChannel(avId), self.air.air.ourChannel, CLIENTAGENT_DECLARE_OBJECT)
+        dg.addServerHeader(self.air.GetPuppetConnectionChannel(avId), self.air.ourChannel, CLIENTAGENT_DECLARE_OBJECT)
         dg.addUint32(otherId)
-        dg.addUint16(self.air.air.dclassesByName['DistributedToonUD'].getNumber())
-        self.air.air.send(dg)
+        dg.addUint16(self.air.dclassesByName['DistributedToonUD'].getNumber())
+        self.air.send(dg)
 
         # Declare their friend to our avatar.
         dg = PyDatagram()
-        dg.addServerHeader(self.air.air.GetPuppetConnectionChannel(otherId), self.air.air.ourChannel, CLIENTAGENT_DECLARE_OBJECT)
+        dg.addServerHeader(self.air.GetPuppetConnectionChannel(otherId), self.air.ourChannel, CLIENTAGENT_DECLARE_OBJECT)
         dg.addUint32(avId)
-        dg.addUint16(self.air.air.dclassesByName['DistributedToonUD'].getNumber())
-        self.air.air.send(dg)
+        dg.addUint16(self.air.dclassesByName['DistributedToonUD'].getNumber())
+        self.air.send(dg)
 
         # Tell the client that their friend is online.
         datagram = PyDatagram()
@@ -366,51 +384,44 @@ class FriendsManagerUD:
         datagram.addUint8(1)
         datagram.addUint8(1)
 
-         # Send it.
-        dgTwo = PyDatagram()
-        dgTwo.addServerHeader(clientChannel, self.air.air.ourChannel, CLIENTAGENT_SEND_DATAGRAM)
-        dgTwo.addBlob(datagram.getMessage())
-        self.air.air.send(dgTwo)
+        self.sendDatagram(avId, datagram)
 
     def goingOffline(self, avId):
         newOperation = GetAvatarInfoOperation(self, avId, avId, self.__handleGoingOffline)
         newOperation.start()
+
+        # Tell the party manager we are going offline.
+        self.air.partyManager.avatarOffline(avId)
 
     def __handleGoingOffline(self, success, avId, fields, isPet):
         if not success:
             return
 
         for friendId, trueFriend in fields['setFriendsList'][0]:
-            self.air.air.getActivated(friendId, functools.partial(self.__handleGoneOffline, otherId = avId, accId = fields['setDISLid'][0]))
+            self.air.getActivated(friendId, functools.partial(self.__handleGoneOffline, otherId = avId, accId = fields['setDISLid'][0]))
 
     def __handleGoneOffline(self, avId, activated, otherId = None, accId = None):
-        clientChannel = self.air.air.GetPuppetConnectionChannel(avId)
-
         if not (otherId and activated and accId):
             return
 
         # Undeclare to the friend.
         dg = PyDatagram()
-        dg.addServerHeader(self.air.air.GetPuppetConnectionChannel(avId), self.air.air.ourChannel, CLIENTAGENT_UNDECLARE_OBJECT)
+        dg.addServerHeader(self.air.GetPuppetConnectionChannel(avId), self.air.ourChannel, CLIENTAGENT_UNDECLARE_OBJECT)
         dg.addUint32(otherId)
-        self.air.air.send(dg)
+        self.air.send(dg)
 
         # Undeclare to the now-offline avId.
         dg = PyDatagram()
-        dg.addServerHeader(self.air.air.GetAccountConnectionChannel(accId), self.air.air.ourChannel, CLIENTAGENT_UNDECLARE_OBJECT)
+        dg.addServerHeader(self.air.GetAccountConnectionChannel(accId), self.air.ourChannel, CLIENTAGENT_UNDECLARE_OBJECT)
         dg.addUint32(avId)
-        self.air.air.send(dg)
+        self.air.send(dg)
 
         # Tell them they're offline.
         datagram = PyDatagram()
         datagram.addUint16(54) # CLIENT_FRIEND_OFFLINE
         datagram.addUint32(otherId)
 
-         # Send it.
-        dgTwo = PyDatagram()
-        dgTwo.addServerHeader(clientChannel, self.air.air.ourChannel, CLIENTAGENT_SEND_DATAGRAM)
-        dgTwo.addBlob(datagram.getMessage())
-        self.air.air.send(dgTwo)
+        self.sendDatagram(avId, datagram)
 
     def clearList(self, avId):
         newOperation = GetAvatarInfoOperation(self, avId, avId, self.__handleClearListGotFriendsList)
@@ -460,8 +471,8 @@ class FriendsManagerUD:
         self.deleteOperation(avId)
 
         if success and online:
-            dg = self.air.air.dclassesByName['DistributedToonUD'].aiFormatUpdate('friendsNotify', friendId, friendId, self.air.air.ourChannel, [avId, 1])
-            self.air.air.send(dg)
+            dg = self.air.dclassesByName['DistributedToonUD'].aiFormatUpdate('friendsNotify', friendId, friendId, self.air.ourChannel, [avId, 1])
+            self.air.send(dg)
 
         if not friendIds:
             return

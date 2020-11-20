@@ -1,6 +1,7 @@
 from panda3d.core import loadPrcFile
 from panda3d.toontown import DNAStorage, SuitLeg, SuitLegList
-import builtins, sys, os, traceback
+from direct.showbase import PythonUtil
+import __builtin__, sys, os, traceback
 
 builtins.isClient = lambda: PythonUtil.isClient()
 builtins.DNAStorage = DNAStorage

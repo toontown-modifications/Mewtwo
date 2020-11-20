@@ -1,63 +1,126 @@
-from direct.directnotify import DirectNotifyGlobal
-from direct.distributed.ClockDelta import globalClockDelta
+#-------------------------------------------------------------------------------
+# Contact: Edmundo Ruiz (Schell Games)
+# Created: Oct 2008
+#
+# Purpose: AI component that manages which toons are currently dancing, who entered
+#          and exited the dance floor, and broadcasts dance moves to all clients.
+#-------------------------------------------------------------------------------
 
 from game.toontown.parties.DistributedPartyActivityAI import DistributedPartyActivityAI
-
+from game.toontown.parties import PartyGlobals
 
 class DistributedPartyDanceActivityBaseAI(DistributedPartyActivityAI):
-    notify = DirectNotifyGlobal.directNotify.newCategory('DistributedPartyDanceActivityBaseAI')
+    notify = directNotify.newCategory("DistributedPartyDanceActivityBaseAI")
 
-    def __init__(self, air, parent, activity):
-        DistributedPartyActivityAI.__init__(self, air, parent, activity)
-        self.toons = []
-        self.headings = []
+    def __init__(self, air, partyDoId, x, y, h, activityId, dancePatternToAnims):
+        self.notify.debug("Intializing.")
+        DistributedPartyActivityAI.__init__(self,
+                                            air,
+                                            partyDoId,
+                                            x, y, h,
+                                            activityId,
+                                            PartyGlobals.ActivityTypes.Continuous)
+        self.toonIdsToHeadings = {} # toon's heading when it joined
+        self.dancePatternToAnims = dancePatternToAnims
 
-    def announceGenerate(self):
-        DistributedPartyActivityAI.announceGenerate(self)
-        self.sendUpdate('setState', ['Active', globalClockDelta.getRealNetworkTime()])
+    def delete(self):
+        pass
 
-    def updateDancingToon(self, state, anim):
-        avId = self.air.getAvatarIdFromSender()
-        if not avId:
-            return
-
-        if avId not in self.toons:
-            self.air.writeServerEvent('suspicious', avId=avId,
-                                      issue='Toon tried to update their state while not dancing!')
-            return
-
-        self.sendUpdate('setDancingToonState', [avId, state, anim])
-
+    # Distributed (clsend airecv)
     def toonJoinRequest(self):
-        avId = self.air.getAvatarIdFromSender()
-        if not avId:
-            return
+        """Gets from client when a toon enters the dance floor."""
+        senderId = self.air.getAvatarIdFromSender()
+        self.notify.debug("Request enter %s" % senderId)
+        if senderId not in  self.toonIds:
+            if self.party.isInActivity(senderId):
+                hToUse = 0
+                toon = self.air.doId2do.get(senderId)
+                if toon:
+                    hToUse = toon.getH()
+                self.sendToonJoinResponse(senderId,
+                                      joined = False,
+                                      h = hToUse)
+            else:
+                self.sendToonJoinResponse(senderId,
+                                      joined = True,
+                                      h = self.air.doId2do[senderId].getH())
 
-        if avId in self.toons:
-            self.air.writeServerEvent('suspicious', avId=avId, issue='Toon tried to enter dance activity twice!')
-            return
+        else:
+            self.air.writeServerEvent(
+                "suspicious",
+                senderId,
+                "Party Dance Activity AI Join Request: Sender already in Party Dance Activity"
+                )
+            self.notify.warning("toonJoinRequest() - Sender already in Activity")
 
-        av = self.air.doId2do.get(avId)
-        if not av:
-            self.air.writeServerEvent('suspicious', avId=avId,
-                                      issue='Toon tried to interact with a party activity from a different district!')
-            return
+    def sendToonJoinResponse(self, toonId, joined=True, h=0.0):
+        if joined:
+            self._addToon(toonId)
+            self.toonIdsToHeadings[toonId] = h
+            self.notify.debug("sending setToonsPlaying")
+            self.notify.debug("    toonIds: %s" %self.toonIds)
+            self.notify.debug("    toonHeadings: %s" %self.getHeadingList())
+            self.sendUpdate("setToonsPlaying", [self.toonIds, self.getHeadingList()])
+        else:
+            self.sendUpdateToAvatarId(toonId, "joinRequestDenied", [PartyGlobals.DenialReasons.SilentFail])
 
-        self.toons.append(avId)
-        self.headings.append(av.getH())
-        self.sendUpdate('setToonsPlaying', [self.toons, self.headings])
-
+    # Distributed (clsend airecv)
     def toonExitRequest(self):
-        avId = self.air.getAvatarIdFromSender()
-        if not avId:
-            return
+        """
+        Gets from client when a dancing toon enters the dance floor.
+        """
+        senderId = self.air.getAvatarIdFromSender()
+        self.notify.debug("Request exit %s" % senderId)
+        if senderId in self.toonIds:
+            self.sendToonExitResponse(senderId, exited = True)
+        else:
+            # this case is possible when a toon lands on dance floor from the cannon
+            # joinRequest is never sent by client but exitRequest is sent
+            self.sendToonExitResponse(senderId, exited = False, denialReason=PartyGlobals.DenialReasons.SilentFail)
 
-        if avId not in self.toons:
-            self.air.writeServerEvent('suspicious', avId=avId,
-                                      issue='Toon tried to exit a dance floor they\'re not on!')
-            return
+    def sendToonExitResponse(self, toonId, exited, denialReason=PartyGlobals.DenialReasons.Default):
+        if exited:
+            self._removeToon(toonId)
 
-        index = self.toons.index(avId)
-        self.toons.remove(avId)
-        self.headings.pop(index)
-        self.sendUpdate('setToonsPlaying', [self.toons, self.headings])
+            if toonId in self.toonIdsToHeadings:
+                del self.toonIdsToHeadings[toonId]
+
+            self.sendUpdate("setToonsPlaying", [self.toonIds, self.getHeadingList()])
+        else:
+            self.sendUpdateToAvatarId(toonId, "exitRequestDenied", [denialReason])
+
+    def getHeadingList(self):
+        """
+        Returns a list of initial headings for toons in the activity, in the
+        same order as self.toonIds
+        """
+        headingList = []
+        for toonId in self.toonIds:
+            headingList.append(self.toonIdsToHeadings[toonId])
+        return headingList
+
+    # Distributed (clsend airecv)
+    def updateDancingToon(self, state, anim):
+        """
+        Gets from client when a dancing toon performs a dance move.
+        """
+        senderId = self.air.getAvatarIdFromSender()
+        if anim != "" and anim not in self.dancePatternToAnims.values():
+            # TODO: Log suspicious behavior?
+            return
+        self.d_setDancingToonState(senderId, state, anim)
+        self.notify.debug("Request dance move %s" % senderId)
+
+    # Distributed (broadcast)
+    def d_setDancingToonState(self, toonId, state, anim):
+        self.sendUpdate("setDancingToonState", [toonId, state, anim])
+
+    def _handleUnexpectedToonExit(self, toonId):
+        """
+        An avatar bailed out because he lost his connection or quit
+        unexpectedly. Overriding base class functionality because of the special
+        setToonsPlaying function in this class.
+        """
+        self._removeToon(toonId)
+        self.sendUpdate("setToonsPlaying", [self.toonIds, self.getHeadingList()])
+

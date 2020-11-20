@@ -313,10 +313,10 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
 
         if av.ghostMode == 1:
             av.b_setGhostMode(0)
-            response = 'Enabled ghost mode!'
+            response = 'Disabled ghost mode!'
         else:
             av.b_setGhostMode(1)
-            response = 'Disabled ghost mode!'
+            response = 'Enabled ghost mode!'
 
         self.sendResponseMessage(avId, response)
 
@@ -867,7 +867,7 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
         }
 
         try:
-            requests.post('http://otp-gs.sunrisegames.tech:19135/api/setStatus', json = data, headers = headers)
+            requests.post('http://otp-gs.sunrise.games:19135/api/setStatus', json = data, headers = headers)
         except:
             self.notify.warning('Failed to close server!')
 
@@ -907,6 +907,53 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
         countdown(minutes)
 
         self.sendResponseMessage(av.doId, 'Started maintenance!')
+
+    def d_setTeleportAllSBHQ(self, av):
+        for doId in self.air.doId2do.keys()[:]:
+            do = self.air.doId2do.get(doId)
+
+            # Make sure the DO is actually a toon.
+            if isinstance(do, DistributedPlayerAI) and do.isPlayerControlled():
+                if do.zoneId == av.zoneId:
+                    # This toon is our zone.
+                    # Teleport them to Sellbot HQ.
+                    self.sendUpdateToAvatarId(doId, 'requestTeleport', ['cogHQLoader', 'cogHQExterior', ToontownGlobals.SellbotHQ, ToontownGlobals.SellbotHQ, 0])
+                    self.sendResponseMessage(av.doId, 'Sent toons to Sellbot HQ!')
+
+    def d_doParty(self, av, command):
+        response = 'You did not specify a command!'
+
+        if command == 'update':
+            # simulate this avatarLogging in, which forces invites
+            # and party updates from the dbs
+            self.air.partyManager.partyUpdate(av.doId)
+
+        elif command == 'checkStart':
+            # force an immediate check of which parties can start
+            self.air.partyManager.forceCheckStart()
+
+        elif command == 'unreleasedServer':
+            newVal = self.air.partyManager.toggleAllowUnreleasedServer()
+            response = 'Allow Unreleased Server= %s' % newVal
+
+        elif command == 'canBuy':
+            newVal = self.air.partyManager.toggleCanBuyParties()
+            response = 'can buy parties= %s' % newVal
+
+        elif command == 'end':
+            response = self.air.partyManager.magicWordEnd(av.doId)
+
+        elif command == 'plan':
+            response = 'Going to party grounds to plan'
+
+            # hoodId determines the loading
+            hoodId = ToontownGlobals.PartyHood
+
+            self.sendUpdateToAvatarId(av.doId, 'requestTeleport',
+                          ['safeZoneLoader', 'party',
+                           hoodId, 0, 0])
+
+        self.sendResponseMessage(av.doId, response)
 
     def setMagicWordExt(self, magicWord, avId):
         av = self.air.doId2do.get(avId)
@@ -1105,6 +1152,12 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
                 self.d_setMaintenance(av, int(args[0]))
             except ValueError:
                 self.sendResponseMessage(avId, 'Invalid parameters.')
+        elif magicWord == 'tpallsbhq':
+            self.d_setTeleportAllSBHQ(av)
+        elif magicWord == 'party':
+            if not validation:
+                return
+            self.d_doParty(av, string)
         else:
             if magicWord not in disneyCmds:
                 self.sendResponseMessage(avId, '{0} is not a valid Magic Word.'.format(magicWord))

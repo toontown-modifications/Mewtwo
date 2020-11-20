@@ -1,6 +1,6 @@
 import requests
 
-banEndpoint = 'https://sunrisegames.tech/bans/BanAccount.php'
+banEndpoint = 'https://sunrise.games/bans/BanAccount.php'
 
 username = eval(input('Username: '))
 reason = eval(input('Reason for Ban: '))
