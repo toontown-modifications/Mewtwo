@@ -215,7 +215,7 @@ class DistributedPartyActivityAI(DistributedObjectAI.DistributedObjectAI):
         """
         now = globalClock.getFrameTime()
         while len(self.toonIdsToJellybeanRewards):
-            self.issueJellybeanRewardToToonId(self.toonIdsToJellybeanRewards.keys()[0], now=now)
+            self.issueJellybeanRewardToToonId(list(self.toonIdsToJellybeanRewards.keys())[0], now=now)
 
     def issueJellybeanRewardToToonId(self, toonId, now=None):
         """
