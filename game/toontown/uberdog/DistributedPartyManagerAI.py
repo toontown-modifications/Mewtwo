@@ -660,8 +660,8 @@ class DistributedPartyManagerAI(DistributedObjectAI):
             # If the host got here and there's no party for him, then start a party.
             # TODO-parties: Double check on the party shard dict to make sure that toon's party is not happening somewhere else.
             if (
-                (not senderId in self.hostAvIdToPartiesRunning)) and
-                (not senderId in self.hostAvIdToClosingPartyZoneId))
+                (not senderId in self.hostAvIdToPartiesRunning) and
+                (not senderId in self.hostAvIdToClosingPartyZoneId)
                ):
                 # The host is starting a party, let's clear him out of the avIdToPartyZoneId
                 #self.clearPartyZoneId(senderId) # this doesn't clear him out of guests
