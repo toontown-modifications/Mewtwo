@@ -249,7 +249,7 @@ class DistributedPartyJukeboxActivityBaseAI(DistributedPartyActivityAI):
     def getRandomMusicInfo(self, phase=13):
         if phase == -1:
             # Get random phase
-            keys = self.phaseToMusicData.keys()
+            keys = list(self.phaseToMusicData.keys())
             # bias random music towards the new party songs
             keys += [13,13,13,]
             phase = random.choice(keys) # this is random.choice
