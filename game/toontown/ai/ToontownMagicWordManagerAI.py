@@ -978,9 +978,6 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
             av.d_setSystemMessage(0, 'You do not have sufficient access to execute Magic Words!')
             return
 
-        # Log this attempt.
-        self.notify.info('{0} with avId of {1} executed Magic Word: {2}!'.format(av.getName(), avId, magicWord))
-
         # Write this attempt to disk.
         # We may need to view this later.
         with open(self.backupDir + '/log.txt', 'a') as logFile:
@@ -1163,6 +1160,9 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
                 self.sendResponseMessage(avId, '{0} is not a valid Magic Word.'.format(magicWord))
                 self.notify.info('{0} ({1}) has executed a unknown Magic Word: {2}!'.format(av.getName(), avId, magicWord))
                 return
+
+        # Log this attempt.
+        self.notify.info('{0} ({1}) has executed Magic Word: {2}!'.format(av.getName(), avId, magicWord))
 
         # Call our main class:
         MagicWordManagerAI.setMagicWord(self, magicWord, avId, zoneId)
