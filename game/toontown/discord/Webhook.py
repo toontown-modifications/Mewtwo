@@ -1,5 +1,6 @@
 from direct.directnotify.DirectNotifyGlobal import directNotify
-import requests, _thread
+from threading import Thread
+import requests
 
 class Webhook:
     notify = directNotify.newCategory('Webhook')
@@ -65,6 +66,6 @@ class Webhook:
         data['embeds'].append(embed)
 
         if patch:
-            webhookThread = thread.start_new_thread(self.send, (data, True,))
+            webhookThread = Thread(target = self.send, args = (data, True,)).start()
         else:
-            webhookThread = thread.start_new_thread(self.send, (data, False,))
+            webhookThread = Thread(target = self.send, args = (data, False,)).start()
