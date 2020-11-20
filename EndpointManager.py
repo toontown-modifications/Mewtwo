@@ -141,4 +141,4 @@ async def initializeService():
 
 loop = asyncio.get_event_loop()
 app = loop.run_until_complete(initializeService())
-web.run_app(app, host = '0.0.0.0', port = 4500)
+web.run_app(app, host = '0.0.0.0', port = 4501)
