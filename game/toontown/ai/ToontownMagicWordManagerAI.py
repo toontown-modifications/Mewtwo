@@ -25,7 +25,7 @@ from game.toontown.effects import FireworkShows
 from game.toontown.effects.DistributedFireworkShowAI import DistributedFireworkShowAI
 from game.toontown.pets.DistributedPetAI import DistributedPetAI
 
-import random, time, os, traceback, requests
+import random, time, os, traceback, requests, limeade
 
 class ToontownMagicWordManagerAI(MagicWordManagerAI):
     notify = directNotify.newCategory('ToontownMagicWordManagerAI')
@@ -955,6 +955,12 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
 
         self.sendResponseMessage(av.doId, response)
 
+    def refreshModules(self, av):
+        limeade.refresh()
+
+        response = 'AI modules have been refreshed.'
+        self.sendResponseMessage(av.doId, response)
+
     def setMagicWordExt(self, magicWord, avId):
         av = self.air.doId2do.get(avId)
 
@@ -1155,6 +1161,8 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
             if not validation:
                 return
             self.d_doParty(av, string)
+        elif magicWord == 'refresh':
+            self.refreshModules(av)
         else:
             if magicWord not in disneyCmds:
                 self.sendResponseMessage(avId, '{0} is not a valid Magic Word.'.format(magicWord))
