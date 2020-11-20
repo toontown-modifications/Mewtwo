@@ -79,7 +79,7 @@ class ttInviteDb:
                 DEFAULT CHARSET=utf8;
                 """)
                 # this ensure that the table values come directly from PartyGlobals.InviteStatus
-                for index in xrange(len(PartyGlobals.InviteStatus)):
+                for index in range(len(PartyGlobals.InviteStatus)):
                     cursor.execute(\
                         "INSERT INTO ttInviteStatus(statusId, description) VALUES (%d, '%s')" %
                     (index, PartyGlobals.InviteStatus.getString(index)))
