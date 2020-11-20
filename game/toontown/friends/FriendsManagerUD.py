@@ -262,29 +262,7 @@ class FriendsManagerUD:
             resp.addBlob(field[2])
             resp.addUint32(field[3])
 
-        # Send it.
-        dg = PyDatagram()
-        dg.addServerHeader(clientChannel, self.air.air.ourChannel, CLIENTAGENT_SEND_DATAGRAM)
-        dg.addBlob(resp.getMessage())
-        self.air.air.send(dg)
-
-        if not onlineFriends:
-            return
-
-        datagram = PyDatagram()
-        datagram.addUint16(53) # CLIENT_FRIEND_ONLINE
-
-        for friendId in onlineFriends:
-            datagram.addUint32(friendId)
-
-        datagram.addUint8(1)
-        datagram.addUint8(1)
-
-         # Send it.
-        dgTwo = PyDatagram()
-        dgTwo.addServerHeader(clientChannel, self.air.air.ourChannel, CLIENTAGENT_SEND_DATAGRAM)
-        dgTwo.addBlob(datagram.getMessage())
-        self.air.air.send(dgTwo)
+        self.sendDatagram(avId, resp)
 
     def removeFriend(self, avId, friendId):
         if not avId:
