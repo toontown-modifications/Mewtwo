@@ -884,7 +884,7 @@ class DistributedPartyManagerUD(DistributedObjectGlobalUD):
                 activityIds.append(partyInfo["activities"][i])
         # we can not rely on globalClock.getRealTime() as that depends on when the process is started
         # and will definitely be different between the uberdog and AI
-        actualStartTime = long(time.time())
+        actualStartTime = int(time.time())
         self.hostAvIdToAllPartiesInfo[partyInfo["hostId"]] = [shardId, zoneId, partyInfo["isPrivate"], 0, hostName, activityIds,actualStartTime, partyId]
         self.sendUpdateToAllAis("updateToPublicPartyInfoUdToAllAi", [partyInfo["hostId"], actualStartTime, shardId, zoneId, partyInfo["isPrivate"], 0, hostName, activityIds, partyId])
         self.informInviteesPartyHasStarted(partyId)
