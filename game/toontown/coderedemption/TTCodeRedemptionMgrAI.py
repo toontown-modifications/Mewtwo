@@ -61,12 +61,6 @@ class TTCodeRedemptionMgrAI(DistributedObjectAI):
             awardMgrResult = 0
             self.failedAttempts = 0
 
-        if code == 'reload':
-            result = TTCodeRedemptionConsts.RedeemErrors.CodeIsInactive
-            awardMgrResult = 0
-            self.d_redeemCodeResult(avId, context, result, awardMgrResult)
-            return
-
         # Iterate over these items and deliver item to player.
         items = self.getItemsForCode(code)
 
