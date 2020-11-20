@@ -1,6 +1,7 @@
 from direct.directnotify.DirectNotifyGlobal import directNotify
+from threading import Thread
 
-import _thread, socket, json
+import socket, json
 
 class DiscordIntegrationServer:
     notify = directNotify.newCategory('DiscordIntegrationServer')
@@ -78,6 +79,6 @@ class DiscordIntegrationServer:
                 simbase.air.extAgent.warnPlayer(avClientChannel, reason)
 
     def startServer(self):
-        serverThread = _thread.start_new_thread(self.setupServer, ())
+        serverThread = Thread(target = self.setupServer, args = ()).start()
 
         self.notify.info('Successfully started socket server.')
