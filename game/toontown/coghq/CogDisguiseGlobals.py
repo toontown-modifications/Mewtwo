@@ -505,7 +505,6 @@ def asBitstring(number):
 
     return str
 
-
 def asNumber(bitstring):
     num = 0
     for i in range(0, len(bitstring)):
@@ -514,8 +513,7 @@ def asNumber(bitstring):
 
     return num
 
-
 def dept2deptIndex(dept):
-    if type(dept) == bytes:
+    if type(dept) == str:
         dept = SuitDNA.suitDepts.index(dept)
     return dept
