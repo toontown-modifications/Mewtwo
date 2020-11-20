@@ -405,7 +405,7 @@ class DistributedPartyManagerUD(DistributedObjectGlobalUD):
                            ord(activitiesStr[i*4 + 3])
                            )
             formattedActivities.append(oneActivity)
-        decorStr = partyInfoDict['decorations']
+        decorStr = partyInfoDict['decorations'].decode()
         formattedDecors = []
         for i in range( len(decorStr) // 4):
             oneDecor = (ord(decorStr[i*4]),
