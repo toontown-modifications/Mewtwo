@@ -11536,6 +11536,7 @@ def generateZone2NpcDict():
         zoneId = npcDesc[0]
         if zoneId in zone2NpcDict:
             zone2NpcDict[zoneId].append(id)
+            zone2NpcDict[zoneId].sort()
         else:
             zone2NpcDict[zoneId] = [id]
 
