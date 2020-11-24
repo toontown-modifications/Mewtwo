@@ -72,11 +72,11 @@ class PetManagerAI:
                   'setLastSeenTimestamp': int(time.time()), 'setTrickAptitudes': []}
 
         for traitName in PetTraits.getTraitNames():
-            setter = 'set%s%s' % (string.upper(traitName[0]), traitName[1:])
+            setter = 'set%s%s' % (traitName[0].upper(), traitName[1:])
             fields[setter] = traits.getTraitValue(traitName)
 
         for component in PetMood.PetMood.Components:
-            setter = 'set%s%s' % (string.upper(component[0]), component[1:])
+            setter = 'set%s%s' % (component[0].upper(), component[1:])
             fields[setter] = 0.0
 
         def petCreated(petId):
