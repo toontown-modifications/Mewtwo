@@ -49,11 +49,26 @@ class TimeManagerAI(DistributedObjectAI):
         self.avId2exceptioninfo[avId] = info
         self.air.writeServerEvent('client-exception', avId = avId, info = info)
 
-    def setSignature(self, userSignature, hBin, pycBin):
-        avId = self.air.getAvatarIdFromSender()
+    def setSignature(self, signature, hash, pyc):
+        """
+        This method is called by the client at startup time, to send
+        the xrc signature and the prc hash to the AI for logging in
+        case the client does anything suspicious.
+        """
+        if signature:
+            requesterId = self.air.getAvatarIdFromSender()
+            prcHash = HashVal()
+            prcHash.setFromBin(hash)
+            info = '%s|%s' % (signature, prcHash.asHex())
+            self.notify.info('Client %s signature: %s' % (requesterId, info))
+            self.air.writeServerEvent('client-signature', requesterId, info)
 
-        if not avId:
-            return
+        pycHash = HashVal()
+        pycHash.setFromBin(pyc)
+        if pycHash != HashVal():
+            info = pycHash.asHex()
+            self.notify.info('Client %s py signature: %s' % (requesterId, info))
+            self.air.writeServerEvent('client-py-signature', requesterId, info)
 
     def setFrameRate(self, todo0, todo1, todo2, todo3, todo4, todo5, todo6,
                      todo7, todo8, todo9, todo10, todo11, todo12, todo13,
