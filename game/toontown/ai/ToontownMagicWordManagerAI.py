@@ -1008,7 +1008,8 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
             'sbm',
             'skipBattleMovie',
             'endgame',
-            'wingame'
+            'wingame',
+            'sit'
         ]
 
         if magicWord == 'maxbankmoney':
