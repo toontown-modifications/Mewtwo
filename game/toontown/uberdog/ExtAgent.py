@@ -582,6 +582,27 @@ class ExtAgent(ServerBase):
         # This name is not whitelisted.
         return False
 
+    def packDetails(self, dclass, fields):
+        # Pack required fields.
+        fieldPacker = DCPacker()
+        for i in range(dclass.getNumInheritedFields()):
+            field = dclass.getInheritedField(i)
+            if not field.isRequired() or field.asMolecularField():
+                continue
+
+            k = field.getName()
+            v = fields.get(k, None)
+
+            fieldPacker.beginPack(field)
+            if not v:
+                fieldPacker.packDefaultValue()
+            else:
+                field.packArgs(fieldPacker, v)
+
+            fieldPacker.endPack()
+
+        return fieldPacker.getBytes()
+
     def handleDatagram(self, dgi):
         """
         This handles datagrams coming directly from the Toontown 2013 client.
@@ -1354,28 +1375,8 @@ class ExtAgent(ServerBase):
                 if dclass != self.air.dclassesByName[dclassName]:
                     return
 
-                requiredPacker = DCPacker()
-                otherCount = 0
-                otherPacker = DCPacker()
-
-                for f in range(dclass.getNumInheritedFields()):
-                    field = dclass.getInheritedField(f)
-
-                    if field.isRequired():
-                        requiredPacker.beginPack(field)
-                        if field.getName() in fields:
-                            field.packArgs(requiredPacker, fields[field.getName()])
-                        else:
-                            requiredPacker.packDefaultValue()
-
-                        requiredPacker.endPack()
-
-                    elif field.isRam() and field.getName() in fields:
-                        otherPacker.rawPackUint16(field.getNumber())
-                        otherPacker.beginPack(field)
-                        field.packArgs(otherPacker, fields[field.getName()])
-                        otherPacker.endPack()
-                        otherCount += 1
+                # Pack our data to go to the client.
+                packedData = self.packDetails(dclass, fields)
 
                 # Our details response.
                 resp = PyDatagram()
@@ -1384,8 +1385,7 @@ class ExtAgent(ServerBase):
 
                 resp.addUint32(doId)
                 resp.addUint8(0)
-                resp.appendData(requiredPacker.getBytes())
-                resp.appendData(otherPacker.getBytes())
+                resp.appendData(packedData)
 
                 # Send it.
                 dg = PyDatagram()
