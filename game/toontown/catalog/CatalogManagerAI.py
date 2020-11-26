@@ -22,7 +22,7 @@ class CatalogManagerAI(DistributedObjectAI.DistributedObjectAI):
     notify = DirectNotifyGlobal.directNotify.newCategory("CatalogManagerAI")
 
     timeScale = simbase.config.GetFloat('catalog-time-scale', 1.0)
-    catalogInterval = CatalogInterval // timeScale
+    catalogInterval = CatalogInterval / timeScale
 
     # If this is true, the catalog manager will deliver catalogs based
     # on real time elapsed, even if the user has not played for more
@@ -81,7 +81,7 @@ class CatalogManagerAI(DistributedObjectAI.DistributedObjectAI):
         # to the indicated avatar.
 
         # Get the current time in minutes.
-        now = (int)(time.time() / 60 + 0.5)
+        now = (int)(time.time() // 60 + 0.5)
 
         if avatar.catalogScheduleNextTime == 0:
             # This avatar has never received a catalog before; this
