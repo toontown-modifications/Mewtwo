@@ -22,7 +22,7 @@ class CatalogManagerAI(DistributedObjectAI.DistributedObjectAI):
     notify = DirectNotifyGlobal.directNotify.newCategory("CatalogManagerAI")
 
     timeScale = simbase.config.GetFloat('catalog-time-scale', 1.0)
-    catalogInterval = CatalogInterval // timeScale
+    catalogInterval = CatalogInterval / timeScale
 
     # If this is true, the catalog manager will deliver catalogs based
     # on real time elapsed, even if the user has not played for more
@@ -110,7 +110,7 @@ class CatalogManagerAI(DistributedObjectAI.DistributedObjectAI):
             # Maybe the right thing to do is not to skip any
             # intervening weeks.
             interval = now - weekStart
-            weekDelta = int(math.floor(float(interval) // float(self.catalogInterval)))
+            weekDelta = int(math.floor(float(interval) / float(self.catalogInterval)))
             if self.skipWeeks:
                 currentWeek += weekDelta
             weekStart += weekDelta * self.catalogInterval
