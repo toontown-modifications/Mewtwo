@@ -110,7 +110,7 @@ class CatalogManagerAI(DistributedObjectAI.DistributedObjectAI):
             # Maybe the right thing to do is not to skip any
             # intervening weeks.
             interval = now - weekStart
-            weekDelta = int(math.floor(float(interval) // float(self.catalogInterval)))
+            weekDelta = int(math.floor(float(interval) / float(self.catalogInterval)))
             if self.skipWeeks:
                 currentWeek += weekDelta
             weekStart += weekDelta * self.catalogInterval
