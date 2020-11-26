@@ -2284,7 +2284,7 @@ class DistributedToonAI(DistributedPlayerAI.DistributedPlayerAI, DistributedSmoo
         self.d_setCatalog(monthlyCatalog, weeklyCatalog, backCatalog)
 
     def d_setCatalog(self, monthlyCatalog, weeklyCatalog, backCatalog):
-        self.sendUpdate('setCatalog', [monthlyCatalog.getBlob(), weeklyCatalog.getBlob(), backCatalog.getBlob()])
+        self.sendUpdate('setCatalog', [monthlyCatalog, weeklyCatalog, backCatalog])
 
     def setCatalog(self, monthlyCatalog, weeklyCatalog, backCatalog):
         self.monthlyCatalog = CatalogItemList.CatalogItemList(monthlyCatalog)
