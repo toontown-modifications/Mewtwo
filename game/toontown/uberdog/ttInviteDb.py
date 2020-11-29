@@ -155,7 +155,7 @@ class ttInviteDb:
             if isRetry == True:
                 self.notify.warning("Error on getInvites retry, giving up:\n%s" % str(e))
                 return ()
-            elif e[0] == SERVER_GONE_ERROR or e[0] == SERVER_LOST:
+            elif e == SERVER_GONE_ERROR or e == SERVER_LOST:
                 self.reconnect()
                 return self.getInvites(avatarId,True)
             else:
@@ -183,7 +183,7 @@ class ttInviteDb:
             if isRetry == True:
                 self.notify.warning("Error on putInvite retry, giving up:\n%s" % str(e))
                 return
-            elif e[0] == SERVER_GONE_ERROR or e[0] == SERVER_LOST:
+            elif e == SERVER_GONE_ERROR or e == SERVER_LOST:
                 self.reconnect()
                 self.putInvite(partyId, inviteeId,True)
             else:
@@ -213,7 +213,7 @@ class ttInviteDb:
             if isRetry == True:
                 self.notify.warning("Error in deleteInviteByParty retry, giving up:\n%s" % str(e))
                 return
-            elif e[0] == SERVER_GONE_ERROR or e[0] == SERVER_LOST:
+            elif e == SERVER_GONE_ERROR or e == SERVER_LOST:
                 self.reconnect()
                 self.deleteMail(accountId,messageId,True)
             else:
@@ -241,7 +241,7 @@ class ttInviteDb:
             if isRetry == True:
                 self.notify.warning("Error on getReplies retry, giving up:\n%s" % str(e))
                 return ()
-            elif e[0] == SERVER_GONE_ERROR or e[0] == SERVER_LOST:
+            elif e == SERVER_GONE_ERROR or e == SERVER_LOST:
                 self.reconnect()
                 return self.getReplies(partyId,True)
             else:
@@ -275,7 +275,7 @@ class ttInviteDb:
             if isRetry == True:
                 self.notify.warning("Error on getOneInvite retry, giving up:\n%s" % str(e))
                 return ()
-            elif e[0] == SERVER_GONE_ERROR or e[0] == SERVER_LOST:
+            elif e == SERVER_GONE_ERROR or e == SERVER_LOST:
                 self.reconnect()
                 return self.getOneInvite(partyId,True)
             else:
@@ -304,7 +304,7 @@ class ttInviteDb:
             if isRetry == True:
                 self.notify.warning("Error on updateInvite retry, giving up:\n%s" % str(e))
                 return ()
-            elif e[0] == SERVER_GONE_ERROR or e[0] == SERVER_LOST:
+            elif e == SERVER_GONE_ERROR or e == SERVER_LOST:
                 self.reconnect()
                 return self.updateInvite( newStatus, inviteKey, True)
             else:
@@ -332,7 +332,7 @@ class ttInviteDb:
             if isRetry == True:
                 self.notify.warning("Error on getInviteesOfParty retry, giving up:\n%s" % str(e))
                 return ()
-            elif e[0] == SERVER_GONE_ERROR or e[0] == SERVER_LOST:
+            elif e == SERVER_GONE_ERROR or e == SERVER_LOST:
                 self.reconnect()
                 return self.getInviteesOfParty(partyId,True)
             else:

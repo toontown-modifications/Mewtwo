@@ -176,7 +176,7 @@ class ttPartyDb:
             if isRetry:
                 self.notify.warning("Error on getParty retry. Giving up:\n%s" % str(e))
                 return ()
-            elif e[0] == SERVER_GONE_ERROR or e[0] == SERVER_LOST:
+            elif e == SERVER_GONE_ERROR or e == SERVER_LOST:
                 self.reconnect()
                 return self.getParty(partyId,True)
             else:
@@ -227,7 +227,7 @@ class ttPartyDb:
             if isRetry:
                 self.notify.warning("putParty failed with error '%s' on retry. Giving up." % str(e))
                 return False
-            elif e[0] == SERVER_GONE_ERROR or e[0] == SERVER_LOST:
+            elif e == SERVER_GONE_ERROR or e == SERVER_LOST:
                 self.reconnect()
                 return self.putParty(hostId, startTime, endTime, isPrivate, inviteTheme, activityStr, decorStr, status, True)
             else:
@@ -262,7 +262,7 @@ class ttPartyDb:
             if isRetry:
                 self.notify.warning("Error in deleteParty retry, giving up:\n%s" % str(e))
                 return
-            elif e[0] == SERVER_GONE_ERROR or e[0] == SERVER_LOST:
+            elif e == SERVER_GONE_ERROR or e == SERVER_LOST:
                 self.reconnect()
                 self.deleteParty(partyId,True)
             else:
@@ -303,7 +303,7 @@ class ttPartyDb:
             if isRetry:
                 self.notify.warning("Error on getPartiesAvailableToStart retry, giving up:\n%s" % str(e))
                 return ()
-            elif e[0] == SERVER_GONE_ERROR or e[0] == SERVER_LOST:
+            elif e == SERVER_GONE_ERROR or e == SERVER_LOST:
                 self.reconnect()
                 return self.getPartiesAvailableToStart(currentTime, True)
             else:
@@ -344,7 +344,7 @@ class ttPartyDb:
             if isRetry:
                 self.notify.warning("Error on getPartiesOfHost retry, giving up:\n%s" % str(e))
                 return ()
-            elif e[0] == SERVER_GONE_ERROR or e[0] == SERVER_LOST:
+            elif e == SERVER_GONE_ERROR or e == SERVER_LOST:
                 self.reconnect()
                 return self.getPartiesOfHost(hostId, sortedByStartTime, True)
             else:
@@ -375,7 +375,7 @@ class ttPartyDb:
             if isRetry:
                 self.notify.warning("Error on getPartiesOfHostThatCanStart retry, giving up:\n%s" % str(e))
                 return ()
-            elif e[0] == SERVER_GONE_ERROR or e[0] == SERVER_LOST:
+            elif e == SERVER_GONE_ERROR or e == SERVER_LOST:
                 self.reconnect()
                 return self.getPartiesOfHostThatCanStart(hostId, True)
             else:
@@ -407,7 +407,7 @@ class ttPartyDb:
             if isRetry:
                 self.notify.warning("Error on changePrivate retry, giving up:\n%s" % str(e))
                 return ()
-            elif e[0] == SERVER_GONE_ERROR or e[0] == SERVER_LOST:
+            elif e == SERVER_GONE_ERROR or e == SERVER_LOST:
                 self.reconnect()
                 return self.changePrivate(newPrivateStatus, partyId, True)
             else:
@@ -440,7 +440,7 @@ class ttPartyDb:
             if isRetry:
                 self.notify.warning("Error on changePartyStatus retry, giving up:\n%s" % str(e))
                 return ()
-            elif e[0] == SERVER_GONE_ERROR or e[0] == SERVER_LOST:
+            elif e == SERVER_GONE_ERROR or e == SERVER_LOST:
                 self.reconnect()
                 return self.changePartyStatus(newPartyStatus, partyId, True)
             else:
@@ -493,7 +493,7 @@ class ttPartyDb:
             if isRetry:
                 self.notify.warning("Error on getMultipleParties retry. Giving up:\n%s" % str(e))
                 return ()
-            elif e[0] == SERVER_GONE_ERROR or e[0] == SERVER_LOST:
+            elif e == SERVER_GONE_ERROR or e == SERVER_LOST:
                 self.reconnect()
                 return self.getMultipleParties(partyIds, sortByStartTime, True)
             else:
@@ -544,7 +544,7 @@ class ttPartyDb:
             if isRetry:
                 self.notify.warning("Error on getPrioritizedParties retry. Giving up:\n%s" % str(e))
                 return ()
-            elif e[0] == SERVER_GONE_ERROR or e[0] == SERVER_LOST:
+            elif e == SERVER_GONE_ERROR or e == SERVER_LOST:
                 self.reconnect()
                 return self.getPrioritizedParties( partyIds, thresholdTime, limit, future, cancelled, isRetry=True)
             else:
@@ -554,7 +554,6 @@ class ttPartyDb:
         except Exception as e:
             self.notify.warning("Unknown error in getPrioritizedParties getCancelledFutureParties, giving up:\n%s" % str(e))
             return ()
-
 
     def getHostPrioritizedParties(self, hostId, thresholdTime, limit, future, cancelled, isRetry=False):
         """Return parties from the database using the criteria specified in future and cancelled."""
@@ -592,7 +591,7 @@ class ttPartyDb:
             if isRetry:
                 self.notify.warning("Error on getHostPrioritizedParties retry. Giving up:\n%s" % str(e))
                 return ()
-            elif e[0] == SERVER_GONE_ERROR or e[0] == SERVER_LOST:
+            elif e == SERVER_GONE_ERROR or e == SERVER_LOST:
                 self.reconnect()
                 return self.getHostPrioritizedParties( hostId, thresholdTime, limit, future, cancelled, isRetry=True)
             else:
@@ -627,7 +626,7 @@ class ttPartyDb:
             if isRetry:
                 self.notify.warning("Error on forceFinishForStarted retry, giving up:\n%s" % str(e))
                 return ()
-            elif e[0] == SERVER_GONE_ERROR or e[0] == SERVER_LOST:
+            elif e == SERVER_GONE_ERROR or e == SERVER_LOST:
                 self.reconnect()
                 return self.forceFinishForStarted(thresholdTime, True)
             else:
@@ -661,7 +660,7 @@ class ttPartyDb:
             if isRetry:
                 self.notify.warning("Error on forceNeverStartedForCanStart retry, giving up:\n%s" % str(e))
                 return ()
-            elif e[0] == SERVER_GONE_ERROR or e[0] == SERVER_LOST:
+            elif e == SERVER_GONE_ERROR or e == SERVER_LOST:
                 self.reconnect()
                 return self.forceNeverStartedForCanStart(thresholdTime, True)
             else:
@@ -701,7 +700,7 @@ class ttPartyDb:
             if isRetry:
                 self.notify.warning("Error on changeMultiplePartiesStatus retry, giving up:\n%s" % str(e))
                 return ()
-            elif e[0] == SERVER_GONE_ERROR or e[0] == SERVER_LOST:
+            elif e == SERVER_GONE_ERROR or e == SERVER_LOST:
                 self.reconnect()
                 return self.changeMultiplePartiesStatus(partyIds, newPartyStatus,  True)
             else:
