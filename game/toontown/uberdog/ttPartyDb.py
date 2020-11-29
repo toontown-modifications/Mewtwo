@@ -504,8 +504,6 @@ class ttPartyDb:
             self.notify.warning("Unknown error in getMultipleParties, giving up:\n%s" % str(e))
             return ()
 
-
-
     def getPrioritizedParties(self, partyIds, thresholdTime, limit, future, cancelled, isRetry=False):
         """Return parties from the database using the criteria specified in future and cancelled."""
         if not self.sqlAvailable:
