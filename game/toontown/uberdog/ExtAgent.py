@@ -1100,9 +1100,13 @@ class ExtAgent(ServerBase):
                 datagram.addBlob(cleanupDatagram.getMessage())
                 self.air.send(datagram)
 
-                # Tell the Party manager that we are online.
-                # [avatarId, accountId, playerName, playerNameApproved, openChatEnabled, createFriendsWithChat, chatCodeCreation]
-                self.air.partyManager.avatarOnlinePlusAccountInfo(avId, target, '', 1, 1, 1, 1)
+                try:
+                    # Tell the Party manager that we are online.
+                    # [avatarId, accountId, playerName, playerNameApproved, openChatEnabled, createFriendsWithChat, chatCodeCreation]
+                    self.air.partyManager.avatarOnlinePlusAccountInfo(avId, target, '', 1, 1, 1, 1)
+                except:
+                    # The MySQL database must of died.
+                    self.notify.warning('Failed to call avatarOnlinePlusAccountInfo for Parties!')
 
             def handleAccountRetrieve(dclass, fields):
                 if dclass != self.air.dclassesByName['AccountUD']:
