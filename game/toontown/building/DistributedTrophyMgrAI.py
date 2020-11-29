@@ -124,7 +124,7 @@ class DistributedTrophyMgrAI(DistributedObjectAI.DistributedObjectAI):
         """
         Returns a list of score,avId pairs in sorted order, highest first
         """
-        i = map(lambda t: list(t), self.trophyDict.items())
+        i = list(map(lambda t: list(t), self.trophyDict.items()))
         map(lambda r: r.reverse(),i)
         i.sort()
         i.reverse()
