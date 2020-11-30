@@ -38,7 +38,7 @@ class DistributedTrophyMgrAI(DistributedObjectAI.DistributedObjectAI):
         Computes a list of score,avId pairs in sorted order, highest first
         """
         # Make a copy so we can manipulate it
-        i = map(lambda t: list(t), self.trophyDict.items())
+        i = list(map(lambda t: list(t), self.trophyDict.items()))
 
         # Recompute only if the score is greater than the lowest score
         # or if there are less than 10 players in the list
