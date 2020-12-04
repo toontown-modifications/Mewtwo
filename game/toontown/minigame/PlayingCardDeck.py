@@ -1,4 +1,4 @@
-import random
+from game.otp.util import random
 from . import PlayingCardGlobals
 from game.toontown.minigame.PlayingCard import PlayingCardBase
 
