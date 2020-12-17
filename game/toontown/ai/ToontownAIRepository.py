@@ -590,10 +590,6 @@ class ToontownAIRepository(ToontownInternalRepository, ServerBase):
         if msgType == ToontownAIMsgTypes.PARTY_MANAGER_UD_TO_ALL_AI:
             self.__handlePartyManagerUdToAllAi(di)
             return
-        elif msgType == 1004:
-            # wtf
-            print(di)
-            return
 
         ToontownInternalRepository.handleDatagram(self, di)
 
