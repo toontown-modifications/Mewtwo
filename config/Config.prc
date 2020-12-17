@@ -28,6 +28,7 @@ want-instant-parties true
 want-welcome-valley false
 want-fireworks-cannons false
 want-loyalty-requirement true
+want-ds-anydbm false
 
 # Code Redemption
 max-code-redemption-attempts 5
