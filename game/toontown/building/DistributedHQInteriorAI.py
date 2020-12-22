@@ -35,7 +35,7 @@ class DistributedHQInteriorAI(DistributedObjectAI.DistributedObjectAI):
     def sendNewLeaderBoard(self):
         if self.air:
             self.isDirty = False
-            self.sendUpdate('setLeaderBoard', [pickle.dumps(self.air.trophyMgr.getLeaderInfo(), 1)])
+            self.sendUpdate('setLeaderBoard', [pickle.dumps(list(self.air.trophyMgr.getLeaderInfo()), 1)])
 
     def getLeaderBoard(self):
         return pickle.dumps(self.air.trophyMgr.getLeaderInfo(), 1)
