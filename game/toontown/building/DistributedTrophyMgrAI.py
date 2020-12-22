@@ -55,10 +55,10 @@ class DistributedTrophyMgrAI(DistributedObjectAI.DistributedObjectAI):
 
             # Keep some side tracking variables as an optimization so we
             # do not need to compute them every time.
-            self.__leaderScores = map(lambda t: t[0], self.__leaders)
+            self.__leaderScores = list(map(lambda t: t[0], self.__leaders))
             self.__minLeaderScore = min(self.__leaderScores)
-            self.__leaderAvIds = map(lambda t: t[1], self.__leaders)
-            self.__leaderNames = map(lambda avId: self.nameDict[avId], self.__leaderAvIds)
+            self.__leaderAvIds = list(map(lambda t: t[1], self.__leaders))
+            self.__leaderNames = list(map(lambda avId: self.nameDict[avId], self.__leaderAvIds))
 
             self.notify.debug("recomputed leaders:\n leaderScores: %s\n leaderAvIds: %s\n leaderNames: %s" %
                               (self.__leaderScores, self.__leaderAvIds, self.__leaderNames))
