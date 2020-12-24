@@ -3,7 +3,7 @@ from direct.showbase import DirectObject
 from game.toontown.suit import SuitDNA
 from direct.directnotify import DirectNotifyGlobal
 from . import LevelBattleManagerAI
-import types, random
+import types, random, functools
 
 class LevelSuitPlannerAI(DirectObject.DirectObject):
     notify = DirectNotifyGlobal.directNotify.newCategory('LevelSuitPlannerAI')
@@ -39,7 +39,7 @@ class LevelSuitPlannerAI(DirectObject.DirectObject):
         for currChance in range(num):
             joinChances.append(random.randint(1, 100))
 
-        joinChances.sort(cmp)
+        joinChances.sort(key=functools.cmp_to_key(cmp))
         return joinChances
 
     def __genSuitInfos(self, level, track):
