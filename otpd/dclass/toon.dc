@@ -2478,8 +2478,8 @@ dclass DistributedWinterCarolingTarget : DistributedScavengerHuntTarget {
 dclass DistributedDataStoreManager : DistributedObject {
   startStore(uint8);
   stopStore(uint8);
-  queryStore(uint8, string);
-  receiveResults(uint8, string);
+  queryStore(uint8, blob);
+  receiveResults(uint8, blob);
   deleteBackupStores();
 };
 

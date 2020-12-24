@@ -18,9 +18,6 @@ class DistributedDataStoreManagerAI(DistributedObjectGlobalAI):
         self.sendUpdate('stopStore', [typeId])
 
     def queryStore(self, query, callback):
-        if type(query) != str:
-            return
-
         self.context += 1
         self.ctx2Callback[self.context] = callback
         self.sendUpdate('queryStore', [self.context, query])
