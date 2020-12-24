@@ -227,4 +227,10 @@ class TTCodeRedemptionMgrAI(DistributedObjectAI):
             beans = CatalogBeanItem(12000, tagCode = 2)
             return [beans]
 
+        if code == 'feeling-jolly':
+            shirt = CatalogClothingItem(1100, 0)
+            shorts = CatalogClothingItem(1104, 0)
+            beans = CatalogBeanItem(12000, tagCode = 2)
+            return [shirt, shorts, beans]
+
         return False
