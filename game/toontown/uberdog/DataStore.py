@@ -40,7 +40,7 @@ class DataStore:
         if self.wantAnyDbm:
             try:
                 if os.path.exists(self.filepath):
-                    self.data = dbm.open(self.filepath, 'w')
+                    self.data = dbm.open(self.filepath, 'wb')
                     self.notify.debug('Opening existing anydbm database at: %s.' % (self.filepath,))
                 else:
                     self.data = dbm.open(self.filepath, 'c')
@@ -50,13 +50,13 @@ class DataStore:
 
         else:
             try:
-                file = open(self.filepath + '.bu', 'r')
+                file = open(self.filepath + '.bu', 'rb')
                 self.notify.debug('Opening backup pickle data file at %s.' % (self.filepath + '.bu',))
                 if os.path.exists(self.filepath):
                     os.remove(self.filepath)
             except IOError:
                 try:
-                    file = open(self.filepath, 'r')
+                    file = open(self.filepath, 'rb')
                     self.notify.debug('Opening old pickle data file at %s..' % (self.filepath,))
                 except IOError:
                     file = None
@@ -80,7 +80,7 @@ class DataStore:
                     backuppath = self.filepath + '.bu'
                     if os.path.exists(self.filepath):
                         os.rename(self.filepath, backuppath)
-                    outfile = open(self.filepath, 'w')
+                    outfile = open(self.filepath, 'wb')
                     pickle.dump(self.data, outfile)
                     outfile.close()
                     if os.path.exists(backuppath):
