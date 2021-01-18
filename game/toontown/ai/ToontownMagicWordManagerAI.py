@@ -1044,7 +1044,7 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
         elif magicWord == 'unites':
             if not validation:
                 return
-            self.d_restockUnites(avId, num = args[0])
+            self.d_restockUnites(avId, num = int(args[0]))
         elif magicWord == 'name':
             self.d_setName(avId, name = string)
         elif magicWord == 'pinkslips':
