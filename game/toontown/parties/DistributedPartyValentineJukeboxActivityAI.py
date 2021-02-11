@@ -1,8 +1,5 @@
-from direct.directnotify import DirectNotifyGlobal
+from direct.directnotify.DirectNotifyGlobal import directNotify
 from game.toontown.parties.DistributedPartyJukeboxActivityBaseAI import DistributedPartyJukeboxActivityBaseAI
 
-
-class DistributedPartyValentineJukeboxActivityAI(
-        DistributedPartyJukeboxActivityBaseAI):
-    notify = DirectNotifyGlobal.directNotify.newCategory(
-        "DistributedPartyValentineJukeboxActivityAI")
+class DistributedPartyValentineJukeboxActivityAI(DistributedPartyJukeboxActivityBaseAI):
+    notify = directNotify.newCategory('DistributedPartyValentineJukeboxActivityAI')

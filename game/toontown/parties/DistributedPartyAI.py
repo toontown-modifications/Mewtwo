@@ -21,6 +21,10 @@ from game.toontown.parties.DistributedPartyFireworksActivityAI import Distribute
 from game.toontown.parties.DistributedPartyJukebox40ActivityAI import DistributedPartyJukebox40ActivityAI
 from game.toontown.parties.DistributedPartyDance20ActivityAI import DistributedPartyDance20ActivityAI
 from game.toontown.parties.DistributedPartyCogActivityAI import DistributedPartyCogActivityAI
+from game.toontown.parties.DistributedPartyValentineJukeboxActivityAI import DistributedPartyValentineJukeboxActivityAI
+from game.toontown.parties.DistributedPartyValentineJukebox40ActivityAI import DistributedPartyValentineJukebox40ActivityAI
+from game.toontown.parties.DistributedPartyValentineDanceActivityAI import DistributedPartyValentineDanceActivityAI
+from game.toontown.parties.DistributedPartyValentineDance20ActivityAI import DistributedPartyValentineDance20ActivityAI
 
 ActivityIdsToClasses = {
     PartyGlobals.ActivityIds.PartyJukebox : DistributedPartyJukeboxActivityAI,
@@ -35,6 +39,10 @@ ActivityIdsToClasses = {
     PartyGlobals.ActivityIds.PartyJukebox40 : DistributedPartyJukebox40ActivityAI,
     PartyGlobals.ActivityIds.PartyDance20 : DistributedPartyDance20ActivityAI,
     PartyGlobals.ActivityIds.PartyCog : DistributedPartyCogActivityAI,
+    PartyGlobals.ActivityIds.PartyValentineJukebox : DistributedPartyValentineJukeboxActivityAI,
+    PartyGlobals.ActivityIds.PartyValentineJukebox40 : DistributedPartyValentineJukebox40ActivityAI,
+    PartyGlobals.ActivityIds.PartyValentineDance : DistributedPartyValentineDanceActivityAI,
+    PartyGlobals.ActivityIds.PartyValentineDance20 : DistributedPartyValentineDance20ActivityAI,
     }
 
 class DistributedPartyAI(DistributedObjectAI):
