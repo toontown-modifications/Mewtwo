@@ -25,6 +25,7 @@ from game.toontown.parties.DistributedPartyValentineJukeboxActivityAI import Dis
 from game.toontown.parties.DistributedPartyValentineJukebox40ActivityAI import DistributedPartyValentineJukebox40ActivityAI
 from game.toontown.parties.DistributedPartyValentineDanceActivityAI import DistributedPartyValentineDanceActivityAI
 from game.toontown.parties.DistributedPartyValentineDance20ActivityAI import DistributedPartyValentineDance20ActivityAI
+from game.toontown.parties.DistributedPartyValentineTrampolineActivityAI import DistributedPartyValentineTrampolineActivityAI
 
 ActivityIdsToClasses = {
     PartyGlobals.ActivityIds.PartyJukebox : DistributedPartyJukeboxActivityAI,
@@ -43,6 +44,7 @@ ActivityIdsToClasses = {
     PartyGlobals.ActivityIds.PartyValentineJukebox40 : DistributedPartyValentineJukebox40ActivityAI,
     PartyGlobals.ActivityIds.PartyValentineDance : DistributedPartyValentineDanceActivityAI,
     PartyGlobals.ActivityIds.PartyValentineDance20 : DistributedPartyValentineDance20ActivityAI,
+    PartyGlobals.ActivityIds.PartyValentineTrampoline : DistributedPartyValentineTrampolineActivityAI
     }
 
 class DistributedPartyAI(DistributedObjectAI):
