@@ -494,7 +494,7 @@ class ExtAgent(ServerBase):
         playToken = self.accId2playToken.get(accId)
 
         for word in message.split(' '):
-            cleanWord = self.whiteList.cleanText(word)
+            cleanWord = self.whiteList.cleanText(word).decode()
 
             if cleanWord in TTLocalizer.Blacklist:
                 flagged = word
