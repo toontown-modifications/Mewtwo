@@ -75,6 +75,8 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
 
         av.b_setMoney(av.getMaxMoney())
 
+        self.sendResponseMessage(avId, 'You are now Jeff Bezos.')
+
     def d_setToonMax(self, avId):
         if avId not in self.air.doId2do:
             return
@@ -961,6 +963,35 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
         response = 'AI modules have been refreshed.'
         self.sendResponseMessage(av.doId, response)
 
+    def handleInvasionCommand(self, avId, command, suit, amount, skeleton):
+        if not 10 <= amount <= 25000:
+            response = 'Incorrect value: {0}! Specify a value between 10 and 25,000.'.format(amount)
+            self.sendResponseMessage(avId, response)
+            return
+
+        invMgr = simbase.air.suitInvasionManager
+
+        if command == 'start':
+            if invMgr.getInvading():
+                response = 'There is already an invasion running on the current district!'
+                self.sendResponseMessage(avId, response)
+                return
+            if suit not in SuitDNA.suitHeadTypes:
+                response = 'This cog does not exist!'
+                self.sendResponseMessage(avId, response)
+                return
+            invMgr.startInvasion(suit, amount, skeleton)
+            self.sendResponseMessage(avId, 'Success! Invasion amount is: {0}.'.format(amount))
+        elif cmd == 'stop':
+            if not invMgr.getInvading():
+                response = 'There is not an invasion running on the current district!'
+                self.sendResponseMessage(avId, response)
+                return
+            invMgr.stopInvasion()
+        else:
+            response = 'Invalid command! Commands are ~invasion start or stop.'
+            self.sendResponseMessage(avId, response)
+
     def setMagicWordExt(self, magicWord, avId):
         av = self.air.doId2do.get(avId)
 
@@ -1164,6 +1195,17 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
             self.d_doParty(av, string)
         elif magicWord == 'refresh':
             self.refreshModules(av)
+        elif magicWord in ('spawninv', 'inv'):
+            if not validation:
+                return
+            try:
+                command = args[0]
+                suit = args[1]
+                amount = int(args[2])
+                skeleton = int(args[3])
+                self.handleInvasionCommand(avId, command, suit, amount, skeleton)
+            except:
+                self.sendResponseMessage(avId, 'Invalid parameters.')
         else:
             if magicWord not in disneyCmds:
                 self.sendResponseMessage(avId, '{0} is not a valid Magic Word.'.format(magicWord))
