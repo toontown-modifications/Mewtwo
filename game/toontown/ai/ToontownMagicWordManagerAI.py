@@ -260,6 +260,9 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
 
         av.b_setTickets(num)
 
+        response = 'Set tickets to: {0}.'.format(num)
+        self.sendResponseMessage(avId, response)
+
     def d_startHoliday(self, avId, holidayId):
         if not hasattr(self.air, 'holidayManager'):
             msg = "Holiday manager isn't generated in this AI. Holiday not started."
@@ -353,6 +356,8 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
 
         if av.isGM():
             av.b_setGM(0)
+            self.sendResponseMessage(avId, 'Disabled GM icon!')
+            return
 
         if gmType == 1:
             av.b_setGM(1)
@@ -1088,7 +1093,10 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
         elif magicWord == 'tickets':
             if not validation:
                 return
-            self.d_setTickets(avId, num = args[0])
+            try:
+                self.d_setTickets(avId, num = int(args[0]))
+            except ValueError:
+                self.sendResponseMessage(avId, 'Invalid parameters.')
         elif magicWord == 'newsummons':
             if not validation:
                 return
