@@ -145,7 +145,7 @@ class TutorialManagerAI(DistributedObjectAI):
 
     def requestTutorial(self):
         avId = self.air.getAvatarIdFromSender()
-        avatar = self.air.doId2do.get(avId)            
+        av = self.air.doId2do.get(avId)            
 
         if av.getTutorialAck():
             # Log this event.
