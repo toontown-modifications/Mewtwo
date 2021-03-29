@@ -1,6 +1,10 @@
 from direct.directnotify.DirectNotifyGlobal import directNotify
 from direct.distributed.DistributedObjectAI import DistributedObjectAI
 from direct.fsm.FSM import FSM
+from direct.distributed.PyDatagram import PyDatagram
+from direct.distributed import MsgTypes'
+
+from otp.otpbase import OTPLocalizer
 
 from game.toontown.ai.DistributedBlackCatMgrAI import DistributedBlackCatMgrAI, BlackCatDayHolidayAI
 from game.toontown.building import DoorTypes
@@ -13,6 +17,7 @@ from game.toontown.suit.DistributedTutorialSuitAI import DistributedTutorialSuit
 from game.toontown.toon import NPCToons
 from game.toontown.toonbase import TTLocalizer
 from game.toontown.toonbase import ToontownBattleGlobals
+import time
 
 class TutorialZones:
     BRANCH = 0
@@ -138,9 +143,25 @@ class TutorialManagerAI(DistributedObjectAI):
         DistributedObjectAI.__init__(self, air)
 
         self.playerDict = {}
+        self.fieldRateLimit = {}
 
     def requestTutorial(self):
         avId = self.air.getAvatarIdFromSender()
+
+        if avId in self.fieldRateLimit and self.fieldRateLimit[avId] > time.time():
+            # Log this event.
+            self.air.writeServerEvent('suspicious', avId, 'Attempted to spam TutorialManagerAI.requestTutorial.')
+
+            # Boot them out with a fake message.
+            channel = avId + (1001 << 32)
+            dg = PyDatagram()
+            dg.addServerHeader(channel, OTP_ALL_CLIENTS, MsgTypes.CLIENTAGENT_EJECT)
+            dg.addUint16(120)
+            dg.addString(OTPLocalizer.CRBootedReasons[120])
+            self.air.send(dg)
+            return
+
+        self.fieldRateLimit[address] = time.time() + 3.0
 
         if not avId:
             accountId = self.air.getAccountIdFromSender()
