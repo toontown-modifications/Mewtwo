@@ -4,3 +4,5 @@ pycryptodome
 pytz
 lxml
 limeade
+werkzeug
+json-rpc
