@@ -5,6 +5,7 @@ from direct.distributed.PyDatagram import PyDatagram
 from direct.distributed import MsgTypes
 
 from game.otp.otpbase import OTPLocalizer
+from game.otp.distributed import OtpDoGlobals
 
 from game.toontown.ai.DistributedBlackCatMgrAI import DistributedBlackCatMgrAI, BlackCatDayHolidayAI
 from game.toontown.building import DoorTypes
@@ -154,7 +155,7 @@ class TutorialManagerAI(DistributedObjectAI):
             # Boot them out with a fake message.
             channel = avId + (1001 << 32)
             dg = PyDatagram()
-            dg.addServerHeader(channel, OTP_ALL_CLIENTS, MsgTypes.CLIENTAGENT_EJECT)
+            dg.addServerHeader(channel, OtpDoGlobals.OTP_ALL_CLIENTS, MsgTypes.CLIENTAGENT_EJECT)
             dg.addUint16(120)
             dg.addString(OTPLocalizer.CRBootedReasons[120])
             self.air.send(dg)
