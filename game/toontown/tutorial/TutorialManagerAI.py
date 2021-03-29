@@ -2,7 +2,7 @@ from direct.directnotify.DirectNotifyGlobal import directNotify
 from direct.distributed.DistributedObjectAI import DistributedObjectAI
 from direct.fsm.FSM import FSM
 from direct.distributed.PyDatagram import PyDatagram
-from direct.distributed import MsgTypes'
+from direct.distributed import MsgTypes
 
 from otp.otpbase import OTPLocalizer
 
