@@ -4,7 +4,7 @@ from direct.fsm.FSM import FSM
 from direct.distributed.PyDatagram import PyDatagram
 from direct.distributed import MsgTypes
 
-from otp.otpbase import OTPLocalizer
+from game.otp.otpbase import OTPLocalizer
 
 from game.toontown.ai.DistributedBlackCatMgrAI import DistributedBlackCatMgrAI, BlackCatDayHolidayAI
 from game.toontown.building import DoorTypes
