@@ -38,16 +38,16 @@ class RPCServerUD:
             return 'Broadcasted system message to shard.'
         elif action == 'kickPlayer':
             if len(arguments) == 2:
-                avId = arguments[0]
+                avId = int(arguments[0])
                 reason = arguments[1]
                 self.air.extAgent.sendKick(avId, reason)
                 return 'Kicked player from server.'
             elif action == 'approveName':
-                avId = arguments[0]
+                avId = int(arguments[0])
                 self.air.extAgent.approveName(avId)
                 return 'Approved name.'
             elif whatToDo == 'rejectName':
-                avId = arguments[0]
+                avId = int(arguments[0])
                 self.air.extAgent.rejectName(avId)
                 return 'Rejected name.'
 
