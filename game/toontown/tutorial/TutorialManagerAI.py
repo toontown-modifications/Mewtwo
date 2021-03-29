@@ -146,7 +146,7 @@ class TutorialManagerAI(DistributedObjectAI):
     def requestTutorial(self):
         avId = self.air.getAvatarIdFromSender()
 
-        if not av.getTutorialAck():
+        if av.getTutorialAck():
             # Log this event.
             self.air.writeServerEvent('suspicious', avId, 'Attempted to send TutorialManagerAI.requestTutorial, but has already completed Tutorial!')
 
