@@ -161,7 +161,7 @@ class TutorialManagerAI(DistributedObjectAI):
             self.air.send(dg)
             return
 
-        self.fieldRateLimit[address] = time.time() + 3.0
+        self.fieldRateLimit[avId] = time.time() + 3.0
 
         if not avId:
             accountId = self.air.getAccountIdFromSender()
