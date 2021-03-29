@@ -17,7 +17,6 @@ from game.toontown.suit.DistributedTutorialSuitAI import DistributedTutorialSuit
 from game.toontown.toon import NPCToons
 from game.toontown.toonbase import TTLocalizer
 from game.toontown.toonbase import ToontownBattleGlobals
-import time
 
 class TutorialZones:
     BRANCH = 0
@@ -143,14 +142,13 @@ class TutorialManagerAI(DistributedObjectAI):
         DistributedObjectAI.__init__(self, air)
 
         self.playerDict = {}
-        self.fieldRateLimit = {}
 
     def requestTutorial(self):
         avId = self.air.getAvatarIdFromSender()
 
-        if avId in self.fieldRateLimit and self.fieldRateLimit[avId] > time.time():
+        if not av.getTutorialAck():
             # Log this event.
-            self.air.writeServerEvent('suspicious', avId, 'Attempted to spam TutorialManagerAI.requestTutorial.')
+            self.air.writeServerEvent('suspicious', avId, 'Attempted to send TutorialManagerAI.requestTutorial, but has already completed Tutorial!')
 
             # Boot them out with a fake message.
             channel = avId + (1001 << 32)
@@ -160,8 +158,6 @@ class TutorialManagerAI(DistributedObjectAI):
             dg.addString(OTPLocalizer.CRBootedReasons[120])
             self.air.send(dg)
             return
-
-        self.fieldRateLimit[avId] = time.time() + 3.0
 
         if not avId:
             accountId = self.air.getAccountIdFromSender()
