@@ -8,6 +8,7 @@ from game.toontown.parties.ToontownTimeManager import ToontownTimeManager
 from game.otp.distributed import OtpDoGlobals
 from game.toontown.distributed.ToontownInternalRepository import ToontownInternalRepository
 from game.toontown.discord.DiscordIntegrationServer import DiscordIntegrationServer
+from game.toontown.rpc.RPCServerUD import RPCServerUD
 import builtins, time
 
 builtins.isClient = lambda: PythonUtil.isClient()
@@ -47,6 +48,7 @@ class ToontownServerRepositoryAgent(ToontownInternalRepository):
             self.discordIntegration = DiscordIntegrationServer(self)
 
         self.toontownTimeManager = ToontownTimeManager(serverTimeUponLogin = int(time.time()), globalClockRealTimeUponLogin = globalClock.getRealTime())
+        self.rpcServer = RPCServerUD(self)
 
     def generateManagers(self):
         self.centralLogger = self.generateGlobalObject(OtpDoGlobals.OTP_DO_ID_CENTRAL_LOGGER, 'CentralLogger')
