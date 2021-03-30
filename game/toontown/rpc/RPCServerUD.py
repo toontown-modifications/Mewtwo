@@ -65,6 +65,14 @@ class RPCServerUD:
 
                 # Query the avatar to get some account information.
                 self.air.dbInterface.queryObject(self.air.dbId, avatarId, handleRetrieve)
+                return 'Banned avatar.'
+            elif whatToDo == 'warnPlayer':
+                avId = int(arguments[0])
+                reason = str(arguments[1])
+
+                avClientChannel = self.air.GetPuppetConnectionChannel(avId)
+                self.air.extAgent.warnPlayer(avClientChannel, reason)
+                return 'Warned avatar.'
 
         return 'Unhandled action.'
 
