@@ -1248,6 +1248,18 @@ class ExtAgent(ServerBase):
                     message.setWebhook(config.GetString('discord-approvals-webhook'))
                     message.finalize()
 
+                    headers = {
+                        'User-Agent': 'SunriseGames-ExtAgent'
+                    }
+
+                    data = {
+                        'name': name,
+                        'secretKey': 'jzYEqAZkEP',
+                        'avatarId': avId
+                    }
+
+                    request = requests.post('https://sunrise.games/panel/names/approve.php', data, headers = headers).json()
+
             pendingName = name
             approvedName = ''
             rejectedName = ''
