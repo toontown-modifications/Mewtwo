@@ -66,7 +66,7 @@ class RPCServerUD:
                 # Query the avatar to get some account information.
                 self.air.dbInterface.queryObject(self.air.dbId, avatarId, handleRetrieve)
                 return 'Banned avatar.'
-            elif whatToDo == 'warnPlayer':
+            elif action == 'warnPlayer':
                 avId = int(arguments[0])
                 reason = str(arguments[1])
 
