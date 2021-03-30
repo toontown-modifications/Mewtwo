@@ -46,10 +46,25 @@ class RPCServerUD:
                 avId = int(arguments[0])
                 self.air.extAgent.approveName(avId)
                 return 'Approved name.'
-            elif whatToDo == 'rejectName':
+            elif action == 'rejectName':
                 avId = int(arguments[0])
                 self.air.extAgent.rejectName(avId)
                 return 'Rejected name.'
+            elif action == 'banAccount':
+                avatarId = int(arguments[0])
+
+                def handleRetrieve(dclass, fields):
+                    if dclass != self.air.dclassesByName['DistributedToonUD']:
+                        return
+
+                    accountId = fields['setDISLid'][0]
+                    playToken = self.air.extAgent.accId2playToken.get(accountId, '')
+
+                    self.air.extAgent.sendKick(avId, 'N/A')
+                    self.air.extAgent.banAccount(playToken, 'N/A', 'N/A', True)
+
+                # Query the avatar to get some account information.
+                self.air.dbInterface.queryObject(self.air.dbId, avatarId, handleRetrieve)
 
         return 'Unhandled action.'
 
