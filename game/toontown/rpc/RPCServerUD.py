@@ -42,37 +42,37 @@ class RPCServerUD:
                 reason = arguments[1]
                 self.air.extAgent.sendKick(avId, reason)
                 return 'Kicked player from server.'
-            elif action == 'approveName':
-                avId = int(arguments[0])
-                self.air.extAgent.approveName(avId)
-                return 'Approved name.'
-            elif action == 'rejectName':
-                avId = int(arguments[0])
-                self.air.extAgent.rejectName(avId)
-                return 'Rejected name.'
-            elif action == 'banAccount':
-                avatarId = int(arguments[0])
+        elif action == 'approveName':
+            avId = int(arguments[0])
+            self.air.extAgent.approveName(avId)
+            return 'Approved name.'
+        elif action == 'rejectName':
+            avId = int(arguments[0])
+            self.air.extAgent.rejectName(avId)
+            return 'Rejected name.'
+        elif action == 'banAccount':
+            avatarId = int(arguments[0])
 
-                def handleRetrieve(dclass, fields):
-                    if dclass != self.air.dclassesByName['DistributedToonUD']:
-                        return
+            def handleRetrieve(dclass, fields):
+                if dclass != self.air.dclassesByName['DistributedToonUD']:
+                    return
 
-                    accountId = fields['setDISLid'][0]
-                    playToken = self.air.extAgent.accId2playToken.get(accountId, '')
+                accountId = fields['setDISLid'][0]
+                playToken = self.air.extAgent.accId2playToken.get(accountId, '')
 
-                    self.air.extAgent.sendKick(avId, 'N/A')
-                    self.air.extAgent.banAccount(playToken, 'N/A', 'N/A', True)
+                self.air.extAgent.sendKick(avId, 'N/A')
+                self.air.extAgent.banAccount(playToken, 'N/A', 'N/A', True)
 
-                # Query the avatar to get some account information.
-                self.air.dbInterface.queryObject(self.air.dbId, avatarId, handleRetrieve)
-                return 'Banned avatar.'
-            elif action == 'warnPlayer':
-                avId = int(arguments[0])
-                reason = str(arguments[1])
+            # Query the avatar to get some account information.
+            self.air.dbInterface.queryObject(self.air.dbId, avatarId, handleRetrieve)
+            return 'Banned avatar.'
+        elif action == 'warnPlayer':
+            avId = int(arguments[0])
+            reason = str(arguments[1])
 
-                avClientChannel = self.air.GetPuppetConnectionChannel(avId)
-                self.air.extAgent.warnPlayer(avClientChannel, reason)
-                return 'Warned avatar.'
+            avClientChannel = self.air.GetPuppetConnectionChannel(avId)
+            self.air.extAgent.warnPlayer(avClientChannel, reason)
+            return 'Warned avatar.'
 
         return 'Unhandled action.'
 
