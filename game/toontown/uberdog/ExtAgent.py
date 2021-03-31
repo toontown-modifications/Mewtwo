@@ -1211,6 +1211,8 @@ class ExtAgent(ServerBase):
             # Query the avatar.
             self.air.dbInterface.queryObject(self.air.dbId, avId, handleRetrieve)
         elif msgType == 70: # CLIENT_SET_WISHNAME
+            accountId = self.air.getAccountIdFromSender()
+
             try:
                 avId = dgi.getUint32()
                 name = dgi.getString()
@@ -1229,7 +1231,12 @@ class ExtAgent(ServerBase):
             if avId:
                 self.air.dbInterface.updateObject(self.air.dbId, avId, self.air.dclassesByName['DistributedToonUD'], fields)
 
-                if self.isProdServer():
+                valid = False
+
+                if accountId in self.air.centralLogger.stateMap:
+                    valid = self.air.centralLogger.stateMap[accountId]
+
+                if self.isProdServer() and valid:
                     fields = [{
                         'name': 'Avatar Id',
                         'value': avId,
@@ -1294,6 +1301,9 @@ class ExtAgent(ServerBase):
             dg.addServerHeader(clientChannel, self.air.ourChannel, CLIENTAGENT_SEND_DATAGRAM)
             dg.addBlob(resp.getMessage())
             self.air.send(dg)
+
+            # Reset the account state.
+            self.air.centralLogger.stateMap[accountId] = False
         elif msgType == 97: # CLIENT_ADD_INTEREST
             # Reformat the packets for the CA.
             handle = dgi.getUint16()
@@ -1533,6 +1543,13 @@ class ExtAgent(ServerBase):
 
             # Query the avatar.
             self.air.dbInterface.queryObject(self.air.dbId, avatarId, handleRetrieve)
+        elif msgType == 71: # CLIENT_SET_WISHNAME_RESP
+            # This is called when someone tries to play with datagrams.
+            errorCode = 288
+            message = TTLocalizer.LogoutForced
+
+            self.sendBoot(clientChannel, errorCode, message)
+            self.sendEject(clientChannel, errorCode, message)
         else:
             self.notify.warning('Received unknown message type %s from Client' % msgType)
 

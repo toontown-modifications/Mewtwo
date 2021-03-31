@@ -14,6 +14,7 @@ class CentralLoggerUD(DistributedObjectGlobalUD, ServerBase):
         ServerBase.__init__(self)
 
         self.wantPartialProd = config.GetBool('want-partial-prod', False)
+        self.stateMap = {}
 
     def getCategory(self, category):
         if category == 'MODERATION_FOUL_LANGUAGE':
@@ -89,6 +90,13 @@ class CentralLoggerUD(DistributedObjectGlobalUD, ServerBase):
                 message.setColor(1127128)
                 message.setWebhook(config.GetString('discord-reports-webhook'))
                 message.finalize()
+
+        # This is because we have naughty toons trying to flood the webhook.
+        accountId = self.air.getAccountIdFromSender()
+        self.stateMap[accountId] = False
+
+        if message.startswith('MAT - endingMakeAToon'):
+            self.stateMap[accountId] = True
 
         self.air.writeServerEvent(category, messageType = msgType, message = message, **fields)
 
