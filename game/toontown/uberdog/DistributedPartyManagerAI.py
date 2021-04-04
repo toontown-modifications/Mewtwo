@@ -569,7 +569,7 @@ class DistributedPartyManagerAI(DistributedObjectAI):
     def delete(self):
         DistributedPartyManagerAI.notify.debug("BASE: delete: deleting DistributedPartyManagerAI object")
         self.ignoreAll()
-        DistributedObjectGlobalAI.DistributedObjectGlobalAI.delete(self)
+        DistributedObjectGlobalAI.delete(self)
         for party in self.hostAvIdToPartiesRunning.values():
             party.requestDelete()
         del self.avIdToPartyZoneId
