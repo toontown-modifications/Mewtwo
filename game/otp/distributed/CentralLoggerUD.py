@@ -86,7 +86,7 @@ class CentralLoggerUD(DistributedObjectGlobalUD, ServerBase):
                 'name': 'Server Type',
                 'value': ServerGlobals.FINAL_TOONTOWN,
                 'inline': True
-            }}
+            }]
 
             if category != 'Unknown Category':
                 message = Webhook()
