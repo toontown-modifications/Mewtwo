@@ -20,6 +20,11 @@ from Crypto.Util.Padding import unpad
 from datetime import datetime
 import json, time, os, random, requests, binascii, base64
 
+class ServerGlobals:
+    FINAL_TOONTOWN = 1
+    TEST_TOONTOWN_2012 = 2
+    TOONTOWN_JP_2010 = 3
+
 class JSONBridge:
 
     def __init__(self):
@@ -1246,6 +1251,10 @@ class ExtAgent(ServerBase):
                         'name': 'Name',
                         'value': name,
                         'inline': True
+                    },
+                    {
+                        'name': 'Server Type',
+                        'value': ServerGlobals.FINAL_TOONTOWN
                     }]
 
                     message = Webhook()
