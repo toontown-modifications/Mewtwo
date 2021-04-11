@@ -3,6 +3,7 @@ from direct.distributed.DistributedObjectGlobalUD import DistributedObjectGlobal
 
 from game.toontown.uberdog.ServerBase import ServerBase
 from game.toontown.discord.Webhook import Webhook
+from game.toontown.uberdog.ExtAgent import ServerGlobals
 
 import json
 
