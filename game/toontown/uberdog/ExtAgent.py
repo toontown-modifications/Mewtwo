@@ -1254,7 +1254,8 @@ class ExtAgent(ServerBase):
                     },
                     {
                         'name': 'Server Type',
-                        'value': ServerGlobals.FINAL_TOONTOWN
+                        'value': ServerGlobals.FINAL_TOONTOWN,
+                        'inline': True
                     }]
 
                     message = Webhook()

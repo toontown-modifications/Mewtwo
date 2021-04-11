@@ -81,7 +81,12 @@ class CentralLoggerUD(DistributedObjectGlobalUD, ServerBase):
                 'name': 'Sender Avatar Id',
                 'value': self.air.getAvatarIdFromSender(),
                 'inline': True
-            }]
+            },
+            {
+                'name': 'Server Type',
+                'value': ServerGlobals.FINAL_TOONTOWN,
+                'inline': True
+            }
 
             if category != 'Unknown Category':
                 message = Webhook()
