@@ -105,6 +105,7 @@ class DistributedAvatarAI(DistributedNodeAI.DistributedNodeAI):
 
             if toon:
                 toon.d_setSystemMessage(0, 'Admin chat has been temporarily patched until I properly fix the underlying crash.')
+                toon.requestDelete()
                 return
  
         DistributedNodeAI.DistributedNodeAI.setParentStr(self, parentToken)
@@ -158,7 +159,6 @@ class DistributedAvatarAI(DistributedNodeAI.DistributedNodeAI):
 
     def setTalkAccount(self, receiverAvId, todo2, todo3, message, modifications, todo4):
         sender = self.air.getAvatarIdFromSender()
-        print(sender)
 
         if not sender:
             return
