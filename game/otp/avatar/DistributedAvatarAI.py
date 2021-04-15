@@ -102,8 +102,7 @@ class DistributedAvatarAI(DistributedNodeAI.DistributedNodeAI):
 
             # TODO: Proper fix
             if self.air.doId2do.get(senderId):
-                toon.d_setSystemMessage(0, 'Nice try.')
-                toon.disconnect()
+                toon.d_setSystemMessage(0, 'Admin chat has been temporarily patched until I properly fix the underlying crash.')
                 return
  
         DistributedNodeAI.DistributedNodeAI.setParentStr(self, parentToken)
