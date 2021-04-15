@@ -99,6 +99,13 @@ class DistributedAvatarAI(DistributedNodeAI.DistributedNodeAI):
             senderId = self.air.getAvatarIdFromSender()
             self.air.writeServerEvent('Admin chat warning', senderId, 'using setParentStr to send "%s"' % parentToken)
             self.notify.warning('Admin chat warning: %s using setParentStr to send "%s"' % (senderId, parentToken))
+
+            # TODO: Proper fix
+            if self.air.doId2do.get(senderId):
+                toon.d_setSystemMessage(0, 'Nice try.')
+                toon.disconnect()
+                return
+ 
         DistributedNodeAI.DistributedNodeAI.setParentStr(self, parentToken)
 
     def setTalk(self, todo, todo2, todo3, message, modifications, todo4):
