@@ -60,7 +60,7 @@ class RPCServerUD:
                 accountId = fields['setDISLid'][0]
                 playToken = self.air.extAgent.accId2playToken.get(accountId, '')
 
-                self.air.extAgent.sendKick(avId, 'N/A')
+                self.air.extAgent.sendKick(avatarId, 'N/A')
                 self.air.extAgent.banAccount(playToken, 'N/A', 'N/A', True)
 
             # Query the avatar to get some account information.
