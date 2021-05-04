@@ -50,7 +50,7 @@ class RPCServerUD:
             avId = int(arguments[0])
             self.air.extAgent.rejectName(avId)
             return 'Rejected name.'
-        elif action == 'banAccount':
+        elif action == 'banPlayer':
             avatarId = int(arguments[0])
 
             def handleRetrieve(dclass, fields):
