@@ -122,7 +122,7 @@ class ExtAgent(ServerBase):
             # Create our database folder.
             os.makedirs(self.databasePath)
 
-        self.banEndpointBase = 'https://sunrise.games/bans/{0}'
+        self.banEndpointBase = 'https://toontastic.sunrise.games/bans/{0}'
 
         self.requestHeaders = {
             'User-Agent': 'Sunrise Games - ExtAgent'
