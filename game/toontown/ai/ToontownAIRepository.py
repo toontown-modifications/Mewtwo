@@ -66,11 +66,11 @@ from game.toontown.coderedemption.TTCodeRedemptionMgrAI import TTCodeRedemptionM
 from game.toontown.uberdog.DistributedPartyManagerAI import DistributedPartyManagerAI
 from game.toontown.distributed.ToontownInternalRepository import ToontownInternalRepository
 from game.toontown.estate.DistributedBankMgrAI import DistributedBankMgrAI
-from game.toontown.ai.DialogueManagerAI import DialogueManagerAI
 from game.otp.uberdog.OtpAvatarManagerAI import OtpAvatarManagerAI
 from game.toontown.uberdog.ServerBase import ServerBase
 from game.otp.otpbase import OTPGlobals
 from game.toontown.ai import ToontownAIMsgTypes
+from game.toontown.toon.NPCDialogueManagerAI import NPCDialogueManagerAI
 
 import builtins, time, os, requests
 
@@ -255,7 +255,7 @@ class ToontownAIRepository(ToontownInternalRepository, ServerBase):
 
         self.cogSuitMgr = CogSuitManagerAI(self)
 
-        self.dialogueManager = DialogueManagerAI(self)
+        self.dialogueManager = NPCDialogueManagerAI()
 
     def createManagers(self):
         # Generate our TimeManagerAI.
