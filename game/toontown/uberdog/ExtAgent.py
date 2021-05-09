@@ -236,14 +236,14 @@ class ExtAgent(ServerBase):
     def registerShard(self, shardId, shardName):
         self.shardInfo[shardId] = (shardName, 0)
 
-    def loginAccount(self, fields, clientChannel, accountId, playToken, openChat, isPaid, dislId):
+    def loginAccount(self, fields, clientChannel, accountId, playToken, openChat, isPaid, dislId, linkedToParent):
         # If somebody is logged into this account, disconnect them.
         errorCode = 100
         self.sendEject(self.air.GetAccountConnectionChannel(accountId), errorCode, OTPLocalizer.CRBootedReasons.get(errorCode))
 
         # Wait half a second before continuing to avoid a race condition.
         taskMgr.doMethodLater(0.5,
-                              lambda x: self.finishLoginAccount(fields, clientChannel, accountId, playToken, openChat, isPaid, dislId),
+                              lambda x: self.finishLoginAccount(fields, clientChannel, accountId, playToken, openChat, isPaid, dislId, linkedToParent),
                               self.air.uniqueName('wait-acc-%s' % accountId), appendTask=False)
 
     def getCreationDate(self, fields):
@@ -269,7 +269,7 @@ class ExtAgent(ServerBase):
 
         return accountDays
 
-    def finishLoginAccount(self, fields, clientChannel, accountId, playToken, openChat, isPaid, dislId):
+    def finishLoginAccount(self, fields, clientChannel, accountId, playToken, openChat, isPaid, dislId, linkedToParent):
         # If there's anybody on the account, kill them for redundant login:
         errorCode = 100
 
@@ -329,7 +329,7 @@ class ExtAgent(ServerBase):
 
         resp.addString(time.strftime('%Y-%m-%d %H:%M:%S')) # lastLoggedInStr
         resp.addInt32(self.getAccountDays(fields)) # accountDays
-        resp.addString('NO_PARENT_ACCOUNT') # toonAccountType
+        resp.addString('WITH_PARENT_ACCOUNT' if linkedToParent else 'NO_PARENT_ACCOUNT') # toonAccountType
         resp.addString(playToken) # userName
 
         # Dispatch the response to the client.
@@ -751,6 +751,7 @@ class ExtAgent(ServerBase):
                     tokenTimestamp = jsonData['Timestamp']
                     dislId = int(jsonData['dislId'])
                     accountType = str(jsonData['accountType'])
+                    linkedToParent = int(jsonData['LinkedToParent'])
                 except:
                     # Bad play token.
                     errorCode = 122
@@ -822,6 +823,7 @@ class ExtAgent(ServerBase):
                 openChat = False
                 isPaid = False
                 dislId = 1
+                linkedToParent = False
 
             # Check the server version against the real one.
             ourVersion = config.GetString('server-version', '')
@@ -851,7 +853,7 @@ class ExtAgent(ServerBase):
                         return
 
                     # Log in the account.
-                    self.loginAccount(fields, clientChannel, accountId, playToken, openChat, isPaid, dislId)
+                    self.loginAccount(fields, clientChannel, accountId, playToken, openChat, isPaid, dislId, linkedToParent)
 
                 # Query the Account object.
                 self.air.dbInterface.queryObject(self.air.dbId, accountId, queryLoginResponse)
@@ -875,7 +877,7 @@ class ExtAgent(ServerBase):
                 self.bridge.put(playToken, accountId)
 
                 # Log in the account.
-                self.loginAccount(account, clientChannel, accountId, playToken, openChat, isPaid, dislId)
+                self.loginAccount(account, clientChannel, accountId, playToken, openChat, isPaid, dislId, linkedToParent)
 
             # Create the Account in the database.
             self.air.dbInterface.createObject(self.air.dbId,

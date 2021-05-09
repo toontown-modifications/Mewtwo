@@ -65,9 +65,6 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
         MagicWordManagerAI.delete(self)
 
     def d_setAvatarRich(self, avId):
-        if avId not in self.air.doId2do:
-            return
-
         av = self.air.doId2do.get(avId)
 
         if not av:
