@@ -16,7 +16,7 @@ class RPCServerUD:
         self.air = air
 
         # Start up the RPC service thread.
-        Thread(target = self.startup, args = ()).start()
+        Thread(target = self.startup).start()
 
     @Request.application
     def application(self, request):

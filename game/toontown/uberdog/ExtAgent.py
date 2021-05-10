@@ -130,6 +130,8 @@ class ExtAgent(ServerBase):
 
         self.playTokenDecryptKey = 'eee39eae6e156222a460e240496876f00623ae6b5ad08701209de12ae298fac4'
 
+        self.wantTokenExpirations = config.GetBool('want-token-expirations', False)
+
         # Enable information logging.
         self.notify.setInfo(True)
 
@@ -748,10 +750,18 @@ class ExtAgent(ServerBase):
                     playToken = str(jsonData['playToken'])
                     openChat = int(jsonData['OpenChat'])
                     isPaid = int(jsonData['Member'])
-                    tokenTimestamp = jsonData['Timestamp']
+                    timestamp = jsonData['Timestamp']
                     dislId = int(jsonData['dislId'])
                     accountType = str(jsonData['accountType'])
                     linkedToParent = int(jsonData['LinkedToParent'])
+
+                    if self.wantTokenExpirations and timestamp < int(time.time()):
+                        errorCode = 122
+                        message = 'Token has expired.'
+
+                        self.sendBoot(clientChannel, errorCode, message)
+                        self.sendEject(clientChannel, errorCode, message)
+                        return
                 except:
                     # Bad play token.
                     errorCode = 122
