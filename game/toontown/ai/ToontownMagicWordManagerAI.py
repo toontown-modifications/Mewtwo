@@ -994,6 +994,78 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
             response = 'Invalid command! Commands are ~invasion start or stop.'
             self.sendResponseMessage(avId, response)
 
+    def locate(self, av, avIdShort = 0, returnType = ''):
+        '''Locate an avatar anywhere on the [CURRENT] AI.'''
+        # TODO: Use OTP messages to get location of avId from anywhere in the OTP cyber-space.
+        # NOTE: The avIdShort concept needs changing, especially when we start entering 200000000's for avIds
+        if avIdShort <= 0:
+            response = 'Please enter a valid avId to find! Note: You only need to enter the last few digits of the full avId!'
+            self.sendResponseMessage(av.doId, response)
+            return
+
+        avIdFull = 400000000 - (300000000 - avIdShort)
+        av = simbase.air.doId2do.get(avIdFull, None)
+
+        if not av:
+            response = 'Could not find the avatar on the current AI.'
+            self.sendResponseMessage(av.doId, response)
+            return
+
+        # Get the avatar's location.
+        zoneId = av.getLocation()[1] # This returns: (parentId, zoneId)
+        trueZoneId = zoneId
+        interior = False
+
+        if returnType == 'zone':
+            # The avatar that called the MagicWord wants a zoneId... Provide them with the untouched zoneId.
+            response = '{0} is in zoneId {1}.'.format(av.getName(), trueZoneId)
+            self.sendResponseMessage(av.doId, response)
+            return
+
+        if returnType == 'playground':
+            # The avatar that called the MagicWord wants the playground name that the avatar is currently in.
+            zoneId = ZoneUtil.getCanonicalHoodId(zoneId)
+
+        if ZoneUtil.isInterior(zoneId):
+            # If we're in an interior, we want to fetch the street/playground zone, since there isn't
+            # any mapping for interiorId -> shop name (afaik).
+            zoneId -= 500
+            interior = True
+
+        if ZoneUtil.isPlayground(zoneId):
+            # If it's a playground, TTG contains a map of all hoodIds -> playground names.
+            where = ToontownGlobals.hoodNameMap.get(zoneId, None)
+        else:
+            # If it's not a playground, the TTL contains a list of all streetId -> street names.
+            zoneId -= zoneId % 100  # This essentially truncates the last 2 digits.
+            where = TTLocalizer.GlobalStreetNames.get(zoneId, None)
+
+        if not where:
+            response = 'Failed to map the zoneId {0} [trueZoneId: {1}] to a location...'.format(zoneId, trueZoneId)
+            self.sendResponseMessage(av.doId, response)
+            return
+
+        if interior:
+            response = '{0} has been located {1} {2}, inside a building.'.format(av.getName(), where[1], where[2])
+            self.sendResponseMessage(av.doId, response)
+            return
+
+        response = '{0} has been located {1} {2}.'.format(av.getName(), where[1], where[2])
+        self.sendResponseMessage(av.doId, response)
+
+    def listAllPlayers(self, av):
+        from game.toontown.toon.DistributedNPCToonBaseAI import DistributedNPCToonBaseAI
+
+        out = '\n\nCMD\n'
+
+        for doId, obj in list(self.air.doId2do.items()):
+            if obj.__class__.__name__ == 'DistributedToonAI':
+                if not obj.isNPC():
+                    x = self.locate(av, doId - 100000000)
+                    out += '%d: %s [%s]\n' % (doId, obj.getName(), self.locate(av, doId - 100000000))
+        
+        self.sendResponseMessage(av.doId, out)
+
     def setMagicWordExt(self, magicWord, avId):
         av = self.air.doId2do.get(avId)
 
@@ -1210,6 +1282,16 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
                 skeleton = int(args[3])
                 self.handleInvasionCommand(avId, command, suit, amount, skeleton)
             except:
+                self.sendResponseMessage(avId, 'Invalid parameters.')
+        elif magicWord == 'allplayers':
+            self.listAllPlayers(av)
+        elif magicWord == 'locate':
+            if not validation:
+                return
+            try:
+                self.locate(av, int(args[0]), str(args[1]))
+            except:
+
                 self.sendResponseMessage(avId, 'Invalid parameters.')
         else:
             if magicWord not in disneyCmds:

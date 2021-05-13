@@ -4456,3 +4456,6 @@ class DistributedToonAI(DistributedPlayerAI.DistributedPlayerAI, DistributedSmoo
         print("hooked location")
         self.b_setLocation(self.parentId, zoneId)
         print(self.zoneId)
+
+    def isNPC(self):
+        return False

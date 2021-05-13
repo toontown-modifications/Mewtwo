@@ -100,14 +100,6 @@ class DistributedAvatarAI(DistributedNodeAI.DistributedNodeAI):
             self.air.writeServerEvent('Admin chat warning', senderId, 'using setParentStr to send "%s"' % parentToken)
             self.notify.warning('Admin chat warning: %s using setParentStr to send "%s"' % (senderId, parentToken))
 
-            # TODO: Proper fix
-            toon = self.air.doId2do.get(senderId)
-
-            if toon:
-                toon.d_setSystemMessage(0, 'Admin chat has been temporarily patched until I properly fix the underlying crash.')
-                toon.requestDelete()
-                return
- 
         DistributedNodeAI.DistributedNodeAI.setParentStr(self, parentToken)
 
     def setTalk(self, todo, todo2, todo3, message, modifications, todo4):
