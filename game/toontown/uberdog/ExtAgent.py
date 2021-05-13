@@ -18,7 +18,7 @@ from game.toontown.discord.Webhook import Webhook
 from Crypto.Cipher import AES
 from Crypto.Util.Padding import unpad
 from datetime import datetime
-import json, time, os, random, requests, binascii, base64
+import json, time, os, random, requests, binascii, base64, limeade
 
 class ServerGlobals:
     FINAL_TOONTOWN = 1
@@ -77,9 +77,11 @@ class ExtAgent(ServerBase):
         self.air.netMessenger.register(1, 'magicWord')
         self.air.netMessenger.register(2, 'postAddFriend')
         self.air.netMessenger.register(5, 'magicWordApproved')
+        self.air.netMessenger.register(6, 'refreshModules')
 
         self.air.netMessenger.accept('registerShard', self, self.registerShard)
         self.air.netMessenger.accept('postAddFriend', self, self.postAddFriend)
+        self.air.netMessenger.accept('refreshModules', self, self.refreshModules)
 
         self.shardInfo = {}
 
@@ -134,6 +136,9 @@ class ExtAgent(ServerBase):
 
         # Enable information logging.
         self.notify.setInfo(True)
+
+    def refreshModules(self):
+        limeade.refresh()
 
     def getStatus(self):
         try:

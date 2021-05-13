@@ -961,8 +961,9 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
 
     def refreshModules(self, av):
         limeade.refresh()
+        self.air.netMessenger.send('refreshModules')
 
-        response = 'AI modules have been refreshed.'
+        response = 'Modules have been refreshed.'
         self.sendResponseMessage(av.doId, response)
 
     def handleInvasionCommand(self, avId, command, suit, amount, skeleton):
