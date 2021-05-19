@@ -3,6 +3,8 @@ from game.otp.distributed import OtpDoGlobals
 from direct.distributed import MsgTypes
 from direct.distributed.PyDatagram import PyDatagram
 from game.otp.ai import AIMsgTypes
+from game.toontown.toonbase import TTLocalizer
+import traceback
 
 class ToontownInternalRepository(AstronInternalRepository):
     GameGlobalsId = OtpDoGlobals.OTP_DO_ID_TOONTOWN
@@ -121,3 +123,26 @@ class ToontownInternalRepository(AstronInternalRepository):
 
     def getSenderReturnChannel(self):
         return self.getMsgSender()
+
+    def readerPollOnce(self):
+        avatarId = self.getAvatarIdFromSender()
+        accountId = self.getAccountIdFromSender()
+
+        try:
+            return AstronInternalRepository.readerPollOnce(self)
+        except (SystemExit, KeyboardInterrupt):
+            raise
+
+        except Exception as e:
+            if avatarId > 100000000:
+                dg = PyDatagram()
+                dg.addServerHeader(self.getMsgSender(), self.ourChannel, MsgTypes.CLIENTAGENT_EJECT)
+                dg.addUint16(153)
+                dg.addString(TTLocalizer.LogoutForced)
+                self.send(dg)
+
+            self.writeServerEvent('INTERNAL-EXCEPTION', avatarId, accountId, repr(e), traceback.format_exc())
+            self.notify.warning('INTERNAL-EXCEPTION: %s (%s)' % (repr(e), avatarId))
+            print(traceback.format_exc())
+
+        return 1
