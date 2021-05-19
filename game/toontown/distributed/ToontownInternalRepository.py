@@ -136,7 +136,7 @@ class ToontownInternalRepository(AstronInternalRepository):
         except Exception as e:
             if avatarId > 100000000:
                 dg = PyDatagram()
-                dg.addServerHeader(self.getMsgSender(), self.ourChannel, MsgTypes.CLIENTAGENT_EJECT)
+                dg.addServerHeader(self.getSenderReturnChannel(), self.ourChannel, MsgTypes.CLIENTAGENT_EJECT)
                 dg.addUint16(153)
                 dg.addString(TTLocalizer.LogoutForced)
                 self.send(dg)
