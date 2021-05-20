@@ -95,6 +95,8 @@ class DistributedAvatarAI(DistributedNodeAI.DistributedNodeAI):
         self.sendUpdateToAvatarId(senderId, 'confirmAvOnShard', [avId, onShard])
 
     def setParentStr(self, parentToken):
+        print(parentToken)
+
         if parentToken and isinstance(parentToken, bytes):
             senderId = self.air.getAvatarIdFromSender()
             self.air.writeServerEvent('Admin chat warning', senderId, 'using setParentStr to send "%s"' % parentToken)
