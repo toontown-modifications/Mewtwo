@@ -502,7 +502,7 @@ dclass DistributedToon : DistributedPlayer {
   setCatalogNotify(uint8 = 0, uint8 = 0) required ownrecv db;
   playSplashEffect(int16/10, int16/10, int16/10) broadcast ownsend;
   setWhisperSCToontaskFrom(uint32, uint32, uint32, uint32, uint8) ownrecv clsend;
-  setSCToontask(uint32 taskId, uint32 toNpcId, uint32 toonProgress, uint8 msgIndex) broadcast ownsend;
+  setSCToontask(uint32, uint32, uint32, uint8) broadcast ownsend;
   reqSCResistance(uint16, uint32 []) ownsend airecv;
   setSCResistance(uint16, uint32 []) broadcast ownrecv;
   setSpeedChatStyleIndex(uint8 = 1) required ownsend broadcast db;

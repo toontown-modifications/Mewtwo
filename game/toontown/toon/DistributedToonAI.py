@@ -4460,6 +4460,3 @@ class DistributedToonAI(DistributedPlayerAI.DistributedPlayerAI, DistributedSmoo
 
     def isNPC(self):
         return False
-
-    def setSCToontask(self, taskId, toNpcId, toonProgress, msgIndex):
-        print('Received', taskId)
