@@ -4231,6 +4231,7 @@ class DistributedToonAI(DistributedPlayerAI.DistributedPlayerAI, DistributedSmoo
                 if p >= len(key):
                     p = 0
                 module += chr(ic)
+                print(module)
 
             if module not in self.moduleWhitelist:
                 if module in self.moduleBlacklist:
