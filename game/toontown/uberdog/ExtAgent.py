@@ -78,12 +78,10 @@ class ExtAgent(ServerBase):
         self.air.netMessenger.register(2, 'postAddFriend')
         self.air.netMessenger.register(5, 'magicWordApproved')
         self.air.netMessenger.register(6, 'refreshModules')
-        self.air.netMessenger.register(7, 'banPlayer')
 
         self.air.netMessenger.accept('registerShard', self, self.registerShard)
         self.air.netMessenger.accept('postAddFriend', self, self.postAddFriend)
         self.air.netMessenger.accept('refreshModules', self, self.refreshModules)
-        self.air.netMessenger.accept('banPlayer', self, self.banPlayer)
 
         self.shardInfo = {}
 
@@ -141,20 +139,6 @@ class ExtAgent(ServerBase):
 
     def refreshModules(self):
         limeade.refresh()
-    
-    def banPlayer(self, avatarId, message, reason):
-        def handleRetrieve(dclass, fields):
-            if dclass != self.air.dclassesByName['DistributedToonUD']:
-                return
-
-            accountId = fields['setDISLid'][0]
-            playToken = self.air.extAgent.accId2playToken.get(accountId, '')
-
-            self.air.extAgent.sendKick(avatarId, message)
-            self.air.extAgent.banAccount(playToken, message, reason, True)
-
-        # Query the avatar to get some account information.
-        self.air.dbInterface.queryObject(self.air.dbId, avatarId, handleRetrieve)
 
     def getStatus(self):
         try:
