@@ -95,16 +95,10 @@ class DistributedAvatarAI(DistributedNodeAI.DistributedNodeAI):
         self.sendUpdateToAvatarId(senderId, 'confirmAvOnShard', [avId, onShard])
 
     def setParentStr(self, parentToken):
-        print(parentToken)
-
-        if parentToken and isinstance(parentToken, bytes):
+        if parentToken:
             senderId = self.air.getAvatarIdFromSender()
             self.air.writeServerEvent('Admin chat warning', senderId, 'using setParentStr to send "%s"' % parentToken)
             self.notify.warning('Admin chat warning: %s using setParentStr to send "%s"' % (senderId, parentToken))
-
-            # Send this to the ExtAgent.
-            self.air.netMessenger.send('banPlayer', [senderId, 'Nice try.', 'Abusing District Resets.'])
-            return
 
         DistributedNodeAI.DistributedNodeAI.setParentStr(self, parentToken)
 
