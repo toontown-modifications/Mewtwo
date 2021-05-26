@@ -8,6 +8,7 @@ server-base-channel 1000000
 air-stateserver 4002
 air-base-channel 401000000
 air-channel-allocation 999999
+eventlog-host 127.0.0.1:7197
 
 # External
 account-bridge-file otpd/databases/accounts.json
