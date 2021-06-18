@@ -1,4 +1,4 @@
-from panda3d.core import loadPrcFile
+from panda3d.core import loadPrcFile, ConfigVariableString
 from direct.showbase import PythonUtil
 import builtins, sys, os, traceback
 
@@ -18,7 +18,7 @@ builtins.isClient = lambda: PythonUtil.isClient()
 from game.otp.uberdog.UberDogGlobal import *
 from game.toontown.uberdog import PartiesUdConfig
 
-uber.mysqlhost = uber.config.GetString("mysql-host", PartiesUdConfig.ttDbHost)
+uber.mysqlhost = ConfigVariableString("mysql-host", PartiesUdConfig.ttDbHost).value
 
 if os.getenv('USE_EXT_AGENT') == '1':
     # We want to use ExtAgent for messages.
@@ -29,7 +29,7 @@ else:
     from .ToontownServerRepository import ToontownServerRepository
     uber.air = ToontownServerRepository()
 
-host = config.GetString('air-connect', '127.0.0.1')
+host = ConfigVariableString('air-connect', '127.0.0.1').value
 port = 7100
 if ':' in host:
     host, port = host.split(':', 1)

@@ -3,7 +3,7 @@ from direct.showbase.PythonUtil import reduceAngle, randFloat, normalDistrib
 from direct.showbase import DirectObject
 from game.toontown.pets import PetChase
 from game.toontown.pets import PetConstants
-from game.libtoontown.pets.CPetChase import CPetChase
+from panda3d.toontown import CPetChase
 
 class PetWander(CPetChase, DirectObject.DirectObject):
 

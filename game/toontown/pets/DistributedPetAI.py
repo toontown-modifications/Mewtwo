@@ -23,8 +23,7 @@ import time
 import string
 import copy
 from direct.showbase.PythonUtil import StackTrace
-from game.libtoontown.pets.CPetChase import CPetChase
-from game.libtoontown.pets.CPetFlee import CPetFlee
+from panda3d.toontown import CPetChase, CPetFlee
 
 class DistributedPetAI(DistributedSmoothNodeAI.DistributedSmoothNodeAI, PetLookerAI.PetLookerAI, PetBase.PetBase):
     notify = DirectNotifyGlobal.directNotify.newCategory('DistributedPetAI')

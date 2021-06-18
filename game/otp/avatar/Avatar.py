@@ -1,6 +1,6 @@
 from pandac.PandaModules import *
-from game.libotp import Nametag, NametagGroup
-from game.libotp import CFSpeech, CFThought, CFTimeout, CFPageButton, CFNoQuitButton, CFQuitButton
+from panda3d.otp import Nametag, NametagGroup
+from panda3d.otp import CFSpeech, CFThought, CFTimeout, CFPageButton, CFNoQuitButton, CFQuitButton
 from game.otp.otpbase import OTPGlobals
 from game.otp.otpbase import OTPLocalizer
 from direct.actor.Actor import Actor

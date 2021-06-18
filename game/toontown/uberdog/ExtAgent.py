@@ -395,8 +395,8 @@ class ExtAgent(ServerBase):
         zoneVisDict = {}
 
         for i in range(dnaStore.getNumDNAVisGroupsAI()):
-            groupFullName = dnaStore.getDNAVisGroupName(i)
             visGroup = dnaStore.getDNAVisGroupAI(i)
+            groupFullName = visGroup.getName()
             visZoneId = int(extractGroupName(groupFullName))
             visZoneId = ZoneUtil.getTrueZoneId(visZoneId, zoneId)
             visibles = []

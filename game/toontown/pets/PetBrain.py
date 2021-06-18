@@ -9,7 +9,7 @@ from direct.fsm import FSM
 from game.toontown.toon import DistributedToonAI
 from game.toontown.pets import PetConstants, PetObserve, PetGoal, PetGoalMgr
 from game.toontown.pets import PetTricks, PetLookerAI
-from game.libtoontown.pets.CPetBrain import CPetBrain
+from panda3d.toontown import CPetBrain
 import random, types
 
 class PetBrain(DirectObject.DirectObject, CPetBrain):
