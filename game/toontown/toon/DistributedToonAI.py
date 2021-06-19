@@ -3198,7 +3198,7 @@ class DistributedToonAI(DistributedPlayerAI.DistributedPlayerAI, DistributedSmoo
 
         def _moveSphere(self, task):
             self.collNodePath.setZ(self.getRender(), 0)
-            return Task.cont
+            yield
 
         def isInEstate(self):
             return hasattr(self, 'inEstate') and self.inEstate
