@@ -26,14 +26,14 @@ class FireworkHolidayAI(HolidayBaseAI):
                 # Holiday started right on top of the hour, start the show!
                 self.startShow()
 
-                self.showTask = taskMgr.doMethodLater(self.getSecondsTillHour(), self.startShow, 'hourly-fireworks')
+                self.showTask = taskMgr.doMethodLater(self.getSecondsTillHour(), self.startShow, b'hourly-fireworks')
             else:
                 thetime = time.time() % 3600
 
                 if thetime < 60:
-                    self.showTask = taskMgr.doMethodLater(1, self.startShow, 'hourly-fireworks')
+                    self.showTask = taskMgr.doMethodLater(1, self.startShow, b'hourly-fireworks')
                 else:
-                    self.showTask = taskMgr.doMethodLater(3600 - thetime, self.startShow, 'hourly-fireworks')
+                    self.showTask = taskMgr.doMethodLater(3600 - thetime, self.startShow, b'hourly-fireworks')
 
     def stop(self):
         taskMgr.remove(self.showTask)
