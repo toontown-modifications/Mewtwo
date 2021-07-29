@@ -1,11 +1,11 @@
 *.pyc
-*.yaml
 *.log
 *.buildings
 *.pets
 otpd/config/account-bridge.json
 otpd/databases/accounts.json
 otpd/databases/bak/*
+otpd/databases/otpdb/*.yaml
 
 .idea/*
 venv/*
