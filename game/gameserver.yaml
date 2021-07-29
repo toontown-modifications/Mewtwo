@@ -18,7 +18,7 @@ metadata:
   # generate a unique name
   # will need to be created with `kubectl create`
   #generateName: mewtwo-
-  name: mewtwo-877np1aacxa
+  name: mewtwo-877np1aacxat
 spec:
   ports:
     - name: default
