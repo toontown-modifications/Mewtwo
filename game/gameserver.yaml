@@ -18,7 +18,7 @@ metadata:
   # generate a unique name
   # will need to be created with `kubectl create`
   #generateName: mewtwo-
-  name: mewtwo-877np1
+  name: mewtwo-877np1aacxa
 spec:
   ports:
     - name: default
@@ -34,5 +34,3 @@ spec:
       containers:
       - name: mewtwo
         image: registry.gitlab.com/rocketstoontownonline/game-otp/mewtwo
-      imagePullSecrets:
-        - name: eyJhdXRocyI6eyJET0NLRVJfUkVHSVNUUllfU0VSVkVSIjp7InVzZXJuYW1lIjoicm9ja2V0c3Rvb250b3dub25saW5lL2dhbWUtb3RwL21ld3R3byIsInBhc3N3b3JkIjoiTmJKTEtWdjEtRXFKeXlzbzRTeFkiLCJlbWFpbCI6InJvY2tldGdhbWVyNTgwQGdtYWlsLmNvbSIsImF1dGgiOiJjbTlqYTJWMGMzUnZiMjUwYjNkdWIyNXNhVzVsTDJkaGJXVXRiM1J3TDIxbGQzUjNienBPWWtwTVMxWjJNUzFGY1VwNWVYTnZORk40V1E9PSJ9fX0=
