@@ -950,8 +950,8 @@ class ExtAgent(ServerBase):
                         self.air.netMessenger.send('magicWord', [message, doId])
                         return
                     else:
-                        avClientChannel = self.air.GetPuppetConnectionChannel(doId)
-                        self.sendSystemMessage(avClientChannel, 'You do not have sufficient access to execute Magic Words!')
+                        # No permission to invoke commands.
+                        # Silently ignore.
                         return
 
                 blacklisted = self.filterBlacklist(doId, int(self.air.getAccountIdFromSender()), message)
