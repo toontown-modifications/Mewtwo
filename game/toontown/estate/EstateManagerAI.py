@@ -8,6 +8,8 @@ from game.toontown.estate.DistributedHouseAI import DistributedHouseAI
 
 from game.toontown.toon import ToonDNA
 
+from concurrent.futures import ThreadPoolExecutor
+
 import functools
 
 class LoadHouseOperation(FSM):
@@ -237,11 +239,13 @@ class LoadEstateOperation(FSM):
 
     def enterLoadHouses(self):
         self.houseOperations = []
-        for houseIndex in range(6):
-            houseOperation = LoadHouseOperation(self.mgr, self.estate, houseIndex, self.avatars[houseIndex],
-                                                self.__handleHouseLoaded)
-            self.houseOperations.append(houseOperation)
-            houseOperation.start()
+
+        with ThreadPoolExecutor(6) as executor:
+            for houseIndex in range(6):
+                houseOperation = LoadHouseOperation(self.mgr, self.estate, houseIndex, self.avatars[houseIndex],
+                                                    self.__handleHouseLoaded)
+                self.houseOperations.append(houseOperation)
+                executor.submit(houseOperation.start)
 
     def __handleHouseLoaded(self, house):
         if self.state != 'LoadHouses':
@@ -257,12 +261,14 @@ class LoadEstateOperation(FSM):
 
     def enterLoadPets(self):
         self.petOperations = []
-        for houseIndex in range(6):
-            av = self.avatars[houseIndex]
-            if av and av['setPetId'][0] != 0:
-                petOperation = LoadPetOperation(self.mgr, self.estate, av, self.__handlePetLoaded)
-                self.petOperations.append(petOperation)
-                petOperation.start()
+
+        with ThreadPoolExecutor(6) as executor:
+            for houseIndex in range(6):
+                av = self.avatars[houseIndex]
+                if av and av['setPetId'][0] != 0:
+                    petOperation = LoadPetOperation(self.mgr, self.estate, av, self.__handlePetLoaded)
+                    self.petOperations.append(petOperation)
+                    executor.submit(petOperation.start)
 
         if not self.petOperations:
             taskMgr.doMethodLater(0, lambda: self.demand('Finished'), 'no-pets', extraArgs=[])
