@@ -1061,7 +1061,7 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
 
         for doId, obj in list(self.air.doId2do.items()):
             if obj.__class__.__name__ == 'DistributedToonAI':
-                if not obj.isNPC():
+                if obj.isPlayerControlled():
                     x = self.locate(av, doId - 100000000)
                     out += '%d: %s [%s]\n' % (doId, obj.getName(), self.locate(av, doId - 100000000))
         
