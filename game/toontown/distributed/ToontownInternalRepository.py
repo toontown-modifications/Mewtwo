@@ -10,7 +10,7 @@ class ToontownInternalRepository(AstronInternalRepository):
     GameGlobalsId = OtpDoGlobals.OTP_DO_ID_TOONTOWN
     dbId = 4003
 
-    def __init__(self, baseChannel, serverId = None, dcFileNames = None, dcSuffix = 'AI', connectMethod = None, threadedNet = None):
+    def __init__(self, baseChannel, serverId = None, dcFileNames = None, dcSuffix = 'AI', connectMethod = None, threadedNet = True):
         AstronInternalRepository.__init__(self, baseChannel, serverId = serverId, dcFileNames = dcFileNames, dcSuffix = dcSuffix, connectMethod = connectMethod, threadedNet = threadedNet)
 
         if dcSuffix == 'UD':
