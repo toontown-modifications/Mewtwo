@@ -193,6 +193,7 @@ class ToontownAIRepository(ToontownInternalRepository, ServerBase):
 
         self.netMessenger.register(0, 'registerShard')
         self.netMessenger.register(2, 'postAddFriend')
+        self.netMessenger.register(6, 'refreshModules')
 
         self.createObjects()
 
