@@ -89,8 +89,6 @@ class DistCogdoMazeGameAI(DistCogdoGameAI, DistCogdoMazeGameBase):
         self._speedMonitor = SpeedMonitor('cogdoMazeGame-%s' % self.doId)
         self._toonId2speedToken = {}
 
-        self.openDoor() # TEMP
-
     def delete(self):
         self.ignoreAll()
         self._speedMonitor.destroy()
@@ -403,6 +401,8 @@ class DistCogdoMazeGameAI(DistCogdoGameAI, DistCogdoMazeGameBase):
                 token = self._speedMonitor.addNodepath(toon)
                 self._toonId2speedToken[toonId] = token
                 self._speedMonitor.setSpeedLimit(token, config.GetFloat('cogdo-maze-speed-limit', Globals.ToonRunSpeed * 1.1), Functor(self._toonOverSpeedLimit, toonId))
+
+        self.openDoor() # TEMP
 
     def _toonOverSpeedLimit(self, toonId, speed):
         self._bootPlayerForHacking(toonId, 'speeding in cogdo maze game (%.2f feet/sec)' % speed, config.GetBool('want-ban-cogdo-maze-speeding', 0))
