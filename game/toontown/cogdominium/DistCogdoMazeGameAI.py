@@ -16,7 +16,7 @@ class DistCogdoMazeGameAI(DistCogdoGameAI, DistCogdoMazeGameBase):
     TimeoutTimerTaskName = 'CMG_timeoutTimerTask'
     CountdownTimerTaskName = 'CMG_countdownTimerTask'
     AnnounceGameDoneTimerTaskName = 'CMG_AnnounceGameDoneTimerTask'
-    SkipCogdoGames = simbase.config.GetBool('skip-cogdo-game', 1)
+    SkipCogdoGames = simbase.config.GetBool('skip-cogdo-game', 0)
 
     def __init__(self, air, id):
         DistCogdoGameAI.__init__(self, air, id)
@@ -88,6 +88,8 @@ class DistCogdoMazeGameAI(DistCogdoGameAI, DistCogdoMazeGameBase):
 
         self._speedMonitor = SpeedMonitor('cogdoMazeGame-%s' % self.doId)
         self._toonId2speedToken = {}
+
+        self.openDoor() # TEMP
 
     def delete(self):
         self.ignoreAll()
