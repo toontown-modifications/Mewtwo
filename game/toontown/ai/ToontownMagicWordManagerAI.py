@@ -1064,7 +1064,7 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
                 if obj.isPlayerControlled():
                     x = self.locate(av, doId - 100000000)
                     out += '%d: %s [%s]\n' % (doId, obj.getName(), self.locate(av, doId - 100000000))
-        
+
         self.sendResponseMessage(av.doId, out)
 
     def setMagicWordExt(self, magicWord, avId):
@@ -1292,7 +1292,6 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
             try:
                 self.locate(av, int(args[0]), str(args[1]))
             except:
-
                 self.sendResponseMessage(avId, 'Invalid parameters.')
         else:
             if magicWord not in disneyCmds or magicWord == '':
