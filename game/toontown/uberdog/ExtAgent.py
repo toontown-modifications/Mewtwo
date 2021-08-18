@@ -141,7 +141,7 @@ class ExtAgent(ServerBase):
 
     def refreshModules(self):
         limeade.refresh()
-    
+
     def banPlayer(self, avatarId, message, reason):
         def handleRetrieve(dclass, fields):
             if dclass != self.air.dclassesByName['DistributedToonUD']:

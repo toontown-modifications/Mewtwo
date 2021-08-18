@@ -1087,7 +1087,7 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
         av = self.air.doId2do.get(avId)
 
         if self.air.isProdServer() and av.getDISLid() not in self.staffMembers:
-            av.d_setSystemMessage(0, 'You do not have sufficient access to execute Magic Words!')
+            # Silently ignore.
             return
 
         # Write this attempt to disk.
