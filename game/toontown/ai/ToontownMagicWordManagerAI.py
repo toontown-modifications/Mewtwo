@@ -913,7 +913,7 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
         self.sendResponseMessage(av.doId, 'Started maintenance!')
 
     def d_setTeleportAllSBHQ(self, av):
-        for doId in self.air.doId2do.keys()[:]:
+        for doId in list(self.air.doId2do.keys())[:]:
             do = self.air.doId2do.get(doId)
 
             # Make sure the DO is actually a toon.
