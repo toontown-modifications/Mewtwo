@@ -1379,7 +1379,7 @@ class ExtAgent(ServerBase):
 
                 loaderName = ZoneUtil.getLoaderName(zoneId)
 
-                if branchId and zoneId != branchId and isPlayground or isCogHQ: #and loaderName not in ('safeZoneLoader', 'cogHQLoader'):
+                if branchId and zoneId != branchId and isPlayground or isCogHQ and loaderName not in ('safeZoneLoader', 'cogHQLoader'):
                     # Set object location.
                     dg = PyDatagram()
                     dg.addServerHeader(clientChannel, self.air.ourChannel, CLIENT_OBJECT_LOCATION)
