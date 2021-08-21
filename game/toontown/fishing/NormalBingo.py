@@ -29,7 +29,7 @@ class NormalBingo(BingoCardBase.BingoCardBase):
         return 1
 
     def checkForBingo(self):
-        id = self.cardSize / 2
+        id = self.cardSize // 2
         if self.checkForWin(id):
             return BingoGlobals.WIN
 
