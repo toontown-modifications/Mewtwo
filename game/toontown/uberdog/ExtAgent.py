@@ -949,10 +949,6 @@ class ExtAgent(ServerBase):
                         # Route this to the Magic Word manager.
                         self.air.netMessenger.send('magicWord', [message, doId])
                         return
-                    else:
-                        # No permission to invoke commands.
-                        # Silently ignore.
-                        return
 
                 blacklisted = self.filterBlacklist(doId, int(self.air.getAccountIdFromSender()), message)
 
@@ -1383,7 +1379,7 @@ class ExtAgent(ServerBase):
 
                 loaderName = ZoneUtil.getLoaderName(zoneId)
 
-                if branchId and zoneId != branchId and isPlayground or isCogHQ and loaderName != 'safeZoneLoader':
+                if branchId and zoneId != branchId and isPlayground or isCogHQ: #and loaderName not in ('safeZoneLoader', 'cogHQLoader'):
                     # Set object location.
                     dg = PyDatagram()
                     dg.addServerHeader(clientChannel, self.air.ourChannel, CLIENT_OBJECT_LOCATION)

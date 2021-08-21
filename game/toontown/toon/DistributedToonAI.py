@@ -263,9 +263,8 @@ class DistributedToonAI(DistributedPlayerAI.DistributedPlayerAI, DistributedSmoo
             if 100 <= zoneId < ToontownGlobals.DynamicZonesBegin:
                 hood = ZoneUtil.getHoodId(zoneId)
 
-                if not ZoneUtil.isCogHQZone(zoneId):
-                    self.b_setLastHood(hood)
-                    self.b_setDefaultZone(hood)
+                self.b_setLastHood(hood)
+                self.b_setDefaultZone(hood)
 
                 hoodsVisited = list(self.getHoodsVisited())
 
