@@ -118,7 +118,9 @@ class NewsManagerAI(DistributedObjectAI):
             ToontownGlobals.MAILBOXES_BUFF_BATTLES,
             ToontownGlobals.TRASHCANS_BUFF_BATTLES,
             ToontownGlobals.MORE_XP_HOLIDAY,
-            ToontownGlobals.JELLYBEAN_TROLLEY_HOLIDAY_MONTH
+            ToontownGlobals.JELLYBEAN_TROLLEY_HOLIDAY_MONTH,
+            ToontownGlobals.JELLYBEAN_FISHING_HOLIDAY_MONTH,
+            ToontownGlobals.JELLYBEAN_PARTIES_HOLIDAY_MONTH
         ]
 
         for permanentEvent in permanentEvents:
