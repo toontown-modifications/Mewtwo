@@ -6,5 +6,3 @@ class DistributedSillyMeterMgrAI(DistributedPhaseEventMgrAI):
 
     def __init__(self, air, curPhase, holidayDates, isRunning, numPhases):
         DistributedPhaseEventMgrAI.__init__(self, air, curPhase, holidayDates, isRunning, numPhases)
-
-        air.SillyMeterMgr = self

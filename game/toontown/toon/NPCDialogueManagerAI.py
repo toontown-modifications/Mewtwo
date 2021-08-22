@@ -22,7 +22,7 @@ class NPCDialogueManagerAI:
             self.dialogues.append(dialogue)
         return result
         
-    def requestDialogue(self, participant, dialogueTopic):
+    def requestDialogue(self, participant, dialogueTopic, endPause):
         """
         Request to be added to the dialogue: dialogueTopic
         """

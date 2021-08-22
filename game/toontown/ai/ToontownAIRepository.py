@@ -443,6 +443,10 @@ class ToontownAIRepository(ToontownInternalRepository, ServerBase):
             # We need to setup the initial invasion.
             self.suitInvasionManager.generateInitialInvasion()
 
+        # These are required so the scientists can talk.
+        self.holidayManager.startHoliday(ToontownGlobals.SILLYMETER_HOLIDAY)
+        self.holidayManager.startHoliday(ToontownGlobals.SILLYMETER_EXT_HOLIDAY)
+
         # Let our user know we have finished starting up.
         self.notify.info('{0} has finished starting up.'.format(self.districtName))
 

@@ -110,6 +110,7 @@ class NewsManagerAI(DistributedObjectAI):
             ToontownGlobals.RESISTANCE_EVENT,
             ToontownGlobals.POLAR_PLACE_EVENT,
             ToontownGlobals.SILLYMETER_HOLIDAY,
+            ToontownGlobals.SILLYMETER_EXT_HOLIDAY,
             ToontownGlobals.MAILBOX_ZERO_HOLIDAY,
             ToontownGlobals.TRASHCAN_ZERO_HOLIDAY,
             ToontownGlobals.SILLY_SURGE_HOLIDAY,

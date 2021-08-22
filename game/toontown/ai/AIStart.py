@@ -29,7 +29,7 @@ districtName = os.getenv('DISTRICT_NAME')
 
 simbase.air = ToontownAIRepository(int(os.getenv('BASE_CHANNEL')), districtName)
 
-host = config.GetString('air-connect', '127.0.0.1')
+host = ConfigVariableString('air-connect', '127.0.0.1').value
 port = 7100
 if ':' in host:
     host, port = host.split(':', 1)

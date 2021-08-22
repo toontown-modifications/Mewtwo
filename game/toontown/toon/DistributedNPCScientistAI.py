@@ -57,7 +57,7 @@ class DistributedNPCScientistAI(DistributedNPCToonBaseAI.DistributedNPCToonBaseA
                      self.enterOff,
                      self.exitOff, [])],
          'Neutral', 'Off')
-         
+
         if self.npcId == 2018 or self.npcId == 2019:
             self.startAnimState = 'ScientistJealous'
         elif self.npcId == 2020:

@@ -46,7 +46,7 @@ holidayToMgr = {
 }
 
 class HolidayManagerAI:
-    notify =directNotify.newCategory('HolidayManagerAI')
+    notify = directNotify.newCategory('HolidayManagerAI')
 
     def __init__(self, air):
         self.air = air
@@ -54,7 +54,7 @@ class HolidayManagerAI:
         self.currentHolidays = {}
 
     def isHolidayRunning(self, holidayId):
-        return holidayId in self.currentHolidays
+        return holidayId in self.currentHolidays or holidayId == ToontownGlobals.SILLYMETER_EXT_HOLIDAY
 
     def isMoreXpHolidayRunning(self):
         if ToontownGlobals.MORE_XP_HOLIDAY in self.currentHolidays:

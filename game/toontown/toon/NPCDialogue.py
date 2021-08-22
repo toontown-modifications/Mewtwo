@@ -4,6 +4,7 @@ from direct.directnotify import DirectNotifyGlobal
 from . import DistributedNPCToonBaseAI
 from direct.task import Task
 import random
+from panda3d.otp import CFSpeech, CFTimeout
 
 class NPCDialogue:
     """
