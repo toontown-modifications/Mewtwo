@@ -15,7 +15,7 @@ class SillyMeterHolidayAI(HolidayBaseAI):
     def start(self):
         HolidayBaseAI.start(self)
 
-        self.air.SillyMeterMgr = DistributedSillyMeterMgrAI(self.air, True, 0, 12, [])
+        self.air.SillyMeterMgr = DistributedSillyMeterMgrAI(self.air, True, 0, self.FINAL_PHASE, [])
         self.air.SillyMeterMgr.generateWithRequired(ToontownGlobals.UberZone)
 
         self.air.SillyMeterMgr.b_setCurPhase(self.FINAL_PHASE)
