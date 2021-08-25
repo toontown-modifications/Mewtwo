@@ -25,6 +25,12 @@ class ServerGlobals:
     TEST_TOONTOWN_2012 = 2
     TOONTOWN_JP_2010 = 3
 
+    serverToName = {
+        FINAL_TOONTOWN: 'FinalToontown',
+        TEST_TOONTOWN_2012: 'TestToontown2012',
+        TOONTOWN_JP_2010: 'ToontownJapan2010'
+    }
+
 class JSONBridge:
 
     def __init__(self):
@@ -1301,7 +1307,8 @@ class ExtAgent(ServerBase):
                     data = {
                         'name': name,
                         'secretKey': 'jzYEqAZkEP',
-                        'avatarId': avId
+                        'avatarId': avId,
+                        'serverName': ServerGlobals.serverToName[ServerGlobals.FINAL_TOONTOWN]
                     }
 
                     request = requests.post('https://sunrise.games/panel/names/approve.php', data, headers = headers).json()
