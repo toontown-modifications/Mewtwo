@@ -239,16 +239,15 @@ class FriendsManagerUD:
         if onlineFriends:
             # We have online friends.
             # Send to the client.
-            datagram = PyDatagram()
-            datagram.addUint16(53) # CLIENT_FRIEND_ONLINE
-
             for friendId in onlineFriends:
+                datagram = PyDatagram()
+                datagram.addUint16(53) # CLIENT_FRIEND_ONLINE
                 datagram.addUint32(friendId)
 
-            datagram.addUint8(1)
-            datagram.addUint8(1)
+                datagram.addUint8(1) # commonChatFlags
+                datagram.addUint8(1) # whitelistChatFlags
 
-            self.sendDatagram(avId, datagram)
+                self.sendDatagram(avId, datagram)
 
         resp = PyDatagram()
 
@@ -328,8 +327,8 @@ class FriendsManagerUD:
         datagram.addUint16(53) # CLIENT_FRIEND_ONLINE
         datagram.addUint32(friendId)
 
-        datagram.addUint8(1)
-        datagram.addUint8(1)
+        datagram.addUint8(1) # commonChatFlags
+        datagram.addUint8(1) # whitelistChatFlags
 
         self.sendDatagram(avId, datagram)
 
@@ -359,8 +358,8 @@ class FriendsManagerUD:
         datagram.addUint16(53) # CLIENT_FRIEND_ONLINE
         datagram.addUint32(otherId)
 
-        datagram.addUint8(1)
-        datagram.addUint8(1)
+        datagram.addUint8(1) # commonChatFlags
+        datagram.addUint8(1) # whitelistChatFlags
 
         self.sendDatagram(avId, datagram)
 
