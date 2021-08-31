@@ -130,6 +130,7 @@ class ToontownAIRepository(ToontownInternalRepository, ServerBase):
             'token': config.GetString('api-token'),
             'population': districtPopulation,
             'serverType': ServerGlobals.FINAL_TOONTOWN,
+            'shardName': self.districtName
         }
 
         headers = {
