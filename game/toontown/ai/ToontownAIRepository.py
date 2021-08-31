@@ -71,6 +71,7 @@ from game.toontown.uberdog.ServerBase import ServerBase
 from game.otp.otpbase import OTPGlobals
 from game.toontown.ai import ToontownAIMsgTypes
 from game.toontown.toon.NPCDialogueManagerAI import NPCDialogueManagerAI
+from game.toontown.uberdog.ExtAgent import ServerGlobals
 
 import builtins, time, os, requests
 
@@ -127,7 +128,8 @@ class ToontownAIRepository(ToontownInternalRepository, ServerBase):
 
         data = {
             'token': config.GetString('api-token'),
-            'population': districtPopulation
+            'population': districtPopulation,
+            'serverType': ServerGlobals.FINAL_TOONTOWN,
         }
 
         headers = {
