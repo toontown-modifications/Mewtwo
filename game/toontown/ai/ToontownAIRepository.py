@@ -223,11 +223,6 @@ class ToontownAIRepository(ToontownInternalRepository, ServerBase):
         self.notify.info('Creating zones...')
         self.createZones()
 
-        if self.isProdServer():
-            # This is the production server.
-            # Send our initial pouplation.
-            self.sendPopulation(self.districtPopulation)
-
         self.district.b_setAvailable(1)
 
         # Inform the ExtAgent of us.
