@@ -130,7 +130,8 @@ class ToontownAIRepository(ToontownInternalRepository, ServerBase):
             'token': config.GetString('api-token'),
             'population': districtPopulation,
             'serverType': ServerGlobals.FINAL_TOONTOWN,
-            'shardName': self.districtName
+            'shardName': self.districtName,
+            'shardId': self.districtId
         }
 
         headers = {
@@ -221,6 +222,11 @@ class ToontownAIRepository(ToontownInternalRepository, ServerBase):
 
         self.notify.info('Creating zones...')
         self.createZones()
+
+        if self.isProdServer():
+            # This is the production server.
+            # Send our initial pouplation.
+            self.sendPopulation(self.districtPopulation)
 
         self.district.b_setAvailable(1)
 
