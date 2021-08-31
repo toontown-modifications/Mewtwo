@@ -4,7 +4,7 @@ Mewtwo
 Mewtwo is a implementation of Disney's OTP server.
 
 ## Panda3D
-[Windows SDK (x86_64)](https://rocketprogrammer.me/binaries/Panda3D-1.11.0-py3.8-x64.exe)
+[Windows SDK (x86_64)](https://rocketprogrammer.me/binaries/Panda3D-1.11.0-py3.9-x64.exe)
 
 [Linux SDK (x86_64)](https://rocketprogrammer.me/linux/py3.deb)
 
