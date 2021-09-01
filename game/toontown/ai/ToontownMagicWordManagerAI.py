@@ -24,6 +24,7 @@ from game.toontown.parties import PartyGlobals
 from game.toontown.effects import FireworkShows
 from game.toontown.effects.DistributedFireworkShowAI import DistributedFireworkShowAI
 from game.toontown.pets.DistributedPetAI import DistributedPetAI
+from game.toontown.uberdog.ExtAgent import ServerGlobals
 
 import random, time, os, traceback, requests, limeade
 
@@ -863,7 +864,8 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
     def closeServer(self):
         data = {
             'token': config.GetString('api-token', ''),
-            'setter': True
+            'setter': True,
+            'serverType': ServerGlobals.serverToName[ServerGlobals.FINAL_TOONTOWN]
         }
 
         headers = {

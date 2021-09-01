@@ -26,9 +26,9 @@ class ServerGlobals:
     TOONTOWN_JP_2010 = 3
 
     serverToName = {
-        FINAL_TOONTOWN: 'FinalToontown',
-        TEST_TOONTOWN_2012: 'TestToontown2012',
-        TOONTOWN_JP_2010: 'ToontownJapan2010'
+        FINAL_TOONTOWN: 'Final Toontown',
+        TEST_TOONTOWN_2012: 'Test Toontown 2012',
+        TOONTOWN_JP_2010: 'Toontown Japan 2010'
     }
 
 class JSONBridge:
@@ -164,7 +164,9 @@ class ExtAgent(ServerBase):
 
     def getStatus(self):
         try:
-            request = requests.get('http://unite.sunrise.games:19135/api/getStatusForServer', headers = self.requestHeaders)
+            serverType = ServerGlobals.serverToName[ServerGlobals.FINAL_TOONTOWN]
+            endpoint = 'http://unite.sunrise.games:19135/api/getStatusForServer?serverType={0}'
+            request = requests.get(endpoint.format(serverType), headers = self.requestHeaders)
             return request.text
         except:
             self.notify.warning('Failed to get status!')
