@@ -140,7 +140,7 @@ class ExtAgent(ServerBase):
 
         # If you truly need these, ask Rocket.
         self.rpcKey = config.GetString('rpc-key')
-        self.playTokenDecryptKey = config.GetString('token-decrypt')
+        self.playTokenDecryptKey = config.GetString('token-key')
 
         self.wantTokenExpirations = config.GetBool('want-token-expirations', False)
 
