@@ -1,13 +1,16 @@
+from panda3d.core import loadPrcFile
 import requests
+
+# Load our configuration.
+loadPrcFile('../../config/local.prc')
 
 banEndpoint = 'https://sunrise.games/bans/ChatBanEmail.php'
 
 playToken = eval(input('Playtoken: '))
 chatMessages = eval(input('Chat messages: '))
 
-# Since you are in this repository.
-# I trust you to not leak this.
-secretKey = 'jzYEqAZkEP'
+# If you truly need this key, ask Rocke
+secretKey = config.GetString('rpc-key')
 
 headers = {
     'User-Agent': 'Sunrise Games - SendBanEmail'

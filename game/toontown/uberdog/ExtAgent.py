@@ -138,7 +138,9 @@ class ExtAgent(ServerBase):
             'User-Agent': 'Sunrise Games - ExtAgent'
         }
 
-        self.playTokenDecryptKey = 'eee39eae6e156222a460e240496876f00623ae6b5ad08701209de12ae298fac4'
+        # If you truly need these, ask Rocket.
+        self.secretKey = config.GetString('rpc-key')
+        self.playTokenDecryptKey = config.GetString('token-decrypt')
 
         self.wantTokenExpirations = config.GetBool('want-token-expirations', False)
 
@@ -224,18 +226,17 @@ class ExtAgent(ServerBase):
     def banAccount(self, playToken, message, banReason = 'Chat Filter', silent = False):
         endpoint = self.banEndpointBase.format('BanAccount.php')
         emailDispatchEndpoint = self.banEndpointBase.format('ChatBanEmail.php')
-        secretKey = 'jzYEqAZkEP'
 
         banData = {
             'username': playToken,
             'banReason': banReason,
-            'secretKey': secretKey
+            'secretKey': self.secretKey
         }
 
         emailData = {
             'playToken': playToken,
             'chatMessages': message,
-            'secretKey': secretKey
+            'secretKey': self.secretKey
         }
 
         banRequest = requests.post(endpoint, banData, headers = self.requestHeaders)
@@ -1308,7 +1309,7 @@ class ExtAgent(ServerBase):
 
                     data = {
                         'name': name,
-                        'secretKey': 'jzYEqAZkEP',
+                        'secretKey': self.secretKey,
                         'avatarId': avId,
                         'serverName': ServerGlobals.serverToName[ServerGlobals.FINAL_TOONTOWN]
                     }
