@@ -137,6 +137,7 @@ class DistributedGagTreeAI(DistributedPlantBaseAI):
         if problem:
             self.air.writeServerEvent('suspicious', avId, 'tried to harvest a tree that\'s not fruiting!',
                                       problem=problem)
+            self.d_interactionDenied()
             return
 
         harvested = 0

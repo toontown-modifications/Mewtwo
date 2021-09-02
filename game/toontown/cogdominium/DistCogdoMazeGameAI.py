@@ -329,7 +329,7 @@ class DistCogdoMazeGameAI(DistCogdoGameAI, DistCogdoMazeGameBase):
             self.logSuspiciousEvent(senderId, 'CogdoMazeGameAI.requestGag: toon not present')
             return
 
-        distance = (toon.getPos() - wcPos).length()
+        distance = (toon.getPos() - wcPos)
         threshold = (Globals.WaterCoolerTriggerRadius + Globals.PlayerCollisionRadius) * 1.05
         if distance > threshold:
             self._toonHackingRequestGag(senderId)
@@ -401,8 +401,6 @@ class DistCogdoMazeGameAI(DistCogdoGameAI, DistCogdoMazeGameBase):
                 token = self._speedMonitor.addNodepath(toon)
                 self._toonId2speedToken[toonId] = token
                 self._speedMonitor.setSpeedLimit(token, config.GetFloat('cogdo-maze-speed-limit', Globals.ToonRunSpeed * 1.1), Functor(self._toonOverSpeedLimit, toonId))
-
-        self.openDoor() # TEMP
 
     def _toonOverSpeedLimit(self, toonId, speed):
         self._bootPlayerForHacking(toonId, 'speeding in cogdo maze game (%.2f feet/sec)' % speed, config.GetBool('want-ban-cogdo-maze-speeding', 0))
