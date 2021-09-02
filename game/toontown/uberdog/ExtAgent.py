@@ -139,7 +139,7 @@ class ExtAgent(ServerBase):
         }
 
         # If you truly need these, ask Rocket.
-        self.secretKey = config.GetString('rpc-key')
+        self.rpcKey = config.GetString('rpc-key')
         self.playTokenDecryptKey = config.GetString('token-decrypt')
 
         self.wantTokenExpirations = config.GetBool('want-token-expirations', False)
@@ -230,13 +230,13 @@ class ExtAgent(ServerBase):
         banData = {
             'username': playToken,
             'banReason': banReason,
-            'secretKey': self.secretKey
+            'secretKey': self.rpcKey
         }
 
         emailData = {
             'playToken': playToken,
             'chatMessages': message,
-            'secretKey': self.secretKey
+            'secretKey': self.rpcKey
         }
 
         banRequest = requests.post(endpoint, banData, headers = self.requestHeaders)
@@ -1309,7 +1309,7 @@ class ExtAgent(ServerBase):
 
                     data = {
                         'name': name,
-                        'secretKey': self.secretKey,
+                        'secretKey': self.rpcKey,
                         'avatarId': avId,
                         'serverName': ServerGlobals.serverToName[ServerGlobals.FINAL_TOONTOWN]
                     }
