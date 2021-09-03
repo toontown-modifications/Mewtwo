@@ -1,7 +1,9 @@
 @echo off
 cd ../..
 
+set /P PYTHON_PATH=<PYTHON_PATH
+
 :main
-python -m DistrictStarter
+%PYTHON_PATH% -m DistrictStarter
 pause
 goto :main

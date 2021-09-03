@@ -102,22 +102,36 @@ class ExtAgent(ServerBase):
         self.clientChannel2avId = {}
         self.clientChannel2handle = {}
         self.dnaStores = {}
+        self.zoneVisDict = {}
         self.chatOffenses = {}
         self.accId2playToken = {}
         self.memberInfo = {}
         self.staffMembers = {}
 
         self.friendsManager = FriendsManagerUD(self)
-
-        self.validZones = [ToontownGlobals.ToontownCentral,
-                           ToontownGlobals.DonaldsDock,
-                           ToontownGlobals.DaisyGardens,
-                           ToontownGlobals.MinniesMelodyland,
-                           ToontownGlobals.TheBrrrgh,
-                           ToontownGlobals.DonaldsDreamland,
-                           ToontownGlobals.SellbotHQ,
-                           ToontownGlobals.CashbotHQ,
-                           ToontownGlobals.LawbotHQ]
+                           
+        self.validVisZones = [ToontownGlobals.SillyStreet, 
+                              ToontownGlobals.LoopyLane, 
+                              ToontownGlobals.PunchlinePlace, 
+                              ToontownGlobals.BarnacleBoulevard, 
+                              ToontownGlobals.SeaweedStreet, 
+                              ToontownGlobals.LighthouseLane, 
+                              ToontownGlobals.ElmStreet, 
+                              ToontownGlobals.MapleStreet, 
+                              ToontownGlobals.OakStreet, 
+                              ToontownGlobals.AltoAvenue, 
+                              ToontownGlobals.BaritoneBoulevard, 
+                              ToontownGlobals.TenorTerrace, 
+                              ToontownGlobals.WalrusWay, 
+                              ToontownGlobals.SleetStreet, 
+                              ToontownGlobals.PolarPlace, 
+                              ToontownGlobals.LullabyLane,
+                              ToontownGlobals.PajamaPlace, 
+                              ToontownGlobals.SellbotHQ, 
+                              ToontownGlobals.SellbotFactoryExt, 
+                              ToontownGlobals.CashbotHQ, 
+                              ToontownGlobals.LawbotHQ]
+                           
         self.blacklistZones = [
             ToontownGlobals.SellbotLobby,
             ToontownGlobals.LawbotOfficeExt,
@@ -146,6 +160,10 @@ class ExtAgent(ServerBase):
 
         # Enable information logging.
         self.notify.setInfo(True)
+        
+        # Load our DNA files...
+        # Vis Zones shouldn't be loaded per interest, but rather on UD startup.
+        self.loadVisZones()
 
     def refreshModules(self):
         limeade.refresh()
@@ -384,24 +402,20 @@ class ExtAgent(ServerBase):
             return True
 
         return False
-
-    def getVisBranchZones(self, zoneId, isCogHQ = False):
-        if zoneId in self.blacklistZones:
-            return []
+        
+    def loadVisZones(self):
+        self.notify.info('Loading DNA files...')
+        for zoneId in self.validVisZones:
+            self.loadVisZone(zoneId)
+        
+    def loadVisZone(self, zoneId):
         branchZoneId = ZoneUtil.getBranchZone(zoneId)
         hoodId = ZoneUtil.getHoodId(branchZoneId)
-        dnaStore = self.dnaStores.get(branchZoneId)
 
-        if hoodId not in self.validZones:
-            return []
-
-        if not dnaStore:
-            dnaStore = DNAStorage()
-            dnaFileName = genDNAFileName(branchZoneId)
-            loadDNAFileAI(dnaStore, dnaFileName)
-            self.dnaStores[branchZoneId] = dnaStore
-
-        zoneVisDict = {}
+        dnaStore = DNAStorage() # TODO: do I even need this?
+        dnaFileName = genDNAFileName(branchZoneId)
+        loadDNAFileAI(dnaStore, dnaFileName)
+        self.dnaStores[branchZoneId] = dnaStore
 
         for i in range(dnaStore.getNumDNAVisGroupsAI()):
             visGroup = dnaStore.getDNAVisGroupAI(i)
@@ -414,16 +428,12 @@ class ExtAgent(ServerBase):
                 visibles.append(int(visGroup.getVisibleName(i)))
 
             visibles.append(ZoneUtil.getBranchZone(visZoneId))
-            zoneVisDict[visZoneId] = visibles
+            self.zoneVisDict[visZoneId] = visibles
 
-        if zoneId not in zoneVisDict:
-            # Potential injector skid.
-            return []
-
-        if not isCogHQ:
-            return zoneVisDict[zoneId]
-        else:
-            return list(zoneVisDict.values())[0]
+    def getVisBranchZones(self, zoneId):
+        if zoneId in self.zoneVisDict:
+            return self.zoneVisDict[zoneId]
+        return []
 
     def getAvatars(self, clientChannel):
         def handleAvRetrieveDone(avList, avatarFields):

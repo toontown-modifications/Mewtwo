@@ -6,6 +6,7 @@ otpd/config/account-bridge.json
 otpd/databases/accounts.json
 otpd/databases/bak/*
 otpd/databases/otpdb/*.yaml
+PYTHON_PATH
 
 .idea/*
 venv/*
