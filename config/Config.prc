@@ -13,8 +13,7 @@ eventlog-host 127.0.0.1:7197
 # External
 account-bridge-file otpd/databases/accounts.json
 
-api-token QrLEtq3CCWEax3M2
-server-type prod
+server-type dev
 
 # Features
 want-gardening true
