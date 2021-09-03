@@ -109,29 +109,29 @@ class ExtAgent(ServerBase):
         self.staffMembers = {}
 
         self.friendsManager = FriendsManagerUD(self)
-                           
-        self.validVisZones = [ToontownGlobals.SillyStreet, 
-                              ToontownGlobals.LoopyLane, 
-                              ToontownGlobals.PunchlinePlace, 
-                              ToontownGlobals.BarnacleBoulevard, 
-                              ToontownGlobals.SeaweedStreet, 
-                              ToontownGlobals.LighthouseLane, 
-                              ToontownGlobals.ElmStreet, 
-                              ToontownGlobals.MapleStreet, 
-                              ToontownGlobals.OakStreet, 
-                              ToontownGlobals.AltoAvenue, 
-                              ToontownGlobals.BaritoneBoulevard, 
-                              ToontownGlobals.TenorTerrace, 
-                              ToontownGlobals.WalrusWay, 
-                              ToontownGlobals.SleetStreet, 
-                              ToontownGlobals.PolarPlace, 
+
+        self.validVisZones = [ToontownGlobals.SillyStreet,
+                              ToontownGlobals.LoopyLane,
+                              ToontownGlobals.PunchlinePlace,
+                              ToontownGlobals.BarnacleBoulevard,
+                              ToontownGlobals.SeaweedStreet,
+                              ToontownGlobals.LighthouseLane,
+                              ToontownGlobals.ElmStreet,
+                              ToontownGlobals.MapleStreet,
+                              ToontownGlobals.OakStreet,
+                              ToontownGlobals.AltoAvenue,
+                              ToontownGlobals.BaritoneBoulevard,
+                              ToontownGlobals.TenorTerrace,
+                              ToontownGlobals.WalrusWay,
+                              ToontownGlobals.SleetStreet,
+                              ToontownGlobals.PolarPlace,
                               ToontownGlobals.LullabyLane,
-                              ToontownGlobals.PajamaPlace, 
-                              ToontownGlobals.SellbotHQ, 
-                              ToontownGlobals.SellbotFactoryExt, 
-                              ToontownGlobals.CashbotHQ, 
+                              ToontownGlobals.PajamaPlace,
+                              ToontownGlobals.SellbotHQ,
+                              ToontownGlobals.SellbotFactoryExt,
+                              ToontownGlobals.CashbotHQ,
                               ToontownGlobals.LawbotHQ]
-                           
+
         self.blacklistZones = [
             ToontownGlobals.SellbotLobby,
             ToontownGlobals.LawbotOfficeExt,
@@ -160,7 +160,7 @@ class ExtAgent(ServerBase):
 
         # Enable information logging.
         self.notify.setInfo(True)
-        
+
         # Load our DNA files...
         # Vis Zones shouldn't be loaded per interest, but rather on UD startup.
         self.loadVisZones()
@@ -402,12 +402,12 @@ class ExtAgent(ServerBase):
             return True
 
         return False
-        
+
     def loadVisZones(self):
         self.notify.info('Loading DNA files...')
         for zoneId in self.validVisZones:
             self.loadVisZone(zoneId)
-        
+
     def loadVisZone(self, zoneId):
         branchZoneId = ZoneUtil.getBranchZone(zoneId)
         hoodId = ZoneUtil.getHoodId(branchZoneId)
