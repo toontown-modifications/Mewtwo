@@ -4,12 +4,12 @@ import requests
 # Load our configuration.
 loadPrcFile('../../config/local.prc')
 
-banEndpoint = 'https://sunrise.games/bans/ChatBanEmail.php'
+banEndpoint = 'https://toontastic.sunrise.games/bans/ChatBanEmail.php'
 
 playToken = eval(input('Playtoken: '))
 chatMessages = eval(input('Chat messages: '))
 
-# If you truly need this key, ask Rocke
+# If you truly need this key, ask Rocket.
 secretKey = config.GetString('rpc-key')
 
 headers = {
