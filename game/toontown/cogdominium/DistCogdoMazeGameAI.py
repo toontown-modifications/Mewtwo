@@ -329,11 +329,10 @@ class DistCogdoMazeGameAI(DistCogdoGameAI, DistCogdoMazeGameBase):
             self.logSuspiciousEvent(senderId, 'CogdoMazeGameAI.requestGag: toon not present')
             return
 
-        distance = (toon.getPos() - wcPos)
+        distance = (toon.getPos() - wcPos).length()
         threshold = (Globals.WaterCoolerTriggerRadius + Globals.PlayerCollisionRadius) * 1.05
         if distance > threshold:
             self._toonHackingRequestGag(senderId)
-            return
 
         self.d_broadcastHasGag(senderId, self.getCurrentNetworkTime())
 
