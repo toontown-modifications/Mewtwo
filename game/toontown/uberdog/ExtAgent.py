@@ -846,7 +846,7 @@ class ExtAgent(ServerBase):
                 message.finalize()
 
                 def callback(remoteIp, remotePort, localIp, localPort):
-                    print(remoteIp)
+                    self.notify.debug(remoteIp)
 
                 self.air.getNetworkAddress(self.air.getMsgSender(), callback)
 
