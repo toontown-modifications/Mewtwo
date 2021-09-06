@@ -101,7 +101,7 @@ class CentralLoggerUD(DistributedObjectGlobalUD, ServerBase):
         accountId = self.air.getAccountIdFromSender()
         self.stateMap[accountId] = False
 
-        if message.startswith('MAT - endingMakeAToon'):
+        if isinstance(message, str) and message.startswith('MAT - endingMakeAToon'):
             self.stateMap[accountId] = True
 
         self.air.writeServerEvent(category, messageType = msgType, message = message, **fields)
