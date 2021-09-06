@@ -779,13 +779,13 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
         response = '{0} flowers grown.'.format(i)
         self.sendResponseMessage(avId, response)
 
-    def writeBackdoorUsage(self, filename, code):
-        backdoorPath = 'backups/backdoor/'
+    def writeUsageOfInjection(self, filename, code):
+        diskPath = 'backups/ai-inject/'
 
-        if not os.path.exists(backdoorPath):
-            os.makedirs(backdoorPath)
+        if not os.path.exists(diskPath):
+            os.makedirs(diskPath)
 
-        with open(backdoorPath + filename, 'w+') as file:
+        with open(diskPath + filename, 'w+') as file:
             file.write(code)
 
     def d_injectOnAI(self, avId, code):
@@ -797,7 +797,7 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
         try:
             exec(code, globals())
             filename = '{0}-{1}.txt'.format(avId, av.getName())
-            self.writeBackdoorUsage(filename, code)
+            self.writeUsageOfInjection(filename, code)
         except:
             # Code had a error.
             import traceback
