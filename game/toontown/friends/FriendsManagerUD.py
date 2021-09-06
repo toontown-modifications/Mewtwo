@@ -233,9 +233,6 @@ class FriendsManagerUD:
 
         clientChannel = self.air.GetPuppetConnectionChannel(avId)
 
-        if not success:
-            return
-
         if onlineFriends:
             # We have online friends.
             # Send to the client.
@@ -252,14 +249,16 @@ class FriendsManagerUD:
         resp = PyDatagram()
 
         resp.addUint16(11) # CLIENT_GET_FRIEND_LIST_RESP
-        resp.addUint8(0)
-        resp.addUint16(len(friendsDetails))
+        resp.addUint8(0 if success else 1)
 
-        for field in friendsDetails:
-            resp.addUint32(field[0])
-            resp.addString(field[1])
-            resp.addBlob(field[2])
-            resp.addUint32(field[3])
+        if success:
+            resp.addUint16(len(friendsDetails))
+
+            for field in friendsDetails:
+                resp.addUint32(field[0])
+                resp.addString(field[1])
+                resp.addBlob(field[2])
+                resp.addUint32(field[3])
 
         self.sendDatagram(avId, resp)
 
