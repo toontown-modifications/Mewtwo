@@ -1080,7 +1080,7 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
 
         self.setMagicWord(magicWord, avId, av.zoneId, '')
 
-    def setMagicWordApproved(self, accountId):
+    def setMagicWordApproved(self, accountId, accountType):
         self.staffMembers.append(accountId)
         self.accountMap[accountId] = accountType
 
