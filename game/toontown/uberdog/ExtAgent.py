@@ -858,7 +858,7 @@ class ExtAgent(ServerBase):
 
                     if accountId:
                         # This account is allowed to use Magic Words.
-                        self.air.netMessenger.send('magicWordApproved', [accountId])
+                        self.air.netMessenger.send('magicWordApproved', [accountId, accountType])
 
                 if self.getStatus() == 1 and playToken not in self.staffMembers:
                     errorCode = 151

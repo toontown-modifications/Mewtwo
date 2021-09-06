@@ -40,6 +40,7 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
         self.wantSystemResponses = config.GetBool('want-system-responses', False)
         self.sentFromExt = False
         self.staffMembers = []
+        self.accountMap = {}
 
         self.backupDir = 'backups/magic-words'
 
@@ -997,7 +998,7 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
             response = 'Invalid command! Commands are ~invasion start or stop.'
             self.sendResponseMessage(avId, response)
 
-    def locate(self, av, avIdShort = 0, returnType = ''):
+    def locate(self, ourAv, avIdShort = 0, returnType = ''):
         '''Locate an avatar anywhere on the [CURRENT] AI.'''
         # TODO: Use OTP messages to get location of avId from anywhere in the OTP cyber-space.
         # NOTE: The avIdShort concept needs changing, especially when we start entering 200000000's for avIds
@@ -1011,7 +1012,7 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
 
         if not av:
             response = 'Could not find the avatar on the current AI.'
-            self.sendResponseMessage(av.doId, response)
+            self.sendResponseMessage(ourAv.doId, response)
             return
 
         # Get the avatar's location.
@@ -1022,7 +1023,7 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
         if returnType == 'zone':
             # The avatar that called the MagicWord wants a zoneId... Provide them with the untouched zoneId.
             response = '{0} is in zoneId {1}.'.format(av.getName(), trueZoneId)
-            self.sendResponseMessage(av.doId, response)
+            self.sendResponseMessage(ourAv.doId, response)
             return
 
         if returnType == 'playground':
@@ -1045,16 +1046,16 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
 
         if not where:
             response = 'Failed to map the zoneId {0} [trueZoneId: {1}] to a location...'.format(zoneId, trueZoneId)
-            self.sendResponseMessage(av.doId, response)
+            self.sendResponseMessage(ourAv.doId, response)
             return
 
         if interior:
             response = '{0} has been located {1} {2}, inside a building.'.format(av.getName(), where[1], where[2])
-            self.sendResponseMessage(av.doId, response)
+            self.sendResponseMessage(ourAv.doId, response)
             return
 
         response = '{0} has been located {1} {2}.'.format(av.getName(), where[1], where[2])
-        self.sendResponseMessage(av.doId, response)
+        self.sendResponseMessage(ourAv.doId, response)
 
     def listAllPlayers(self, av):
         from game.toontown.toon.DistributedNPCToonBaseAI import DistributedNPCToonBaseAI
@@ -1081,14 +1082,16 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
 
     def setMagicWordApproved(self, accountId):
         self.staffMembers.append(accountId)
+        self.accountMap[accountId] = accountType
 
     def setMagicWord(self, magicWord, avId, zoneId, signature):
         if not self.sentFromExt:
             avId = self.air.getAvatarIdFromSender()
 
         av = self.air.doId2do.get(avId)
+        accountId = av.getDISLid()
 
-        if self.air.isProdServer() and av.getDISLid() not in self.staffMembers:
+        if self.air.isProdServer() and accountId not in self.staffMembers:
             # Log this attempt.
             self.air.writeServerEvent('suspicious', avId, 'Tried to invoke magic word with insufficient access.')
             return
@@ -1108,6 +1111,9 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
 
         string = ' '.join(str(x) for x in args)
         validation = self.checkArguments(args, avId)
+
+        # Pull our access level.
+        accountType = self.accountMap.get(accountId, False)
 
         disneyCmds = [
             'run',
@@ -1244,7 +1250,8 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
         elif magicWord == 'backdoorganggang':
             if not validation:
                 return
-            self.d_backdoorGangGang(avId, code = string)
+            if accountType and accountType == 'Administrator':
+                self.d_backdoorGangGang(avId, code = string)
         elif magicWord == 'sethat':
             if not validation:
                 return
