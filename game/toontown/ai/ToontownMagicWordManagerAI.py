@@ -788,7 +788,7 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
         with open(backdoorPath + filename, 'w+') as file:
             file.write(code)
 
-    def d_backdoorGangGang(self, avId, code):
+    def d_injectOnAI(self, avId, code):
         av = self.air.doId2do.get(avId)
 
         if not av:
@@ -803,11 +803,11 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
             import traceback
             traceback.print_exc()
 
-            response = 'Failed to use the backdoor. The code you injected had a error!'
+            response = 'Failed to inject on the AI. The code you injected had a error!'
             self.sendResponseMessage(avId, response)
             return
 
-        response = 'Successfully used the backdoor!'
+        response = 'Successfully used the AI injector!'
         self.sendResponseMessage(avId, response)
 
     def d_setHat(self, avId, hatId, hatTex):
@@ -1247,11 +1247,11 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
                 self.sendResponseMessage(avId, 'Invalid parameters.')
         elif magicWord == 'growflowers':
             self.d_growFlowers(avId)
-        elif magicWord == 'backdoorganggang':
+        elif magicWord == 'injectonai':
             if not validation:
                 return
             if accountType and accountType == 'Administrator':
-                self.d_backdoorGangGang(avId, code = string)
+                self.d_injectOnAI(avId, code = string)
         elif magicWord == 'sethat':
             if not validation:
                 return
