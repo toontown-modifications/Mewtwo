@@ -1308,7 +1308,7 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
             if not validation:
                 return
             try:
-                suit = args[0]
+                suit = str(args[0])
                 self.handleQueueInvasion(avId, suit)
             except:
                 self.sendResponseMessage(avId, 'Invalid parameters.')
