@@ -176,8 +176,8 @@ class ExtAgent(ServerBase):
             accountId = fields['setDISLid'][0]
             playToken = self.accId2playToken.get(accountId, '')
 
-            self.air.extAgent.sendKick(avatarId, message)
-            self.air.extAgent.banAccount(playToken, message, reason, True)
+            self.sendKick(avatarId, message)
+            self.banAccount(playToken, message, reason, True)
 
         # Query the avatar to get some account information.
         self.air.dbInterface.queryObject(self.air.dbId, avatarId, handleRetrieve)
