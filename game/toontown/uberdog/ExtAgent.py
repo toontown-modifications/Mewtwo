@@ -174,7 +174,7 @@ class ExtAgent(ServerBase):
                 return
 
             accountId = fields['setDISLid'][0]
-            playToken = self.air.extAgent.accId2playToken.get(accountId, '')
+            playToken = self.accId2playToken.get(accountId, '')
 
             self.air.extAgent.sendKick(avatarId, message)
             self.air.extAgent.banAccount(playToken, message, reason, True)
@@ -969,7 +969,7 @@ class ExtAgent(ServerBase):
                         self.air.netMessenger.send('magicWord', [message, doId])
                         return
 
-                blacklisted = self.filterBlacklist(doId, int(self.air.getAccountIdFromSender()), message)
+                blacklisted = self.filterBlacklist(doId, accId, message)
 
                 if blacklisted:
                     cleanMessage, modifications = '', []
@@ -1279,7 +1279,7 @@ class ExtAgent(ServerBase):
             fields = {
                 'WishNameState': ('PENDING',),
                 'WishName': (name,)
-                }
+            }
 
             if avId:
                 self.air.dbInterface.updateObject(self.air.dbId, avId, self.air.dclassesByName['DistributedToonUD'], fields)

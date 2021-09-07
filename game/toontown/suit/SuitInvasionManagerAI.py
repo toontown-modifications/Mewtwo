@@ -16,7 +16,7 @@ class SuitInvasionManagerAI:
         self.cogType = ''
 
         self.constantInvasionsDistrict = False
-        
+
         self.queuedSuits = []
 
         if self.air.districtName == 'Nutty River':
@@ -179,6 +179,6 @@ class SuitInvasionManagerAI:
         timePerSuit = config.GetFloat('invasion-time-per-suit', 1.2)
         taskMgr.doMethodLater(self.numCogs * timePerSuit, self.stopInvasion, 'invasion-timeout')
         return True
-        
+
     def queueInvasion(self, cogType):
         self.queuedSuits.append(cogType)

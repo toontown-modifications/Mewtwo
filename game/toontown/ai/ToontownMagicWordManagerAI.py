@@ -997,7 +997,7 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
         else:
             response = 'Invalid command! Commands are ~invasion start or stop.'
             self.sendResponseMessage(avId, response)
-            
+
     def handleQueueInvasion(self, avId, suitName):
         if suitName not in SuitDNA.suitHeadTypes:
             response = 'Invalid Cog name (%s). Cog names must be in strings.' % suitName
