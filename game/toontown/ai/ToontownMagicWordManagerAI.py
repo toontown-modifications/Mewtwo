@@ -997,6 +997,16 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
         else:
             response = 'Invalid command! Commands are ~invasion start or stop.'
             self.sendResponseMessage(avId, response)
+            
+    def handleQueueInvasion(self, avId, suitName):
+        if suitName not in SuitDNA.suitHeadTypes:
+            response = 'Invalid Cog name (%s). Cog names must be in strings.' % suitName
+            self.sendResponseMessage(avId, response)
+            return
+        invMgr = simbase.air.suitInvasionManager
+        invMgr.queueInvasion(suitName)
+        response = 'Queued %s invasion!' % suitName
+        self.sendResponseMessage(avId, response)
 
     def locate(self, ourAv, avIdShort = 0, returnType = ''):
         '''Locate an avatar anywhere on the [CURRENT] AI.'''
@@ -1292,6 +1302,14 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
                 amount = int(args[2])
                 skeleton = int(args[3])
                 self.handleInvasionCommand(avId, command, suit, amount, skeleton)
+            except:
+                self.sendResponseMessage(avId, 'Invalid parameters.')
+        elif magicWord in ('queueinv', 'queueinvasion'):
+            if not validation:
+                return
+            try:
+                suit = args[0]
+                self.handleQueueInvasion(avId, suit)
             except:
                 self.sendResponseMessage(avId, 'Invalid parameters.')
         elif magicWord == 'allplayers':

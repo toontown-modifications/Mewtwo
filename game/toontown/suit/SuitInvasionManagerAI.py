@@ -16,6 +16,8 @@ class SuitInvasionManagerAI:
         self.cogType = ''
 
         self.constantInvasionsDistrict = False
+        
+        self.queuedSuits = []
 
         if self.air.districtName == 'Nutty River':
             self.constantInvasionsDistrict = True
@@ -36,7 +38,11 @@ class SuitInvasionManagerAI:
             'p' # Pencil Pusher
         ]
 
-        cogType = random.choice(suitTypes)
+        if self.queuedSuits:
+            cogType = self.queuedSuits[0]
+            del self.queuedSuits[0]
+        else:
+            cogType = random.choice(suitTypes)
         numCogs = random.randint(1000, 3000)
 
         skeleton = 0
@@ -173,3 +179,6 @@ class SuitInvasionManagerAI:
         timePerSuit = config.GetFloat('invasion-time-per-suit', 1.2)
         taskMgr.doMethodLater(self.numCogs * timePerSuit, self.stopInvasion, 'invasion-timeout')
         return True
+        
+    def queueInvasion(self, cogType):
+        self.queuedSuits.append(cogType)
