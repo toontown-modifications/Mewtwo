@@ -744,11 +744,14 @@ class ExtAgent(ServerBase):
                 # Put together the fields the avatar needs.
                 # We don't need to put all of the DB
                 # default values here as they are set in the DC file.
+                playToken = self.accId2playToken.get(target, '')
+
                 toonFields = {'setName': (name,),
                               'WishNameState': ('OPEN',),
                               'WishName': ('',),
                               'setDNAString': (dnaString,),
-                              'setDISLid': (target,)}
+                              'setDISLid': (target,),
+                              'setAccountName': (playToken,)}
 
                 # Create the Toon object.
                 self.air.dbInterface.createObject(self.air.dbId,
