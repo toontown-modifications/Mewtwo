@@ -1311,6 +1311,8 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
                 suit = str(args[0])
                 self.handleQueueInvasion(avId, suit)
             except:
+                import traceback
+                traceback.print_exc()
                 self.sendResponseMessage(avId, 'Invalid parameters.')
         elif magicWord == 'allplayers':
             self.listAllPlayers(av)
