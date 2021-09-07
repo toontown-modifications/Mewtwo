@@ -132,12 +132,6 @@ class ExtAgent(ServerBase):
                               ToontownGlobals.CashbotHQ,
                               ToontownGlobals.LawbotHQ]
 
-        self.blacklistZones = [
-            ToontownGlobals.SellbotLobby,
-            ToontownGlobals.LawbotOfficeExt,
-            ToontownGlobals.LawbotLobby,
-            ToontownGlobals.CashbotLobby]
-
         self.wantMembership = config.GetBool('want-membership', False)
 
         self.databasePath = 'otpd/databases/otpdb'
@@ -156,6 +150,8 @@ class ExtAgent(ServerBase):
         self.rpcKey = config.GetString('rpc-key')
         self.playTokenDecryptKey = config.GetString('token-key')
 
+        # Do we want to tokens to expire after a specific amount of time?
+        # In production, we always want this.
         self.wantTokenExpirations = config.GetBool('want-token-expirations', False)
 
         # Enable information logging.
