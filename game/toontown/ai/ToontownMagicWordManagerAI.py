@@ -311,7 +311,7 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
 
         av.b_setCogStatus([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1])
         av.b_setCogCount([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1])
-        
+
     def d_maxCogBook(self, avId):
         av = self.air.doId2do.get(avId)
         if not av:
@@ -993,7 +993,6 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
 
         invMgr = simbase.air.suitInvasionManager
 
-        if command == 'start':
         if invMgr.getInvading():
             response = 'There is already an invasion running on the current district!'
             self.sendResponseMessage(avId, response)
@@ -1004,13 +1003,13 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
             return
         invMgr.startInvasion(suit, amount, skeleton)
         self.sendResponseMessage(avId, 'Success! Invasion amount is: {0}.'.format(amount))
-            
+
     def handleStopInvasion(self, avId):
         if simbase.air.suitInvasionManager.getInvading():
             simbase.air.suitInvasionManager.stopInvasion()
         else:
             self.sendResponseMessage(avId, 'No invasion is currently present on this district.')
-            
+
     def handleQueueInvasion(self, avId, suitName):
         if suitName not in SuitDNA.suitHeadTypes:
             response = 'Invalid Cog name (%s). Cog names must be in strings.' % suitName

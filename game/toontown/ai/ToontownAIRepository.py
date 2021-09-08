@@ -11,7 +11,6 @@ from game.toontown.distributed.ToontownDistrictStatsAI import ToontownDistrictSt
 from game.toontown.ai.HolidayManagerAI import HolidayManagerAI
 from game.toontown.toonbase import ToontownGlobals
 from game.toontown.catalog.CatalogManagerAI import CatalogManagerAI
-from direct.showbase import PythonUtil
 from game.otp.distributed import OtpDoGlobals
 from game.otp.ai.AIZoneData import AIZoneDataStore
 from game.toontown.ai.WelcomeValleyManagerAI import WelcomeValleyManagerAI
@@ -73,9 +72,7 @@ from game.toontown.ai import ToontownAIMsgTypes
 from game.toontown.toon.NPCDialogueManagerAI import NPCDialogueManagerAI
 from game.toontown.uberdog.ExtAgent import ServerGlobals
 
-import builtins, time, os, requests
-
-builtins.isClient = lambda: PythonUtil.isClient()
+import time, os, requests
 
 class ToontownAIRepository(ToontownInternalRepository, ServerBase):
     notify = directNotify.newCategory('ToontownAIRepository')
