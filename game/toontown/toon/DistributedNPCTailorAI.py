@@ -3,7 +3,6 @@ from pandac.PandaModules import *
 from .DistributedNPCToonBaseAI import *
 from . import ToonDNA
 from direct.task.Task import Task
-from game.toontown.ai import DatabaseObject
 from game.toontown.estate import ClosetGlobals
 
 class DistributedNPCTailorAI(DistributedNPCToonBaseAI):
@@ -167,8 +166,14 @@ class DistributedNPCTailorAI(DistributedNPCToonBaseAI):
                 toon.doId = avId
             if self.customerDNA:
                 toon.b_setDNAString(self.customerDNA.makeNetString())
-                db = DatabaseObject.DatabaseObject(self.air, avId)
-                db.storeObject(toon, ['setDNAString'])
+
+                dclass = self.air.dclassesByName['DistributedToonAI']
+
+                data = {
+                    'setDNAString': (self.customerDNA.makeNetString(),)
+                }
+
+                simbase.air.dbInterface.updateObject(self.air.dbId, avId, dclass.getName(), data)
         else:
             self.notify.warning('invalid customer avId: %s, customerId: %s ' % (avId, self.customerId))
         if self.busy == avId:
