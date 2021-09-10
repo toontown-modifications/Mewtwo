@@ -22,7 +22,7 @@ os.system('screen -dmS Sillyville ./run_first_ai.sh')
 # Wait until the first AI starts.
 time.sleep(10)
 
-os.system('screen -dmS NuttyRiver ./run_second_ai.sh')
+os.system('screen -dmS "Nutty River" ./run_second_ai.sh')
 
 if isProduction:
     os.system('screen -dmS Stunnel ./run_stunnel.sh')
