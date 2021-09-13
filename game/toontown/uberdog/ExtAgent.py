@@ -18,6 +18,7 @@ from game.toontown.discord.Webhook import Webhook
 from Crypto.Cipher import AES
 from Crypto.Util.Padding import unpad
 from datetime import datetime
+from pymongo import MongoClient
 import json, time, os, random, requests, binascii, base64, limeade
 
 class ServerGlobals:
@@ -30,6 +31,48 @@ class ServerGlobals:
         TEST_TOONTOWN_2012: 'Test Toontown 2012',
         TOONTOWN_JP_2010: 'Toontown Japan 2010'
     }
+
+class MongoBridge:
+    def __init__(self):
+        dbUrl = config.GetString('mongodb-url', 'mongodb://127.0.0.1:27017')
+        self.client = MongoClient(dbUrl)
+
+        dbName = config.GetString('mongodb-name', 'Mewtwo')
+        self.db = self.client[dbName]
+
+        self.accounts = self.db.accounts
+
+    def query(self, playToken):
+        """
+        Return the Account ID from the play token if it exists in the database.
+        Otherwise, return False.
+        """
+
+        account = self.accounts.find_one({'playToken': playToken})
+
+        if account:
+            # Return our accountId.
+            return int(account['accountId'])
+        else:
+            # Create a new account.
+            account = {
+                'playToken': playToken,
+                'accountId': 0
+            }
+
+            # Insert the account into the database.
+            self.accounts.insert(account)
+            return False
+
+    def put(self, playToken, accountId):
+        """
+        Throw an Account ID by its play token into the database.
+        """
+
+        account = self.accounts.find_one({'playToken': playToken})
+
+        # Update the account object.
+        self.accounts.update_one({'playToken': playToken}, {'$set': {'accountId': accountId}})
 
 class JSONBridge:
 

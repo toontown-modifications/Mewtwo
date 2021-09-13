@@ -6,3 +6,4 @@ lxml
 limeade
 werkzeug
 json-rpc
+pymongo
