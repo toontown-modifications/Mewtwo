@@ -40,9 +40,44 @@ simbase.air.connect(host, port)
 try:
     run()
 except Exception:
+    # Grab the exception data.
     info = traceback.format_exc()
+
+    # Prepare the log name.
     logName = 'data/tracebacks/ai/{0}.txt'.format(districtName)
 
     with open(logName, 'w+') as log:
+        # Write this data to disk.
         log.write(info + '\n')
     raise
+finally:
+    isProdServer = config.GetString('server-type', 'dev') == 'prod'
+
+    if isProdServer:
+        # Finally, send to to our Discord.
+        from game.toontown.discord.Webhook import Webhook
+        from game.toontown.uberdog.ExtAgent import ServerGlobals
+
+        # Grab the server type.
+        serverId = ServerGlobals.FINAL_TOONTOWN
+        serverType = ServerGlobals.serverToName[serverId]
+
+        # Let staff know this district is down.
+        hookFields = [{
+            'name': 'District Name',
+            'value': districtName,
+            'inline': True
+        },
+        {
+            'name': 'Server Type',
+            'value': serverType,
+            'inline': True
+        }]
+
+        # Send this message to Discord.
+        message = Webhook()
+        message.setDescription('District has gone down!')
+        message.setFields(hookFields)
+        message.setColor(1127128)
+        message.setWebhook(ConfigVariableString('discord-reset-webhook').value)
+        message.finalize()
