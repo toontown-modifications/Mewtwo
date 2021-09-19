@@ -800,10 +800,15 @@ class ExtAgent(ServerBase):
 
             # Query the account.
             self.air.dbInterface.queryObject(self.air.dbId, clientChannel >> 32, handleRetrieve)
-        elif msgType == 10: # CLIENT_GET_FRIEND_LIST
+        elif msgType in (10, 115): # CLIENT_GET_FRIEND_LIST, CLIENT_GET_FRIEND_LIST_EXTENDED
+            if msgType == 10:
+                extended = False
+            else:
+                extended = True
+
             avId = self.air.getAvatarIdFromSender()
 
-            self.friendsManager.getFriendsListRequest(avId)
+            self.friendsManager.getFriendsListRequest(avId, extended)
         elif msgType == 125: # CLIENT_LOGIN_TOONTOWN
             try:
                 playToken = dgi.getString()
@@ -1186,6 +1191,9 @@ class ExtAgent(ServerBase):
                 # Tell the friends manager that an avatar is coming online.
                 for x, y in fields['setFriendsList'][0]:
                     self.air.netMessenger.send('avatarOnline', [avId, x])
+
+                # XD
+                self.air.playerFriendsManager.avatarOnline(avId)
 
                 # Assign a POST_REMOVE for an avatar that disconnects unexpectedly.
                 cleanupDatagram = self.air.netMessenger.prepare('avatarOffline', [avId])
