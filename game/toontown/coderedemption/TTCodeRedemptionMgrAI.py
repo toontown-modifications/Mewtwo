@@ -186,15 +186,7 @@ class TTCodeRedemptionMgrAI(DistributedObjectAI):
             shirt = CatalogClothingItem(1809, 0)
             return [shirt]
 
-        if code == 'sweet':
-            beans = CatalogBeanItem(12000, tagCode = 2)
-            return [beans]
-
-        if code == 'tasty':
-            beans = CatalogBeanItem(12000, tagCode = 2)
-            return [beans]
-
-        if code == 'beaned':
+        if code in ('sweet', 'tasty', 'beaned', 'party-fun'):
             beans = CatalogBeanItem(12000, tagCode = 2)
             return [beans]
 
@@ -222,10 +214,6 @@ class TTCodeRedemptionMgrAI(DistributedObjectAI):
             else:
                 shirt = CatalogFurnitureItem(4010, 0)
             return [trunk]
-
-        if code == 'party-fun':
-            beans = CatalogBeanItem(12000, tagCode = 2)
-            return [beans]
 
         if code == 'feeling-jolly':
             shirt = CatalogClothingItem(1100, 0)
