@@ -83,4 +83,4 @@ class RPCServerUD:
             self.air.extAgent.sendSystemMessage(clientChannel, message)
 
     def startup(self):
-        run_simple('0.0.0.0', 8080, self.application)
+        run_simple('0.0.0.0', 7969, self.application)
