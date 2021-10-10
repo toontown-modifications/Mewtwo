@@ -224,7 +224,7 @@ class ExtAgent(ServerBase):
     def getStatus(self):
         try:
             serverType = ServerGlobals.serverToName[ServerGlobals.FINAL_TOONTOWN]
-            endpoint = 'http://unite.sunrise.games:19135/api/getStatusForServer?serverType={0}'
+            endpoint = 'https://api.sunrise.games/api/getStatusForServer?serverType={0}'
             request = requests.get(endpoint.format(serverType), headers = self.requestHeaders)
             return request.text
         except:
