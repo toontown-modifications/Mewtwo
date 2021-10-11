@@ -51,7 +51,7 @@ except Exception:
         log.write(info + '\n')
     raise
 finally:
-    isProdServer = config.GetString('server-type', 'dev') == 'prod'
+    isProdServer = ConfigVariableString('server-type', 'dev').value == 'prod'
 
     if isProdServer:
         # Finally, send to to our Discord.

@@ -2,7 +2,7 @@ from direct.directnotify.DirectNotifyGlobal import directNotify
 from direct.distributed.PyDatagram import *
 from direct.fsm.FSM import FSM
 
-import functools, json, time
+import functools, time
 
 class GetAvatarInfoOperation(FSM):
 
