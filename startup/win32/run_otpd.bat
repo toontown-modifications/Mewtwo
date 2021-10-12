@@ -1,4 +1,5 @@
 @echo off
+title OTP Server - ExtAgent
 cd ../../otpd
 
 :main

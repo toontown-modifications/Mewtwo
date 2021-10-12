@@ -1,4 +1,5 @@
 @echo off
+title Server - Non ExtAgent
 cd ../..
 
 set USE_EXT_AGENT=0
