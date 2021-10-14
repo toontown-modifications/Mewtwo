@@ -74,6 +74,11 @@ class SuitInvasionManagerAI:
             'name': 'District',
             'value': self.air.districtName,
             'inline': True
+        },
+        {
+            'name': 'Server Type',
+            'value': ServerGlobals.FINAL_TOONTOWN,
+            'inline': True
         }]
 
         message = Webhook()
