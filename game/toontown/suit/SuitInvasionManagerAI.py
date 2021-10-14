@@ -54,7 +54,7 @@ class SuitInvasionManagerAI:
             # Send our invasion to the Discord channel.
             self.sendInitialInvasion()
             self.sendToServer('setInvasion')
-            taskMgr.doMethodLater(1, self.sendToServer, 'Update Invasion', extraArgs = ['updateInvasion'])
+            taskMgr.doMethodLater(30, self.sendToServer, 'Update Invasion', extraArgs = ['updateInvasion'])
 
         if task:
             return task.done
