@@ -121,8 +121,6 @@ class ToontownAIRepository(ToontownInternalRepository, ServerBase):
         return False
 
     def sendPopulation(self, districtPopulation):
-        apiToken = config.GetString('api-token', '')
-
         data = {
             'token': config.GetString('api-token'),
             'population': districtPopulation,
