@@ -384,7 +384,7 @@ class DistributedSellbotBossAI(DistributedBossCogAI.DistributedBossCogAI, FSM.FS
                 else:
                     self.sendUpdateToAvatarId(toonId, 'toonPromoted', [0])
 
-            if self.nerfed:
+            if self.nerfed and toon.getStyle().getGender() == 'm':
                 # Give the toon their reward.
                 toon.d_setSystemMessage(0, 'Toon Resistance: As a reward, you now have your Cog Crusher outfit! Thank YOU for being Toon Enough!')
 
