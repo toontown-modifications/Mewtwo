@@ -120,10 +120,10 @@ class ToontownAIRepository(ToontownInternalRepository, ServerBase):
 
         return False
 
-    def sendPopulation(self, districtPopulation):
+    def sendPopulation(self):
         data = {
             'token': config.GetString('api-token'),
-            'population': districtPopulation,
+            'population': self.districtPopulation,
             'serverType': ServerGlobals.FINAL_TOONTOWN,
             'shardName': self.districtName,
             'shardId': self.districtId
@@ -145,7 +145,7 @@ class ToontownAIRepository(ToontownInternalRepository, ServerBase):
         if self.isProdServer():
             # This is the production server.
             # Send our population increase.
-            self.sendPopulation(self.districtPopulation)
+            self.sendPopulation()
 
     def decrementPopulation(self):
         self.districtPopulation -= 1
@@ -154,7 +154,7 @@ class ToontownAIRepository(ToontownInternalRepository, ServerBase):
         if self.isProdServer():
             # This is the production server.
             # Send our population decrease.
-            self.sendPopulation(self.districtPopulation)
+            self.sendPopulation()
 
     def sendQueryToonMaxHp(self, doId, checkResult):
         if self.notify.getDebug():
