@@ -158,7 +158,7 @@ class ToontownAIRepository(ToontownInternalRepository, ServerBase):
 
     def sendQueryToonMaxHp(self, doId, checkResult):
         if self.notify.getDebug():
-            self.notify.debug('sendQueryToonMaxHp ({0}, {1})'.format(doId, checkResult))
+            self.notify.debug(f'sendQueryToonMaxHp ({doId}, {checkResult})')
 
     def _isValidPlayerLocation(self, parentId, zoneId):
         if not parentId or zoneId > ToontownGlobals.DynamicZonesEnd or zoneId == 0:
@@ -167,7 +167,7 @@ class ToontownAIRepository(ToontownInternalRepository, ServerBase):
         return True
 
     def getAvatarExitEvent(self, doId):
-        return 'distObjDelete-{0}'.format(doId)
+        return f'distObjDelete-{doId}'
 
     def getZoneDataStore(self):
         return self.zoneDataStore
@@ -447,7 +447,7 @@ class ToontownAIRepository(ToontownInternalRepository, ServerBase):
         self.holidayManager.startHoliday(ToontownGlobals.SILLYMETER_EXT_HOLIDAY)
 
         # Let our user know we have finished starting up.
-        self.notify.info('{0} has finished starting up.'.format(self.districtName))
+        self.notify.info('{self.districtName} has finished starting up.')
 
     def loadDNAFileAI(self, dnaStore, dnaFileName):
         resourcesPath = 'game/resources/'
@@ -471,12 +471,12 @@ class ToontownAIRepository(ToontownInternalRepository, ServerBase):
         if 'outdoor_zone' in hood or 'golf_zone' in hood:
             phase = '6'
 
-        return 'phase_{0}/dna/{1}_{2}.dna'.format(phase, hood, zoneId)
+        return f'phase_{phase}/dna/{hood}_{zoneId}.dna'
 
     def lookupDNAFileName(self, dnaFileName):
         for _ in range(3, 13):
-            if os.path.exists('game/resources/phase_{0}/dna/{1}'.format(_, dnaFileName)):
-                return 'phase_{0}/dna/{1}'.format(_, dnaFileName)
+            if os.path.exists(f'game/resources/phase_{_}/dna/{dnaFileName}'):
+                return 'phase_{_}/dna/{dnaFileName}'
 
     def findFishingPonds(self, dnaData, zoneId, area):
         fishingPonds = []

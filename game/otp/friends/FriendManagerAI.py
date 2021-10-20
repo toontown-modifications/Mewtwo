@@ -278,7 +278,8 @@ class FriendManagerAI(DistributedObjectAI):
             self.updateTrueFriendCodesFile()
 
     def getFilename(self):
-        return '{0}{1}.json'.format('trueFriendCodes_', self.shard)
+        baseFolder = simbase.config.GetString('true-friend-storage')
+        return f'{baseFolder}/{self.shard}.json'
 
     def loadTrueFriendCodes(self):
         try:
@@ -298,7 +299,8 @@ class FriendManagerAI(DistributedObjectAI):
             json.dump(self.tfCodes, tfCodesFile)
             tfCodesFile.close()
         except:
-            pass
+            import traceback
+            traceback.print_exc()
 
     def __trueFriendCodesTask(self, task):
         for tfCode in list(self.tfCodes.keys()):
@@ -306,7 +308,7 @@ class FriendManagerAI(DistributedObjectAI):
             tfCodeDay = tfCodeInfo[1]
             today = datetime.datetime.now().day
             if tfCodeDay + 2 == today:
-                self.notify.info('Removing 2-day-old True Friend code: {0}'.format(tfCode))
+                self.notify.info(f'Removing 2-day-old True Friend code: {tfCode}')
                 self.removeSecret(tfCode)
 
         return task.again

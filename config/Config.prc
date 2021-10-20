@@ -37,6 +37,7 @@ max-code-redemption-attempts 5
 # Backups
 buildings-server-data-folder backups/buildings
 store-server-data-folder backups/store
+true-friend-storage backups/friendCodes
 
 # Whitelist
 whitelist-url http://cdn.toontown.disney.go.com/toontown/en/

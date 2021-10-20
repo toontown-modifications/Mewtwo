@@ -42,7 +42,7 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
         self.staffMembers = []
         self.accountMap = {}
 
-        self.backupDir = 'backups/magic-words'
+        self.backupDir = 'backups/magicWords'
 
         if not os.path.exists(self.backupDir):
             # Create our backup directory.

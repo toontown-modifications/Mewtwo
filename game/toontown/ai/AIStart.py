@@ -44,7 +44,7 @@ except Exception:
     info = traceback.format_exc()
 
     # Prepare the log name.
-    logName = 'data/tracebacks/ai/{0}.txt'.format(districtName)
+    logName = f'data/tracebacks/ai/{districtName}.txt'
 
     with open(logName, 'w+') as log:
         # Write this data to disk.

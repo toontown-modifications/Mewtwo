@@ -15,12 +15,12 @@ class DistributedBlackCatMgrAI(DistributedObjectAI):
     def doBlackCatTransformation(self):
         avId = self.air.getAvatarIdFromSender()
         if avId != self.avId:
-            self.air.writeServerEvent('suspicious', avId, 'Got black cat attempt for {} while we\'re expecting for {}!'.format(avId, self.avId))
+            self.air.writeServerEvent('suspicious', avId, f'Got black cat attempt for {avId} while we\'re expecting for {self.avId}!')
             return
 
         toon = self.air.doId2do.get(avId)
         if not toon:
-            self.air.writeServerEvent('suspicious', avId, 'Unknown avatar {} tried to create a black cat!'.format(avId))
+            self.air.writeServerEvent('suspicious', avId, f'Unknown avatar {avId} tried to create a black cat!')
             return
 
         toon.makeBlackCat()

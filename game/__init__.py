@@ -10,7 +10,7 @@ def genDNAFileName(zoneId):
     if hoodId == zoneId:
         zoneId = 'sz'
 
-    return 'phase_{0}/dna/{1}_{2}.dna'.format(phase, hood, zoneId)
+    return f'phase_{phase}/dna/{hood}_{zoneId}.dna'
 
 def extractGroupName(groupFullName):
     return groupFullName.split(':', 1)[0]
