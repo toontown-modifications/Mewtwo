@@ -447,7 +447,7 @@ class ToontownAIRepository(ToontownInternalRepository, ServerBase):
         self.holidayManager.startHoliday(ToontownGlobals.SILLYMETER_EXT_HOLIDAY)
 
         # Let our user know we have finished starting up.
-        self.notify.info('{self.districtName} has finished starting up.')
+        self.notify.info(f'{self.districtName} has finished starting up.')
 
     def loadDNAFileAI(self, dnaStore, dnaFileName):
         resourcesPath = 'game/resources/'
