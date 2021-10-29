@@ -476,7 +476,7 @@ class ToontownAIRepository(ToontownInternalRepository, ServerBase):
     def lookupDNAFileName(self, dnaFileName):
         for _ in range(3, 13):
             if os.path.exists(f'game/resources/phase_{_}/dna/{dnaFileName}'):
-                return 'phase_{_}/dna/{dnaFileName}'
+                return f'phase_{_}/dna/{dnaFileName}'
 
     def findFishingPonds(self, dnaData, zoneId, area):
         fishingPonds = []
