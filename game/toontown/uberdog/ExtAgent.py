@@ -986,7 +986,7 @@ class ExtAgent(ServerBase):
             toon = self.air.dclassesByName['DistributedToonUD']
 
             setTalk = toon.getFieldByName('setTalk')
-            setTalkWhisper = toon.getFieldByName('setTalkWhisper').
+            setTalkWhisper = toon.getFieldByName('setTalkWhisper')
 
             if fieldNumber == setTalk.getNumber():
                 # We'll have to unpack the data and send our own datagrams.
