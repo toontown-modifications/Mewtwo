@@ -983,14 +983,17 @@ class ExtAgent(ServerBase):
             fieldNumber = dgi.getUint16()
             dcData = dgi.getRemainingBytes()
 
-            if fieldNumber == 103: # setTalk field
+            toon = self.air.dclassesByName['DistributedToonUD']
+
+            setTalk = toon.getFieldByName('setTalk')
+            setTalkWhisper = toon.getFieldByName('setTalkWhisper').
+
+            if fieldNumber == setTalk.getNumber():
                 # We'll have to unpack the data and send our own datagrams.
-                toon = self.air.dclassesByName['DistributedToonUD']
-                talkField = toon.getFieldByName('setTalk')
                 unpacker = DCPacker()
                 unpacker.setUnpackData(dcData)
-                unpacker.beginUnpack(talkField)
-                fieldArgs = talkField.unpackArgs(unpacker)
+                unpacker.beginUnpack(setTalk)
+                fieldArgs = setTalk.unpackArgs(unpacker)
                 unpacker.endUnpack()
 
                 if len(fieldArgs) != 6:
@@ -1024,14 +1027,12 @@ class ExtAgent(ServerBase):
                                            [0, 0, '', cleanMessage, modifications, 0])
                 self.air.send(resp)
                 return
-            elif fieldNumber == 104: # setTalkWhisper field
+            elif fieldNumber == setTalkWhisper.getNumber():
                 # We'll have to unpack the data and send our own datagrams.
-                toon = self.air.dclassesByName['DistributedToonUD']
-                talkWhisperField = toon.getFieldByName('setTalkWhisper')
                 unpacker = DCPacker()
                 unpacker.setUnpackData(dcData)
-                unpacker.beginUnpack(talkWhisperField)
-                fieldArgs = talkWhisperField.unpackArgs(unpacker)
+                unpacker.beginUnpack(setTalkWhisper)
+                fieldArgs = setTalkWhisper.unpackArgs(unpacker)
                 unpacker.endUnpack()
 
                 accId = self.air.getAccountIdFromSender()
