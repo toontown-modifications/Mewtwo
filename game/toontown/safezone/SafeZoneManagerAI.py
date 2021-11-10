@@ -17,7 +17,7 @@ class SafeZoneManagerAI(DistributedObjectAI):
         av.startToonUp(HealFrequency)
 
         # Used for avatars that are in battle in case they escape.
-        event = 'inSafezone-{0}'.format(avId)
+        event = f'inSafezone-{avId}'
         messenger.send(event)
 
     def exitSafeZone(self):
