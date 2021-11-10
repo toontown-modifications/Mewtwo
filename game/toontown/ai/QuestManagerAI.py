@@ -56,7 +56,16 @@ class QuestManagerAI:
         for index, quest in enumerate(self.__toonQuestsList2Quests(toon.quests)):
             if isinstance(quest, Quests.CogQuest):
                 for suit in suitsKilled:
-                    for _ in range(quest.doesCogCount(toon.getDoId(), suit, zoneId, activeToons)):
+                    if suit['isVP']:
+                        funcType = 'doesVPCount'
+                    elif suit['isCFO']:
+                        funcType = 'doesCFOCount'
+                    else:
+                        funcType = 'doesCogCount'
+
+                    questFunc = getattr(quest, funcType)
+
+                    for _ in range(questFunc(toon.getDoId(), suit, zoneId, activeToons)):
                         self.__incrementQuestProgress(toon.quests[index])
 
         if toon.quests:
