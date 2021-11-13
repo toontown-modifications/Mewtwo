@@ -173,7 +173,7 @@ class DistributedNPCTailorAI(DistributedNPCToonBaseAI):
                     'setDNAString': (self.customerDNA.makeNetString(),)
                 }
 
-                simbase.air.dbInterface.updateObject(self.air.dbId, avId, dclass.getName(), data)
+                simbase.air.dbInterface.updateObject(self.air.dbId, avId, dclass, data)
         else:
             self.notify.warning('invalid customer avId: %s, customerId: %s ' % (avId, self.customerId))
         if self.busy == avId:
