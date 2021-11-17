@@ -25,11 +25,13 @@ class ServerGlobals:
     FINAL_TOONTOWN = 1
     TEST_TOONTOWN_2012 = 2
     TOONTOWN_JP_2010 = 3
+    TOONTOWN_BR = 4
 
     serverToName = {
         FINAL_TOONTOWN: 'Final Toontown',
         TEST_TOONTOWN_2012: 'Test Toontown 2012',
-        TOONTOWN_JP_2010: 'Toontown Japan 2010'
+        TOONTOWN_JP_2010: 'Toontown Japan 2010',
+        TOONTOWN_BR: 'Final Toontown Brazil'
     }
 
 class MongoBridge:
