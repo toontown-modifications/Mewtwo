@@ -471,11 +471,6 @@ class ExtAgent(ServerBase):
             visibles.append(ZoneUtil.getBranchZone(visZoneId))
             self.zoneVisDict[visZoneId] = visibles
 
-    def getVisBranchZones(self, zoneId):
-        if zoneId in self.zoneVisDict:
-            return self.zoneVisDict[zoneId]
-        return []
-
     def getAvatars(self, clientChannel):
         def handleAvRetrieveDone(avList, avatarFields):
             # Prepare the potential avatar datagram for the client.
@@ -1413,55 +1408,28 @@ class ExtAgent(ServerBase):
             handle = dgi.getUint16()
             context = dgi.getUint32()
             parentId = dgi.getUint32()
-            zones = []
 
-            while dgi.getRemainingSize() != 0:
-                zones.append(dgi.getUint32())
+            # We get every zone in the interest, including visibles zones from our visgroup
+            zones = set()
 
-            if len(zones) == 1:
-                zoneId = zones[0]
+            while dgi.getRemainingSize():
+                zoneId = dgi.getUint32()
 
-                visZones = set()
+                if zoneId == 1:
+                    # No we don't want you Quiet Zone
+                    continue
 
-                isStreetBranch = self.getInStreetBranch(zoneId)
-                isCogHQ = self.getInCogHQ(zoneId)
-                isPlayground = ZoneUtil.isPlayground(zoneId)
-                branchId = ZoneUtil.getBranchZone(zoneId)
+                zones.add(zoneId)
 
-                if isStreetBranch:
-                    zoneId = ZoneUtil.getCanonicalZoneId(zoneId)
-                    branchId = ZoneUtil.getBranchZone(zoneId)
+                # We add visibles
+                canonicalZoneId = ZoneUtil.getCanonicalZoneId(zoneId)
 
-                    if zoneId % 100 != 0:
-                        visZones.update(self.getVisBranchZones(zoneId))
+                if canonicalZoneId in self.zoneVisDict:
+                    for visZoneId in self.zoneVisDict[canonicalZoneId]:
+                        zones.add(ZoneUtil.getTrueZoneId(visZoneId, zoneId))
 
-                if isCogHQ:
-                    visZones.update(self.getVisBranchZones(zoneId))
-
-                # Set interest on the VisZones.
-                for zone in visZones:
-                    zones.append(zone)
-
-                loaderName = ZoneUtil.getLoaderName(zoneId)
-
-                if branchId and zoneId != branchId and isPlayground or isCogHQ and loaderName not in ('safeZoneLoader', 'cogHQLoader'):
-                    # Set object location.
-                    dg = PyDatagram()
-                    dg.addServerHeader(clientChannel, self.air.ourChannel, CLIENT_OBJECT_LOCATION)
-                    dg.addUint32(self.clientChannel2avId[clientChannel])
-                    dg.addUint32(parentId)
-                    dg.addUint32(zoneId)
-                    self.air.send(dg)
-
-                    # Set interest on the branch ID.
-                    zones.append(branchId)
-
-                    if clientChannel in self.clientChannel2handle:
-                        # Use the same handle to alter the interest.
-                        handle = self.clientChannel2handle[clientChannel]
-                    else:
-                        # Save the handle for later.
-                        self.clientChannel2handle[clientChannel] = handle
+                    # We want to add the "main" zone, i.e 2200 for 2205, etc
+                    zones.add(zoneId - zoneId % 100)
 
             resp = PyDatagram()
             resp.addServerHeader(clientChannel, self.air.ourChannel, CLIENT_ADD_INTEREST_MULTIPLE)
