@@ -431,19 +431,6 @@ class ExtAgent(ServerBase):
 
         self.accId2playToken[accountId] = playToken
 
-    def getInStreetBranch(self, zoneId):
-        if not ZoneUtil.isPlayground(zoneId):
-            where = ZoneUtil.getWhereName(zoneId, True)
-            return where == 'street'
-
-        return False
-
-    def getInCogHQ(self, zoneId):
-        if ZoneUtil.isCogHQZone(zoneId):
-            return True
-
-        return False
-
     def loadVisZones(self):
         self.notify.info('Loading DNA files...')
         for zoneId in self.validVisZones:
