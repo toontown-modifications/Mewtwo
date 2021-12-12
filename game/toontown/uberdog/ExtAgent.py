@@ -1599,7 +1599,7 @@ class ExtAgent(ServerBase):
             self.sendBoot(clientChannel, errorCode, message)
             self.sendEject(clientChannel, errorCode, message)
         else:
-            self.notify.warning('Received unknown message type %s from Client' % msgType)
+            self.notify.warning(f'Received unknown message type {msgType} from Client')
 
     def handleResp(self, dgi):
         """
@@ -1694,7 +1694,7 @@ class ExtAgent(ServerBase):
             resp.addUint16(msgType)
             resp.addUint32(doId)
         else:
-            self.notify.warning('Received unknown message type %s from Astron' % msgType)
+            self.notify.warning(f'Received unknown message type {msgType} from Astron')
 
         if not resp:
             return
