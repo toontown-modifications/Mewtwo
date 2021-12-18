@@ -12,7 +12,7 @@ def main():
     params['action'] = 'retrieveAccountId'
     params['arguments'] = ['Rocket']
 
-    # Kick player payload.
+    # Create our payload.
     payload = {
         'method': 'action',
         'params': params,

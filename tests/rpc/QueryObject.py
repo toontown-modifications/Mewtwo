@@ -12,7 +12,7 @@ def main():
     params['action'] = 'queryObject'
     params['arguments'] = [100000000]
 
-    # Kick player payload.
+    # Create our payload.
     payload = {
         'method': 'action',
         'params': params,

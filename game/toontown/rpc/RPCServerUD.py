@@ -96,6 +96,7 @@ class RPCServerUD:
 
                 result.extend([dclass, fields])
 
+                # Unblock, we are done.
                 unblocked.set()
 
             self.air.dbInterface.queryObject(self.air.dbId, doId, callback)
