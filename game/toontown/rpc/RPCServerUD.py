@@ -1,4 +1,5 @@
 from direct.directnotify.DirectNotifyGlobal import directNotify
+from direct.stdpy import threading2
 
 from game.otp.distributed import OtpDoGlobals
 from game.otp.otpbase import OTPLocalizer
@@ -75,7 +76,7 @@ class RPCServerUD:
             return 'Warned avatar.'
         elif action == 'retrieveAccountId':
             playToken = str(arguments[0])
-            accountId = self.air.extAgent.query(playToken)
+            accountId = self.air.extAgent.bridge.query(playToken)
 
             response = f'No account found associated with {playToken}!'
 
@@ -87,14 +88,20 @@ class RPCServerUD:
             doId = int(arguments[0])
 
             result = []
+            unblocked = threading2.Event()
 
             def callback(dclass, fields):
                 if dclass is not None:
                     dclass = dclass.getName()
 
-                    result.extend([dclass, fields])
+                result.extend([dclass, fields])
+
+                unblocked.set()
 
             self.air.dbInterface.queryObject(self.air.dbId, doId, callback)
+
+            # Block until the callback is executed:
+            unblocked.wait()
 
             return result
 
