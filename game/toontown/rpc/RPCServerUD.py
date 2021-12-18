@@ -73,6 +73,30 @@ class RPCServerUD:
             avClientChannel = self.air.GetPuppetConnectionChannel(avId)
             self.air.extAgent.warnPlayer(avClientChannel, reason)
             return 'Warned avatar.'
+        elif action == 'retrieveAccountId':
+            playToken = str(arguments[0])
+            accountId = self.air.extAgent.query(playToken)
+
+            response = f'No account found associated with {playToken}!'
+
+            if accountId:
+                response = f'The accountId associated with {playToken} is {accountId}.'
+
+            return response
+        elif action == 'queryObject':
+            doId = int(arguments[0])
+
+            result = []
+
+            def callback(dclass, fields):
+                if dclass is not None:
+                    dclass = dclass.getName()
+
+                    result.extend([dclass, fields])
+
+            self.air.dbInterface.queryObject(self.air.dbId, doId, callback)
+
+            return result
 
         return 'Unhandled action.'
 
