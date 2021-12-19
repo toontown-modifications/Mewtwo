@@ -1,5 +1,5 @@
 services:
-  Mewtwo:
+  mewtwo:
     build: .
     scale: 2
     ports:
