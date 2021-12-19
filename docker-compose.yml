@@ -1,6 +1,6 @@
 services:
   mewtwo:
-    build: game/Dockerfile
+    build: game
     scale: 2
     ports:
       - 6667:6667
