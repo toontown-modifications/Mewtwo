@@ -1,0 +1,6 @@
+services:
+  Mewtwo:
+    build: .
+    scale: 2
+    ports:
+      - 6667:6667
