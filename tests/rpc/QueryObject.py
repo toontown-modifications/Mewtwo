@@ -21,7 +21,10 @@ def main():
     }
 
     response = requests.post(url, json = payload).json()
-    print(response['result'])
+    responseData = response['result']
+
+    for fieldName in responseData[1]:
+        value = responseData[1][fieldName]
 
 if __name__ == '__main__':
     main()
