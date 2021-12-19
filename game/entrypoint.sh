@@ -1,2 +1,2 @@
 #!/bin/bash
-python3 -u ServerStarter.py
+python3 -u ServerStarter.py && tail -f /dev/null
