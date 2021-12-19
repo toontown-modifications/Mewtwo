@@ -15,17 +15,17 @@ RUN curl -s -L https://bootstrap.pypa.io/get-pip.py | python3
 RUN pip install requests mysqlclient pycryptodome pytz lxml limeade werkzeug json-rpc
 
 # Grab Panda3D and the older FSM module.
-RUN wget -P /panda3d https://rocketprogrammer.me/binaries/py3.deb
+RUN wget -P /panda3d https://rocketprogrammer.me/linux/py3_a.deb
 RUN wget -P /panda3d https://rocketprogrammer.me/binaries/FSM.py
 
 # Install panda3d
 RUN cd /panda3d \
-    && dpkg -i py3.deb
+    && dpkg -i py3_a.deb
 RUN cd /panda3d && cp FSM.py /usr/share/panda3d/direct/fsm/FSM.py
 
 # Migrate all files into root
 WORKDIR /server
-RUN git clone https://oauth2:NBSQjuVLzk3XkAxAPTuj@gitlab.com/rocketstoontownonline/Game-OTP/Mewtwo /server
+RUN git clone https://Robot:ce11d5d015c990243b496e7babe5bdfe3c8f0bd9@git.sunrise.games/SunriseGames/Mewtwo.git /server
 COPY ./ .
 
 ENTRYPOINT [ "/bin/bash", "entrypoint.sh" ]
