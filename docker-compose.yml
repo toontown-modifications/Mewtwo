@@ -3,4 +3,4 @@ services:
     build: game
     scale: 1
     ports:
-      - 6667:6667
+      - 6665:6665
