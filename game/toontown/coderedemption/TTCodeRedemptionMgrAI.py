@@ -76,7 +76,7 @@ class TTCodeRedemptionMgrAI(DistributedObjectAI):
         for item in items:
             if isinstance(item, CatalogInvalidItem):
                 # This item is invalid.
-                self.air.writeServerEvent('suspicious', avId = avId, issue = 'Invalid CatalogItem\'s for code: %s' % code)
+                self.air.writeServerEvent('suspicious', avId = avId, issue = f'Invalid CatalogItem\'s for code: {code}')
                 result = TTCodeRedemptionConsts.RedeemErrors.CodeDoesntExist
                 awardMgrResult = 0
                 break
@@ -117,7 +117,7 @@ class TTCodeRedemptionMgrAI(DistributedObjectAI):
                     awardMgrResult = AwardManagerConsts.GiveAwardErrors.AlreadyInCloset
 
         # Log this redeem using the eventlogger.
-        self.air.writeServerEvent('code-redeemed', avId = avId, limited = limited, issue = 'Code attempted to be redeemed: {0}'.format(code))
+        self.air.writeServerEvent('code-redeemed', avId = avId, limited = limited, issue = f'Code attempted to be redeemed: {code}')
 
         # Send our response.
         self.d_redeemCodeResult(avId, context, result, awardMgrResult)
