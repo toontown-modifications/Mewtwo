@@ -2,4 +2,4 @@ from direct.directnotify.DirectNotifyGlobal import directNotify
 from game.toontown.parties.DistributedPartyTrampolineActivityAI import DistributedPartyTrampolineActivityAI
 
 class DistributedPartyWinterTrampolineActivityAI(DistributedPartyTrampolineActivityAI):
-    notify = DirectNotifyGlobal.directNotify.newCategory('DistributedPartyWinterTrampolineActivityAI')
+    notify = directNotify.newCategory('DistributedPartyWinterTrampolineActivityAI')
