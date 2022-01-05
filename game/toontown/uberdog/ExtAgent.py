@@ -336,7 +336,7 @@ class ExtAgent(ServerBase):
         # Wait half a second before continuing to avoid a race condition.
         taskMgr.doMethodLater(0.5,
                               lambda x: self.finishLoginAccount(fields, clientChannel, accountId, playToken, openChat, isPaid, dislId, linkedToParent),
-                              self.air.uniqueName('wait-acc-%s' % accountId), appendTask=False)
+                              self.air.uniqueName(f'wait-acc-{accountId}'), appendTask = False)
 
     def getCreationDate(self, fields):
         # Grab the account creation date from our fields.
@@ -1512,8 +1512,8 @@ class ExtAgent(ServerBase):
                     # however it shouldn't be a problem if it doesn't.
 
                     estateFields = {
-                        'setSlot{0}ToonId'.format(index): [0],
-                        'setSlot{0}Items'.format(index): [[]]
+                        f'setSlot{index}ToonId': [0],
+                        f'setSlot{index}Items': [[]]
                         }
 
                     self.air.dbInterface.updateObject(self.air.dbId, estateId, self.air.dclassesByName['DistributedEstateAI'], estateFields)
