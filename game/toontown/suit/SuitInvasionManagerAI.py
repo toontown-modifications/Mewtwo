@@ -2,8 +2,9 @@ from direct.directnotify.DirectNotifyGlobal import directNotify
 
 from game.toontown.toonbase import ToontownGlobals
 from game.toontown.discord.Webhook import Webhook
+from game.toontown.uberdog.ExtAgent import ServerGlobals
 
-import random
+import random, requests
 
 class SuitInvasionManagerAI:
     notify = directNotify.newCategory('SuitInvasionManagerAI')
@@ -52,7 +53,8 @@ class SuitInvasionManagerAI:
         if self.air.isProdServer():
             # Send our invasion to the Discord channel.
             self.sendInitialInvasion()
-            #taskMgr.doMethodLater(30, self.updateDiscord, 'Update Invasion')
+            self.sendToServer('setInvasion')
+            taskMgr.doMethodLater(30, self.sendToServer, 'Update Invasion', extraArgs = ['updateInvasion'])
 
         if task:
             return task.done
@@ -72,6 +74,11 @@ class SuitInvasionManagerAI:
             'name': 'District',
             'value': self.air.districtName,
             'inline': True
+        },
+        {
+            'name': 'Server Type',
+            'value': ServerGlobals.FINAL_TOONTOWN,
+            'inline': True
         }]
 
         message = Webhook()
@@ -83,6 +90,24 @@ class SuitInvasionManagerAI:
 
         if task:
             return task.again
+
+    def sendToServer(self, actionType = 'updateInvasion'):
+        data = {
+            'token': config.GetString('api-token', ''),
+            'serverType': ServerGlobals.serverToName[ServerGlobals.FINAL_TOONTOWN],
+            'districtName': self.air.districtName,
+            'cogType': self.cogType,
+            'numCogs': self.numCogs
+        }
+
+        headers = {
+            'User-Agent': 'Sunrise Games - SuitInvasionManagerAI'
+        }
+
+        try:
+            requests.post('https://api.sunrise.games/api/{0}'.format(actionType), json = data, headers = headers)
+        except:
+            self.notify.warning('Failed to send to server!')
 
     def getCogType(self, cogType):
         if cogType == 'f':

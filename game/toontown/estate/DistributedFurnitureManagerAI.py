@@ -400,7 +400,7 @@ class DistributedFurnitureManagerAI(DistributedObjectAI):
                 setter(getter())
                 del self.deletedItems[index]
                 self.b_setDeletedItems(self.getDeletedItems())
-                self.removeDeletedItemBlob(item.getBlob().encode('base64'))
+                self.removeDeletedItemBlob(item.getBlob().hex())
                 self.sendUpdateToAvatarId(avId, 'recoverDeletedItemResponse',
                                           [ToontownGlobals.FM_RecoveredItem, context])
 
@@ -479,7 +479,7 @@ class DistributedFurnitureManagerAI(DistributedObjectAI):
             del self.deletedItems[0]
 
         self.b_setDeletedItems(self.getDeletedItems())
-        self.addDeletedItemBlob(item.getBlob().encode('base64'))
+        self.addDeletedItemBlob(item.getBlob().hex())
 
     def getNumItems(self):
         numItems = len(self.house.interiorItems) + len(self.house.atticItems) + len(self.house.atticWallpaper) + len(
@@ -562,7 +562,7 @@ class DistributedFurnitureManagerAI(DistributedObjectAI):
             if deletedItemDayId + int(ToontownGlobals.DeletedItemLifetime / 60 / 24) <= dayId:
                 for deletedItemBlob in deletedItemBlobs[:]:
                     try:
-                        deletedItem = CatalogItem.getItem(deletedItemBlob.decode('base64'))
+                        deletedItem = CatalogItem.getItem(binascii.unhexlify(deletedItemBlob))
                     except:
                         self.day2deletedItems[deletedItemDay].remove(deletedItemBlob)
                         if not self.day2deletedItems[deletedItemDay]:

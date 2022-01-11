@@ -1,4 +1,5 @@
 from direct.directnotify.DirectNotifyGlobal import directNotify
+from direct.stdpy import threading2
 
 from game.otp.distributed import OtpDoGlobals
 from game.otp.otpbase import OTPLocalizer
@@ -73,6 +74,37 @@ class RPCServerUD:
             avClientChannel = self.air.GetPuppetConnectionChannel(avId)
             self.air.extAgent.warnPlayer(avClientChannel, reason)
             return 'Warned avatar.'
+        elif action == 'retrieveAccountId':
+            playToken = str(arguments[0])
+            accountId = self.air.extAgent.bridge.query(playToken)
+
+            response = f'No account found associated with {playToken}!'
+
+            if accountId:
+                response = f'The accountId associated with {playToken} is {accountId}.'
+
+            return response
+        elif action == 'queryObject':
+            doId = int(arguments[0])
+
+            result = []
+            unblocked = threading2.Event()
+
+            def callback(dclass, fields):
+                if dclass is not None:
+                    dclass = dclass.getName()
+
+                result.extend([dclass, fields])
+
+                # Unblock, we are done.
+                unblocked.set()
+
+            self.air.dbInterface.queryObject(self.air.dbId, doId, callback)
+
+            # Block until the callback is executed:
+            unblocked.wait()
+
+            return result
 
         return 'Unhandled action.'
 
@@ -83,4 +115,4 @@ class RPCServerUD:
             self.air.extAgent.sendSystemMessage(clientChannel, message)
 
     def startup(self):
-        run_simple('0.0.0.0', 8080, self.application)
+        run_simple('0.0.0.0', 7969, self.application)

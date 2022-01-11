@@ -76,7 +76,7 @@ class TTCodeRedemptionMgrAI(DistributedObjectAI):
         for item in items:
             if isinstance(item, CatalogInvalidItem):
                 # This item is invalid.
-                self.air.writeServerEvent('suspicious', avId = avId, issue = 'Invalid CatalogItem\'s for code: %s' % code)
+                self.air.writeServerEvent('suspicious', avId = avId, issue = f'Invalid CatalogItem\'s for code: {code}')
                 result = TTCodeRedemptionConsts.RedeemErrors.CodeDoesntExist
                 awardMgrResult = 0
                 break
@@ -117,7 +117,7 @@ class TTCodeRedemptionMgrAI(DistributedObjectAI):
                     awardMgrResult = AwardManagerConsts.GiveAwardErrors.AlreadyInCloset
 
         # Log this redeem using the eventlogger.
-        self.air.writeServerEvent('code-redeemed', avId = avId, limited = limited, issue = 'Code attempted to be redeemed: {0}'.format(code))
+        self.air.writeServerEvent('code-redeemed', avId = avId, limited = limited, issue = f'Code attempted to be redeemed: {code}')
 
         # Send our response.
         self.d_redeemCodeResult(avId, context, result, awardMgrResult)
@@ -186,15 +186,7 @@ class TTCodeRedemptionMgrAI(DistributedObjectAI):
             shirt = CatalogClothingItem(1809, 0)
             return [shirt]
 
-        if code == 'sweet':
-            beans = CatalogBeanItem(12000, tagCode = 2)
-            return [beans]
-
-        if code == 'tasty':
-            beans = CatalogBeanItem(12000, tagCode = 2)
-            return [beans]
-
-        if code == 'beaned':
+        if code in ('sweet', 'tasty', 'beaned', 'party-fun'):
             beans = CatalogBeanItem(12000, tagCode = 2)
             return [beans]
 
@@ -222,10 +214,6 @@ class TTCodeRedemptionMgrAI(DistributedObjectAI):
             else:
                 shirt = CatalogFurnitureItem(4010, 0)
             return [trunk]
-
-        if code == 'party-fun':
-            beans = CatalogBeanItem(12000, tagCode = 2)
-            return [beans]
 
         if code == 'feeling-jolly':
             shirt = CatalogClothingItem(1100, 0)

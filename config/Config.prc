@@ -25,7 +25,6 @@ want-do-live-updates true
 want-discord-integration true
 want-parties false
 want-instant-parties true
-want-welcome-valley false
 want-fireworks-cannons false
 want-loyalty-requirement true
 want-ds-anydbm false
@@ -37,6 +36,7 @@ max-code-redemption-attempts 5
 # Backups
 buildings-server-data-folder backups/buildings
 store-server-data-folder backups/store
+true-friend-storage backups/friendCodes
 
 # Whitelist
 whitelist-url http://cdn.toontown.disney.go.com/toontown/en/

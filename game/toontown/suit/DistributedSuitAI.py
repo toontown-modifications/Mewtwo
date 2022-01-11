@@ -43,6 +43,9 @@ class DistributedSuitAI(DistributedSuitBaseAI.DistributedSuitBaseAI):
         return
 
     def delete(self):
+        if self.isDeleted():
+            return
+
         del self.bldgTrack
         del self.branchId
         del self.buildingDestination

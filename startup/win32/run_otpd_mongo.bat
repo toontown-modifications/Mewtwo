@@ -1,4 +1,5 @@
 @echo off
+title OTP Server - ExtAgent (MongoDB)
 cd ../../otpd
 
 :main

@@ -1,4 +1,5 @@
 @echo off
+title Server - ExtAgent
 cd ../..
 
 set USE_EXT_AGENT=1

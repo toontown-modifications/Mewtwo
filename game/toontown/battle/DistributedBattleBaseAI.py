@@ -730,7 +730,7 @@ class DistributedBattleBaseAI(DistributedObjectAI.DistributedObjectAI, BattleBas
                     'setInventory': (invStr,)
                 }
 
-                simbase.air.dbInterface.updateObject(self.air.dbId, toonId, dclass.getName(), fields)
+                simbase.air.dbInterface.updateObject(self.air.dbId, toonId, dclass, fields)
         return
 
     def getToon(self, toonId):

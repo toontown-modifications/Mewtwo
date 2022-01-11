@@ -86,9 +86,9 @@ async def checkUsernameAvailability(request):
             'Fantastic'
         ]
 
-        suggestedUsername1 = '{0}{1}'.format(username, random.randint(1, 100))
-        suggestedUsername2 = '{0}{1}'.format(username, random.randint(1, 100))
-        suggestedUsername3 = '{0}{1}'.format(random.choice(words), username)
+        suggestedUsername1 = f'{username}{random.randint(1, 100)}'
+        suggestedUsername2 = f'{username}{random.randint(1, 100)}'
+        suggestedUsername3 = f'{random.choice(words)}{username}'
 
         resultsFields = [
             ('suggestedUsername1', suggestedUsername1),

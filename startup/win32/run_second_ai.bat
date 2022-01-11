@@ -7,6 +7,8 @@ set /P PYTHON_PATH=<PYTHON_PATH
 
 cls
 
+title %DISTRICT_NAME%
+
 :main
 %PYTHON_PATH% -m game.toontown.ai.AIStart config/Config.prc
 pause

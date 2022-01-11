@@ -48,7 +48,9 @@ class ToontownServerRepositoryAgent(ToontownInternalRepository):
             self.discordIntegration = DiscordIntegrationServer(self)
 
         self.toontownTimeManager = ToontownTimeManager(serverTimeUponLogin = int(time.time()), globalClockRealTimeUponLogin = globalClock.getRealTime())
-        self.rpcServer = RPCServerUD(self)
+
+        if self.extAgent.isProdServer():
+            self.rpcServer = RPCServerUD(self)
 
     def generateManagers(self):
         self.centralLogger = self.generateGlobalObject(OtpDoGlobals.OTP_DO_ID_CENTRAL_LOGGER, 'CentralLogger')

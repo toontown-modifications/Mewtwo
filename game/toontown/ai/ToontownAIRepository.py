@@ -101,7 +101,6 @@ class ToontownAIRepository(ToontownInternalRepository, ServerBase):
         self.wantCogdominiums = config.GetBool('want-cogdominiums', False)
         self.useAllMinigames = config.GetBool('use-all-minigames', False)
         self.wantCodeRedemption = config.GetBool('want-coderedemption', False)
-        self.wantWelcomeValley = config.GetBool('want-welcome-valley', False)
 
         self.cogSuitMessageSent = False
 
@@ -120,12 +119,10 @@ class ToontownAIRepository(ToontownInternalRepository, ServerBase):
 
         return False
 
-    def sendPopulation(self, districtPopulation):
-        apiToken = config.GetString('api-token', '')
-
+    def sendPopulation(self):
         data = {
             'token': config.GetString('api-token'),
-            'population': districtPopulation,
+            'population': self.districtPopulation,
             'serverType': ServerGlobals.FINAL_TOONTOWN,
             'shardName': self.districtName,
             'shardId': self.districtId
@@ -136,7 +133,7 @@ class ToontownAIRepository(ToontownInternalRepository, ServerBase):
         }
 
         try:
-            requests.post('http://unite.sunrise.games:19135/api/setPopulation', json = data, headers = headers)
+            requests.post('https://api.sunrise.games/api/setPopulation', json = data, headers = headers)
         except:
             self.notify.warning('Failed to send district population!')
 
@@ -147,7 +144,7 @@ class ToontownAIRepository(ToontownInternalRepository, ServerBase):
         if self.isProdServer():
             # This is the production server.
             # Send our population increase.
-            self.sendPopulation(self.districtPopulation)
+            self.sendPopulation()
 
     def decrementPopulation(self):
         self.districtPopulation -= 1
@@ -156,11 +153,11 @@ class ToontownAIRepository(ToontownInternalRepository, ServerBase):
         if self.isProdServer():
             # This is the production server.
             # Send our population decrease.
-            self.sendPopulation(self.districtPopulation)
+            self.sendPopulation()
 
     def sendQueryToonMaxHp(self, doId, checkResult):
         if self.notify.getDebug():
-            self.notify.debug('sendQueryToonMaxHp ({0}, {1})'.format(doId, checkResult))
+            self.notify.debug(f'sendQueryToonMaxHp ({doId}, {checkResult})')
 
     def _isValidPlayerLocation(self, parentId, zoneId):
         if not parentId or zoneId > ToontownGlobals.DynamicZonesEnd or zoneId == 0:
@@ -169,7 +166,7 @@ class ToontownAIRepository(ToontownInternalRepository, ServerBase):
         return True
 
     def getAvatarExitEvent(self, doId):
-        return 'distObjDelete-{0}'.format(doId)
+        return f'distObjDelete-{doId}'
 
     def getZoneDataStore(self):
         return self.zoneDataStore
@@ -264,9 +261,8 @@ class ToontownAIRepository(ToontownInternalRepository, ServerBase):
         self.timeManager = TimeManagerAI(self)
         self.timeManager.generateWithRequired(OtpDoGlobals.OTP_ZONE_ID_MANAGEMENT)
 
-        if self.wantWelcomeValley:
-            self.welcomeValleyManager = WelcomeValleyManagerAI(self)
-            self.welcomeValleyManager.generateWithRequired(OtpDoGlobals.OTP_ZONE_ID_MANAGEMENT)
+        self.welcomeValleyManager = WelcomeValleyManagerAI(self)
+        self.welcomeValleyManager.generateWithRequired(OtpDoGlobals.OTP_ZONE_ID_MANAGEMENT)
 
         self.inGameNewsMgr = DistributedInGameNewsMgrAI(self)
         self.inGameNewsMgr.generateWithRequired(OtpDoGlobals.OTP_ZONE_ID_MANAGEMENT)
@@ -429,9 +425,8 @@ class ToontownAIRepository(ToontownInternalRepository, ServerBase):
         )
         self.createHood(GZHoodDataAI, ToontownGlobals.GolfZone)
 
-        if self.wantWelcomeValley:
-            # Welcome Valley hoods (Toontown Central & Goofy Speedway)
-            self.welcomeValleyManager.createWelcomeValleyHoods()
+        # Welcome Valley hoods (Toontown Central & Goofy Speedway)
+        self.welcomeValleyManager.createWelcomeValleyHoods()
 
         # Assign the initial suit buildings.
         self.notify.info('Assigning initial Cog buildings and Field Offices...')
@@ -449,7 +444,7 @@ class ToontownAIRepository(ToontownInternalRepository, ServerBase):
         self.holidayManager.startHoliday(ToontownGlobals.SILLYMETER_EXT_HOLIDAY)
 
         # Let our user know we have finished starting up.
-        self.notify.info('{0} has finished starting up.'.format(self.districtName))
+        self.notify.info(f'{self.districtName} has finished starting up.')
 
     def loadDNAFileAI(self, dnaStore, dnaFileName):
         resourcesPath = 'game/resources/'
@@ -473,12 +468,12 @@ class ToontownAIRepository(ToontownInternalRepository, ServerBase):
         if 'outdoor_zone' in hood or 'golf_zone' in hood:
             phase = '6'
 
-        return 'phase_{0}/dna/{1}_{2}.dna'.format(phase, hood, zoneId)
+        return f'phase_{phase}/dna/{hood}_{zoneId}.dna'
 
     def lookupDNAFileName(self, dnaFileName):
         for _ in range(3, 13):
-            if os.path.exists('game/resources/phase_{0}/dna/{1}'.format(_, dnaFileName)):
-                return 'phase_{0}/dna/{1}'.format(_, dnaFileName)
+            if os.path.exists(f'game/resources/phase_{_}/dna/{dnaFileName}'):
+                return f'phase_{_}/dna/{dnaFileName}'
 
     def findFishingPonds(self, dnaData, zoneId, area):
         fishingPonds = []

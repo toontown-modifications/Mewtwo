@@ -25,11 +25,13 @@ class ServerGlobals:
     FINAL_TOONTOWN = 1
     TEST_TOONTOWN_2012 = 2
     TOONTOWN_JP_2010 = 3
+    TOONTOWN_BR = 4
 
     serverToName = {
         FINAL_TOONTOWN: 'Final Toontown',
         TEST_TOONTOWN_2012: 'Test Toontown 2012',
-        TOONTOWN_JP_2010: 'Toontown Japan 2010'
+        TOONTOWN_JP_2010: 'Toontown Japan 2010',
+        TOONTOWN_BR: 'Final Toontown Brazil'
     }
 
 class MongoBridge:
@@ -204,6 +206,13 @@ class ExtAgent(ServerBase):
         # Vis Zones shouldn't be loaded per interest, but rather on UD startup.
         self.loadVisZones()
 
+    def sendDatagram(self, clientChannel, datagram):
+        # Send our datagram to the OTP ClientAgent.
+        dg = PyDatagram()
+        dg.addServerHeader(clientChannel, self.air.ourChannel, CLIENTAGENT_SEND_DATAGRAM)
+        dg.addBlob(datagram.getMessage())
+        self.air.send(dg)
+
     def refreshModules(self):
         limeade.refresh()
 
@@ -224,7 +233,7 @@ class ExtAgent(ServerBase):
     def getStatus(self):
         try:
             serverType = ServerGlobals.serverToName[ServerGlobals.FINAL_TOONTOWN]
-            endpoint = 'http://unite.sunrise.games:19135/api/getStatusForServer?serverType={0}'
+            endpoint = f'https://api.sunrise.games/api/getStatusForServer?serverType={serverType}'
             request = requests.get(endpoint.format(serverType), headers = self.requestHeaders)
             return request.text
         except:
@@ -258,10 +267,7 @@ class ExtAgent(ServerBase):
         resp.addString(errorStr)
 
         # Send it.
-        dg = PyDatagram()
-        dg.addServerHeader(clientChannel, self.air.ourChannel, CLIENTAGENT_SEND_DATAGRAM)
-        dg.addBlob(resp.getMessage())
-        self.air.send(dg)
+        self.sendDatagram(clientChannel, resp)
 
     def sendSystemMessage(self, clientChannel, message, aknowledge = False):
         # Prepare the System Message response.
@@ -275,10 +281,7 @@ class ExtAgent(ServerBase):
         resp.addString(message)
 
         # Send it.
-        dg = PyDatagram()
-        dg.addServerHeader(clientChannel, self.air.ourChannel, CLIENTAGENT_SEND_DATAGRAM)
-        dg.addBlob(resp.getMessage())
-        self.air.send(dg)
+        self.sendDatagram(clientChannel, resp)
 
     def banAccount(self, playToken, message, banReason = 'Chat Filter', silent = False):
         endpoint = self.banEndpointBase.format('BanAccount.php')
@@ -333,7 +336,7 @@ class ExtAgent(ServerBase):
         # Wait half a second before continuing to avoid a race condition.
         taskMgr.doMethodLater(0.5,
                               lambda x: self.finishLoginAccount(fields, clientChannel, accountId, playToken, openChat, isPaid, dislId, linkedToParent),
-                              self.air.uniqueName('wait-acc-%s' % accountId), appendTask=False)
+                              self.air.uniqueName(f'wait-acc-{accountId}'), appendTask = False)
 
     def getCreationDate(self, fields):
         # Grab the account creation date from our fields.
@@ -422,25 +425,9 @@ class ExtAgent(ServerBase):
         resp.addString(playToken) # userName
 
         # Dispatch the response to the client.
-        dg = PyDatagram()
-        dg.addServerHeader(clientChannel, self.air.ourChannel, CLIENTAGENT_SEND_DATAGRAM)
-        dg.addBlob(resp.getMessage())
-        self.air.send(dg)
+        self.sendDatagram(clientChannel, resp)
 
         self.accId2playToken[accountId] = playToken
-
-    def getInStreetBranch(self, zoneId):
-        if not ZoneUtil.isPlayground(zoneId):
-            where = ZoneUtil.getWhereName(zoneId, True)
-            return where == 'street'
-
-        return False
-
-    def getInCogHQ(self, zoneId):
-        if ZoneUtil.isCogHQZone(zoneId):
-            return True
-
-        return False
 
     def loadVisZones(self):
         self.notify.info('Loading DNA files...')
@@ -468,11 +455,6 @@ class ExtAgent(ServerBase):
 
             visibles.append(ZoneUtil.getBranchZone(visZoneId))
             self.zoneVisDict[visZoneId] = visibles
-
-    def getVisBranchZones(self, zoneId):
-        if zoneId in self.zoneVisDict:
-            return self.zoneVisDict[zoneId]
-        return []
 
     def getAvatars(self, clientChannel):
         def handleAvRetrieveDone(avList, avatarFields):
@@ -511,10 +493,7 @@ class ExtAgent(ServerBase):
                 resp.addUint8(index) # avPosition
                 resp.addUint8(allowedName) # aName
 
-            dg = PyDatagram()
-            dg.addServerHeader(clientChannel, self.air.ourChannel, CLIENTAGENT_SEND_DATAGRAM)
-            dg.addBlob(resp.getMessage())
-            self.air.send(dg)
+            self.sendDatagram(clientChannel, resp)
 
         def handleRetrieve(dclass, fields):
             if dclass != self.air.dclassesByName['AccountUD']:
@@ -595,13 +574,13 @@ class ExtAgent(ServerBase):
         self.chatOffenses[doId] += 1
 
         if self.chatOffenses[doId] == 1:
-            message = 'Warning - Watch your language. \nUsing inappropriate words will get you suspended. You said "{0}"'.format(message)
+            message = f'Warning - Watch your language. \nUsing inappropriate words will get you suspended. You said "{message}"'
             self.sendSystemMessage(avClientChannel, message)
         elif self.chatOffenses[doId] == 2:
-            message = 'Final Warning. If you continue using inappropriate language you will be suspended. You said "{0}"'.format(message)
+            message = f'Final Warning. If you continue using inappropriate language you will be suspended. You said "{message}"'
             self.sendSystemMessage(avClientChannel, message)
         elif self.chatOffenses[doId] == 3:
-            message = 'Your account has been suspended for 24 hours for using inappropriate language. You said "{0}"'.format(message)
+            message = f'Your account has been suspended for 24 hours for using inappropriate language. You said "{message}"'
             self.sendSystemMessage(avClientChannel, message)
             self.sendKick(doId, 'Language')
 
@@ -661,7 +640,7 @@ class ExtAgent(ServerBase):
 
                 whitelistedName = ''.join(chrList)
 
-                if name.lower() == whitelistedName:
+                if name.lower() == whitelistedName.lower():
                     # This name is whitelisted.
                     return True
 
@@ -735,10 +714,7 @@ class ExtAgent(ServerBase):
                 resp.addUint8(0)
                 resp.addUint32(avId)
 
-                dg = PyDatagram()
-                dg.addServerHeader(clientChannel, self.air.ourChannel, CLIENTAGENT_SEND_DATAGRAM)
-                dg.addBlob(resp.getMessage())
-                self.air.send(dg)
+                self.sendDatagram(clientChannel, resp)
 
             def handleCreate(oldAvList, newAvList, avId):
                 if not avId:
@@ -988,14 +964,17 @@ class ExtAgent(ServerBase):
             fieldNumber = dgi.getUint16()
             dcData = dgi.getRemainingBytes()
 
-            if fieldNumber == 103: # setTalk field
+            toon = self.air.dclassesByName['DistributedToonUD']
+
+            setTalk = toon.getFieldByName('setTalk')
+            setTalkWhisper = toon.getFieldByName('setTalkWhisper')
+
+            if fieldNumber == setTalk.getNumber():
                 # We'll have to unpack the data and send our own datagrams.
-                toon = self.air.dclassesByName['DistributedToonUD']
-                talkField = toon.getFieldByName('setTalk')
                 unpacker = DCPacker()
                 unpacker.setUnpackData(dcData)
-                unpacker.beginUnpack(talkField)
-                fieldArgs = talkField.unpackArgs(unpacker)
+                unpacker.beginUnpack(setTalk)
+                fieldArgs = setTalk.unpackArgs(unpacker)
                 unpacker.endUnpack()
 
                 if len(fieldArgs) != 6:
@@ -1029,14 +1008,12 @@ class ExtAgent(ServerBase):
                                            [0, 0, '', cleanMessage, modifications, 0])
                 self.air.send(resp)
                 return
-            elif fieldNumber == 104: # setTalkWhisper field
+            elif fieldNumber == setTalkWhisper.getNumber():
                 # We'll have to unpack the data and send our own datagrams.
-                toon = self.air.dclassesByName['DistributedToonUD']
-                talkWhisperField = toon.getFieldByName('setTalkWhisper')
                 unpacker = DCPacker()
                 unpacker.setUnpackData(dcData)
-                unpacker.beginUnpack(talkWhisperField)
-                fieldArgs = talkWhisperField.unpackArgs(unpacker)
+                unpacker.beginUnpack(setTalkWhisper)
+                fieldArgs = setTalkWhisper.unpackArgs(unpacker)
                 unpacker.endUnpack()
 
                 accId = self.air.getAccountIdFromSender()
@@ -1306,10 +1283,7 @@ class ExtAgent(ServerBase):
                 resp.addUint8(0)
 
                 # Send it.
-                dg = PyDatagram()
-                dg.addServerHeader(clientChannel, self.air.ourChannel, CLIENTAGENT_SEND_DATAGRAM)
-                dg.addBlob(resp.getMessage())
-                self.air.send(dg)
+                self.sendDatagram(clientChannel, resp)
 
             # Query the avatar.
             self.air.dbInterface.queryObject(self.air.dbId, avId, handleRetrieve)
@@ -1325,11 +1299,40 @@ class ExtAgent(ServerBase):
                 self.sendEject(clientChannel, 122, message)
                 return
 
+            pendingName = name
+            approvedName = ''
+            rejectedName = ''
+            nameStatus = 'PENDING'
+
+            # Check our name for any blacklisted words.
+            isNameBlacklisted = self.checkBadName(name)
+
+            if isNameBlacklisted:
+                # This name has blacklisted words.
+                pendingName = ''
+                rejectedName = name
+                nameStatus = 'REJECTED'
+
+            # Check to see if this name is whitelisted.
+            isNameWhitelisted = self.checkWhitelistedName(name)
+
+            if isNameWhitelisted:
+                # This name is whitelisted.
+                pendingName = ''
+                approvedName = name
+                nameStatus = 'APPROVED'
+
             # If we have a avId, update the Avatar object with the new wish name.
             fields = {
-                'WishNameState': ('PENDING',),
+                'WishNameState': (nameStatus,),
                 'WishName': (name,)
             }
+
+            if nameStatus == 'APPROVED':
+                # Name is pre-approved.
+                fields['setName'] = (name,)
+                fields['WishName'] = ('',)
+                fields['WishNameState'] = ('',)
 
             if avId:
                 self.air.dbInterface.updateObject(self.air.dbId, avId, self.air.dclassesByName['DistributedToonUD'], fields)
@@ -1339,7 +1342,7 @@ class ExtAgent(ServerBase):
                 if accountId in self.air.centralLogger.stateMap:
                     valid = self.air.centralLogger.stateMap[accountId]
 
-                if self.isProdServer() and valid:
+                if self.isProdServer() and valid and nameStatus == 'PENDING':
                     fields = [{
                         'name': 'Avatar Id',
                         'value': avId,
@@ -1376,26 +1379,6 @@ class ExtAgent(ServerBase):
 
                     request = requests.post('https://sunrise.games/panel/names/approve.php', data, headers = headers).json()
 
-            pendingName = name
-            approvedName = ''
-            rejectedName = ''
-
-            # Check our name for any blacklisted words.
-            isNameBlacklisted = self.checkBadName(name)
-
-            if isNameBlacklisted:
-                # This name has blacklisted words.
-                pendingName = ''
-                rejectedName = name
-
-            # Check to see if this name is whitelisted.
-            isNameWhitelisted = self.checkWhitelistedName(name)
-
-            if isNameWhitelisted:
-                # This name is whitelisted.
-                pendingName = ''
-                approvedName = name
-
             # Prepare the wish name response.
             resp = PyDatagram()
             resp.addUint16(71) # CLIENT_SET_WISHNAME_RESP
@@ -1406,10 +1389,7 @@ class ExtAgent(ServerBase):
             resp.addString(rejectedName) # rejectedName
 
             # Send it.
-            dg = PyDatagram()
-            dg.addServerHeader(clientChannel, self.air.ourChannel, CLIENTAGENT_SEND_DATAGRAM)
-            dg.addBlob(resp.getMessage())
-            self.air.send(dg)
+            self.sendDatagram(clientChannel, resp)
 
             # Reset the account state.
             self.air.centralLogger.stateMap[accountId] = False
@@ -1418,55 +1398,28 @@ class ExtAgent(ServerBase):
             handle = dgi.getUint16()
             context = dgi.getUint32()
             parentId = dgi.getUint32()
-            zones = []
 
-            while dgi.getRemainingSize() != 0:
-                zones.append(dgi.getUint32())
+            # We get every zone in the interest, including visibles zones from our visgroup
+            zones = set()
 
-            if len(zones) == 1:
-                zoneId = zones[0]
+            while dgi.getRemainingSize():
+                zoneId = dgi.getUint32()
 
-                visZones = set()
+                if zoneId == 1:
+                    # No we don't want you Quiet Zone
+                    continue
 
-                isStreetBranch = self.getInStreetBranch(zoneId)
-                isCogHQ = self.getInCogHQ(zoneId)
-                isPlayground = ZoneUtil.isPlayground(zoneId)
-                branchId = ZoneUtil.getBranchZone(zoneId)
+                zones.add(zoneId)
 
-                if isStreetBranch:
-                    zoneId = ZoneUtil.getCanonicalZoneId(zoneId)
-                    branchId = ZoneUtil.getBranchZone(zoneId)
+                # We add visibles
+                canonicalZoneId = ZoneUtil.getCanonicalZoneId(zoneId)
 
-                    if zoneId % 100 != 0:
-                        visZones.update(self.getVisBranchZones(zoneId))
+                if canonicalZoneId in self.zoneVisDict:
+                    for visZoneId in self.zoneVisDict[canonicalZoneId]:
+                        zones.add(ZoneUtil.getTrueZoneId(visZoneId, zoneId))
 
-                if isCogHQ:
-                    visZones.update(self.getVisBranchZones(zoneId))
-
-                # Set interest on the VisZones.
-                for zone in visZones:
-                    zones.append(zone)
-
-                loaderName = ZoneUtil.getLoaderName(zoneId)
-
-                if branchId and zoneId != branchId and isPlayground or isCogHQ and loaderName not in ('safeZoneLoader', 'cogHQLoader'):
-                    # Set object location.
-                    dg = PyDatagram()
-                    dg.addServerHeader(clientChannel, self.air.ourChannel, CLIENT_OBJECT_LOCATION)
-                    dg.addUint32(self.clientChannel2avId[clientChannel])
-                    dg.addUint32(parentId)
-                    dg.addUint32(zoneId)
-                    self.air.send(dg)
-
-                    # Set interest on the branch ID.
-                    zones.append(branchId)
-
-                    if clientChannel in self.clientChannel2handle:
-                        # Use the same handle to alter the interest.
-                        handle = self.clientChannel2handle[clientChannel]
-                    else:
-                        # Save the handle for later.
-                        self.clientChannel2handle[clientChannel] = handle
+                    # We want to add the "main" zone, i.e 2200 for 2205, etc
+                    zones.add(zoneId - zoneId % 100)
 
             resp = PyDatagram()
             resp.addServerHeader(clientChannel, self.air.ourChannel, CLIENT_ADD_INTEREST_MULTIPLE)
@@ -1523,10 +1476,7 @@ class ExtAgent(ServerBase):
                 resp.appendData(packedData)
 
                 # Send it.
-                dg = PyDatagram()
-                dg.addServerHeader(clientChannel, self.air.ourChannel, CLIENTAGENT_SEND_DATAGRAM)
-                dg.addBlob(resp.getMessage())
-                self.air.send(dg)
+                self.sendDatagram(clientChannel, resp)
 
             self.air.dbInterface.queryObject(self.air.dbId, doId, handleRetrieve)
         elif msgType == 56: # CLIENT_REMOVE_FRIEND
@@ -1570,8 +1520,8 @@ class ExtAgent(ServerBase):
                     # however it shouldn't be a problem if it doesn't.
 
                     estateFields = {
-                        'setSlot{0}ToonId'.format(index): [0],
-                        'setSlot{0}Items'.format(index): [[]]
+                        f'setSlot{index}ToonId': [0],
+                        f'setSlot{index}Items': [[]]
                         }
 
                     self.air.dbInterface.updateObject(self.air.dbId, estateId, self.air.dclassesByName['DistributedEstateAI'], estateFields)
@@ -1616,10 +1566,7 @@ class ExtAgent(ServerBase):
             resp.addString(message)
 
             # Dispatch the response to the client.
-            dg = PyDatagram()
-            dg.addServerHeader(clientChannel, self.air.ourChannel, CLIENTAGENT_SEND_DATAGRAM)
-            dg.addBlob(resp.getMessage())
-            self.air.send(dg)
+            self.sendDatagram(clientChannel, resp)
         elif msgType == 72: # CLIENT_SET_WISHNAME_CLEAR
             avatarId = dgi.getUint32()
             actionFlag = dgi.getUint8()
@@ -1660,7 +1607,7 @@ class ExtAgent(ServerBase):
             self.sendBoot(clientChannel, errorCode, message)
             self.sendEject(clientChannel, errorCode, message)
         else:
-            self.notify.warning('Received unknown message type %s from Client' % msgType)
+            self.notify.warning(f'Received unknown message type {msgType} from Client')
 
     def handleResp(self, dgi):
         """
@@ -1755,12 +1702,9 @@ class ExtAgent(ServerBase):
             resp.addUint16(msgType)
             resp.addUint32(doId)
         else:
-            self.notify.warning('Received unknown message type %s from Astron' % msgType)
+            self.notify.warning(f'Received unknown message type {msgType} from Astron')
 
         if not resp:
             return
 
-        dg = PyDatagram()
-        dg.addServerHeader(clientChannel, self.air.ourChannel, CLIENTAGENT_SEND_DATAGRAM)
-        dg.addBlob(resp.getMessage())
-        self.air.send(dg)
+        self.sendDatagram(clientChannel, resp)
