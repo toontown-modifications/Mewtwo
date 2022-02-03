@@ -1,4 +1,4 @@
-from otp.ai.AIBase import *
+from game.otp.ai.AIBase import *
 from direct.distributed.ClockDelta import *
 from direct.interval.IntervalGlobal import *
 
