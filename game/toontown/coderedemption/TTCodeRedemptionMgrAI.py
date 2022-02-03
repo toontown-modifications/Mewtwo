@@ -110,6 +110,7 @@ class TTCodeRedemptionMgrAI(DistributedObjectAI):
                     av.onAwardOrder.append(item)
                     av.b_setAwardSchedule(av.onAwardOrder)
                     result = TTCodeRedemptionConsts.RedeemErrors.Success
+                    av.setRedeemedCode(code)
                     awardMgrResult = AwardManagerConsts.GiveAwardErrors.Success
                 elif limited == 1:
                     result = TTCodeRedemptionConsts.RedeemErrors.AwardCouldntBeGiven
