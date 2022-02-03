@@ -340,7 +340,7 @@ class EstateManagerAI(DistributedObjectAI):
         self.estate = {}
         self.estate2toons = {}
         self.estate2timeout = {}
-        self.zone2toons = {}
+        self.refCount = {}
         self.zone2owner = {}
         self.petOperations = []
 
@@ -541,7 +541,7 @@ class EstateManagerAI(DistributedObjectAI):
         if av not in self.toon2estate:
             self.toon2estate[av] = estate
 
-        self.zone2toons.setdefault(estate.zoneId, []).append(av.doId)
+        self.refCount.setdefault(estate.zoneId, []).append(av.doId)
 
     def _unmapFromEstate(self, av):
         estate = self.toon2estate.get(av)
@@ -560,7 +560,7 @@ class EstateManagerAI(DistributedObjectAI):
             pass
 
         try:
-            self.zone2toons[estate.zoneId].remove(av.doId)
+            self.refCount[estate.zoneId].remove(av.doId)
         except (KeyError, ValueError):
             pass
 
@@ -582,7 +582,7 @@ class EstateManagerAI(DistributedObjectAI):
             pass
 
         try:
-            del self.zone2toons[estate.zoneId]
+            del self.refCount[estate.zoneId]
         except KeyError:
             pass
 

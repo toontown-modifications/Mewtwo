@@ -178,8 +178,9 @@ class DistributedEstateAI(DistributedObjectAI):
                 return
 
             if rentalType == ToontownGlobals.RentalCannon:
-                target = DistributedTargetAI(self.air)
+                target = DistributedTargetAI(self.air, -5.6, -24, 50)
                 target.generateWithRequired(self.zoneId)
+                target.start()
                 self.cannons.append(target)
                 for posHpr in CannonGlobals.cannonDrops:
                     cannon = DistributedCannonAI(self.air, self.doId, target.doId, *posHpr)
