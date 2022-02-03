@@ -61,6 +61,14 @@ class TTCodeRedemptionMgrAI(DistributedObjectAI):
             awardMgrResult = 0
             self.failedAttempts = 0
 
+        # Has this avatar already redeemed this code?
+        if code.lower() in av.redeemedCodes:
+            # Yup!
+            result = TTCodeRedemptionConsts.RedeemErrors.AlreadyRedeemed
+            awardMgrResult = 0
+            self.d_redeemCodeResult(avId, context, result, awardMgrResult)
+            return
+
         # Iterate over these items and deliver item to player.
         items = self.getItemsForCode(code)
 
