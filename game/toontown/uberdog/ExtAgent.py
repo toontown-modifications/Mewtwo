@@ -1164,6 +1164,16 @@ class ExtAgent(ServerBase):
                 for x, y in fields['setFriendsList'][0]:
                     self.air.netMessenger.send('avatarOnline', [avId, x])
 
+                # DB patch for Kart accessories.
+                if fields['setKartAccessoriesOwned'][0] == [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]:
+                    toonName = fields['setName'][0]
+
+                    self.notify.info(f'Updating kart acessories for {toonName}.')
+
+                    fields['setKartAccessoriesOwned'] = [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
+
+                    self.air.dbInterface.updateObject(self.air.dbId, avId, self.air.dclassesByName['DistributedToonUD'], fields)
+
                 # Assign a POST_REMOVE for an avatar that disconnects unexpectedly.
                 cleanupDatagram = self.air.netMessenger.prepare('avatarOffline', [avId])
 
