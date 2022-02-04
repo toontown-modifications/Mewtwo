@@ -20,7 +20,7 @@ want-gardening true
 want-randomized-hats false
 want-membership true
 want-cogdominiums true
-want-coderedemption false
+want-coderedemption true
 want-do-live-updates true
 want-discord-integration true
 want-parties false
