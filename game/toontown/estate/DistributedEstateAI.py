@@ -192,7 +192,8 @@ class DistributedEstateAI(DistributedObjectAI):
                 self.flyingTreasurePlanner.placeAllTreasures()
                 self.b_setTreasureIds([treasure.doId for treasure in self.flyingTreasurePlanner.treasures])
 
-                if len(self.cannons) >= 6:
+                if len(self.cannons) > 6:
+                    print(len(self.cannons))
                     for cannon in self.cannons[:]:
                         cannon.requestDelete()
                         self.cannons.remove(cannon)
