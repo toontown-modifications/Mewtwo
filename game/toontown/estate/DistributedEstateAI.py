@@ -187,6 +187,11 @@ class DistributedEstateAI(DistributedObjectAI):
                     cannon.generateWithRequired(self.zoneId)
                     self.cannons.append(cannon)
 
+                self.b_setClouds(1)
+                self.flyingTreasurePlanner = EFlyingTreasurePlannerAI(self.zoneId, callback=self.__treasureGrabbed)
+                self.flyingTreasurePlanner.placeAllTreasures()
+                self.b_setTreasureIds([treasure.doId for treasure in self.flyingTreasurePlanner.treasures])
+
                 if len(self.cannons) >= 6:
                     for cannon in self.cannons[:]:
                         cannon.requestDelete()
@@ -198,11 +203,6 @@ class DistributedEstateAI(DistributedObjectAI):
                     self.b_setTreasureIds([])
                     self.flyingTreasurePlanner.deleteAllTreasuresNow()
                     self.flyingTreasurePlanner = None
-
-                self.b_setClouds(1)
-                self.flyingTreasurePlanner = EFlyingTreasurePlannerAI(self.zoneId, callback=self.__treasureGrabbed)
-                self.flyingTreasurePlanner.placeAllTreasures()
-                self.b_setTreasureIds([treasure.doId for treasure in self.flyingTreasurePlanner.treasures])
 
             taskMgr.doMethodLater(self.rentalTimeStamp - time.time(), self.__rentalExpire,
                                   self.uniqueName('rentalExpire'))
