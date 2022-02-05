@@ -192,19 +192,6 @@ class DistributedEstateAI(DistributedObjectAI):
                 self.flyingTreasurePlanner.placeAllTreasures()
                 self.b_setTreasureIds([treasure.doId for treasure in self.flyingTreasurePlanner.treasures])
 
-                if len(self.cannons) > 6:
-                    print(len(self.cannons))
-                    for cannon in self.cannons[:]:
-                        cannon.requestDelete()
-                        self.cannons.remove(cannon)
-
-                    self.b_setClouds(0)
-                    self.b_setRentalTimeStamp(0)
-                    self.b_setRentalType(0)
-                    self.b_setTreasureIds([])
-                    self.flyingTreasurePlanner.deleteAllTreasuresNow()
-                    self.flyingTreasurePlanner = None
-
             taskMgr.doMethodLater(self.rentalTimeStamp - time.time(), self.__rentalExpire,
                                   self.uniqueName('rentalExpire'))
 

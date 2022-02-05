@@ -18,7 +18,9 @@ from game.toontown.catalog.CatalogRentalItem import CatalogRentalItem
 from game.toontown.catalog.CatalogInvalidItem import CatalogInvalidItem
 from game.toontown.catalog.CatalogFurnitureItem import CatalogFurnitureItem
 
-import time
+from game.toontown.uberdog.ExtAgent import ServerGlobals
+
+import time, requests
 
 class TTCodeRedemptionMgrAI(DistributedObjectAI):
     notify = directNotify.newCategory('TTCodeRedemptionMgrAI')
@@ -61,8 +63,11 @@ class TTCodeRedemptionMgrAI(DistributedObjectAI):
             awardMgrResult = 0
             self.failedAttempts = 0
 
+        # Make the code lowercase.
+        code = code.lower()
+
         # Has this avatar already redeemed this code?
-        if code.lower() in av.redeemedCodes:
+        if self.isCodeUsed(code, avId):
             # Yup!
             result = TTCodeRedemptionConsts.RedeemErrors.CodeAlreadyRedeemed
             awardMgrResult = AwardManagerConsts.GiveAwardErrors.GenericAlreadyHaveError
@@ -110,7 +115,7 @@ class TTCodeRedemptionMgrAI(DistributedObjectAI):
                     av.onAwardOrder.append(item)
                     av.b_setAwardSchedule(av.onAwardOrder)
                     result = TTCodeRedemptionConsts.RedeemErrors.Success
-                    av.setRedeemedCode(code)
+                    self.setRedeemedCode(code, avId)
                     awardMgrResult = AwardManagerConsts.GiveAwardErrors.Success
                 elif limited == 1:
                     result = TTCodeRedemptionConsts.RedeemErrors.AwardCouldntBeGiven
@@ -158,9 +163,6 @@ class TTCodeRedemptionMgrAI(DistributedObjectAI):
                 shirt = CatalogClothingItem(2003, 0)
             return [shirt]
         '''
-
-        # Make the code lowercase.
-        code = code.lower()
 
         # Our codes.
         if code == 'gadzooks':
@@ -231,3 +233,32 @@ class TTCodeRedemptionMgrAI(DistributedObjectAI):
             return [shirt, shorts, beans]
 
         return False
+
+    def isCodeUsed(self, code, avId):
+        headers = {
+            'User-Agent': 'SunriseGames-TTCodeRedemptionMgrAI'
+        }
+
+        data = {
+            'code': code,
+            'secretKey': config.GetString('rpc-key'),
+            'avatarId': avId,
+            'serverName': ServerGlobals.serverToName[ServerGlobals.FINAL_TOONTOWN]
+        }
+
+        request = requests.get('https://toontastic.sunrise.games/api/codes/codeCheck.php', data, headers = headers).json()
+        return request['status']
+
+    def setRedeemedCode(self, code, avId):
+        headers = {
+            'User-Agent': 'SunriseGames-TTCodeRedemptionMgrAI'
+        }
+
+        data = {
+            'code': code,
+            'secretKey': config.GetString('rpc-key'),
+            'avatarId': avId,
+            'serverName': ServerGlobals.serverToName[ServerGlobals.FINAL_TOONTOWN]
+        }
+
+        requests.post('https://toontastic.sunrise.games/api/codes/setCodeUsed.php', data, headers = headers)
