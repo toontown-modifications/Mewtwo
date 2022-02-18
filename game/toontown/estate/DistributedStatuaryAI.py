@@ -1,83 +1,40 @@
-import time
-
+from game.otp.ai.AIBase import *
+from . import DistributedLawnDecorAI
 from direct.directnotify import DirectNotifyGlobal
+from . import GardenGlobals
 
-from game.toontown.estate import GardenGlobals
-from game.toontown.estate.DistributedLawnDecorAI import DistributedLawnDecorAI
-
-FOUR_DAYS = 86400 * 4
-
-class DistributedStatuaryAI(DistributedLawnDecorAI):
+class DistributedStatuaryAI(DistributedLawnDecorAI.DistributedLawnDecorAI):
     notify = DirectNotifyGlobal.directNotify.newCategory('DistributedStatuaryAI')
+    
+    
+    def __init__(self, typeIndex = 201, waterLevel = 0, growthLevel = 0, optional = None, ownerIndex = 0, plot = 0):
+        DistributedLawnDecorAI.DistributedLawnDecorAI.__init__(self, simbase.air, ownerIndex, plot)
+        self.typeIndex = typeIndex
+        self.waterLevel = waterLevel
+        self.growthLevel = growthLevel
+        self.optional = optional
+        self.name = GardenGlobals.PlantAttributes[typeIndex]['name']
+        self.plantType = GardenGlobals.PlantAttributes[typeIndex]['plantType']
+        self.modelPath = GardenGlobals.PlantAttributes[typeIndex]['model']
 
-    def __init__(self, mgr):
-        DistributedLawnDecorAI.__init__(self, mgr)
-        self.attributes = None
-        self.growthThresholds = None
-        self.lastCheck = 0
-        self.growthLevel = 0
-        self.data = None
-
-    def calculate(self, lastCheck):
-        self.attributes = GardenGlobals.PlantAttributes[self.index]
-        self.growthThresholds = self.attributes.get('growthThresholds', (0, 0))
-        now = int(time.time())
-        self.lastCheck = lastCheck
-        if self.lastCheck == 0:
-            self.lastCheck = now
-
-        self.growthLevel = min((now - self.lastCheck) // FOUR_DAYS, self.growthThresholds[-1] + 1)
-        self.update()
-
+        #testStatue = DistributedToonStatuaryAI.DistributedToonStatuaryAI()
+        #testStatue.copyToon()
+        #testStatue.removeTextures()
+        
     def setTypeIndex(self, typeIndex):
-        self.index = typeIndex
-
+        self.typeIndex = typeIndex
+        
     def getTypeIndex(self):
-        return self.index
-
+        return self.typeIndex
+        
+    def setWaterLevel(self, waterLevel):
+        self.waterLevel = waterLevel
+        
     def getWaterLevel(self):
-        return 1
-
+        return self.waterLevel
+        
     def setGrowthLevel(self, growthLevel):
         self.growthLevel = growthLevel
-
+        
     def getGrowthLevel(self):
         return self.growthLevel
-
-    def setOptional(self, data):
-        self.data = data
-
-    def getOptional(self):
-        return self.data
-
-    def update(self):
-        self.mgr.data['statuary'] = self.mgr.S_pack(self.data, self.lastCheck, self.index, self.growthLevel)
-        self.mgr.update()
-
-    def removeItem(self):
-        avId = self.air.getAvatarIdFromSender()
-        if not avId:
-            return
-
-        self.d_setMovie(GardenGlobals.MOVIE_REMOVE)
-
-        def handleRemoveItem(task):
-            if not self.air:
-                return
-
-            plot = self.mgr.placePlot(-1)
-            plot.setPlot(self.plot)
-            plot.setPos(self.getPos())
-            plot.setH(self.getH())
-            plot.setOwnerIndex(self.ownerIndex)
-            plot.generateWithRequired(self.zoneId)
-            plot.d_setMovie(GardenGlobals.MOVIE_FINISHREMOVING, avId)
-            plot.d_setMovie(GardenGlobals.MOVIE_CLEAR, avId)
-            self.air.writeServerEvent('remove-statuary', avId, plot=self.plot)
-            self.requestDelete()
-            self.mgr.objects.remove(self)
-            self.mgr.data['statuary'] = 0
-            self.mgr.update()
-            return task.done
-
-        taskMgr.doMethodLater(7, handleRemoveItem, self.uniqueName('handle-remove-item'))

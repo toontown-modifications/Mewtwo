@@ -1,5 +1,5 @@
-from panda3d.core import UniqueIdAllocator
-from panda3d.toontown import DNAStorage, loadDNAFileAI, DNAGroup, DNAVisGroup
+from panda3d.core import UniqueIdAllocator, CSDefault
+from panda3d.toontown import DNAStorage, loadDNAFileAI, DNAGroup, DNAVisGroup, loadDNAFile
 
 from direct.directnotify.DirectNotifyGlobal import directNotify
 from direct.distributed.DistributedObjectAI import DistributedObjectAI
@@ -453,6 +453,12 @@ class ToontownAIRepository(ToontownInternalRepository, ServerBase):
             dnaFileName = resourcesPath + dnaFileName
 
         return loadDNAFileAI(dnaStore, dnaFileName)
+
+    def loadDNAFile(self, dnaStore, dnaFile, cs=CSDefault):
+        """
+        load everything, including geometry
+        """
+        return loadDNAFile(dnaStore, dnaFile, cs)
 
     def genDNAFileName(self, zoneId):
         zoneId = ZoneUtil.getCanonicalZoneId(zoneId)

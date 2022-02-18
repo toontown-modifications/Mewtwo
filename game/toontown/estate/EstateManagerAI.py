@@ -31,7 +31,8 @@ class LoadHouseOperation(FSM):
             # Case #1: There isn't an avatar in that estate slot. Make a blank house.
             # Because this state completes so fast, we'll use taskMgr to delay
             # it until the next iteration. This solves reentrancy problems.
-            taskMgr.doMethodLater(0.0, self.demand, 'makeBlankHouse-{0}'.format(id(self)), extraArgs = ['MakeBlankHouse'])
+            identifier = id(self)
+            taskMgr.doMethodLater(0.0, self.demand, f'makeBlankHouse-{identifier}', extraArgs = ['MakeBlankHouse'])
             return
 
         style = ToonDNA.ToonDNA()
@@ -98,9 +99,6 @@ class LoadHouseOperation(FSM):
 
         self.house = house
         self.estate.houses[self.index] = self.house
-        if config.GetBool('want-gardening', False):
-            # Initialize our garden:
-            self.house.createGardenManager()
 
         self.demand('Off')
 
@@ -212,7 +210,7 @@ class LoadEstateOperation(FSM):
                                   self.mgr.air.dclassesByName['DistributedEstateAI'], fields)
 
         # Wait for the estate to generate:
-        self.acceptOnce('generate-{0}'.format(self.estateId), self.__handleEstateGenerated)
+        self.acceptOnce(f'generate-{self.estateId}', self.__handleEstateGenerated)
 
     def __handleEstateGenerated(self, estate):
         # Get the estate:
@@ -228,14 +226,18 @@ class LoadEstateOperation(FSM):
         if owner:
             self.mgr.toon2estate[owner] = self.estate
 
-        # Set the estate's ID list:
-        self.estate.b_setIdList(self.avIds)
+        # FIXME: Do we want simbase.wantPets?
+        # Start pet collisions task:
+        estate.createPetCollisions()
+
+        # Start the garden process:
+        self.estate.gardenInit(self.avIds)
 
         # Load houses:
         self.demand('LoadHouses')
 
     def exitLoadEstate(self):
-        self.ignore('generate-{0}'.format(self.estateId))
+        self.ignore(f'generate-{self.estateId}')
 
     def enterLoadHouses(self):
         self.houseOperations = []
@@ -315,7 +317,7 @@ class LoadPetOperation(FSM):
 
         if self.petId not in self.mgr.air.doId2do:
             self.mgr.air.sendActivate(self.petId, self.mgr.air.districtId, self.estate.zoneId)
-            self.acceptOnce('generate-{0}'.format(self.petId), self.__generated)
+            self.acceptOnce(f'generate-{self.petId}', self.__generated)
         else:
             self.__generated(self.mgr.air.doId2do[self.petId])
 
@@ -326,7 +328,7 @@ class LoadPetOperation(FSM):
         self.demand('Off')
 
     def enterOff(self):
-        self.ignore('generate-{0}'.format(self.petId))
+        self.ignore(f'generate-{self.petId}')
         self.done = True
         self.callback(self.pet)
 

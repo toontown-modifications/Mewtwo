@@ -16,7 +16,6 @@ account-bridge-file otpd/databases/accounts.json
 server-type dev
 
 # Features
-want-gardening true
 want-randomized-hats false
 want-membership true
 want-cogdominiums true
