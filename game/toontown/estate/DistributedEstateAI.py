@@ -956,6 +956,12 @@ class DistributedEstateAI(DistributedObjectAI):
         self.bootStrapEpochs()
         #self.b_setItems(1,[[49,0,16,16,0]])#get some data up for testing
 
+    def doEpochMagicWord(self, avId, numEpoch):
+        for index in range(self.toonsPerAccount):
+            if self.getToonId(index) == avId:
+                self.doEpochNow(numEpoch = numEpoch)
+                return
+
     def updateToonBonusLevels(self, index):
         # find the trees with fruit
         numTracks = len(ToontownBattleGlobals.Tracks)
@@ -1096,6 +1102,14 @@ class DistributedEstateAI(DistributedObjectAI):
                 #pass
                 self.addGardenPlot(toonIndex, plotPointIndex)
 
+    def removePlantAndPlaceGardenPlot(self, slot, hardPoint):
+        """
+        This removes it on the AI side, places a gardenPlot, then updates the client
+        """
+        self.removePlant(slot, hardPoint)
+        itemId = self.addGardenPlot(slot,hardPoint)
+        return itemId
+
     def addGardenPlot(self, slot, hardPoint):
 
             #print("HARDPOINT")
@@ -1130,6 +1144,12 @@ class DistributedEstateAI(DistributedObjectAI):
             if hardPoint == item[1]:
                 return item
         return None
+
+    def findItemPositionInItemList(self, itemList, hardPointIndex):
+        for itemListIndex in range(len(itemList)):
+            if hardPointIndex == itemList[itemListIndex][1]:
+                return itemListIndex
+        return -1
 
     def doEpochData(self, time, numEpochs = 0, onlyForThisToonIndex = None):
         #this function just updates the data buit doesn't effect anything within the zone

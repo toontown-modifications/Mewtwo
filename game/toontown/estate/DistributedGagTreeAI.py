@@ -1,190 +1,127 @@
-import time
-
+from game.toontown.estate import DistributedPlantBaseAI
 from direct.directnotify import DirectNotifyGlobal
+from . import GardenGlobals
 
-from game.toontown.estate import GardenGlobals
-from game.toontown.estate.DistributedPlantBaseAI import DistributedPlantBaseAI
+class DistributedGagTreeAI(DistributedPlantBaseAI.DistributedPlantBaseAI):
+    notify = DirectNotifyGlobal.directNotify.newCategory('DistributedGagTreeAI')
+    
+    def __init__(self, typeIndex = 0, waterLevel = 0, growthLevel = 0, optional = False, ownerIndex = 0, plot = 0):
+        DistributedPlantBaseAI.DistributedPlantBaseAI.__init__(self, typeIndex, waterLevel, growthLevel, optional, ownerIndex, plot)
 
-ONE_DAY = 86400
-PROBLEM_WILTED = 1
-PROBLEM_NOT_GROWN = 2
-PROBLEM_HARVESTED_LATELY = 4
+        track, level = GardenGlobals.getTreeTrackAndLevel(typeIndex)
+        self.gagTrack = track
+        self.gagLevel = level
 
-class DistributedGagTreeAI(DistributedPlantBaseAI):
-    notify = DirectNotifyGlobal.directNotify.newCategory("DistributedGagTreeAI")
-    GrowRate = config.GetBool('trees-grow-rate', 2)
+        self.maxFruit = GardenGlobals.PlantAttributes[typeIndex]['maxFruit']
 
-    def __init__(self, mgr):
-        DistributedPlantBaseAI.__init__(self, mgr)
-        self.wilted = 0
-        self.waterLevel = 0
-        self.lastCheck = 0
-        self.lastHarvested = 0
-        self.treeIndex = 0
+    def hasFruit(self):
+        return self.growthLevel >= self.growthThresholds[2]
 
-    def announceGenerate(self):
-        DistributedPlantBaseAI.announceGenerate(self)
-        messenger.send(self.getEventName('generate'))
+    def doEpoch(self, numEpochs):
+        for i in range(numEpochs):
+            waterLevel = self.getWaterLevel()
+            growthLevel = self.getGrowthLevel()
 
-    def setWilted(self, wilted):
-        self.wilted = wilted
+            if waterLevel > 0:
+                #print "growing plant"
+                # grow the plant if it's not wilted
+                if self.isWilted():
+                    self.b_setWilted(False)
+                else:
+                    growthLevel += 1
+                waterLevel -= 1
+            else:
+                waterLevel -= 1
+                waterLevel = max (waterLevel, self.minWaterLevel)
+
+            if waterLevel == self.minWaterLevel and not self.isWilted():
+                # the toon let us die!
+                self.b_setWilted(True)
+                growthLevel = self.getWiltedLevel(growthLevel)
+
+            self.b_setWaterLevel(waterLevel, False)
+
+            # if we have duplicate gag trees, only 1 of it should bear fruit
+            estate = simbase.air.doId2do.get(self.estateId)
+            if estate:
+                lowestPlotIndex = estate.findLowestGagTreePlot(self.ownerIndex, self.gagTrack,
+                                                               self.gagLevel)
+                if lowestPlotIndex != self.plot:
+                    # aha we are a duplicate tree, force us not to fruit
+                    if growthLevel >= self.growthThresholds[2]:                        
+                        growthLevel = self.growthThresholds[2] -1
+            self.b_setGrowthLevel(growthLevel, False)
+
+        return (growthLevel, waterLevel)
+
+    # use this to find the adjusted growth level when a tree wilts
+    def getWiltedLevel(self, growthLevel):
+        if self.isFruiting():
+            growthLevel = self.growthThresholds[2]-1
+
+        return growthLevel
+        
+    def getWilted(self):
+        return self.optional
+    
+    def setWilted(self, wilted, finalize):
+        self.optional = wilted
+        self.updateEstate(variety=wilted, finalize=finalize)
 
     def d_setWilted(self, wilted):
         self.sendUpdate('setWilted', [wilted])
 
-    def b_setWilted(self, wilted):
-        self.setWilted(wilted)
+    def b_setWilted(self, wilted, finalize=True):
+        self.setWilted(wilted, finalize)
         self.d_setWilted(wilted)
 
-    def getWilted(self):
-        return self.wilted
-
-    def setTreeIndex(self, treeIndex):
-        self.treeIndex = treeIndex
-
-    def getTreeIndex(self):
-        return self.treeIndex
-
-    def calculate(self, lastHarvested, lastCheck):
-        now = int(time.time())
-        if lastCheck == 0:
-            lastCheck = now
-
-        grown = 0
-
-        # Water level
-        elapsed = now - lastCheck
-        while elapsed > ONE_DAY:
-            if self.waterLevel >= 0:
-                grown += self.GrowRate
-
-            elapsed -= ONE_DAY
-            self.waterLevel -= 1
-
-        self.waterLevel = max(self.waterLevel, -2)
-
-        # Growth level
-        maxGrowth = self.growthThresholds[2]
-        newGrowthLevel = min(self.growthLevel + grown, maxGrowth)
-        self.setGrowthLevel(newGrowthLevel)
-        self.setWilted(self.waterLevel == -2)
-        self.lastCheck = now - elapsed
-        self.lastHarvested = lastHarvested
-        self.update()
-
-    def calcDependencies(self):
-        if self.getWilted():
-            return
-
-        track, value = GardenGlobals.getTreeTrackAndLevel(self.typeIndex)
-        while value:
-            value -= 1
-            if not self.mgr.hasTree(track, value):
-                self.b_setWilted(1)
-                continue
-
-            tree = self.mgr.getTree(track, value)
-            if not tree:
-                self.b_setWilted(1)
-                continue
-
-            self.accept(self.getEventName('going-down', id(self.mgr.gardenMgr)), self.ignoreAll)
-            self.accept(self.getEventName('remove', track * 7 + value), self.calcDependencies)
-
-    def getEventName(self, string, typeIndex=None):
-        typeIndex = typeIndex if typeIndex is not None else self.typeIndex
-        return 'garden-%d-%d-%s' % (self.ownerDoId, typeIndex, string)
-
-    def delete(self):
-        messenger.send(self.getEventName('remove'))
-        self.ignoreAll()
-        DistributedPlantBaseAI.delete(self)
-
-    def update(self):
-        mapData = list(map(list, self.mgr.data['trees']))
-        mapData[self.getTreeIndex()] = [self.typeIndex, self.waterLevel, self.lastCheck, self.getGrowthLevel(),
-                                        self.lastHarvested]
-        self.mgr.data['trees'] = mapData
-        self.mgr.update()
-
-    def isFruiting(self):
-        problem = 0
-        if self.getWilted():
-            problem |= PROBLEM_WILTED
-
-        if self.getGrowthLevel() < self.growthThresholds[2]:
-            problem |= PROBLEM_NOT_GROWN
-
-        if (self.lastCheck - self.lastHarvested) < ONE_DAY:
-            problem |= PROBLEM_HARVESTED_LATELY
-
-        return problem
-
-    def getFruiting(self):
-        return self.isFruiting() == 0
+    def isWilted(self):
+        return self.getWilted()
 
     def requestHarvest(self):
-        avId = self.air.getAvatarIdFromSender()
-        av = self.air.doId2do.get(avId)
-        if not av:
+        senderId = self.air.getAvatarIdFromSender()
+        toon = simbase.air.doId2do.get(senderId)
+        if not toon:
+            self.sendInteractionDenied(senderId)
             return
 
-        if avId != self.ownerDoId:
-            self.air.writeServerEvent('suspicious', avId, 'tried to harvest someone else\'s tree!')
+        zoneId = self.zoneId
+        estateOwnerDoId = simbase.air.estateMgr.zone2owner.get(zoneId)
+        if not senderId == estateOwnerDoId:
+            self.notify.warning("how did this happen, harvesting a flower you don't own")
+            self.sendInteractionDenied(senderId)            
+            return
+        
+        if not self.isFruiting() or self.isWilted():
+            self.notify.warning("how did this happen, this tree isn't fruiting")
+            self.sendInteractionDenied(senderId)            
             return
 
-        problem = self.isFruiting()
-        if problem:
-            self.air.writeServerEvent('suspicious', avId, 'tried to harvest a tree that\'s not fruiting!',
-                                      problem=problem)
-            self.d_interactionDenied()
-            return
 
-        harvested = 0
-        track, level = GardenGlobals.getTreeTrackAndLevel(self.typeIndex)
-        while av.inventory.addItem(track, level) > 0 and harvested < 10:
-            harvested += 1
+        if not self.requestInteractingToon(senderId):
+            self.sendInteractionDenied(senderId)
+            return        
 
-        av.d_setInventory(av.getInventory())
-        self.lastHarvested = int(time.time())
-        self.d_setMovie(GardenGlobals.MOVIE_HARVEST)
-        self.update()
+        # add the fruit to the toon's inventory
+        for i in range(self.maxFruit):
+            toon.inventory.addItem(self.gagTrack, self.gagLevel)
 
-    def removeItem(self):
-        avId = self.air.getAvatarIdFromSender()
-        if not avId:
-            return
+        toon.d_setInventory(toon.inventory.makeNetString())
 
-        self.d_setMovie(GardenGlobals.MOVIE_REMOVE)
+        # set the tree back to 'full grown' state... 
+        growthLevel = self.growthThresholds[2] - 1
+        self.b_setGrowthLevel(growthLevel)
 
-        def handleRemove(task):
-            if not self.air:
-                return
+        # tell the toon to display a movie
+        self.setMovie(GardenGlobals.MOVIE_HARVEST, senderId)
 
-            plot = self.mgr.placePlot(self.getTreeIndex())
-            plot.setPlot(self.plot)
-            plot.setPos(self.getPos())
-            plot.setH(self.getH())
-            plot.setOwnerIndex(self.ownerIndex)
-            plot.generateWithRequired(self.zoneId)
-            plot.d_setMovie(GardenGlobals.MOVIE_FINISHREMOVING, avId)
-            plot.d_setMovie(GardenGlobals.MOVIE_CLEAR, avId)
-            self.air.writeServerEvent('remove-tree', avId, plot=self.plot)
-            self.requestDelete()
-            self.mgr.trees.remove(self)
-            mapData = list(map(list, self.mgr.data['trees']))
-            mapData[self.getTreeIndex()] = self.mgr.getNullPlant()
-            self.mgr.data['trees'] = mapData
-            self.mgr.update()
-            self.mgr.reconsiderAvatarOrganicBonus()
-            return task.done
-
-        taskMgr.doMethodLater(7, handleRemove, self.uniqueName('do-remove'))
-
-    def doGrow(self, grown):
-        maxGrowth = self.growthThresholds[2]
-        newGrowthLevel = max(0, min(self.growthLevel + grown, maxGrowth))
-        oldGrowthLevel = self.growthLevel
-        self.b_setGrowthLevel(newGrowthLevel)
-        self.update()
-        return newGrowthLevel - oldGrowthLevel
+        #log that he's harvesting gags
+        self.air.writeServerEvent("garden_gag_harvest", senderId, '%d|%d|%d' % (self.doId,self.gagTrack, self.gagLevel))
+        
+    def hasGagBonus(self):
+        """
+        gag trees give a bonus when they are 1 day away from fruiting, are not wilted.
+        The check that you have the necessary lower level gag trees is done elsewhere
+        """
+        retval = (self.growthLevel >= self.growthThresholds[2] -1) and not self.isWilted()
+        return retval
