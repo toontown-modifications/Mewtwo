@@ -103,7 +103,7 @@ class LoadHouseOperation(FSM):
         self.demand('Off')
 
     def exitLoadHouse(self):
-        self.ignore('generate-%d' % self.houseId)
+        self.ignore(f'generate-{self.houseId}')
 
     def enterOff(self):
         self.done = True
@@ -273,7 +273,7 @@ class LoadEstateOperation(FSM):
                     executor.submit(petOperation.start)
 
         if not self.petOperations:
-            taskMgr.doMethodLater(0, lambda: self.demand('Finished'), 'no-pets', extraArgs=[])
+            taskMgr.doMethodLater(0, lambda: self.demand('Finished'), 'no-pets', extraArgs = [])
 
     def __handlePetLoaded(self, pet):
         if self.state != 'LoadPets':

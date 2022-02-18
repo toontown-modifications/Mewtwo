@@ -24,7 +24,6 @@ want-do-live-updates true
 want-discord-integration true
 want-parties false
 want-instant-parties true
-want-fireworks-cannons false
 want-loyalty-requirement true
 want-ds-anydbm false
 want-token-expirations false

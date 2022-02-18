@@ -10,7 +10,6 @@ from game.toontown.estate import GardenGlobals
 from game.toontown.estate import HouseGlobals
 from game.toontown.estate.DistributedCannonAI import DistributedCannonAI
 from game.toontown.estate.DistributedTargetAI import DistributedTargetAI
-from game.toontown.estate.DistributedFireworksCannonAI import DistributedFireworksCannonAI
 from game.toontown.estate.DistributedGardenAI import DistributedGardenAI
 from game.toontown.fishing.DistributedFishingPondAI import DistributedFishingPondAI
 from game.toontown.safezone.DistributedFishingSpotAI import DistributedFishingSpotAI
@@ -219,14 +218,6 @@ class DistributedEstateAI(DistributedObjectAI):
                 pt.mark('loaded estate model')
                 pt.off()
                 pt.printTo()
-
-        if config.GetBool('want-fireworks-cannons', False):
-            self.fireworksCannon = DistributedFireworksCannonAI(self.air)
-            self.fireworksCannon.generateWithRequired(self.zoneId)
-
-        self.garden = DistributedGardenAI(self.air)
-        self.garden.generateWithRequired(self.zoneId)
-        self.garden.sendNewProp(HouseGlobals.PROP_ICECUBE, 4.710, -86.550, 2.478)
 
     if simbase.wantPets:
         def createPetCollisions(self):
@@ -748,6 +739,12 @@ class DistributedEstateAI(DistributedObjectAI):
                     return house
 
     def delete(self):
+        self.ignoreAll()
+        taskMgr.remove(self.uniqueName("GardenEpoch"))
+        taskMgr.remove(self.uniqueName("endCannons"))
+        taskMgr.remove(self.uniqueName("endCannonsNotify"))
+        taskMgr.remove(self.uniqueName("endGameTable"))
+
         if self.treasurePlanner:
             self.treasurePlanner.stop()
             self.treasurePlanner.deleteAllTreasuresNow()
@@ -765,22 +762,17 @@ class DistributedEstateAI(DistributedObjectAI):
             cannon.requestDelete()
             self.cannons.remove(cannon)
 
-        if self.fireworksCannon:
-            self.fireworksCannon.requestDelete()
-            self.fireworksCannon = None
+        self.deleteGarden()
 
-            self.deleteGarden()
+        if hasattr(self,'gardenBoxList'):
+            for index in range(len(self.gardenBoxList)):
+                for box in self.gardenBoxList[index]:
+                    if box:
+                        box.requestDelete()
 
-            if hasattr(self,'gardenBoxList'):
-                for index in range(len(self.gardenBoxList)):
-                    for box in self.gardenBoxList[index]:
-                        if box:
-                            box.requestDelete()
-
-            del self.gardenBoxList
-            del self.gardenTable
-            # del self.estateButterflies
-            del self.gardenList
+        del self.gardenBoxList
+        del self.gardenTable
+        del self.gardenList
 
         taskMgr.remove(self.uniqueName('rentalExpire'))
         DistributedObjectAI.delete(self)
