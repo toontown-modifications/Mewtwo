@@ -185,7 +185,7 @@ class ExtAgent(ServerBase):
             # Create our database folder.
             os.makedirs(self.databasePath)
 
-        self.banEndpointBase = 'https://toontastic.sunrise.games/bans/{0}'
+        self.banEndpointBase = 'https://toontastic.sunrise.games/bans'
 
         self.requestHeaders = {
             'User-Agent': 'Sunrise Games - ExtAgent'
@@ -284,8 +284,8 @@ class ExtAgent(ServerBase):
         self.sendDatagram(clientChannel, resp)
 
     def banAccount(self, playToken, message, banReason = 'Chat Filter', silent = False):
-        endpoint = self.banEndpointBase.format('BanAccount.php')
-        emailDispatchEndpoint = self.banEndpointBase.format('ChatBanEmail.php')
+        banEndpoint = f'{self.banEndpointBase}/BanAccount.php'
+        emailDispatchEndpoint = f'{self.banEndpointBase}/ChatBanEmail.php'
 
         banData = {
             'username': playToken,
@@ -299,7 +299,7 @@ class ExtAgent(ServerBase):
             'secretKey': self.rpcKey
         }
 
-        banRequest = requests.post(endpoint, banData, headers = self.requestHeaders)
+        banRequest = requests.post(banEndpoint, banData, headers = self.requestHeaders)
 
         if not silent:
             emailRequest = requests.post(emailDispatchEndpoint, emailData, headers = self.requestHeaders)
