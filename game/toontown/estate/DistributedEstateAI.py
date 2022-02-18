@@ -884,6 +884,48 @@ class DistributedEstateAI(DistributedObjectAI):
 
                 self.b_setItems(index, [(255,0,-1,-1,0)]) #empty garden tag
 
+    def setWaterLevelMyGarden(self, avId, waterLevel, specificHardPoint = -1):
+        """
+        sets the water level for all the plants in my garden
+        """
+        assert self.notify.debugStateCall(self)
+        for index in range(self.toonsPerAccount):
+            if self.getToonId(index) == avId:
+                items = self.getItems(index)
+                if specificHardPoint == -1:
+                    for plot in range(len(self.gardenTable[index])):
+                        someLawnDecor = self.gardenTable[index][plot]
+                        if someLawnDecor and hasattr(someLawnDecor,'b_setWaterLevel'):
+                            someLawnDecor.b_setWaterLevel(waterLevel, False)
+
+                    itemList = self.getItems(index)
+                    self.d_setItems(index, itemList)
+                else:
+                    someLawnDecor = self.gardenTable[index][specificHardPoint]
+                    if someLawnDecor and hasattr(someLawnDecor,'b_setWaterLevel'):
+                        someLawnDecor.b_setWaterLevel(waterLevel)
+
+    def setGrowthLevelMyGarden(self, avId, growthLevel, specificHardPoint = -1):
+        """
+        sets the growth level for all the plants in my garden
+        """
+        assert self.notify.debugStateCall(self)
+        for index in range(self.toonsPerAccount):
+            if self.getToonId(index) == avId:
+                items = self.getItems(index)
+                if specificHardPoint == -1:
+                    for plot in range(len(self.gardenTable[index])):
+                        someLawnDecor = self.gardenTable[index][plot]
+                        if someLawnDecor and hasattr(someLawnDecor,'b_setGrowthLevel'):
+                            someLawnDecor.b_setGrowthLevel(growthLevel, False)
+
+                    itemList = self.getItems(index)
+                    self.d_setItems(index, itemList)
+                else:
+                    someLawnDecor = self.gardenTable[index][specificHardPoint]
+                    if someLawnDecor and hasattr(someLawnDecor,'b_setGrowthLevel'):
+                        someLawnDecor.b_setGrowthLevel(growthLevel)
+
     def gardenInit(self, avIdList):
         self.sendUpdate('setIdList', [avIdList])
         #self.bootStrapEpochs()
@@ -939,6 +981,14 @@ class DistributedEstateAI(DistributedObjectAI):
         toon = simbase.air.doId2do.get(toonId)
         if toon:
             toon.b_setTrackBonusLevel(bonusLevels)
+
+    def wiltMyGarden(self, avId, specificHardPoint = -1):
+        self.notify.debug("wilting my garden %s" % (avId))
+        self.setWaterLevelMyGarden( avId, -1, specificHardPoint)
+
+    def unwiltMyGarden(self, avId, specificHardPoint = -1):
+        self.notify.debug("unwilting my garden %s" % (avId))
+        self.setWaterLevelMyGarden( avId, 0, specificHardPoint)
 
     def plantFlower(self, avId, type, plot, water, growth, optional = 0):
             for index in range(self.toonsPerAccount):
