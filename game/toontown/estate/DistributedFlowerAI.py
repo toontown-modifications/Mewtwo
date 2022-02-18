@@ -1,122 +1,119 @@
-import time
-
+from game.toontown.estate import DistributedPlantBaseAI
 from direct.directnotify import DirectNotifyGlobal
+from . import GardenGlobals
 
-from game.toontown.estate import GardenGlobals
-from game.toontown.estate.DistributedPlantBaseAI import DistributedPlantBaseAI
-from game.toontown.estate.FlowerBase import FlowerBase
-
-ONE_DAY = 86400
-
-# X position offsets for flowers & flower plots:
-FLOWER_X_OFFSETS = (None, (0,), (-1.5, 1.5), (-3.4, 0, 3.5))
-
-class DistributedFlowerAI(DistributedPlantBaseAI, FlowerBase):
+class DistributedFlowerAI(DistributedPlantBaseAI.DistributedPlantBaseAI):
     notify = DirectNotifyGlobal.directNotify.newCategory('DistributedFlowerAI')
+    
+    
+    def __init__(self, typeIndex = 0, waterLevel = 0, growthLevel = 0, optional = None, ownerIndex = 0, plot = 0):
+        DistributedPlantBaseAI.DistributedPlantBaseAI.__init__(self, typeIndex, waterLevel, growthLevel, optional, ownerIndex, plot)
 
-    def setTypeIndex(self, value):
-        DistributedPlantBaseAI.setTypeIndex(self, value)
-        FlowerBase.setSpecies(self, value)
+    def getVariety(self):
+        return self.optional
 
-    def setFlowerIndex(self, flowerIndex):
-        self.flowerIndex = flowerIndex
+    def handleSkillUp(self, toon):
+        #first get the recipe back
+        recipeKey = GardenGlobals.PlantAttributes[self.typeIndex]\
+                    ['varieties'][self.optional][0]
+        recipe = GardenGlobals.Recipes[recipeKey]
+        #find out how many beans the toon can plant
+        
+        shovelIndex = toon.getShovel()
+        shovelPower = GardenGlobals.getShovelPower(shovelIndex, toon.getShovelSkill())
+        giveSkillUp = 1
+        if not shovelPower == len(recipe['beans']):
+            giveSkillUp = 0
 
-    def getFlowerIndex(self):
-        return self.flowerIndex
+        #dont give a skill up if its wilted
+        if self.isWilted():
+            giveSkillUp = -1
 
-    def calculate(self, lastCheck):
-        now = int(time.time())
-        if lastCheck == 0:
-            lastCheck = now
+        #dont give a skill up if the plant is not fruiting err blooming
+        if not self.isFruiting():
+            giveSkillUp = -2
 
-        grown = 0
+        if giveSkillUp > 0:
+            #time to add skill points
+            currentShovelSkill = toon.getShovelSkill()
+            newShovelSkill = currentShovelSkill + 1
+            toon.b_setShovelSkill(newShovelSkill)
 
-        # Water level
-        elapsed = now - lastCheck
-        while elapsed > ONE_DAY:
-            if self.waterLevel >= 0:
-                grown += 1
+        #log each time he picks a flower, if he got a skillup or why he didnt,
+        # what his shovel is,  and what his new shovel skill is
+        self.air.writeServerEvent("garden_flower_pick", toon.doId,
+                                  '%d|%d|%d' % (giveSkillUp,toon.getShovel(), toon.getShovelSkill()))
+        
 
-            elapsed -= ONE_DAY
-            self.waterLevel -= 1
+    def handleFlowerBasket(self, toon):
+        addToBasket = True
 
-        self.waterLevel = max(self.waterLevel, -2)
+        if self.isWilted():
+            #don't put a wilted flower in the flower basket
+            addToBasket = False
 
-        # Growth level
-        maxGrowth = self.growthThresholds[2]
-        newGrowthLevel = min(self.growthLevel + grown, maxGrowth)
-        self.setGrowthLevel(newGrowthLevel)
-        self.lastCheck = now - elapsed
-        self.update()
+        #dont put it in the basket if the plant is not fruiting err blooming
+        if not self.isFruiting():
+            addToBasket = False
 
-    def update(self):
-        mapData = list(map(list, self.mgr.data['flowers']))
-        mapData[self.getFlowerIndex()] = [self.getSpecies(), self.waterLevel, self.lastCheck, self.getGrowthLevel(),
-                                          self.getVariety()]
-        self.mgr.data['flowers'] = mapData
-        self.mgr.update()
+        if addToBasket:
+            toon.addFlowerToBasket(self.typeIndex, self.optional)
 
-    def removeItem(self, usingPickAll=0):
-        avId = self.air.getAvatarIdFromSender()
-        if not avId:
+    def removeItem(self):
+        #import pdb; pdb.set_trace()
+        senderId = self.air.getAvatarIdFromSender()
+        
+        zoneId = self.zoneId
+        estateOwnerDoId = simbase.air.estateMgr.zone2owner.get(zoneId)
+
+        if not senderId == estateOwnerDoId:
+            self.notify.warning("how did this happen, picking a flower you don't own")
+            self.sendInteractionDenied(senderId)
             return
 
-        if not usingPickAll:
-            if avId != self.ownerDoId:
-                self.air.writeServerEvent('suspicious', avId, 'tried to remove someone else\'s flower!')
-                return
+        if not self.requestInteractingToon(senderId):
+            self.sendInteractionDenied(senderId)
+            return
+            
+        
+        if estateOwnerDoId:
+            estate = simbase.air.estateMgr.estate.get(estateOwnerDoId)
+            if estate:
+                #we should have a valid DistributedEstateAI at this point
+                self.setMovie(GardenGlobals.MOVIE_REMOVE, senderId)
+                
 
-            self.d_setMovie(GardenGlobals.MOVIE_REMOVE)
+    def movieDone(self):
+        if self.lastMovie == GardenGlobals.MOVIE_REMOVE:
+            self.lastMovie = None
+            zoneId = self.zoneId
+            avId = self.lastMovieAvId
+            estateOwnerDoId = simbase.air.estateMgr.zone2owner.get(zoneId)
+            estate = simbase.air.estateMgr.estate.get(estateOwnerDoId)
+            if estate:
+                itemId = estate.removePlantAndPlaceGardenPlot(self.ownerIndex, self.plot)
 
-        action = 'remove'
-        if self.getGrowthLevel() >= self.growthThresholds[2]:
-            action = 'pick'
+                # tell the gardenplot to tell the toon to finish 'removing'
+                item = simbase.air.doId2do.get(itemId)
+                item.setMovie(GardenGlobals.MOVIE_FINISHREMOVING, avId)
 
-        def handleRemoveItem(task):
-            if not self.air:
-                return
+                toon = simbase.air.doId2do.get(avId)
+                if toon:
+                    self.handleSkillUp(toon)
+                    self.handleFlowerBasket(toon)
+        elif self.lastMovie == GardenGlobals.MOVIE_FINISHPLANTING:
+            self.lastMovie = None
+            zoneId = self.zoneId
+            avId = self.lastMovieAvId
+            estateOwnerDoId = simbase.air.estateMgr.zone2owner.get(zoneId)
+            estate = simbase.air.estateMgr.estate.get(estateOwnerDoId)
+            if estate:
+                itemId = self.doId
 
-            av = self.air.doId2do.get(self.ownerDoId)
-            if not av:
-                return
+                # tell the gardenplot to tell the toon to clear the movie, so the
+                # results dialog doesn't come up again when he exits from his house
+                item = simbase.air.doId2do.get(itemId)
+                item.setMovie(GardenGlobals.MOVIE_CLEAR, avId)                
 
-            plot = self.mgr.placePlot(self.getFlowerIndex())
-            plot.setFlowerIndex(self.getFlowerIndex())
-            plot.setPlot(self.plot)
-            plot.setOwnerIndex(self.ownerIndex)
 
-            # <hack>
-            index = (0, 1, 2, 2, 2, 3, 3, 3, 4, 4)[self.getFlowerIndex()]
-            idx = (0, 0, 0, 1, 2, 0, 1, 2, 0, 1)[self.getFlowerIndex()]
-            zOffset = 1.2
-            gardenBox = self.mgr._estateBoxes[index]
-            xOffset = FLOWER_X_OFFSETS[gardenBox.getTypeIndex()][idx]
-            plot.setPos(gardenBox, 0, 0, 0)
-            plot.setZ(gardenBox, zOffset)
-            plot.setX(gardenBox, xOffset)
-            plot.setH(gardenBox, 0)
-            # </hack>
 
-            plot.generateWithRequired(self.zoneId)
-            if not usingPickAll:
-                plot.d_setMovie(GardenGlobals.MOVIE_FINISHREMOVING, avId)
-                plot.d_setMovie(GardenGlobals.MOVIE_CLEAR, avId)
-
-            self.air.writeServerEvent('%s-flower' % action, avId, plot=self.plot)
-            self.requestDelete()
-            self.mgr.flowers.remove(self)
-            mapData = list(map(list, self.mgr.data['flowers']))
-            mapData[self.getFlowerIndex()] = self.mgr.getNullPlant()
-            self.mgr.data['flowers'] = mapData
-            self.mgr.update()
-            if action == 'pick':
-                av.b_setShovelSkill(av.getShovelSkill() + self.getValue())
-                av.addFlowerToBasket(self.getSpecies(), self.getVariety())
-
-            if task:
-                return task.done
-
-        if usingPickAll:
-            handleRemoveItem(None)
-        else:
-            taskMgr.doMethodLater(7, handleRemoveItem, self.uniqueName('handle-remove-item'))
