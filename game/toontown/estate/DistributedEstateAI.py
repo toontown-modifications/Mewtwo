@@ -1,7 +1,9 @@
-import time
+from panda3d.core import BitMask32
 
 from direct.directnotify.DirectNotifyGlobal import directNotify
 from direct.distributed.DistributedObjectAI import DistributedObjectAI
+
+from game.otp.otpbase import OTPGlobals
 
 from game.toontown.estate import CannonGlobals
 from game.toontown.estate import GardenGlobals
@@ -14,12 +16,14 @@ from game.toontown.fishing.DistributedFishingPondAI import DistributedFishingPon
 from game.toontown.safezone.DistributedFishingSpotAI import DistributedFishingSpotAI
 from game.toontown.safezone.EFlyingTreasurePlannerAI import EFlyingTreasurePlannerAI
 from game.toontown.safezone.ETreasurePlannerAI import ETreasurePlannerAI
-from game.toontown.toonbase import ToontownGlobals
+from game.toontown.toonbase import ToontownGlobals, ToontownBattleGlobals
 from game.toontown.estate import DistributedFlowerAI
 from game.toontown.estate import DistributedGagTreeAI
 from game.toontown.estate import DistributedStatuaryAI
 from game.toontown.estate import DistributedGardenPlotAI
 from game.toontown.estate import DistributedGardenBoxAI
+
+import time, random
 
 class DistributedEstateAI(DistributedObjectAI):
     notify = directNotify.newCategory('DistributedEstateAI')
@@ -57,6 +61,9 @@ class DistributedEstateAI(DistributedObjectAI):
         self.fireworksCannon = None
         self.garden = None
 
+        self.gardenList = [[],[],[],[],[],[]]
+        self.gardenBoxList = [[],[],[],[],[],[]]
+
         self.maxSlots = 32
         self.toonsPerAccount = 6
         #self.timePerEpoch = 300 #five minutes
@@ -65,6 +72,87 @@ class DistributedEstateAI(DistributedObjectAI):
         for count in range(self.toonsPerAccount):
 
             self.gardenTable.append([0] * self.maxSlots) #ACCOUNT HAS 6 TOONS
+
+    def bootStrapEpochs(self):
+        #first update the graden data based on how much time has based
+        #print ("last time %s" % (self.lastEpochTimeStamp))
+        currentTime = time.time()
+        #print ("current time %s" % (currentTime))
+        timeDiff = currentTime - self.lastEpochTimeStamp
+        #print ("time diff %s" % (timeDiff))
+
+        #self.lastEpochTimeStamp = time.mktime((2006, 8, 24, 10, 50, 31, 4, 237, 1))
+
+        tupleNewTime = time.localtime(currentTime - self.epochHourInSeconds)
+        tupleOldTime = time.localtime(self.lastEpochTimeStamp)
+
+        if (tupleOldTime < time.gmtime(0)):
+            tupleOldTime = time.gmtime(0)
+
+        #tupleOldTime = (2006, 6, 18, 0, 36, 45, 0, 170, 1)
+        #tupleNewTime = (2006, 6, 19, 3, 36, 45, 0, 170, 1)
+
+        listLastDay = list(tupleOldTime)
+        listLastDay[3] = 0 #set hour to epoch time
+        listLastDay[4] = 0 #set minute to epoch time
+        listLastDay[5] = 0 #set second to epoch time
+        tupleLastDay = tuple(listLastDay)
+
+        randomDelay = random.random() * 5 * 60 # random five minute range
+
+        secondsNextEpoch = (time.mktime(tupleLastDay) + self.epochHourInSeconds + self.dayInSeconds + randomDelay) - currentTime
+
+
+        #should we do the epoch for the current day?
+        #beforeEpoch = 1
+        #if  tupleNewTime[3] >= self.timeToEpoch:
+        #    beforeEpoch = 0
+
+        epochsToDo =  int((time.time() - time.mktime(tupleLastDay)) / self.dayInSeconds)
+        #epochsToDo -= beforeEpoch
+        if epochsToDo < 0:
+            epochsToDo = 0
+
+        print("epochsToDo %s" % (epochsToDo))
+
+        #print("tuple times")
+        #print tupleNewTime
+        #print tupleOldTime
+
+
+        if epochsToDo:
+            pass
+            print("doingEpochData")
+            self.doEpochData(0, epochsToDo)
+        else:
+            pass
+            print("schedualing next Epoch")
+            #print("Delaying inital epoch")
+            self.scheduleNextEpoch()
+            self.sendUpdate("setLastEpochTimeStamp", [self.lastEpochTimeStamp])
+            #time2Epoch = self.timePerEpoch - timeDiff
+
+    def scheduleNextEpoch(self):
+        currentTime = time.time()
+        tupleNewTime = time.localtime()
+        tupleOldTime = time.localtime(self.lastEpochTimeStamp)
+
+        listLastDay = list(tupleOldTime)
+        listLastDay[3] = 0 #set hour to epoch time
+        listLastDay[4] = 0 #set minute to epoch time
+        listLastDay[5] = 0 #set second to epoch time
+        tupleLastDay = tuple(listLastDay)
+
+        randomDelay = random.random() * 5 * 60 # random five minute range
+        whenNextEpoch = (time.mktime(tupleLastDay) + self.epochHourInSeconds + self.dayInSeconds + randomDelay)
+        secondsNextEpoch = whenNextEpoch - currentTime
+        if secondsNextEpoch >= 0:
+            secondsNextEpoch += self.dayInSeconds
+        taskMgr.doMethodLater((secondsNextEpoch), self.doEpochNow, self.uniqueName("GardenEpoch"))
+
+        tupleNextEpoch = time.localtime(whenNextEpoch)
+
+        self.notify.info("Next epoch to happen at %s" % (str(tupleNextEpoch)))
 
     def announceGenerate(self):
         DistributedObjectAI.announceGenerate(self)
@@ -678,12 +766,34 @@ class DistributedEstateAI(DistributedObjectAI):
             self.fireworksCannon.requestDelete()
             self.fireworksCannon = None
 
-        if self.garden:
-            self.garden.requestDelete()
-            self.garden = None
+            self.deleteGarden()
+
+            if hasattr(self,'gardenBoxList'):
+                for index in range(len(self.gardenBoxList)):
+                    for box in self.gardenBoxList[index]:
+                        if box:
+                            box.requestDelete()
+
+            del self.gardenBoxList
+            del self.gardenTable
+            # del self.estateButterflies
+            del self.gardenList
 
         taskMgr.remove(self.uniqueName('rentalExpire'))
         DistributedObjectAI.delete(self)
+
+    def deleteGarden(self):
+        if not hasattr(self,'gardenTable'):
+            return
+
+        print("calling delete garden")
+
+        for index in range(len(self.gardenTable)):
+            for distLawnDecor in self.gardenTable[index]:
+                if distLawnDecor: # and distLawnDecor.occupied:
+                    distLawnDecor.requestDelete()
+
+        self.gardenTable = []
 
     def destroy(self):
         for house in self.houses:

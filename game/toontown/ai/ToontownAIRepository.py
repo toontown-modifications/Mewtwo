@@ -1,4 +1,4 @@
-from panda3d.core import UniqueIdAllocator, CSDefault
+from panda3d.core import UniqueIdAllocator, CSDefault, DSearchPath, Filename
 from panda3d.toontown import DNAStorage, loadDNAFileAI, DNAGroup, DNAVisGroup, loadDNAFile
 
 from direct.directnotify.DirectNotifyGlobal import directNotify
@@ -72,7 +72,7 @@ from game.toontown.ai import ToontownAIMsgTypes
 from game.toontown.toon.NPCDialogueManagerAI import NPCDialogueManagerAI
 from game.toontown.uberdog.ExtAgent import ServerGlobals
 
-import time, os, requests
+import time, requests
 
 class ToontownAIRepository(ToontownInternalRepository, ServerBase):
     notify = directNotify.newCategory('ToontownAIRepository')
@@ -447,11 +447,6 @@ class ToontownAIRepository(ToontownInternalRepository, ServerBase):
         self.notify.info(f'{self.districtName} has finished starting up.')
 
     def loadDNAFileAI(self, dnaStore, dnaFileName):
-        resourcesPath = 'game/resources/'
-
-        if not dnaFileName.startswith(resourcesPath):
-            dnaFileName = resourcesPath + dnaFileName
-
         return loadDNAFileAI(dnaStore, dnaFileName)
 
     def loadDNAFile(self, dnaStore, dnaFile, cs=CSDefault):
@@ -477,9 +472,25 @@ class ToontownAIRepository(ToontownInternalRepository, ServerBase):
         return f'phase_{phase}/dna/{hood}_{zoneId}.dna'
 
     def lookupDNAFileName(self, dnaFileName):
-        for _ in range(3, 13):
-            if os.path.exists(f'game/resources/phase_{_}/dna/{dnaFileName}'):
-                return f'phase_{_}/dna/{dnaFileName}'
+        searchPath = DSearchPath()
+        searchPath.appendDirectory(Filename('game/resources/phase_3.5/dna'))
+        searchPath.appendDirectory(Filename('game/resources/phase_4/dna'))
+        searchPath.appendDirectory(Filename('game/resources/phase_5/dna'))
+        searchPath.appendDirectory(Filename('game/resources/phase_5.5/dna'))
+        searchPath.appendDirectory(Filename('game/resources/phase_6/dna'))
+        searchPath.appendDirectory(Filename('game/resources/phase_8/dna'))
+        searchPath.appendDirectory(Filename('game/resources/phase_9/dna'))
+        searchPath.appendDirectory(Filename('game/resources/phase_10/dna'))
+        searchPath.appendDirectory(Filename('game/resources/phase_11/dna'))
+        searchPath.appendDirectory(Filename('game/resources/phase_12/dna'))
+        searchPath.appendDirectory(Filename('game/resources/phase_13/dna'))
+        filename = Filename(dnaFileName)
+        found = vfs.resolveFilename(filename, searchPath)
+        if not found:
+            self.notify.warning(f'lookupDNAFileName - {dnaFileName} not found on:')
+            print(searchPath)
+        else:
+            return filename.getFullpath()
 
     def findFishingPonds(self, dnaData, zoneId, area):
         fishingPonds = []
