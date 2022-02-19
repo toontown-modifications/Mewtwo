@@ -86,7 +86,7 @@ class LoadHouseOperation(FSM):
                                    'setAvatarId': [self.avatar['avId']]})
 
         # Wait for the house to generate:
-        self.acceptOnce('generate-%d' % self.houseId, self.__handleHouseGenerated)
+        self.acceptOnce(f'generate-{self.houseId}', self.__handleHouseGenerated)
 
     def __handleHouseGenerated(self, house):
         # The house will need to be able to reference
