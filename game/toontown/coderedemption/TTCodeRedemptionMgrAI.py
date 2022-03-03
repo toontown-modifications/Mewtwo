@@ -84,7 +84,7 @@ class TTCodeRedemptionMgrAI(DistributedObjectAI):
         # Has this avatar already redeemed this code?
         if self.air.isProdServer() and str(avId) in self.getCodeRedeemers(code):
             # Yup!
-            result = TTCodeRedemptionConsts.RedeemErrors.CodeAlreadyRedeemed
+            result = TTCodeRedemptionConsts.RedeemErrors.AwardCouldntBeGiven
             awardMgrResult = AwardManagerConsts.GiveAwardErrors.GenericAlreadyHaveError
             self.d_redeemCodeResult(avId, context, result, awardMgrResult)
             return
