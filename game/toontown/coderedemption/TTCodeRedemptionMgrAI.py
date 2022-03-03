@@ -20,7 +20,7 @@ from game.toontown.catalog.CatalogFurnitureItem import CatalogFurnitureItem
 
 from game.toontown.uberdog.ExtAgent import ServerGlobals
 
-import time, requests
+import time, requests, json
 
 class TTCodeRedemptionMgrAI(DistributedObjectAI):
     notify = directNotify.newCategory('TTCodeRedemptionMgrAI')
@@ -32,6 +32,10 @@ class TTCodeRedemptionMgrAI(DistributedObjectAI):
 
         self.failedAttempts = 0
         self.maxCodeAttempts = config.GetInt('max-code-redemption-attempts', 5)
+
+        self.webHeaders = {
+            'User-Agent': 'SunriseGames-TTCodeRedemptionMgrAI'
+        }
 
     def d_redeemCodeResult(self, avId, context, result, awardMgrResult):
         self.sendUpdateToAvatarId(avId, 'redeemCodeResult', [context, result, awardMgrResult])
@@ -67,7 +71,7 @@ class TTCodeRedemptionMgrAI(DistributedObjectAI):
         code = code.lower()
 
         # Has this avatar already redeemed this code?
-        if self.isCodeUsed(code, avId):
+        if self.air.isProdServer() and str(avId) in self.getCodeRedeemers(code):
             # Yup!
             result = TTCodeRedemptionConsts.RedeemErrors.CodeAlreadyRedeemed
             awardMgrResult = AwardManagerConsts.GiveAwardErrors.GenericAlreadyHaveError
@@ -234,31 +238,22 @@ class TTCodeRedemptionMgrAI(DistributedObjectAI):
 
         return False
 
-    def isCodeUsed(self, code, avId):
-        headers = {
-            'User-Agent': 'SunriseGames-TTCodeRedemptionMgrAI'
-        }
-
+    def getCodeRedeemers(self, code):
         data = {
-            'code': code,
+            'redeemCode': code,
             'secretKey': config.GetString('rpc-key'),
-            'avatarId': avId,
             'serverName': ServerGlobals.serverToName[ServerGlobals.FINAL_TOONTOWN]
         }
 
-        request = requests.get('https://toontastic.sunrise.games/api/codes/codeCheck.php', data, headers = headers).json()
-        return request['status']
+        request = requests.post('https://toontastic.sunrise.games/api/codes/getCodeRedeemers.php', data, headers = self.webHeaders).json()
+        return json.loads(request['RedeemedBy'])
 
     def setRedeemedCode(self, code, avId):
-        headers = {
-            'User-Agent': 'SunriseGames-TTCodeRedemptionMgrAI'
-        }
-
         data = {
-            'code': code,
+            'redeemCode': code,
             'secretKey': config.GetString('rpc-key'),
             'avatarId': avId,
             'serverName': ServerGlobals.serverToName[ServerGlobals.FINAL_TOONTOWN]
         }
 
-        requests.post('https://toontastic.sunrise.games/api/codes/setCodeUsed.php', data, headers = headers)
+        requests.post('https://toontastic.sunrise.games/api/codes/setCodeUsed.php', data, headers = self.webHeaders)
