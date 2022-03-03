@@ -85,7 +85,7 @@ class TTCodeRedemptionMgrAI(DistributedObjectAI):
         if self.air.isProdServer() and str(avId) in self.getCodeRedeemers(code):
             # Yup!
             result = TTCodeRedemptionConsts.RedeemErrors.AwardCouldntBeGiven
-            awardMgrResult = AwardManagerConsts.GiveAwardErrors.GenericAlreadyHaveError
+            awardMgrResult = AwardManagerConsts.GiveAwardErrors.AlreadyRented
             self.d_redeemCodeResult(avId, context, result, awardMgrResult)
             return
 
