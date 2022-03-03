@@ -70,14 +70,6 @@ class TTCodeRedemptionMgrAI(DistributedObjectAI):
         # Make the code lowercase.
         code = code.lower()
 
-        # Has this avatar already redeemed this code?
-        if self.air.isProdServer() and str(avId) in self.getCodeRedeemers(code):
-            # Yup!
-            result = TTCodeRedemptionConsts.RedeemErrors.CodeAlreadyRedeemed
-            awardMgrResult = AwardManagerConsts.GiveAwardErrors.GenericAlreadyHaveError
-            self.d_redeemCodeResult(avId, context, result, awardMgrResult)
-            return
-
         # Iterate over these items and deliver item to player.
         items = self.getItemsForCode(code)
 
@@ -86,6 +78,14 @@ class TTCodeRedemptionMgrAI(DistributedObjectAI):
             result = TTCodeRedemptionConsts.RedeemErrors.CodeDoesntExist
             awardMgrResult = AwardManagerConsts.GiveAwardErrors.Success
             self.failedAttempts += 1
+            self.d_redeemCodeResult(avId, context, result, awardMgrResult)
+            return
+
+        # Has this avatar already redeemed this code?
+        if self.air.isProdServer() and str(avId) in self.getCodeRedeemers(code):
+            # Yup!
+            result = TTCodeRedemptionConsts.RedeemErrors.CodeAlreadyRedeemed
+            awardMgrResult = AwardManagerConsts.GiveAwardErrors.GenericAlreadyHaveError
             self.d_redeemCodeResult(avId, context, result, awardMgrResult)
             return
 
