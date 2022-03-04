@@ -25,7 +25,6 @@ class DistributedPartyManagerUD(DistributedObjectGlobalUD):
     # Hence the use of sendUpdateToDoId when sending back to AI
 
     notify = DirectNotifyGlobal.directNotify.newCategory("DistributedPartyManagerUD")
-    notify.setDebug(True)
 
     def __init__(self, air):
         DistributedObjectGlobalUD.__init__(self, air)

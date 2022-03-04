@@ -16,7 +16,6 @@ class DistributedPartyManagerAI(DistributedObjectAI):
     """AI side class for the party manager."""
 
     notify = directNotify.newCategory("DistributedPartyManagerAI")
-    notify.setDebug(True)
 
     def __init__(self, air):
         DistributedObjectAI.__init__(self, air)
