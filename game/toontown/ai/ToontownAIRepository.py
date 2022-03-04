@@ -5,7 +5,7 @@ from direct.directnotify.DirectNotifyGlobal import directNotify
 from direct.distributed.DistributedObjectAI import DistributedObjectAI
 from direct.distributed.PyDatagram import PyDatagram
 
-from game.otp.ai.TimeManagerAI import TimeManagerAI
+from game.otp.ai import TimeManagerAI
 from game.toontown.distributed.ToontownDistrictAI import ToontownDistrictAI
 from game.toontown.distributed.ToontownDistrictStatsAI import ToontownDistrictStatsAI
 from game.toontown.ai.HolidayManagerAI import HolidayManagerAI
@@ -54,7 +54,7 @@ from game.toontown.racing.DistributedStartingBlockAI import DistributedStartingB
 from game.toontown.racing.DistributedLeaderBoardAI import DistributedLeaderBoardAI
 from game.toontown.racing.RaceManagerAI import RaceManagerAI
 from game.toontown.ai.ToontownMagicWordManagerAI import ToontownMagicWordManagerAI
-from game.toontown.parties.ToontownTimeManager import ToontownTimeManager
+from game.toontown.parties import ToontownTimeManager
 from game.toontown.ai.QuestManagerAI import QuestManagerAI
 from game.toontown.tutorial.TutorialManagerAI import TutorialManagerAI
 from game.toontown.safezone.DistributedPartyGateAI import DistributedPartyGateAI
@@ -242,7 +242,8 @@ class ToontownAIRepository(ToontownInternalRepository, ServerBase):
 
         self.raceMgr = RaceManagerAI(self)
 
-        self.toontownTimeManager = ToontownTimeManager(serverTimeUponLogin = int(time.time()), globalClockRealTimeUponLogin = globalClock.getRealTime())
+        self.toontownTimeManager = ToontownTimeManager.ToontownTimeManager()
+        self.toontownTimeManager.updateLoginTimes(time.time(), time.time(), globalClock.getRealTime())   
 
         self.banManager = BanManagerAI() # Disney's BanManager
 
@@ -257,9 +258,18 @@ class ToontownAIRepository(ToontownInternalRepository, ServerBase):
         self.dialogueManager = NPCDialogueManagerAI()
 
     def createManagers(self):
-        # Generate our TimeManagerAI.
-        self.timeManager = TimeManagerAI(self)
-        self.timeManager.generateWithRequired(OtpDoGlobals.OTP_ZONE_ID_MANAGEMENT)
+        # The Time manager.  This negotiates a timestamp exchange for
+        # the purposes of synchronizing clocks between client and
+        # server with a more accurate handshaking protocol than we
+        # would otherwise get.
+        #
+        # We must create this object first, so clients who happen to
+        # come into the world while the AI is still coming up
+        # (particularly likely if the AI crashed while players were
+        # in) will get a chance to synchronize.
+        self.timeManager = TimeManagerAI.TimeManagerAI(self)
+        self.timeManager.generateOtpObject(
+            self.district.getDoId(), OTPGlobals.UberZone)
 
         self.welcomeValleyManager = WelcomeValleyManagerAI(self)
         self.welcomeValleyManager.generateWithRequired(OtpDoGlobals.OTP_ZONE_ID_MANAGEMENT)
