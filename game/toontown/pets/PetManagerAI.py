@@ -18,7 +18,7 @@ class PetManagerAI:
 
     def __init__(self, air):
         self.air = air
-        self.cacheFile = '{0}pets_{1}.pets'.format(self.cachePath, self.air.districtId)
+        self.cacheFile = f'{self.cachePath}pets_{self.air.districtId}.pets'
 
         if not os.path.exists(self.cachePath):
             os.makedirs(self.cachePath)

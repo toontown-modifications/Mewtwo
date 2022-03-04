@@ -25,7 +25,7 @@ class DiscordIntegrationServer:
                 data = json.loads(data)
             except:
                 # Skid, log the attempt.
-                self.notify.warning('Client {0} tried to send non-JSON data!'.format(ipAddress))
+                self.notify.warning(f'Client {ipAddress} tried to send non-JSON data!')
                 return
 
             whatToDo = data['whatToDo']
@@ -34,7 +34,7 @@ class DiscordIntegrationServer:
 
             if signature != actualSignature:
                 # Skid, log the attempt.
-                self.notify.warning('Client {0} sent invalid signature: {1}!'.format(ipAddress, signature))
+                self.notify.warning(f'Client {ipAddress} sent invalid signature: {signature}!')
                 return
 
             if whatToDo == 'kick':

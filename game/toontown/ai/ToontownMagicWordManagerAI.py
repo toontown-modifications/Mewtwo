@@ -259,7 +259,7 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
 
         av.b_setTickets(num)
 
-        response = 'Set tickets to: {0}.'.format(num)
+        response = f'Set tickets to: {num}.'
         self.sendResponseMessage(avId, response)
 
     def d_startHoliday(self, avId, holidayId):
@@ -359,7 +359,7 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
         foTypes = ['s']
 
         if foType.lower() not in foTypes:
-            self.sendResponseMessage(avId, 'Incorrect Field Office type! The valid ones are {0}!'.format(foTypes))
+            self.sendResponseMessage(avId, f'Incorrect Field Office type! The valid ones are {foTypes}!')
             return
 
         building.cogdoTakeOver(foType, 2, 5)
@@ -667,10 +667,10 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
 
                 return Task.done
 
-            self.acceptOnce(self.air.getAvatarExitEvent(petId), lambda: taskMgr.doMethodLater(0, activatePet, self.uniqueName('petdel-{0}'.format(petId))))
+            self.acceptOnce(self.air.getAvatarExitEvent(petId), lambda: taskMgr.doMethodLater(0, activatePet, self.uniqueName(f'petdel-{petId}')))
 
         self.air.sendActivate(petId, av.air.districtId, 0)
-        self.acceptOnce('generate-{0}'.format(petId), handleGenerate)
+        self.acceptOnce(f'generate-{petId}', handleGenerate)
 
         response = 'Spawned your doodle!'
         self.sendResponseMessage(avId, response)
