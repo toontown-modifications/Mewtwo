@@ -915,17 +915,17 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
                 self.closeServer()
 
             if minutes <= 5:
-                next = 60
+                nextTime = 60
                 minutes -= 1
             elif minutes % 5:
-                next = 60 * (minutes % 5)
+                nextTime = 60 * (minutes % 5)
                 minutes -= minutes % 5
             else:
-                next = 300
+                nextTime = 300
                 minutes -= 5
 
             if minutes >= 0:
-                taskMgr.doMethodLater(next, countdown, 'maintenance-task', extraArgs = [minutes])
+                taskMgr.doMethodLater(nextTime, countdown, 'maintenance-task', extraArgs = [minutes])
 
         countdown(minutes)
 
