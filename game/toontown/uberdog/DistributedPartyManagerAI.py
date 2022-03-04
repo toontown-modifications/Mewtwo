@@ -60,6 +60,8 @@ class DistributedPartyManagerAI(DistributedObjectAI):
         if goingDownDg:
             self.air.addPostSocketClose(goingDownDg)
 
+
+
     def handleAvatarEntered(self, avatar):
         """A toon just logged in, check his party information."""
         DistributedPartyManagerAI.notify.debug( "handleAvatarEntered" )
@@ -353,6 +355,7 @@ class DistributedPartyManagerAI(DistributedObjectAI):
 
         return result
 
+
     def sendAddPartyResponse(self, hostId, errorCode):
         """Tell the client if he's add party request got accepted."""
         self.sendUpdateToAvatarId(hostId, "addPartyResponse", [hostId, errorCode])
@@ -566,7 +569,7 @@ class DistributedPartyManagerAI(DistributedObjectAI):
         DistributedPartyManagerAI.notify.debug("BASE: delete: deleting DistributedPartyManagerAI object")
         self.ignoreAll()
         DistributedObjectGlobalAI.delete(self)
-        for party in self.hostAvIdToPartiesRunning.values():
+        for party in list(self.hostAvIdToPartiesRunning.values()):
             party.requestDelete()
         del self.avIdToPartyZoneId
         del self.hostAvIdToPartiesRunning
@@ -659,8 +662,8 @@ class DistributedPartyManagerAI(DistributedObjectAI):
             # If the host got here and there's no party for him, then start a party.
             # TODO-parties: Double check on the party shard dict to make sure that toon's party is not happening somewhere else.
             if (
-                (not senderId in self.hostAvIdToPartiesRunning) and
-                (not senderId in self.hostAvIdToClosingPartyZoneId)
+                (senderId not in self.hostAvIdToPartiesRunning) and
+                (senderId not in self.hostAvIdToClosingPartyZoneId)
                ):
                 # The host is starting a party, let's clear him out of the avIdToPartyZoneId
                 #self.clearPartyZoneId(senderId) # this doesn't clear him out of guests
@@ -732,6 +735,7 @@ class DistributedPartyManagerAI(DistributedObjectAI):
                 self.notify.warning('suspicious %d trying to start a party when none can start' % senderId)
                 self.__sendNoPartyZoneToClient(senderId)
                 return
+
 
         # We have a toon visiting another toon's party or a host visiting an
         # already started party, update dicts
@@ -846,7 +850,7 @@ class DistributedPartyManagerAI(DistributedObjectAI):
         if avId == hostId:
             # We have to tell the uberdog that we've started a new party so it can
             # update all the other AIs with public party info (but only host does this)
-            if not avId in self.hostAvIdToAllPartiesInfo:
+            if avId not in self.hostAvIdToAllPartiesInfo:
                 self.air.sendUpdateToDoId(
                     "DistributedPartyManager",
                     'partyHasStartedAiToUd',
@@ -966,7 +970,7 @@ class DistributedPartyManagerAI(DistributedObjectAI):
 
     def clearPartyZoneId(self, avId, zoneIdFromClient = None):
         """Clear avId to partyzoneId dict, if zoneIdFromClient is not none, do it only if they match."""
-        if not avId in self.avIdToPartyZoneId:
+        if avId not in self.avIdToPartyZoneId:
             return
         zoneId = self.avIdToPartyZoneId[avId]
         frame = sys._getframe(1)
@@ -996,7 +1000,7 @@ class DistributedPartyManagerAI(DistributedObjectAI):
 
         # there is a chance that the owner will already have left (by
         # closing the window).  We need to handle that gracefully.
-        if not partyInfo.hostId in self.avIdToPartyZoneId:
+        if partyInfo.hostId not in self.avIdToPartyZoneId:
             self.notify.warning("Party Zone info was requested, but the guest left before it could be recived: %d" % estateId)
             return
 
@@ -1317,6 +1321,7 @@ class DistributedPartyManagerAI(DistributedObjectAI):
                      hostName, activityIds, partyId]
                 )
 
+
     def magicWordEnd(self, senderId):
         """End the party prematurely as the sender said a magic word."""
         # first test if we are hosting a party
@@ -1340,6 +1345,7 @@ class DistributedPartyManagerAI(DistributedObjectAI):
         taskMgr.doMethodLater(0.1 + kickDelay + 10.0, self.__cleanupParty, "DistributedPartyManagerAI_CleanUpPartyZone_%d"%partyZoneId, [hostId,partyZoneId])
 
         return ("Party Zone %d Ending Soon" % partyZoneId)
+
 
     def deductMoneyFromOfflineToon(self, toonId, cost):
         """Deduct the cost of the party from an offline toon."""
@@ -1378,6 +1384,7 @@ class DistributedPartyManagerAI(DistributedObjectAI):
             self.air.writeServerEvent('suspicious', toonId,
                                       "gotOfflineToon - Host %s got away with buying a party he can't afford! totalMoney=%s cost=%s"
                                       % (toonId,totalMoney, cost))
+
 
         # takeMoney is doing a b_setMoney, so that gets written into the otp database
         # db = DatabaseObject.DatabaseObject(self.air, toon.doId)
