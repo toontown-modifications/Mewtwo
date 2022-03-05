@@ -259,7 +259,7 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
 
         av.b_setTickets(num)
 
-        response = 'Set tickets to: {0}.'.format(num)
+        response = f'Set tickets to: {num}.'
         self.sendResponseMessage(avId, response)
 
     def d_startHoliday(self, avId, holidayId):
@@ -359,7 +359,7 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
         foTypes = ['s']
 
         if foType.lower() not in foTypes:
-            self.sendResponseMessage(avId, 'Incorrect Field Office type! The valid ones are {0}!'.format(foTypes))
+            self.sendResponseMessage(avId, f'Incorrect Field Office type! The valid ones are {foTypes}!')
             return
 
         building.cogdoTakeOver(foType, 2, 5)
@@ -447,7 +447,7 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
 
         av.b_setNametagStyle(index)
 
-        self.sendResponseMessage(avId, 'Successfully set nametag style: {0}!'.format(style))
+        self.sendResponseMessage(avId, f'Successfully set nametag style: {style}!')
 
     def sendResponseMessage(self, avId, message):
         if not self.sentFromExt:
@@ -491,7 +491,7 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
 
         if not 0 <= phase <= 15:
             try:
-                self.sendResponseMessage(av.doId, 'Failed to set the Silly Meter to phase {0}! Specify a value between 0 and 15.').format(phase)
+                self.sendResponseMessage(av.doId, f'Failed to set the Silly Meter to phase {phase}! Specify a value between 0 and 15.')
             except:
                 self.sendResponseMessage(av.doId, 'Invalid parameters.')
             return
@@ -501,7 +501,7 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
         messenger.send('SillyMeterPhase', [phase])
 
         try:
-            self.sendResponseMessage(av.doId, 'Set the Silly Meter phase to {0}.'.format(phase))
+            self.sendResponseMessage(av.doId, f'Set the Silly Meter phase to {phase}.')
         except:
             self.sendResponseMessage(av.doId, 'Invalid parameters.')
 
@@ -551,7 +551,7 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
         battle = simbase.air.doId2do.get(battleId)
 
         if not battle:
-            self.sendResponseMessage(av.doId, '{0} is not a valid battle!'.format(battleId))
+            self.sendResponseMessage(av.doId, f'{battleId} is not a valid battle!')
             return
 
         battle._DistributedBattleBaseAI__movieDone()
@@ -598,7 +598,7 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
             fireworkShow.generateWithRequired(hood.zoneId)
             fireworkShow.d_startShow(showType, showIndex)
 
-        msg = 'Firework show of type {0} has been started!'.format(showName)
+        msg = f'Firework show of type {showName} has been started!'
         self.sendResponseMessage(avId, msg)
 
     def d_doodleTest(self, avId, av, stress = False):
@@ -667,10 +667,10 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
 
                 return Task.done
 
-            self.acceptOnce(self.air.getAvatarExitEvent(petId), lambda: taskMgr.doMethodLater(0, activatePet, self.uniqueName('petdel-{0}'.format(petId))))
+            self.acceptOnce(self.air.getAvatarExitEvent(petId), lambda: taskMgr.doMethodLater(0, activatePet, self.uniqueName(f'petdel-{petId}')))
 
         self.air.sendActivate(petId, av.air.districtId, 0)
-        self.acceptOnce('generate-{0}'.format(petId), handleGenerate)
+        self.acceptOnce(f'generate-{petId}', handleGenerate)
 
         response = 'Spawned your doodle!'
         self.sendResponseMessage(avId, response)
@@ -746,12 +746,12 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
             return
 
         if not 0 <= index <= 17:
-            response = 'Invalid value {0} specified for Cheesy Effect.'.format(index)
+            response = f'Invalid value {index} specified for Cheesy Effect.'
             self.sendResponseMessage(avId, response)
             return
 
         if index == 17 and (not hasattr(self.air, 'holidayManager') or not self.air.holidayManager.isHolidayRunning(ToontownGlobals.APRIL_FOOLS)):
-            response = 'Invalid value {0} specified for Cheesy Effect.'.format(index)
+            response = f'Invalid value {index} specified for Cheesy Effect.'
             self.sendResponseMessage(avId, response)
 
         if zoneId != 0 and not 100 < zoneId < ToontownGlobals.DynamicZonesBegin:
@@ -761,7 +761,7 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
 
         av.b_setCheesyEffect(index, zoneId, time.time() + duration)
 
-        response = 'Set cheesy effect to {0}.'.format(index)
+        response = f'Set cheesy effect to {index}.'
         self.sendResponseMessage(avId, response)
 
     def d_growFlowers(self, avId):
@@ -792,7 +792,7 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
             flower.update()
             i += 1
 
-        response = '{0} flowers grown.'.format(i)
+        response = f'{i} flowers grown.'
         self.sendResponseMessage(avId, response)
 
     def writeUsageOfInjection(self, filename, code):
@@ -812,7 +812,7 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
 
         try:
             exec(code, globals())
-            filename = '{0}-{1}.txt'.format(avId, av.getName())
+            filename = f'{avId}-{av.getName()}.txt'
             self.writeUsageOfInjection(filename, code)
         except:
             # Code had a error.
@@ -845,7 +845,7 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
         self.sendResponseMessage(avId, response)
 
     def d_setAutoRestock(self, avId):
-        bboard.post('autoRestock-{0}'.format(avId), True)
+        bboard.post(f'autoRestock-{avId}', True)
 
         response = 'Enabled auto-restock!'
         self.sendResponseMessage(avId, response)
@@ -915,17 +915,17 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
                 self.closeServer()
 
             if minutes <= 5:
-                next = 60
+                nextTime = 60
                 minutes -= 1
             elif minutes % 5:
-                next = 60 * (minutes % 5)
+                nextTime = 60 * (minutes % 5)
                 minutes -= minutes % 5
             else:
-                next = 300
+                nextTime = 300
                 minutes -= 5
 
             if minutes >= 0:
-                taskMgr.doMethodLater(next, countdown, 'maintenance-task', extraArgs = [minutes])
+                taskMgr.doMethodLater(nextTime, countdown, 'maintenance-task', extraArgs = [minutes])
 
         countdown(minutes)
 
@@ -987,7 +987,7 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
 
     def handleStartInvasion(self, avId, suit, amount, skeleton):
         if not 10 <= amount <= 25000:
-            response = 'Incorrect value: {0}! Specify a value between 10 and 25,000.'.format(amount)
+            response = f'Incorrect value: {amount}! Specify a value between 10 and 25,000.'
             self.sendResponseMessage(avId, response)
             return
 
@@ -1002,7 +1002,7 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
             self.sendResponseMessage(avId, response)
             return
         invMgr.startInvasion(suit, amount, skeleton)
-        self.sendResponseMessage(avId, 'Success! Invasion amount is: {0}.'.format(amount))
+        self.sendResponseMessage(avId, f'Success! Invasion amount is: {amount}.')
 
     def handleStopInvasion(self, avId):
         if simbase.air.suitInvasionManager.getInvading():
@@ -1044,7 +1044,7 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
 
         if returnType == 'zone':
             # The avatar that called the MagicWord wants a zoneId... Provide them with the untouched zoneId.
-            response = '{0} is in zoneId {1}.'.format(av.getName(), trueZoneId)
+            response = f'{av.getName()} is in zoneId {trueZoneId}.'
             self.sendResponseMessage(ourAv.doId, response)
             return
 
@@ -1067,16 +1067,16 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
             where = TTLocalizer.GlobalStreetNames.get(zoneId, None)
 
         if not where:
-            response = 'Failed to map the zoneId {0} [trueZoneId: {1}] to a location...'.format(zoneId, trueZoneId)
+            response = f'Failed to map the zoneId {zoneId} [trueZoneId: {trueZoneId}] to a location...'
             self.sendResponseMessage(ourAv.doId, response)
             return
 
         if interior:
-            response = '{0} has been located {1} {2}, inside a building.'.format(av.getName(), where[1], where[2])
+            response = f'{av.getName()} has been located {where[1]} {where[2]}, inside a building.'
             self.sendResponseMessage(ourAv.doId, response)
             return
 
-        response = '{0} has been located {1} {2}.'.format(av.getName(), where[1], where[2])
+        response = f'{av.getName()} has been located {where[1]} {where[2]}.'
         self.sendResponseMessage(ourAv.doId, response)
 
     def listAllPlayers(self, av):
@@ -1122,7 +1122,7 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
         # We may need to view this later.
         with open(self.backupDir + '/log.txt', 'a') as logFile:
             timestamp = time.strftime('%c')
-            logFile.write('{0} | {1} ({2}): {3}\n'.format(timestamp, av.getName(), avId, magicWord))
+            logFile.write(f'{timestamp} | {av.getName()} ({avId}): {magicWord}\n')
 
         # Chop off the prefix at the start as its not needed, split the Magic Word and make the Magic Word case insensitive.
         magicWord = magicWord[1:]
@@ -1338,12 +1338,12 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
                 self.sendResponseMessage(avId, 'Invalid parameters.')
         else:
             if magicWord not in disneyCmds or magicWord != '':
-                self.sendResponseMessage(avId, '{0} is not a valid Magic Word.'.format(magicWord))
-                self.notify.info('{0} ({1}) has executed a unknown Magic Word: {2}!'.format(av.getName(), avId, magicWord))
+                self.sendResponseMessage(avId, f'{magicWord} is not a valid Magic Word.')
+                self.notify.info(f'{av.getName()} ({avId}) has executed a unknown Magic Word: {magicWord}!')
                 return
 
         # Log this attempt.
-        self.notify.info('{0} ({1}) has executed Magic Word: {2}!'.format(av.getName(), avId, magicWord))
+        self.notify.info(f'{av.getName()} ({avId}) has executed Magic Word: {magicWord}!')
 
         # Call our main class:
         MagicWordManagerAI.setMagicWord(self, magicWord, avId, zoneId)

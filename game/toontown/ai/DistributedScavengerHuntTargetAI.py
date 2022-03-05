@@ -18,7 +18,7 @@ class DistributedScavengerHuntTargetAI(DistributedObjectAI):
         toon = self.air.doId2do.get(avId)
 
         if not toon:
-            message = 'Unknown player {0} tried to attempt scavenger hunt!'.format(avId)
+            message = f'Unknown player {avId} tried to attempt scavenger hunt!'
             self.notify.warning(message)
             self.air.writeServerEvent('suspicious', avId, message)
             return

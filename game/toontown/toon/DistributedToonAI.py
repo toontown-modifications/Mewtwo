@@ -216,7 +216,6 @@ class DistributedToonAI(DistributedPlayerAI.DistributedPlayerAI, DistributedSmoo
         self.modulelist = ModuleListAI.ModuleList()
         self._dbCheckDoLater = None
         self.gameAccess = OTPGlobals.AccessFull
-        self.redeemedCodes = []
         return
 
     def generate(self):
@@ -4454,6 +4453,3 @@ class DistributedToonAI(DistributedPlayerAI.DistributedPlayerAI, DistributedSmoo
         print("hooked location")
         self.b_setLocation(self.parentId, zoneId)
         print(self.zoneId)
-
-    def setRedeemedCode(self, code):
-        self.redeemedCodes.append(code)

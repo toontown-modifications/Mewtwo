@@ -82,6 +82,7 @@ class DistributedPartyManagerUD(DistributedObjectGlobalUD):
         # currently running parties
         self.sendUpdateToAllAis("partyManagerUdStartingUp", [])
 
+
     def avatarLoggedIn(self, avatarId):
         """Handle an avatar just logging in."""
         # Note this is no longer sent by the AI but is instead in response to
@@ -497,6 +498,7 @@ class DistributedPartyManagerUD(DistributedObjectGlobalUD):
 
         return prioritizedPartyIds, prioritizedPartyInfo
 
+
     def _updateHostedParties(self, avatarId):
         """
         Push information about parties that avatarId is hosting across to the DistributedToon.
@@ -612,6 +614,7 @@ class DistributedPartyManagerUD(DistributedObjectGlobalUD):
                 [party[0]['hostId'], partyId, newPrivateStatus, errorCode ],
             )
             return
+
 
         # TODO updateResult is always empty, do we need to verify the update took?
         updateResult = self.partyDb.changePrivate(partyId, newPrivateStatus)
@@ -922,6 +925,7 @@ class DistributedPartyManagerUD(DistributedObjectGlobalUD):
         """Handle otp_server telling us an avatar is offline."""
         self.markAvatarOffline(avatarId)
 
+
     def markAvatarOnline(self, avatarId):
         """Mark an avatar as online."""
 
@@ -998,6 +1002,7 @@ class DistributedPartyManagerUD(DistributedObjectGlobalUD):
             self.sendUpdateToAllAis("partyHasFinishedUdToAllAi", [hostId])
             del self.hostAvIdToAllPartiesInfo[hostId]
 
+
     def partyManagerAIStartingUp(self, pmDoId, shardId):
         """An AI server is starting up (or restarting) , send him all public parties running."""
         # if this shardId is starting up, it implies that all parties running on this
@@ -1026,6 +1031,7 @@ class DistributedPartyManagerUD(DistributedObjectGlobalUD):
         # shard have been interrupted
         assert self.notify.debugStateCall(self)
         self.handleInterruptedPartiesOnShard(shardId)
+
 
     def updateAllPartyInfoToUd(self, hostId, startTime, shardId, zoneId, isPrivate, numberOfGuests, \
                                hostName, activityIds, partyId):

@@ -105,7 +105,7 @@ class SuitInvasionManagerAI:
         }
 
         try:
-            requests.post('https://api.sunrise.games/api/{0}'.format(actionType), json = data, headers = headers)
+            requests.post(f'https://api.sunrise.games/api/{actionType}', json = data, headers = headers)
         except:
             self.notify.warning('Failed to send to server!')
 

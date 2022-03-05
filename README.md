@@ -9,7 +9,7 @@ Mewtwo is a implementation of Disney's OTP server.
 [Linux SDK (x86_64)](https://rocketprogrammer.me/linux/py3.deb)
 
 ## Getting Started
-* `git clone https://git.sunrise.games/SunriseGames/Mewtwo`
+* `git clone https://gitlab.com/sunrisemmos/Mewtwo`
 * `python -m pip install -r requirements.txt`
 * `cd startup/win32`
 * `run_otpd.bat`
@@ -17,7 +17,7 @@ Mewtwo is a implementation of Disney's OTP server.
 * `run_ai.bat`
 
 ## Components
-* [OTP Server](https://git.sunrise.games/SunriseGames/OTP-Server)
+* [OTP Server](https://gitlab.com/sunrisemmos/OTP-Server)
 * [Panda3D](https://github.com/rocketprogrammer/panda3d)
 * [Anesidora](https://github.com/satire6/Anesidora)
 * [DNA Parser](https://github.com/rocketprogrammer/panda3d/tree/master/panda/src/dna)

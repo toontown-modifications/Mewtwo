@@ -27,7 +27,6 @@ want-instant-parties true
 want-loyalty-requirement true
 want-ds-anydbm false
 want-token-expirations false
-client-ping-disconnect false
 
 # Code Redemption
 max-code-redemption-attempts 5

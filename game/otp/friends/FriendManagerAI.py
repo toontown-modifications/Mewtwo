@@ -181,7 +181,7 @@ class FriendManagerAI(DistributedObjectAI):
         def randomChar():
             return random.choice(chars)
 
-        tfCode = '{0}{1}{2} {3}{4}{5}'.format(randomChar(), randomChar(), randomChar(), randomChar(), randomChar(), randomChar())
+        tfCode = f'{randomChar()}{randomChar()}{randomChar()} {randomChar()}{randomChar()}{randomChar()}'
         return tfCode
 
     def d_requestSecretResponse(self, avId, result, secret):

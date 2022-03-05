@@ -26,7 +26,7 @@ class DistributedDataStoreManagerAI(DistributedObjectGlobalAI):
         callback = self.ctx2Callback.get(context)
 
         if not callback:
-            self.notify.warning('Got receiveResults with unknown context: {0}'.format(context))
+            self.notify.warning(f'Got receiveResults with unknown context: {context}')
             return
 
         results = pickle.loads(results)

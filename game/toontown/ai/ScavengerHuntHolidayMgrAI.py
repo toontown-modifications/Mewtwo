@@ -51,7 +51,7 @@ class ScavengerHuntHolidayMgrAI(HolidayBaseAI):
             targetCtl = DistributedWinterCarolingTargetAI
             self.air.dataStoreManager.startStore(2)
         else:
-            self.notify.warning('Don\'t know which target to use for holiday {0}!'.format(self.holidayId))
+            self.notify.warning(f'Don\'t know which target to use for holiday {self.holidayId}!')
             return
 
         for zoneId in self.targetZones:

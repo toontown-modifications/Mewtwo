@@ -58,7 +58,7 @@ class DistributedFireworksCannonAI(DistributedFireworkShowAI):
         self.resetMovie(avId)
 
     def resetMovie(self, avId):
-        taskMgr.doMethodLater(2, self.d_setMovie, 'resetMovie-{0}'.format(self.doId), extraArgs = [HouseGlobals.FIREWORKS_MOVIE_CLEAR, avId, 0])
+        taskMgr.doMethodLater(2, self.d_setMovie, f'resetMovie-{self.doId}', extraArgs = [HouseGlobals.FIREWORKS_MOVIE_CLEAR, avId, 0])
 
     def d_freeAvatar(self, avId):
         self.sendUpdateToAvatarId(avId, 'freeAvatar', [])

@@ -18,7 +18,9 @@ from game.toontown.catalog.CatalogRentalItem import CatalogRentalItem
 from game.toontown.catalog.CatalogInvalidItem import CatalogInvalidItem
 from game.toontown.catalog.CatalogFurnitureItem import CatalogFurnitureItem
 
-import time
+from game.toontown.uberdog.ExtAgent import ServerGlobals
+
+import time, requests, json
 
 class TTCodeRedemptionMgrAI(DistributedObjectAI):
     notify = directNotify.newCategory('TTCodeRedemptionMgrAI')
@@ -30,6 +32,10 @@ class TTCodeRedemptionMgrAI(DistributedObjectAI):
 
         self.failedAttempts = 0
         self.maxCodeAttempts = config.GetInt('max-code-redemption-attempts', 5)
+
+        self.webHeaders = {
+            'User-Agent': 'SunriseGames-TTCodeRedemptionMgrAI'
+        }
 
     def d_redeemCodeResult(self, avId, context, result, awardMgrResult):
         self.sendUpdateToAvatarId(avId, 'redeemCodeResult', [context, result, awardMgrResult])
@@ -61,13 +67,8 @@ class TTCodeRedemptionMgrAI(DistributedObjectAI):
             awardMgrResult = 0
             self.failedAttempts = 0
 
-        # Has this avatar already redeemed this code?
-        if code.lower() in av.redeemedCodes:
-            # Yup!
-            result = TTCodeRedemptionConsts.RedeemErrors.CodeAlreadyRedeemed
-            awardMgrResult = AwardManagerConsts.GiveAwardErrors.GenericAlreadyHaveError
-            self.d_redeemCodeResult(avId, context, result, awardMgrResult)
-            return
+        # Make the code lowercase.
+        code = code.lower()
 
         # Iterate over these items and deliver item to player.
         items = self.getItemsForCode(code)
@@ -77,6 +78,14 @@ class TTCodeRedemptionMgrAI(DistributedObjectAI):
             result = TTCodeRedemptionConsts.RedeemErrors.CodeDoesntExist
             awardMgrResult = AwardManagerConsts.GiveAwardErrors.Success
             self.failedAttempts += 1
+            self.d_redeemCodeResult(avId, context, result, awardMgrResult)
+            return
+
+        # Has this avatar already redeemed this code?
+        if self.air.isProdServer() and str(avId) in self.getCodeRedeemers(code):
+            # Yup!
+            result = TTCodeRedemptionConsts.RedeemErrors.AwardCouldntBeGiven
+            awardMgrResult = AwardManagerConsts.GiveAwardErrors.AlreadyRented
             self.d_redeemCodeResult(avId, context, result, awardMgrResult)
             return
 
@@ -110,7 +119,7 @@ class TTCodeRedemptionMgrAI(DistributedObjectAI):
                     av.onAwardOrder.append(item)
                     av.b_setAwardSchedule(av.onAwardOrder)
                     result = TTCodeRedemptionConsts.RedeemErrors.Success
-                    av.setRedeemedCode(code)
+                    self.setRedeemedCode(code, avId)
                     awardMgrResult = AwardManagerConsts.GiveAwardErrors.Success
                 elif limited == 1:
                     result = TTCodeRedemptionConsts.RedeemErrors.AwardCouldntBeGiven
@@ -158,9 +167,6 @@ class TTCodeRedemptionMgrAI(DistributedObjectAI):
                 shirt = CatalogClothingItem(2003, 0)
             return [shirt]
         '''
-
-        # Make the code lowercase.
-        code = code.lower()
 
         # Our codes.
         if code == 'gadzooks':
@@ -231,3 +237,23 @@ class TTCodeRedemptionMgrAI(DistributedObjectAI):
             return [shirt, shorts, beans]
 
         return False
+
+    def getCodeRedeemers(self, code):
+        data = {
+            'redeemCode': code,
+            'secretKey': config.GetString('rpc-key'),
+            'serverName': ServerGlobals.serverToName[ServerGlobals.FINAL_TOONTOWN]
+        }
+
+        request = requests.post('https://toontastic.sunrise.games/api/codes/getCodeRedeemers.php', data, headers = self.webHeaders).json()
+        return json.loads(request['RedeemedBy'])
+
+    def setRedeemedCode(self, code, avId):
+        data = {
+            'redeemCode': code,
+            'secretKey': config.GetString('rpc-key'),
+            'avatarId': avId,
+            'serverName': ServerGlobals.serverToName[ServerGlobals.FINAL_TOONTOWN]
+        }
+
+        requests.post('https://toontastic.sunrise.games/api/codes/setCodeUsed.php', data, headers = self.webHeaders)
