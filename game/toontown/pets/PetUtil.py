@@ -8,11 +8,10 @@ def getPetInfoFromSeed(seed, safezoneId):
     random.seed(seed)
     dnaArray = PetDNA.getRandomPetDNA(safezoneId)
     gender = PetDNA.getGender(dnaArray)
-    nameString = PetNameGenerator.PetNameGenerator().randomName(gender=gender, seed=seed + safezoneId)
-    traitSeed = PythonUtil.randUint31()
+    nameString = PetNameGenerator.PetNameGenerator().randomName(gender = gender, seed = seed + safezoneId)
+    traitSeed = PythonUtil.randUint31(rng = random.random)
     random.setstate(S)
     return (nameString, dnaArray, traitSeed)
-
 
 def getPetCostFromSeed(seed, safezoneId):
     name, dna, traitSeed = getPetInfoFromSeed(seed, safezoneId)
