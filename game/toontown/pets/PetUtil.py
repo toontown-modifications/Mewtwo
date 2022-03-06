@@ -1,7 +1,7 @@
 from game.toontown.pets import PetDNA, PetTraits, PetConstants
 from game.toontown.pets import PetNameGenerator
 from direct.showbase import PythonUtil
-import random
+from libsunrise import random
 
 def getPetInfoFromSeed(seed, safezoneId):
     S = random.getstate()
