@@ -3,56 +3,38 @@ from direct.directnotify.DirectNotifyGlobal import directNotify
 from game.toontown.pets import PetDNA, PetMood, PetTraits, PetUtil
 from game.toontown.pets.PetNameGenerator import PetNameGenerator
 
-import json, os, random, string, time
-
-MINUTE = 60
-HOUR = 60 * MINUTE
-DAY = 24 * HOUR
-
-def getDayId():
-    return int(time.time() // DAY)
+import time
 
 class PetManagerAI:
     notify = directNotify.newCategory('PetManagerAI')
-    cachePath = config.GetString('air-pet-cache', 'backups/pets/')
 
     def __init__(self, air):
         self.air = air
-        self.cacheFile = f'{self.cachePath}pets_{self.air.districtId}.pets'
-
-        if not os.path.exists(self.cachePath):
-            os.makedirs(self.cachePath)
-
-        if os.path.isfile(self.cacheFile):
-            with open(self.cacheFile, 'rb') as f:
-                data = f.read()
-
-            try:
-                self.seeds = json.loads(data)
-            except ValueError:
-                self.seeds = {}
-
-            if self.seeds.get('day', -1) != getDayId():
-                self.seeds = {}
-        else:
-            self.seeds = {}
 
         self.nameGenerator = PetNameGenerator()
 
-    def getAvailablePets(self, firstNumPets, secondNumPets):
-        numPets = firstNumPets + secondNumPets
+    def getAvailablePets(self, numDaysPetAvailable, numPetsPerDay):
+        """
+        This should get called when we first enter the PetChooser.
+        It creates the list of toons that are available here.
+        """
 
-        if not self.seeds.get(str(numPets), []) or self.seeds.get('day', -1) != getDayId():
-            self.seeds[str(numPets)] = random.sample(range(256), numPets)
-            self.updatePetSeedCache()
+        from libsunrise import random
+        import time
+        S = random.getstate()
 
-        return self.seeds.get(str(numPets), [numPets])[0:numPets]
+        curDay = int(time.time() / 60.0 / 60.0 / 24.0)
+        seedMax = 2 ** 30  # or something like that
+        seeds = []
 
-    def updatePetSeedCache(self):
-        self.seeds['day'] = getDayId()
+        # get a seed for each day
+        for i in range(numDaysPetAvailable):
+            random.seed(curDay + i)
+            # get a seed for each pet
+            for j in range(numPetsPerDay):
+                seeds.append(random.randrange(seedMax))
 
-        with open(self.cacheFile, 'w') as f:
-            f.write(json.dumps(self.seeds))
+        return seeds
 
     def createNewPetFromSeed(self, avId, seed, nameIndex, gender, safeZoneId):
         av = self.air.doId2do.get(avId)
