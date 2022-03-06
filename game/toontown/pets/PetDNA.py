@@ -243,7 +243,7 @@ def getBodyRarity(bodyIndex):
                 weight[body] = PetRarities['body'][zoneId][body]
 
     minWeight = min(weight.values())
-    rarity = (weight[bodyName] - minWeight) // (totalWeight - minWeight)
+    rarity = (weight[bodyName] - minWeight) / (totalWeight - minWeight)
     return rarity
 
 def getRarity(dna):
