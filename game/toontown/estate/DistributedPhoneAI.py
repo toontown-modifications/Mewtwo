@@ -1,7 +1,7 @@
 import time, base64
 from datetime import datetime
 
-from direct.directnotify import DirectNotifyGlobal
+from direct.directnotify.DirectNotifyGlobal import directNotify
 from direct.distributed.ClockDelta import globalClockDelta
 
 from game.toontown.catalog import CatalogItem
@@ -47,11 +47,10 @@ class LoadGiftAvatar:
         del self.phone.giftingOperations[self.avId]
 
 class DistributedPhoneAI(DistributedFurnitureItemAI):
-    notify = DirectNotifyGlobal.directNotify.newCategory('DistributedPhoneAI')
+    notify = directNotify.newCategory('DistributedPhoneAI')
 
-    def __init__(self, air, house, furnitureMgr, catalogItem):
-        DistributedFurnitureItemAI.__init__(self, air, house, furnitureMgr, catalogItem)
-        self.house = house
+    def __init__(self, air, furnitureMgr, catalogItem):
+        DistributedFurnitureItemAI.__init__(self, air, furnitureMgr, catalogItem)
         self.furnitureMgr = furnitureMgr
         self.sx = 1
         self.sy = 1

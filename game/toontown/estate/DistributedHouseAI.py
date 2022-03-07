@@ -19,7 +19,7 @@ class DistributedHouseAI(DistributedObjectAI):
         self.housePos = 0
         self.houseType = 0
         self.gardenPos = 0
-        self.avatarId = 0
+        self.ownerId = 0
         self.name = ''
         self.color = 0
         self.atticItems = CatalogItemList(store=CatalogItem.Customization)
@@ -60,7 +60,7 @@ class DistributedHouseAI(DistributedObjectAI):
         self.interior.generateWithRequired(self.interiorZone)
 
         # Generate our mailbox:
-        if self.avatarId:
+        if self.ownerId:
             self.mailbox = DistributedMailboxAI(self.air, self)
             self.mailbox.generateWithRequired(self.zoneId)
 
@@ -77,7 +77,7 @@ class DistributedHouseAI(DistributedObjectAI):
             self.interior.furnitureManager.requestDelete()
 
         self.interior.requestDelete()
-        if self.avatarId:
+        if self.ownerId:
             self.mailbox.requestDelete()
 
         if self.gardenManager:
@@ -127,7 +127,7 @@ class DistributedHouseAI(DistributedObjectAI):
         return self.gardenPos
 
     def setAvatarId(self, avatarId):
-        self.avatarId = avatarId
+        self.ownerId = avatarId
 
     def d_setAvatarId(self, avatarId):
         self.sendUpdate('setAvatarId', [avatarId])
@@ -137,7 +137,7 @@ class DistributedHouseAI(DistributedObjectAI):
         self.d_setAvatarId(avatarId)
 
     def getAvatarId(self):
-        return self.avatarId
+        return self.ownerId
 
     def setName(self, name):
         self.name = name

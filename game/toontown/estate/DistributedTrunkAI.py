@@ -1,15 +1,14 @@
-from direct.directnotify import DirectNotifyGlobal
+from direct.directnotify.DirectNotifyGlobal import directNotify
 
 from game.toontown.estate import ClosetGlobals
 from game.toontown.estate.DistributedClosetAI import DistributedClosetAI
 from game.toontown.toon import ToonDNA
 
-
 class DistributedTrunkAI(DistributedClosetAI):
-    notify = DirectNotifyGlobal.directNotify.newCategory('DistributedTrunkAI')
+    notify = directNotify.newCategory('DistributedTrunkAI')
 
-    def __init__(self, air, house, furnitureMgr, catalogItem):
-        DistributedClosetAI.__init__(self, air, house, furnitureMgr, catalogItem)
+    def __init__(self, air, furnitureMgr, catalogItem):
+        DistributedClosetAI.__init__(self, air, furnitureMgr, catalogItem)
         self.hatList = []
         self.glassesList = []
         self.backpackList = []

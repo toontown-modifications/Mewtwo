@@ -1,16 +1,16 @@
-from otp.ai.AIBaseGlobal import *
+from game.otp.ai.AIBaseGlobal import *
 from pandac.PandaModules import *
 from direct.directnotify import DirectNotifyGlobal
 from direct.fsm import ClassicFSM
 from direct.distributed import ClockDelta
-import DistributedFurnitureItemAI
+from . import DistributedFurnitureItemAI
 from direct.task.Task import Task
 from direct.fsm import State
-from toontown.toon import ToonDNA
-from toontown.ai import DatabaseObject
-from toontown.toon import DistributedToonAI
-import ClosetGlobals
-from toontown.toon import InventoryBase
+from game.toontown.toon import ToonDNA
+from game.toontown.ai import DatabaseObject
+from game.toontown.toon import DistributedToonAI
+from . import ClosetGlobals
+from game.toontown.toon import InventoryBase
 
 class DistributedClosetAI(DistributedFurnitureItemAI.DistributedFurnitureItemAI):
 
@@ -85,7 +85,7 @@ class DistributedClosetAI(DistributedFurnitureItemAI.DistributedFurnitureItemAI)
         # Find the owner of the closet
         if self.ownerId:
             self.ownerAv = None
-            if self.air.doId2do.has_key(self.ownerId):
+            if self.ownerId in self.air.doId2do:
                 self.ownerAv = self.air.doId2do[self.ownerId]
                 self.__openCloset()
             else:
@@ -96,7 +96,7 @@ class DistributedClosetAI(DistributedFurnitureItemAI.DistributedFurnitureItemAI)
                 db.doneEvent = gotAvEvent
                 db.getFields(db.getDatabaseFields(aidc))
         else:
-            print "this house has no owner, therefore we can't use the closet"
+            print("this house has no owner, therefore we can't use the closet")
             # send a reset message to the client.  same as a completed purchase
             self.completePurchase(avId)
 
@@ -118,7 +118,7 @@ class DistributedClosetAI(DistributedFurnitureItemAI.DistributedFurnitureItemAI)
         
     def __gotOwnerAv(self, db, retCode):
         print ("gotOwnerAv information")
-        if retCode == 0 and db.values.has_key('setDNAString'):
+        if retCode == 0 and 'setDNAString' in db.values:
             aidc = self.air.dclassesByName['DistributedToonAI']
             self.ownerAv = DistributedToonAI.DistributedToonAI(self.air)
             self.ownerAv.doId = db.doId
@@ -128,7 +128,7 @@ class DistributedClosetAI(DistributedFurnitureItemAI.DistributedFurnitureItemAI)
             
             try:
                 db.fillin(self.ownerAv, aidc)
-            except Exception, theException:
+            except Exception as theException:
                 assert(self.notify.debug('suspicious: customer %s, owner %s: Exception = %s: DistributedClosetAI.__gotOwnerAv: invalid db' %(self.customerId, db.doId, str(theException))))
                 assert(self.notify.debug("FIXME: %s: DistributedClosetAI.__gotOwnerAv: This toon's DB is so broken: look at setClothesBottomsList." %(db.doId)))
                 self.air.writeServerEvent('suspicious', self.customerId, 'DistributedClosetAI.__gotOwnerAv: invalid db. ownerId %s' % (db.doId))
@@ -195,7 +195,7 @@ class DistributedClosetAI(DistributedFurnitureItemAI.DistributedFurnitureItemAI)
                 self.air.writeServerEvent('suspicious', avId, 'DistributedClosetAI.setDNA current customer %s' % (self.customerId))
                 self.notify.warning("customerId: %s, but got setDNA for: %s" % (self.customerId, avId))
             return
-        if (self.air.doId2do.has_key(avId)):
+        if (avId in self.air.doId2do):
             av = self.air.doId2do[avId]
 
             # make sure the DNA is valid

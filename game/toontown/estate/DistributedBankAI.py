@@ -1,16 +1,15 @@
-from direct.directnotify import DirectNotifyGlobal
+from direct.directnotify.DirectNotifyGlobal import directNotify
 from direct.distributed.ClockDelta import globalClockDelta
 
 from game.toontown.estate import BankGlobals
 from game.toontown.estate.DistributedFurnitureItemAI import DistributedFurnitureItemAI
 
-
 class DistributedBankAI(DistributedFurnitureItemAI):
-    notify = DirectNotifyGlobal.directNotify.newCategory('DistributedBankAI')
+    notify = directNotify.newCategory('DistributedBankAI')
 
-    def __init__(self, air, house, furnitureMgr, catalogItem):
-        DistributedFurnitureItemAI.__init__(self, air, house, furnitureMgr, catalogItem)
-        self.ownerId = self.house.avatarId
+    def __init__(self, air, furnitureMgr, catalogItem):
+        DistributedFurnitureItemAI.__init__(self, air, furnitureMgr, catalogItem)
+        self.ownerId = self.furnitureMgr.house.ownerId
         self.avId = 0
 
     def avatarEnter(self):
