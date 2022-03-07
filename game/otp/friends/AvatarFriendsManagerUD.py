@@ -1,10 +1,8 @@
-from direct.directnotify import DirectNotifyGlobal
-from direct.distributed.DistributedObjectUD import DistributedObjectUD
+from direct.directnotify.DirectNotifyGlobal import directNotify
+from direct.distributed.DistributedObjectGlobalUD import DistributedObjectGlobalUD
 
-
-class AvatarFriendsManagerUD(DistributedObjectUD):
-    notify = DirectNotifyGlobal.directNotify.newCategory(
-        "AvatarFriendsManagerUD")
+class AvatarFriendsManagerUD(DistributedObjectGlobalUD):
+    notify = directNotify.newCategory('AvatarFriendsManagerUD')
 
     def online(self):
         pass
