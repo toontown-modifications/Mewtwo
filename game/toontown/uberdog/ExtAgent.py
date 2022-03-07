@@ -1140,8 +1140,6 @@ class ExtAgent(ServerBase):
                         access = OTPGlobals.AccessVelvetRope
 
                 activateFields = {
-                    'setCommonChatFlags': [0],
-                    'setWhitelistChatFlags': [OTPGlobals.CommonChat],
                     'setAccess': [access]
                 }
 
@@ -1179,9 +1177,6 @@ class ExtAgent(ServerBase):
                 # Tell the friends manager that an avatar is coming online.
                 for x, y in fields['setFriendsList'][0]:
                     self.air.netMessenger.send('avatarOnline', [avId, x])
-
-                # XD
-                self.air.playerFriendsManager.avatarOnline(avId)
 
                 # Assign a POST_REMOVE for an avatar that disconnects unexpectedly.
                 cleanupDatagram = self.air.netMessenger.prepare('avatarOffline', [avId])

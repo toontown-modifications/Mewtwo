@@ -306,21 +306,6 @@ class FriendsManagerUD:
             newOperation.start()
             self.operations[avId] = newOperation
 
-        '''
-        else:
-            # Undeclare to the friend.
-            friendDg = PyDatagram()
-            friendDg.addServerHeader(self.air.GetPuppetConnectionChannel(friendId), self.air.ourChannel, CLIENTAGENT_UNDECLARE_OBJECT)
-            friendDg.addUint32(avId)
-            self.air.send(friendDg)
-
-            # Undeclare to the avatar.
-            avatarDg = PyDatagram()
-            avatarDg.addServerHeader(self.air.GetAccountConnectionChannel(avId), self.air.ourChannel, CLIENTAGENT_UNDECLARE_OBJECT)
-            avatarDg.addUint32(friendId)
-            self.air.send(avatarDg)
-            '''
-
     def postAddFriend(self, avId, friendId):
         # Tell the client that their friend is online.
         datagram = PyDatagram()
@@ -362,6 +347,8 @@ class FriendsManagerUD:
         datagram.addUint8(1) # whitelistChatFlags
 
         self.sendDatagram(avId, datagram)
+
+        # self.air.avatarFriendsManager.handleFriendOnline(avId, otherId)
 
     def goingOffline(self, avId):
         newOperation = GetAvatarInfoOperation(self, avId, avId, self.__handleGoingOffline)

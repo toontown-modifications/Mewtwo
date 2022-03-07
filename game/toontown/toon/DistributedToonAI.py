@@ -255,6 +255,8 @@ class DistributedToonAI(DistributedPlayerAI.DistributedPlayerAI, DistributedSmoo
 
         if self.isPlayerControlled():
             self.sendUpdate('setDefaultShard', [self.air.districtId])
+            self.sendUpdate('setCommonChatFlags', [0])
+            self.sendUpdate('setWhitelistChatFlags', [OTPGlobals.CommonChat])
 
     def setLocation(self, parentId, zoneId):
         DistributedPlayerAI.DistributedPlayerAI.setLocation(self, parentId, zoneId)
