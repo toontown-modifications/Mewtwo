@@ -241,7 +241,7 @@ class FriendsManagerUD:
                 datagram.addUint16(53) # CLIENT_FRIEND_ONLINE
                 datagram.addUint32(friendId)
 
-                datagram.addUint8(1) # commonChatFlags
+                datagram.addUint8(0) # commonChatFlags
                 datagram.addUint8(1) # whitelistChatFlags
 
                 self.sendDatagram(avId, datagram)
@@ -326,7 +326,7 @@ class FriendsManagerUD:
         datagram.addUint16(53) # CLIENT_FRIEND_ONLINE
         datagram.addUint32(friendId)
 
-        datagram.addUint8(1) # commonChatFlags
+        datagram.addUint8(0) # commonChatFlags
         datagram.addUint8(1) # whitelistChatFlags
 
         self.sendDatagram(avId, datagram)
@@ -357,7 +357,7 @@ class FriendsManagerUD:
         datagram.addUint16(53) # CLIENT_FRIEND_ONLINE
         datagram.addUint32(otherId)
 
-        datagram.addUint8(1) # commonChatFlags
+        datagram.addUint8(0) # commonChatFlags
         datagram.addUint8(1) # whitelistChatFlags
 
         self.sendDatagram(avId, datagram)

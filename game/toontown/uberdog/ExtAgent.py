@@ -1135,7 +1135,8 @@ class ExtAgent(ServerBase):
                         access = OTPGlobals.AccessVelvetRope
 
                 activateFields = {
-                    'setCommonChatFlags': [ToontownGlobals.CommonChat],
+                    'setCommonChatFlags': [0],
+                    'setWhitelistChatFlags': [OTPGlobals.CommonChat],
                     'setAccess': [access]
                 }
 
