@@ -992,46 +992,16 @@ class ExtAgent(ServerBase):
 
                 blacklisted = self.filterBlacklist(doId, accId, message)
 
-                avId = self.air.getAvatarIdFromSender()
+                if blacklisted:
+                    cleanMessage, modifications = '', []
+                else:
+                    cleanMessage, modifications = self.filterWhiteList(message)
 
-                def handleAvatar(dclass, fields):
-                    if dclass != self.air.dclassesByName['DistributedToonUD']:
-                        return
-
-                    senderName = fields['setName'][0]
-                    senderFriendsList = fields['setFriendsList'][0]
-
-                    trueFriends = 0
-                    sfTargets = []
-
-                    for friend in senderFriendsList:
-                        if friend[1]:
-                            trueFriends += 1
-                            sfTargets.append(friend[0])
-                            #channel = self.air.GetPuppetConnectionChannel(friend[0])
-                            #sfTargets.append(channel)
-
-                    if trueFriends or blacklisted:
-                        # We have true friends or used a blacklisted word; just pass an empty array
-                        # in place of any necessary modifications.
-                        cleanMessage, modifications = message, []
-                    else:
-                        # No true friends here; pass any existing modifications.
-                        cleanMessage, modifications = self.filterWhiteList(message)
-
-                    # Construct a new aiFormatUpdate.
-                    resp = toon.aiFormatUpdate('setTalk', doId, doId, self.air.ourChannel, [avId, 0, senderName, cleanMessage, modifications, 0])
-                    self.air.send(resp)
-
-                    # Construct a new aiFormatUpdate.
-                    for sfId in sfTargets:
-                        print(sfId)
-                        tfResp = toon.aiFormatUpdate('setTalk', sfId, sfId, self.air.ourChannel, [sfId, 0, senderName, cleanMessage, modifications, 0])
-                        self.air.send(tfResp)
-                    return
-
-                # Retrieve to see if this avatar has true friends.
-                self.air.dbInterface.queryObject(self.air.dbId, avId, handleAvatar)
+                # Construct a new aiFormatUpdate.
+                resp = toon.aiFormatUpdate('setTalk', doId, doId,
+                                           self.air.ourChannel,
+                                           [0, 0, '', cleanMessage, modifications, 0])
+                self.air.send(resp)
                 return
             elif fieldNumber == setTalkWhisper.getNumber():
                 # We'll have to unpack the data and send our own datagrams.
