@@ -7,7 +7,6 @@ from . import DistributedFurnitureItemAI
 from direct.task.Task import Task
 from direct.fsm import State
 from game.toontown.toon import ToonDNA
-from game.toontown.ai import DatabaseObject
 from game.toontown.toon import DistributedToonAI
 from . import ClosetGlobals
 from game.toontown.toon import InventoryBase
@@ -89,12 +88,8 @@ class DistributedClosetAI(DistributedFurnitureItemAI.DistributedFurnitureItemAI)
                 self.ownerAv = self.air.doId2do[self.ownerId]
                 self.__openCloset()
             else:
-                gotAvEvent = self.uniqueName("gotAvatar")
-                self.accept(gotAvEvent, self.__gotOwnerAv)
-                aidc = self.air.dclassesByName['DistributedToonAI']
-                db = DatabaseObject.DatabaseObject(simbase.air, self.ownerId)
-                db.doneEvent = gotAvEvent
-                db.getFields(db.getDatabaseFields(aidc))
+                self.air.dbInterface.queryObject(self.air.dbId, self.ownerId, self.__handleOwnerQuery,
+                                             self.air.dclassesByName['DistributedToonAI'])
         else:
             print("this house has no owner, therefore we can't use the closet")
             # send a reset message to the client.  same as a completed purchase
@@ -298,8 +293,13 @@ class DistributedClosetAI(DistributedFurnitureItemAI.DistributedFurnitureItemAI)
                 toon.b_setDNAString(self.customerDNA.makeNetString())
                 # Force a database write since the toon is gone and might
                 # have missed the distributed update.
-                db = DatabaseObject.DatabaseObject(self.air, avId)
-                db.storeObject(toon, ["setDNAString"])
+                dclass = self.air.dclassesByName['DistributedToonAI']
+
+                data = {
+                    'setDNAString': (self.customerDNA.makeNetString(),)
+                }
+
+                simbase.air.dbInterface.updateObject(self.air.dbId, avId, dclass, data)
         else:
             self.notify.warning('invalid customer avId: %s, customerId: %s ' % (avId, self.customerId))
 
@@ -381,6 +381,19 @@ class DistributedClosetAI(DistributedFurnitureItemAI.DistributedFurnitureItemAI)
 
     def getOwnerId(self):
         return self.ownerId
+
+    def __handleOwnerQuery(self, dclass, fields):
+        self.topList = fields['setClothesTopsList'][0]
+        self.bottomList = fields['setClothesBottomsList'][0]
+        style = ToonDNA.ToonDNA()
+        style.makeFromNetString(fields['setDNAString'][0])
+        self.gender = style.gender
+
+        self.d_setState(ClosetGlobals.OPEN, self.customerId, self.ownerId, self.gender, self.topList, self.bottomList)
+
+
+        taskMgr.doMethodLater(ClosetGlobals.TIMEOUT_TIME, self.__handleClosetTimeout,
+                              'closet-timeout-%d' % self.customerId, extraArgs=[self.customerId])
 
     
     if __debug__:
