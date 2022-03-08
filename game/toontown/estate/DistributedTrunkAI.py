@@ -1,4 +1,5 @@
 from direct.directnotify.DirectNotifyGlobal import directNotify
+from direct.distributed.ClockDelta import globalClockDelta
 
 from game.toontown.estate import ClosetGlobals
 from game.toontown.estate.DistributedClosetAI import DistributedClosetAI
