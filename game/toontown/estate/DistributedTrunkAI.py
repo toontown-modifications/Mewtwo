@@ -76,6 +76,9 @@ class DistributedTrunkAI(DistributedClosetAI):
     def d_setState(self, mode, avId, ownerId, gender, hatList, glassesList, backpackList, shoesList):
         self.sendUpdate('setState', [mode, avId, ownerId, gender, hatList, glassesList, backpackList, shoesList])
 
+    def d_setMovie(self, mode, avId):
+        self.sendUpdate('setMovie', [mode, avId, globalClockDelta.getRealNetworkTime()])
+
     def removeItem(self, idx, texture, color, which):
         avId = self.air.getAvatarIdFromSender()
         av = self.air.doId2do.get(avId)
