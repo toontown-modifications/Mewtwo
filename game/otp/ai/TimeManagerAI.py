@@ -153,9 +153,9 @@ class TimeManagerAI(DistributedObjectAI.DistributedObjectAI):
     def checkAvOnDistrict(self, context, avId):
         av = self.air.doId2do.get(avId)
 
+        isOnShard = False
+
         if av:
             isOnShard = True
-        else:
-            isOnShard = False
 
         self.sendUpdateToAvatarId(avId, 'checkAvOnDistrictResult', [context, avId, isOnShard])
