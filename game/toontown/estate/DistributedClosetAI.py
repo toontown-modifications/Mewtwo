@@ -389,11 +389,15 @@ class DistributedClosetAI(DistributedFurnitureItemAI.DistributedFurnitureItemAI)
         style.makeFromNetString(fields['setDNAString'][0])
         self.gender = style.gender
 
-        self.d_setState(ClosetGlobals.OPEN, self.customerId, self.ownerId, self.gender, self.topList, self.bottomList)
+        self.sendUpdate("setState", [ClosetGlobals.OPEN,
+                                     self.customerId, self.ownerId,
+                                     self.ownerAv.gender,
+                                     self.topList, self.bottomList])
 
-
-        taskMgr.doMethodLater(ClosetGlobals.TIMEOUT_TIME, self.__handleClosetTimeout,
-                              'closet-timeout-%d' % self.customerId, extraArgs=[self.customerId])
+        # Start the timer
+        taskMgr.doMethodLater(ClosetGlobals.TIMEOUT_TIME, 
+                              self.sendTimeoutMovie,
+                              self.uniqueName('clearMovie'))
 
     
     if __debug__:
