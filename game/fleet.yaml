@@ -13,23 +13,25 @@
 # limitations under the License.
 
 apiVersion: "agones.dev/v1"
-kind: GameServer
+kind: Fleet
 metadata:
-  generateName: "mewtwo-"
+  name: mewtwo
 spec:
-  ports:
-  - name: default
-    portPolicy: Dynamic
-    containerPort: 7654
+  replicas: 2
   template:
     spec:
-      containers:
-      - name: mewtwo
-        image: registry.gitlab.com/rocketstoontownonline/game-otp/mewtwo
-        resources:
-          requests:
-            memory: "4Gi"
-            cpu: "512m"
-          limits:
-            memory: "4Gi"
-            cpu: "512m"
+      ports:
+      - name: default
+        containerPort: 7654
+      template:
+        spec:
+          containers:
+          - name: mewtwo
+            image: registry.gitlab.com/rocketstoontownonline/game-otp/mewtwo
+            resources:
+              requests:
+                memory: "4Gi"
+                cpu: "512m"
+              limits:
+                memory: "4Gi"
+                cpu: "512m"

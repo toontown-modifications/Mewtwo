@@ -45,6 +45,17 @@ class ToontownInternalRepository(AstronInternalRepository):
 
         AstronInternalRepository.handleDatagram(self, dgi)
 
+    def setAvatarDisconnectReason(self, avId, disconnectReason):
+        # This is told us by the client just before he disconnects.
+        self._avatarDisconnectReasons[avId] = disconnectReason
+
+    def getAvatarDisconnectReason(self, avId):
+        # Returns the reason (as reported by the client) for an
+        # avatar's unexpected exit, or 0 if the reason is unknown.  It
+        # is only valid to query this during the handler for the
+        # avatar's unexpected-exit event.
+        return self._avatarDisconnectReasons.get(avId, 0)
+
     def getAvatarIdFromSender(self):
         return self.getMsgSender() & 0xFFFFFFFF
 

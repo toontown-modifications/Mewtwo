@@ -42,11 +42,12 @@ class GetAvatarInfoOperation(FSM):
 
 class GetFriendsListOperation(FSM):
 
-    def __init__(self, mgr, avId, callback):
+    def __init__(self, mgr, avId, extended, callback):
         FSM.__init__(self, 'GetFriendsListOperation')
 
         self.mgr = mgr
         self.avId = avId
+        self.extended = extended
         self.callback = callback
 
         self.friendsDetails = []
@@ -74,7 +75,7 @@ class GetFriendsListOperation(FSM):
 
     def enterGetFriendDetails(self):
         if len(self.friendsList) <= 0:
-            self.callback(success = False, avId = self.avId, friendsDetails = None, onlineFriends = None)
+            self.callback(success = False, avId = self.avId, friendsDetails = None, onlineFriends = None, extended = self.extended)
             return
 
         for friendId, trueFriend in self.friendsList:
@@ -134,11 +135,11 @@ class GetFriendsListOperation(FSM):
             self.demand('Finished')
 
     def enterFinished(self):
-        self.callback(success = True, avId = self.avId, friendsDetails = self.friendsDetails, onlineFriends = self.onlineFriends)
+        self.callback(success = True, avId = self.avId, friendsDetails = self.friendsDetails, onlineFriends = self.onlineFriends, extended = self.extended)
 
     def enterFailure(self, reason):
         self.mgr.notify.warning(reason)
-        self.callback(success = False, avId = self.avId, friendsDetails = None, onlineFriends = None)
+        self.callback(success = False, avId = self.avId, friendsDetails = None, onlineFriends = None, extended = self.extended)
 
 class UpdateAvatarFieldOperation(FSM):
 
@@ -217,18 +218,18 @@ class FriendsManagerUD:
 
         del self.operations[avId]
 
-    def getFriendsListRequest(self, avId):
+    def getFriendsListRequest(self, avId, extended = False):
         if not avId:
             return
 
         if avId in self.operations:
             return
 
-        newOperation = GetFriendsListOperation(self, avId, self.__gotFriendsList)
+        newOperation = GetFriendsListOperation(self, avId, extended, self.__gotFriendsList)
         newOperation.start()
         self.operations[avId] = newOperation
 
-    def __gotFriendsList(self, success, avId, friendsDetails, onlineFriends):
+    def __gotFriendsList(self, success, avId, friendsDetails, onlineFriends, extended):
         self.deleteOperation(avId)
 
         clientChannel = self.air.GetPuppetConnectionChannel(avId)
@@ -241,14 +242,14 @@ class FriendsManagerUD:
                 datagram.addUint16(53) # CLIENT_FRIEND_ONLINE
                 datagram.addUint32(friendId)
 
-                datagram.addUint8(1) # commonChatFlags
+                datagram.addUint8(0) # commonChatFlags
                 datagram.addUint8(1) # whitelistChatFlags
 
                 self.sendDatagram(avId, datagram)
 
         resp = PyDatagram()
 
-        resp.addUint16(11) # CLIENT_GET_FRIEND_LIST_RESP
+        resp.addUint16(116 if extended else 11) # CLIENT_GET_FRIEND_LIST_RESP
         resp.addUint8(0 if success else 1)
 
         if success:
@@ -305,28 +306,13 @@ class FriendsManagerUD:
             newOperation.start()
             self.operations[avId] = newOperation
 
-        '''
-        else:
-            # Undeclare to the friend.
-            friendDg = PyDatagram()
-            friendDg.addServerHeader(self.air.GetPuppetConnectionChannel(friendId), self.air.ourChannel, CLIENTAGENT_UNDECLARE_OBJECT)
-            friendDg.addUint32(avId)
-            self.air.send(friendDg)
-
-            # Undeclare to the avatar.
-            avatarDg = PyDatagram()
-            avatarDg.addServerHeader(self.air.GetAccountConnectionChannel(avId), self.air.ourChannel, CLIENTAGENT_UNDECLARE_OBJECT)
-            avatarDg.addUint32(friendId)
-            self.air.send(avatarDg)
-            '''
-
     def postAddFriend(self, avId, friendId):
         # Tell the client that their friend is online.
         datagram = PyDatagram()
         datagram.addUint16(53) # CLIENT_FRIEND_ONLINE
         datagram.addUint32(friendId)
 
-        datagram.addUint8(1) # commonChatFlags
+        datagram.addUint8(0) # commonChatFlags
         datagram.addUint8(1) # whitelistChatFlags
 
         self.sendDatagram(avId, datagram)
@@ -357,10 +343,12 @@ class FriendsManagerUD:
         datagram.addUint16(53) # CLIENT_FRIEND_ONLINE
         datagram.addUint32(otherId)
 
-        datagram.addUint8(1) # commonChatFlags
+        datagram.addUint8(0) # commonChatFlags
         datagram.addUint8(1) # whitelistChatFlags
 
         self.sendDatagram(avId, datagram)
+
+        # self.air.avatarFriendsManager.handleFriendOnline(avId, otherId)
 
     def goingOffline(self, avId):
         newOperation = GetAvatarInfoOperation(self, avId, avId, self.__handleGoingOffline)

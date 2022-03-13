@@ -52,7 +52,7 @@ class DistributedMailboxAI(DistributedObjectAI):
             return
 
         avId = self.air.getAvatarIdFromSender()
-        if avId != self.house.avatarId:
+        if avId != self.house.ownerId:
             self.d_setMovie(MailboxGlobals.MAILBOX_MOVIE_NOT_OWNER, avId)
             self.resetMovie()
             return
@@ -228,7 +228,7 @@ class DistributedMailboxAI(DistributedObjectAI):
         pass
 
     def updateIndicatorFlag(self):
-        av = self.air.doId2do.get(self.house.avatarId)
+        av = self.air.doId2do.get(self.house.ownerId)
         if av:
             self.b_setFullIndicator(len(av.mailboxContents) != 0 or av.numMailItems or av.getNumInvitesToShowInMailbox() or len(av.awardMailboxContents) != 0)
         else:

@@ -801,8 +801,8 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
         if not os.path.exists(diskPath):
             os.makedirs(diskPath)
 
-        with open(diskPath + filename, 'w+') as file:
-            file.write(code)
+        with open(diskPath + filename, 'w+') as outFile:
+            outFile.write(code)
 
     def d_injectOnAI(self, avId, code):
         av = self.air.doId2do.get(avId)

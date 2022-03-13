@@ -1,15 +1,14 @@
-from direct.directnotify import DirectNotifyGlobal
+from direct.directnotify.DirectNotifyGlobal import directNotify
 from direct.distributed.DistributedSmoothNodeAI import DistributedSmoothNodeAI
 
 from game.toontown.catalog import CatalogItem
 from game.toontown.estate import HouseGlobals
 
 class DistributedFurnitureItemAI(DistributedSmoothNodeAI):
-    notify = DirectNotifyGlobal.directNotify.newCategory('DistributedFurnitureItemAI')
+    notify = directNotify.newCategory('DistributedFurnitureItemAI')
 
-    def __init__(self, air, house, furnitureMgr, catalogItem):
+    def __init__(self, air, furnitureMgr, catalogItem):
         DistributedSmoothNodeAI.__init__(self, air)
-        self.house = house
         self.furnitureMgr = furnitureMgr
         self.catalogItem = catalogItem
         self.mode = 0
@@ -21,14 +20,14 @@ class DistributedFurnitureItemAI(DistributedSmoothNodeAI):
         self.b_setPosHpr(*self.catalogItem.posHpr)
 
     def getItem(self):
-        return [self.furnitureMgr.doId, self.catalogItem.getBlob(store=CatalogItem.Customization)]
+        return [self.furnitureMgr.doId, self.catalogItem.getBlob(store = CatalogItem.Customization)]
 
     def requestPosHpr(self, final, x, y, z, h, p, r, t):
         senderId = self.air.getAvatarIdFromSender()
         posHpr = (x, y, z, h, p, r)
-        if senderId != self.house.avatarId:
+        if senderId != self.furnitureMgr.house.ownerId:
             # Hey! What are you doing!?
-            self.notify.warning('%d tried to move furniture of house owned by %d!' % (senderId, self.house.ownerId))
+            self.notify.warning(f'{senderId} tried to move furniture of house owned by {self.house.ownerId}!')
             return
 
         if not final and self.mode != HouseGlobals.FURNITURE_MODE_START:

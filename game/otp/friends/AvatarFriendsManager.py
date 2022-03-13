@@ -4,7 +4,6 @@ from game.otp.uberdog.RejectCode import RejectCode
 from game.otp.otpbase import OTPGlobals
 from game.otp.otpbase import OTPLocalizer
 
-
 class AvatarFriendsManager(DistributedObjectGlobal):
     notify = directNotify.newCategory('AvatarFriendsManager')
 
@@ -21,22 +20,17 @@ class AvatarFriendsManager(DistributedObjectGlobal):
     def addIgnore(self, avId):
         if avId not in self.ignoredAvatarList:
             self.ignoredAvatarList.append(avId)
-            base.cr.centralLogger.writeClientEvent('ignoring %s' % (avId, ))
-
+            base.cr.centralLogger.writeClientEvent('ignoring %s' % (avId,))
         messenger.send('AvatarIgnoreChange')
 
     def removeIgnore(self, avId):
         if avId in self.ignoredAvatarList:
             self.ignoredAvatarList.remove(avId)
-            base.cr.centralLogger.writeClientEvent('stopped ignoring %s' %
-                                                   (avId, ))
-
+            base.cr.centralLogger.writeClientEvent('stopped ignoring %s' % (avId,))
         messenger.send('AvatarIgnoreChange')
 
     def checkIgnored(self, avId):
-        if avId:
-            pass
-        return avId in self.ignoredAvatarList
+        return avId and avId in self.ignoredAvatarList
 
     def sendRequestInvite(self, avId):
         self.notify.debugCall()
@@ -55,8 +49,7 @@ class AvatarFriendsManager(DistributedObjectGlobal):
 
     def invitationFrom(self, avId, avatarName):
         self.notify.debugCall()
-        messenger.send(OTPGlobals.AvatarFriendInvitationEvent,
-                       [avId, avatarName])
+        messenger.send(OTPGlobals.AvatarFriendInvitationEvent, [avId, avatarName])
 
     def retractInvite(self, avId):
         self.notify.debugCall()
@@ -66,29 +59,23 @@ class AvatarFriendsManager(DistributedObjectGlobal):
 
     def rejectInvite(self, avId, reason):
         self.notify.debugCall()
-        messenger.send(OTPGlobals.AvatarFriendRejectInviteEvent,
-                       [avId, reason])
+        messenger.send(OTPGlobals.AvatarFriendRejectInviteEvent, [avId, reason])
         if avId in self.invitedAvatarsList:
             self.invitedAvatarsList.remove(avId)
 
     def rejectRemove(self, avId, reason):
         self.notify.debugCall()
-        messenger.send(OTPGlobals.AvatarFriendRejectRemoveEvent,
-                       [avId, reason])
+        messenger.send(OTPGlobals.AvatarFriendRejectRemoveEvent, [avId, reason])
 
     def updateAvatarFriend(self, avId, info):
-        if hasattr(info, 'avatarId') and not (info.avatarId) and avId:
+        if hasattr(info, 'avatarId') and not info.avatarId and avId:
             info.avatarId = avId
-
         if avId not in self.avatarFriendsList:
             self.avatarFriendsList.add(avId)
             self.avatarId2Info[avId] = info
             messenger.send(OTPGlobals.AvatarFriendAddEvent, [avId, info])
-
         if self.avatarId2Info[avId].onlineYesNo != info.onlineYesNo:
-            base.talkAssistant.receiveFriendUpdate(avId, info.getName(),
-                                                   info.onlineYesNo)
-
+            base.talkAssistant.receiveFriendUpdate(avId, info.getName(), info.onlineYesNo)
         self.avatarId2Info[avId] = info
         messenger.send(OTPGlobals.AvatarFriendUpdateEvent, [avId, info])
         if avId in self.invitedAvatarsList:
@@ -99,6 +86,7 @@ class AvatarFriendsManager(DistributedObjectGlobal):
         self.avatarFriendsList.remove(avId)
         self.avatarId2Info.pop(avId, None)
         messenger.send(OTPGlobals.AvatarFriendRemoveEvent, [avId])
+        return
 
     def setFriends(self, avatarIds):
         self.notify.debugCall()
@@ -117,6 +105,5 @@ class AvatarFriendsManager(DistributedObjectGlobal):
         for id in self.avatarId2Info:
             if self.avatarId2Info[id].openChatFriendshipYesNo:
                 count += 1
-                continue
 
         return count

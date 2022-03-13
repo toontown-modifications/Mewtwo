@@ -423,6 +423,7 @@ class DistributedFurnitureManagerAI(DistributedObjectAI):
 
     def generateItem(self, item):
         itemId = item.furnitureType
+
         if itemId == 1399:
             furnitureClass = DistributedPhoneAI
         elif item.getFlags() & CatalogFurnitureItem.FLCloset:
@@ -434,7 +435,7 @@ class DistributedFurnitureManagerAI(DistributedObjectAI):
         else:
             furnitureClass = DistributedFurnitureItemAI
 
-        obj = furnitureClass(self.air, self.house, self, item)
+        obj = furnitureClass(self.air, self, item)
         obj.generateWithRequired(self.interior.zoneId)
         self.items.append(obj)
         return obj
@@ -462,7 +463,7 @@ class DistributedFurnitureManagerAI(DistributedObjectAI):
         return items.getBlob()
 
     def _verifyOwner(self, avId, message, context):
-        if self.house.avatarId != avId:
+        if self.house.ownerId != avId:
             self.air.writeServerEvent('suspicious', avId,
                                       'av tried to send perform furniture management operation %s while not owner!' % message)
             self.sendUpdateToAvatarId(avId, message + 'Response', [ToontownGlobals.FM_NotOwner, context])

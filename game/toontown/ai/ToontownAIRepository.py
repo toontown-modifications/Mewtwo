@@ -97,6 +97,10 @@ class ToontownAIRepository(ToontownInternalRepository, ServerBase):
         self.buildingManagers = {}
         self.partyGates = []
 
+        # Record the reason each client leaves the shard, according to
+        # the client.
+        self._avatarDisconnectReasons = {}
+
         # What we want to have on the server:
         self.wantCogdominiums = config.GetBool('want-cogdominiums', False)
         self.useAllMinigames = config.GetBool('use-all-minigames', False)
@@ -179,9 +183,6 @@ class ToontownAIRepository(ToontownInternalRepository, ServerBase):
 
     def deallocateZone(self, zone):
         self.zoneAllocator.free(zone)
-
-    def getAvatarDisconnectReason(self, avId):
-        return self.timeManager.avId2disconnectcode.get(avId, ToontownGlobals.DisconnectUnknown)
 
     def trueUniqueName(self, idString):
         return self.uniqueName(idString)

@@ -1,10 +1,8 @@
-from direct.directnotify import DirectNotifyGlobal
-from direct.distributed.DistributedObjectUD import DistributedObjectUD
+from direct.directnotify.DirectNotifyGlobal import directNotify
+from direct.distributed.DistributedObjectGlobalUD import DistributedObjectGlobalUD
 
-
-class PlayerFriendsManagerUD(DistributedObjectUD):
-    notify = DirectNotifyGlobal.directNotify.newCategory(
-        "PlayerFriendsManagerUD")
+class PlayerFriendsManagerUD(DistributedObjectGlobalUD):
+    notify = directNotify.newCategory('PlayerFriendsManagerUD')
 
     def requestInvite(self, todo0, todo1, todo2):
         pass

@@ -7,3 +7,4 @@ limeade
 werkzeug
 json-rpc
 pymongo
+git+https://gitlab.com/sunrisemmos/libsunrise

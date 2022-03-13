@@ -255,6 +255,8 @@ class DistributedToonAI(DistributedPlayerAI.DistributedPlayerAI, DistributedSmoo
 
         if self.isPlayerControlled():
             self.sendUpdate('setDefaultShard', [self.air.districtId])
+            self.sendUpdate('setCommonChatFlags', [0])
+            self.sendUpdate('setWhitelistChatFlags', [OTPGlobals.CommonChat])
 
     def setLocation(self, parentId, zoneId):
         DistributedPlayerAI.DistributedPlayerAI.setLocation(self, parentId, zoneId)
@@ -355,6 +357,14 @@ class DistributedToonAI(DistributedPlayerAI.DistributedPlayerAI, DistributedSmoo
             self._dbCheckDoLater = None
         if self.isPlayerControlled():
             messenger.send('avatarExited', [self])
+
+            # Now we don't need to store the disconnect reason any more.
+            # TODO: Be more Disney-like and have this in the ToontownAIRepository?
+            try:
+                del self.air._avatarDisconnectReasons[self.doId]
+            except:
+                pass
+
         if simbase.wantPets:
             if self.isInEstate():
                 print('ToonAI - Exit estate toonId:%s' % self.doId)

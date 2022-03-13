@@ -1,7 +1,5 @@
-from direct.directnotify import DirectNotifyGlobal
+from direct.directnotify.DirectNotifyGlobal import directNotify
 from game.otp.friends.PlayerFriendsManagerUD import PlayerFriendsManagerUD
 
-
 class TTPlayerFriendsManagerUD(PlayerFriendsManagerUD):
-    notify = DirectNotifyGlobal.directNotify.newCategory(
-        "TTPlayerFriendsManagerUD")
+    notify = directNotify.newCategory('TTPlayerFriendsManagerUD')

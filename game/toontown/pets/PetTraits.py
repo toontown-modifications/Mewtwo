@@ -1,7 +1,8 @@
 from direct.showbase.PythonUtil import randFloat, normalDistrib, Enum
 from direct.showbase.PythonUtil import clampScalar
 from game.toontown.toonbase import TTLocalizer, ToontownGlobals
-import random, copy
+from libsunrise import random
+import copy
 TraitDivisor = 10000
 
 def getTraitNames():
@@ -13,14 +14,11 @@ def getTraitNames():
 
     return PetTraits.TraitNames
 
-
 def uniform(min, max, rng):
     return randFloat(min, max, rng.random)
 
-
 def gaussian(min, max, rng):
     return normalDistrib(min, max, rng.gauss)
-
 
 class TraitDistribution:
     TraitQuality = Enum('VERY_BAD, BAD, AVERAGE, GOOD, VERY_GOOD')

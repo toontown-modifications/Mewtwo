@@ -180,7 +180,7 @@ PetEyeColors = (VBase4(0.29, 0.29, 0.69, 1.0),
 PetGenders = [0, 1]
 
 def getRandomPetDNA(zoneId = ToontownGlobals.DonaldsDreamland):
-    from random import choice
+    from libsunrise.random import choice
     head = choice(list(range(-1, len(HeadParts))))
     ears = choice(list(range(-1, len(EarParts))))
     nose = choice(list(range(-1, len(NoseParts))))
@@ -202,16 +202,15 @@ def getRandomPetDNA(zoneId = ToontownGlobals.DonaldsDreamland):
 
 
 def getSpecies(zoneId):
-    body = PythonUtil.weightedRand(PetRarities['body'][zoneId])
+    from libsunrise.random import random
+    body = PythonUtil.weightedRand(PetRarities['body'][zoneId], rng = random)
     return BodyTypes.index(body)
-
 
 def getColors(bodyType):
     if BodyTypes[bodyType] in GenericBodies:
         return GenericPetColors
     else:
         return SpecificPetColors
-
 
 def getFootTexture(bodyType):
     if BodyTypes[bodyType] == 'turtle':
@@ -224,14 +223,12 @@ def getFootTexture(bodyType):
         texName = FeetTextures['normal']
     return texName
 
-
 def getEarTexture(bodyType, earType):
     if BodyTypes[bodyType] == 'giraffe' or BodyTypes[bodyType] == 'leopard':
         dict = ExoticEarTextures
     else:
         dict = EarTextures
     return dict[earType]
-
 
 def getBodyRarity(bodyIndex):
     bodyName = BodyTypes[bodyIndex]
@@ -249,20 +246,16 @@ def getBodyRarity(bodyIndex):
     rarity = (weight[bodyName] - minWeight) / (totalWeight - minWeight)
     return rarity
 
-
 def getRarity(dna):
     body = dna[Fields['body']]
     rarity = getBodyRarity(body)
     return rarity
 
-
 def getGender(dna):
     return dna[Fields['gender']]
 
-
 def setGender(dna, gender):
     dna[Fields['gender']] = gender
-
 
 def getGenderString(dna = None, gender = -1):
     if dna != None:

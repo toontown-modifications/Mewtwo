@@ -22,7 +22,7 @@ RUN cd /panda3d && cp FSM.py /usr/share/panda3d/direct/fsm/FSM.py
 
 # Migrate all files into root
 WORKDIR /server
-RUN git clone https://Robot:ce11d5d015c990243b496e7babe5bdfe3c8f0bd9@git.sunrise.games/SunriseGames/Mewtwo.git /server
+RUN git clone https://oauth2:NBSQjuVLzk3XkAxAPTuj@gitlab.com/rocketstoontownonline/Game-OTP/Mewtwo /server
 COPY ./ .
 
 # Install pip dependencies
