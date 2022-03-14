@@ -391,7 +391,7 @@ class DistributedClosetAI(DistributedFurnitureItemAI.DistributedFurnitureItemAI)
 
         self.sendUpdate("setState", [ClosetGlobals.OPEN,
                                      self.customerId, self.ownerId,
-                                     self.ownerAv.gender,
+                                     self.gender,
                                      self.topList, self.bottomList])
 
         # Start the timer
