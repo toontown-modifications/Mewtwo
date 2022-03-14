@@ -1092,6 +1092,16 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
 
         self.sendResponseMessage(av.doId, out)
 
+    def deliverCatalogItems(self, av: DistributedToonAI):
+        for item in av.onOrder:
+            item.deliveryDate = int(time.time() / 60)
+
+        av.onOrder.markDirty()
+        av.b_setDeliverySchedule(av.onOrder)
+
+        response = f'Delivered {len(av.onOrder)} item(s).'
+        self.sendResponseMessage(av.doId, response)
+
     def setMagicWordExt(self, magicWord, avId):
         av = self.air.doId2do.get(avId)
 
@@ -1336,6 +1346,8 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
                 self.locate(av, int(args[0]), str(args[1]))
             except:
                 self.sendResponseMessage(avId, 'Invalid parameters.')
+        elif magicWord == 'deliveritems':
+            self.deliverCatalogItems(av)
         else:
             if magicWord not in disneyCmds or magicWord != '':
                 self.sendResponseMessage(avId, f'{magicWord} is not a valid Magic Word.')
