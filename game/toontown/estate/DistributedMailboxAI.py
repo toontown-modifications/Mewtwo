@@ -1,9 +1,9 @@
 from direct.distributed import DistributedObjectAI
-import MailboxGlobals
-from toontown.catalog import CatalogItem
-from toontown.catalog import CatalogItemList
-from toontown.toonbase import ToontownGlobals
-from toontown.parties.PartyGlobals import InviteStatus
+from . import MailboxGlobals
+from game.toontown.catalog import CatalogItem
+from game.toontown.catalog import CatalogItemList
+from game.toontown.toonbase import ToontownGlobals
+from game.toontown.parties.PartyGlobals import InviteStatus
 from direct.directnotify.DirectNotifyGlobal import *
 from direct.distributed.ClockDelta import *
 from direct.task import Task

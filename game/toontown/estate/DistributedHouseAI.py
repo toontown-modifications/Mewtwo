@@ -16,7 +16,7 @@ class DistributedHouseAI(DistributedObjectAI):
     def __init__(self, air):
         DistributedObjectAI.__init__(self, air)
         self.estate = None
-        self.housePos = 0
+        self.housePosInd = 0
         self.houseType = 0
         self.gardenPos = 0
         self.ownerId = 0
@@ -55,7 +55,7 @@ class DistributedHouseAI(DistributedObjectAI):
 
         # Setup interior:
         self.interior = DistributedHouseInteriorAI(self.air, self)
-        self.interior.setHouseIndex(self.housePos)
+        self.interior.setHouseIndex(self.housePosInd)
         self.interior.setHouseId(self.getDoId())
         self.interior.generateWithRequired(self.interiorZone)
 
@@ -87,8 +87,8 @@ class DistributedHouseAI(DistributedObjectAI):
         self.estate = None
         DistributedObjectAI.delete(self)
 
-    def setHousePos(self, housePos):
-        self.housePos = housePos
+    def setHousePos(self, housePosInd):
+        self.housePosInd = housePosInd
 
     def d_setHousePos(self, housePos):
         self.sendUpdate('setHousePos', [housePos])
@@ -98,7 +98,7 @@ class DistributedHouseAI(DistributedObjectAI):
         self.d_setHousePos(housePos)
 
     def getHousePos(self):
-        return self.housePos
+        return self.housePosInd
 
     def setHouseType(self, houseType):
         self.houseType = houseType
@@ -358,7 +358,7 @@ class DistributedHouseAI(DistributedObjectAI):
 
         house = loader.loadModel(HouseGlobals.houseModels[self.houseType]).find('**/collision_house')
 
-        posHpr = HouseGlobals.houseDrops[self.housePos]
+        posHpr = HouseGlobals.houseDrops[self.housePosInd]
 
         house.reparentTo(render)
 
