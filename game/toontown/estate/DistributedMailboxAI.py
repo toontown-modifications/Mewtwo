@@ -19,7 +19,6 @@ class DistributedMailboxAI(DistributedObjectAI.DistributedObjectAI):
         self.raiseFlagTask = None
         self.busy = 0
         self.av = None
-        self.collisionSetup = False
 
     def delete(self):
         self.notify.debug("delete()")
@@ -29,26 +28,6 @@ class DistributedMailboxAI(DistributedObjectAI.DistributedObjectAI):
             self.raiseFlagTask = None
         del self.house
         DistributedObjectAI.DistributedObjectAI.delete(self)
-
-    def setupPetCollision(self):
-        if simbase.wantPets and not self.collisionSetup:
-            # assuming houseNode exists
-            houseNode = self.house.houseNode
-            estate = self.air.doId2do[self.house.estateId]
-            zOffset = 0
-            if self.house.housePosInd == 3:
-                zOffset = -1
-            elif self.house.housePosInd == 2:
-                zOffset = 0.5
-            model = loader.loadModel('phase_5.5/models/estate/mailboxHouse.bam')
-
-            coll = model.find('**/mailbox_collision')
-            coll.reparentTo(estate.geom)
-            coll.setPos(houseNode, 19, -4, 0 + zOffset)
-            coll.setH(houseNode, 90)
-
-            model.removeNode()
-            self.collisionSetup = True
 
     def getHouseId(self):
         return self.house.doId

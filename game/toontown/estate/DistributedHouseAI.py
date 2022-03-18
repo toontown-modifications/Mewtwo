@@ -196,7 +196,7 @@ class DistributedHouseAI(DistributedObjectAI.DistributedObjectAI):
         self.resetFurniture()
         self.setupPetCollision()
 
-    def setupPetCollision(self, force=False):
+    def setupPetCollision(self):
         if simbase.wantPets:
             if 0:#__dev__:
                 from panda3d.core import ProfileTimer
@@ -205,7 +205,7 @@ class DistributedHouseAI(DistributedObjectAI.DistributedObjectAI):
                 pt.on()
 
             # add ourselves to the estate model
-            if force or not DistributedHouseAI.HouseModel:
+            if not DistributedHouseAI.HouseModel:
                 if DistributedHouseAI.HouseModel:
                     DistributedHouseAI.HouseModel.removeNode()
                 DistributedHouseAI.HouseModel = loader.loadModel(
@@ -219,9 +219,6 @@ class DistributedHouseAI(DistributedObjectAI.DistributedObjectAI):
             self.houseNode.setPosHpr(
                 *HouseGlobals.houseDrops[self.housePosInd])
             DistributedHouseAI.HouseModel.instanceTo(self.houseNode)
-
-            if self.mailbox:
-                self.mailbox.setupPetCollision()
 
             if hasattr(estate, 'petColls'):
                 estate.createPetCollisions()

@@ -786,11 +786,11 @@ class DistributedEstateAI(DistributedObjectAI.DistributedObjectAI):
         self.notify.debug("unwilting my garden %s" % (avId))
         self.setWaterLevelMyGarden( avId, 0, specificHardPoint)
 
-    def plantFlower(self, avId, type, plot, water, growth, optional = 0, box = None):
+    def plantFlower(self, avId, type, plot, water, growth, optional = 0):
             for index in range(self.toonsPerAccount):
                 if self.getToonId(index) == avId:
                     self.removePlant(index, plot)
-                    itemId = self.addLawnDecorItem(index, type, plot, water, growth, optional, box)
+                    itemId = self.addLawnDecorItem(index, type, plot, water, growth, optional)
                     itemList = self.getItems(index)
                     itemList.append((type, plot, water, growth, optional))
                     self.b_setItems(index, itemList)
@@ -800,7 +800,7 @@ class DistributedEstateAI(DistributedObjectAI.DistributedObjectAI):
             for index in range(self.toonsPerAccount):
                 if self.getToonId(index) == avId:
                     self.removePlant(index, plot)
-                    itemDoId = self.addLawnDecorItem(index, type, plot, water, growth,optional)
+                    itemDoId = self.addLawnDecorItem(index, type, plot, water, growth, optional)
                     itemList = self.getItems(index)
                     itemList.append((type, plot, water, growth, optional))
                     self.b_setItems(index, itemList)
@@ -811,8 +811,6 @@ class DistributedEstateAI(DistributedObjectAI.DistributedObjectAI):
         for item in self.getItems(slot):
             if item[1] == plot:
                 if self.gardenTable[slot][plot]:
-                    if self.gardenTable[slot][plot].box:
-                        self.gardenTable[slot][plot].box.objects = [None if plant is self.gardenTable[slot][plot] else plant for plant in self.gardenTable[slot][plot].box.objects]
                     self.gardenTable[slot][plot].requestDelete()
                     self.gardenTable[slot][plot] = None
                 itemList.remove(item)
@@ -820,7 +818,7 @@ class DistributedEstateAI(DistributedObjectAI.DistributedObjectAI):
                 self.b_setItems(slot, itemList)
                 self.updateToonBonusLevels(slot)
 
-    def addLawnDecorItem(self, slot, type, hardPoint, waterLevel, growthLevel, optional = 0, box = None):
+    def addLawnDecorItem(self, slot, type, hardPoint, waterLevel, growthLevel, optional = 0):
             #Hard coding MickeyStatue1 to be my toon statue
             plantClass = DistributedFlowerAI.DistributedFlowerAI
             plantType = GardenGlobals.PlantAttributes[type]['plantType']
@@ -831,23 +829,16 @@ class DistributedEstateAI(DistributedObjectAI.DistributedObjectAI):
                 postion = GardenGlobals.estatePlots[slot][hardPoint]
                 testPlant.setPosition(postion[0], postion[1], 0)
                 testPlant.setH(postion[2])
-                testPlant.stick2Ground(self)
             elif plantType == GardenGlobals.FLOWER_TYPE:
                 #print("FLOWER")
                 plantClass =  DistributedFlowerAI.DistributedFlowerAI
                 testPlant = DistributedFlowerAI.DistributedFlowerAI(type, waterLevel, growthLevel, optional, slot, hardPoint)
                 plot = GardenGlobals.estatePlots[slot][hardPoint]
                 #postion = GardenGlobals.estateBoxes[slot][plot[0]]
-                if box:
-                    box.objects = [testPlant if plant is None else plant for plant in box.objects]
-                else:
-                    box = self.gardenBoxList[slot][plot[0]]
-                    box.objects.append(testPlant)
-                testPlant.setBox(box)
-                # postion = self.gardenBoxList[slot][plot[0]].getBoxPos(plot[1])
-                # heading = self.gardenBoxList[slot][plot[0]].getH()
-                # testPlant.setPosition(postion[0], postion[1], postion[2])
-                # testPlant.setH(heading)
+                postion = self.gardenBoxList[slot][plot[0]].getBoxPos(plot[1])
+                heading = self.gardenBoxList[slot][plot[0]].getH()
+                testPlant.setPosition(postion[0], postion[1], postion[2])
+                testPlant.setH(heading)
             elif plantType == GardenGlobals.STATUARY_TYPE:
                 #print("STATUARY")
                 plantClass = DistributedStatuaryAI.DistributedStatuaryAI
@@ -864,15 +855,9 @@ class DistributedEstateAI(DistributedObjectAI.DistributedObjectAI):
                 postion = GardenGlobals.estatePlots[slot][hardPoint]
                 testPlant.setPosition(postion[0], postion[1], 0)
                 testPlant.setH(postion[2])
-                testPlant.stick2Ground(self)
 
             testPlant.generateWithRequired(self.zoneId)
             testPlant.setEstateId(self.doId)
-            if plantType in (GardenGlobals.GAG_TREE_TYPE, GardenGlobals.STATUARY_TYPE):
-                # This should belong up there, but it needs the estate id
-                # set up.
-                testPlant.setupPetCollision()
-
 
             #print ("Placing at Position %s %s %s" % (postion[0], postion[1], postion[2]))
             #self.placeOnGround(testPlant.doId)
@@ -881,10 +866,9 @@ class DistributedEstateAI(DistributedObjectAI.DistributedObjectAI):
             return testPlant.doId
 
     def placeLawnDecor(self, toonIndex, itemList):
-        house = self.houseList[toonIndex]
-        boxList = GardenGlobals.estateBoxes[house.houseType]
+        boxList = GardenGlobals.estateBoxes[toonIndex]
         for boxPlace in boxList:
-            newBox = DistributedGardenBoxAI.DistributedGardenBoxAI(boxPlace[3], toonIndex)
+            newBox = DistributedGardenBoxAI.DistributedGardenBoxAI(boxPlace[3])
             newBox.setPosition(boxPlace[0], boxPlace[1], 16)
             newBox.setH(boxPlace[2])
             newBox.generateWithRequired(self.zoneId)
@@ -931,30 +915,23 @@ class DistributedEstateAI(DistributedObjectAI.DistributedObjectAI):
         itemId = self.addGardenPlot(slot, hardPoint, box)
         return itemId
 
-    def addGardenPlot(self, slot, hardPoint, box = None):
+    def addGardenPlot(self, slot, hardPoint):
 
             #print("HARDPOINT")
             plot = GardenGlobals.estatePlots[slot][hardPoint]
             #print(plot)
-            plantClass = DistributedGardenPlotAI.DistributedGardenPlotAI
-            testPlant = DistributedGardenPlotAI.DistributedGardenPlotAI(plot[2], slot, hardPoint)
             if plot[3] == GardenGlobals.FLOWER_TYPE:
                 #print("flower type")
-                if box:
-                    box.objects = [testPlant if plant is None else plant for plant in box.objects]
-                else:
-                    box = self.gardenBoxList[slot][plot[0]]
-                    box.objects.append(testPlant)
-                testPlant.setBox(box)
+                postion = self.gardenBoxList[slot][plot[0]].getBoxPos(plot[1])
+                heading = self.gardenBoxList[slot][plot[0]].getH()
             else:
                 #print("not flower type")
                 postion = plot
                 heading = postion[2]
-                testPlant.setPosition(postion[0], postion[1], 16)
-                testPlant.setH(heading)
-                testPlant.stick2Ground(self)
-                testPlant.setEstateId(self.doId)
-                testPlant.setupPetCollision()
+            plantClass = DistributedGardenPlotAI.DistributedGardenPlotAI
+            testPlant = DistributedGardenPlotAI.DistributedGardenPlotAI(plot[2], slot, hardPoint)
+            testPlant.setPosition(postion[0], postion[1], 16)
+            testPlant.setH(heading)
             testPlant.generateWithRequired(self.zoneId)
 
             #print ("Placing at Position %s %s" % (postion[0], postion[1]))
