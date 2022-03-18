@@ -52,8 +52,6 @@ class TutorialBuildingAI:
         self.interior = DistributedTutorialInteriorAI.DistributedTutorialInteriorAI(blockNumber, self.air, self.interiorZone, self, npcId)
         self.interior.generateWithRequired(self.interiorZone)
 
-        lockValue = FADoorCodes.UNLOCKED
-
         # Outside door:
         door = DistributedDoorAI.DistributedDoorAI(self.air, blockNumber, DoorTypes.EXT_STANDARD, lockValue=FADoorCodes.DEFEAT_FLUNKY_TOM)
 
