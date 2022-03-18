@@ -63,7 +63,7 @@ from game.otp.friends.FriendManagerAI import FriendManagerAI
 from game.toontown.coderedemption.TTCodeRedemptionMgrAI import TTCodeRedemptionMgrAI
 from game.toontown.uberdog.DistributedPartyManagerAI import DistributedPartyManagerAI
 from game.toontown.distributed.ToontownInternalRepository import ToontownInternalRepository
-from game.toontown.estate.DistributedBankMgrAI import DistributedBankMgrAI
+from game.toontown.estate import DistributedBankMgrAI
 from game.otp.uberdog.OtpAvatarManagerAI import OtpAvatarManagerAI
 from game.toontown.uberdog.ServerBase import ServerBase
 from game.otp.otpbase import OTPGlobals
@@ -319,8 +319,9 @@ class ToontownAIRepository(ToontownInternalRepository, ServerBase):
 
         self.dataStoreManager = self.generateGlobalObject(OtpDoGlobals.OTP_DO_ID_TOONTOWN_TEMP_STORE_MANAGER, 'DistributedDataStoreManager')
 
-        self.bankManager = DistributedBankMgrAI(self)
-        self.bankManager.generateWithRequired(OtpDoGlobals.OTP_ZONE_ID_MANAGEMENT)
+        # The bank manager handles banking transactions
+        self.bankMgr = DistributedBankMgrAI.DistributedBankMgrAI(self)
+        self.bankMgr.generateWithRequired(OTPGlobals.UberZone)
 
         self.avatarManager = OtpAvatarManagerAI(self)
         self.avatarManager.generateWithRequiredAndId(self.allocateChannel(), self.getGameDoId(), OtpDoGlobals.OTP_ZONE_ID_MANAGEMENT)
