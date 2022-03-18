@@ -1,5 +1,5 @@
 from panda3d.core import UniqueIdAllocator, CSDefault, DSearchPath, Filename
-from panda3d.toontown import DNAStorage, loadDNAFileAI, DNAGroup, DNAVisGroup, loadDNAFile
+from panda3d.toontown import DNAStorage, loadDNAFileAI, DNAGroup, DNAVisGroup, loadDNAFile, DNAProp
 
 from direct.directnotify.DirectNotifyGlobal import directNotify
 from direct.distributed.DistributedObjectAI import DistributedObjectAI
@@ -71,8 +71,10 @@ from game.otp.otpbase import OTPGlobals
 from game.toontown.ai import ToontownAIMsgTypes
 from game.toontown.toon.NPCDialogueManagerAI import NPCDialogueManagerAI
 from game.toontown.uberdog.ExtAgent import ServerGlobals
+from game.toontown.safezone import DistributedFishingSpotAI
+from game.toontown.fishing import DistributedFishingPondAI
 
-import time, requests
+import time, requests, functools
 
 class ToontownAIRepository(ToontownInternalRepository, ServerBase):
     notify = directNotify.newCategory('ToontownAIRepository')
@@ -96,6 +98,10 @@ class ToontownAIRepository(ToontownInternalRepository, ServerBase):
         self.suitPlanners = {}
         self.buildingManagers = {}
         self.partyGates = []
+
+        # Guard for publish
+        if simbase.wantBingo:
+            self.bingoMgr = None
 
         # Record the reason each client leaves the shard, according to
         # the client.
@@ -503,36 +509,64 @@ class ToontownAIRepository(ToontownInternalRepository, ServerBase):
         else:
             return filename.getFullpath()
 
-    def findFishingPonds(self, dnaData, zoneId, area):
+    def findFishingPonds(self, dnaGroup, zoneId, area, overrideDNAZone = 0):
+        """
+                Recursively scans the given DNA tree for fishing ponds.  These
+                are defined as all the groups whose code includes the string
+                "fishing_pond".  For each such group, creates a
+                DistributedFishingPondAI.  Returns the list of distributed
+                objects and a list of the DNAGroups so we can search them for
+                spots and targets.
+                """
         fishingPonds = []
         fishingPondGroups = []
 
-        if isinstance(dnaData, DNAGroup) and 'fishing_pond' in dnaData.getName():
-            fishingPondGroups.append(dnaData)
-            pond = self.fishManager.generatePond(area, zoneId)
-            fishingPonds.append(pond)
+        if ((isinstance(dnaGroup, DNAGroup)) and
+                # If it is a DNAGroup, and the name starts with fishing_pond, count it
+                (dnaGroup.getName().find('fishing_pond') >= 0)):
+            # Here's a fishing pond!
+            fishingPondGroups.append(dnaGroup)
+            fp = DistributedFishingPondAI.DistributedFishingPondAI(self, area)
+            fp.generateWithRequired(zoneId)
+            fishingPonds.append(fp)
         else:
-            if isinstance(dnaData, DNAVisGroup):
-                zoneId = ZoneUtil.getTrueZoneId(int(dnaData.getName().split(':')[0]), zoneId)
+            # Now look in the children
+            # Fishing ponds cannot have other ponds in them,
+            # so do not search the one we just found:
+            # If we come across a visgroup, note the zoneId and then recurse
+            if (isinstance(dnaGroup, DNAVisGroup) and not overrideDNAZone):
+                # Make sure we get the real zone id, in case we are in welcome valley
+                zoneId = ZoneUtil.getTrueZoneId(
+                    int(dnaGroup.getName().split(':')[0]), zoneId)
+            for i in range(dnaGroup.getNumChildren()):
+                childFishingPonds, childFishingPondGroups = self.findFishingPonds(
+                    dnaGroup.at(i), zoneId, area, overrideDNAZone)
+                fishingPonds += childFishingPonds
+                fishingPondGroups += childFishingPondGroups
+        return fishingPonds, fishingPondGroups
 
-        for i in range(dnaData.getNumChildren()):
-            foundFishingPonds, foundFishingPondGroups = self.findFishingPonds(dnaData.at(i), zoneId, area)
-            fishingPonds.extend(foundFishingPonds)
-            fishingPondGroups.extend(foundFishingPondGroups)
-
-        return (fishingPonds, fishingPondGroups)
-
-    def findFishingSpots(self, dnaData, fishingPond):
+    def findFishingSpots(self, dnaPondGroup, distPond):
+        """
+        Scans the given DNAGroup pond for fishing spots.  These
+        are defined as all the props whose code includes the string
+        "fishing_spot".  Fishing spots should be the only thing under a pond
+        node. For each such prop, creates a DistributedFishingSpotAI.
+        Returns the list of distributed objects created.
+        """
         fishingSpots = []
-
-        if isinstance(dnaData, DNAGroup) and dnaData.getName()[:13] == 'fishing_spot_':
-            spot = self.fishManager.generateSpots(dnaData, fishingPond)
-            fishingSpots.append(spot)
-
-        for i in range(dnaData.getNumChildren()):
-            foundFishingSpots = self.findFishingSpots(dnaData.at(i), fishingPond)
-            fishingSpots.extend(foundFishingSpots)
-
+        # Search the children of the pond
+        for i in range(dnaPondGroup.getNumChildren()):
+            dnaGroup = dnaPondGroup.at(i)
+            if ((isinstance(dnaGroup, DNAProp)) and (dnaGroup.getCode().find('fishing_spot') >= 0)):
+                # Here's a fishing spot!
+                pos = dnaGroup.getPos()
+                hpr = dnaGroup.getHpr()
+                fs = DistributedFishingSpotAI.DistributedFishingSpotAI(
+                     self, distPond, pos[0], pos[1], pos[2], hpr[0], hpr[1], hpr[2])
+                fs.generateWithRequired(distPond.zoneId)
+                fishingSpots.append(fs)
+            else:
+                self.notify.debug("Found dnaGroup that is not a fishing_spot under a pond group")
         return fishingSpots
 
     def findRacingPads(self, dnaData, zoneId, area, type = 'racing_pad', overrideDNAZone = False):
@@ -636,3 +670,212 @@ class ToontownAIRepository(ToontownInternalRepository, ServerBase):
                                   (globalId, OtpDoGlobals.OTP_DO_ID_TOONTOWN_PARTY_MANAGER))
             # Let the dclass finish the job
             do.dclass.receiveUpdate(do, di)
+
+    def handleAvCatch(self, avId, zoneId, catch):
+        """
+        avId - ID of avatar to update
+        zoneId - zoneId of the pond the catch was made in.
+                This is used by the BingoManagerAI to
+                determine which PBMgrAI needs to update
+                the catch.
+        catch - a fish tuple of (genus, species)
+        returns: None
+
+        This method instructs the BingoManagerAI to
+        tell the appropriate PBMgrAI to update the
+        catch of an avatar at the particular pond. This
+        method is called in the FishManagerAI's
+        RecordCatch method.
+        """
+        # Guard for publish
+        if simbase.wantBingo:
+            if self.bingoMgr:
+                self.bingoMgr.setAvCatchForPondMgr(avId, zoneId, catch)
+
+    def createPondBingoMgrAI(self, estate):
+        """
+        estate - the estate for which the PBMgrAI should
+                be created.
+        returns: None
+
+        This method instructs the BingoManagerAI to
+        create a new PBMgrAI for a newly generated
+        estate.
+        """
+        # Guard for publish
+        if simbase.wantBingo:
+            if self.bingoMgr:
+                self.notify.info('createPondBingoMgrAI: Creating a DPBMAI for Dynamic Estate')
+                self.bingoMgr.createPondBingoMgrAI(estate, 1)
+
+    def getEstate(self, avId, accId, zoneId, callback):
+        self.notify.debug(f'getEstate avId={avId}, accId={accId}, zoneId={zoneId}, callback={callback}')
+        estateId = 0
+        estateVal = {} # {estateFieldName: packedValues}
+        avIds = []
+
+        avatars = {} # {avId: {fieldName: [fieldValue]}}
+
+        def __handleGetEstate(dclass, fields):
+            if dclass != self.dclassesByName['DistributedEstateAI']:
+                self.notify.warning(
+                    'Account %d has non-estate dclass %d!' % (accId, dclass)
+                )
+                return
+
+            nonlocal estateVal
+            # Convert Astron response to OTP
+            estateVal = self.packDclassValueDict(dclass, fields)
+
+            # Now to do the houses:
+            self.getHouses(avId, accId, zoneId, estateId, estateVal, avIds, avatars, callback)
+
+
+        def __gotAllAvatars():
+            self.notify.debug(f'__gotAllAvatars: {estateId, avIds, len(avatars)}')
+
+            if estateId:
+                self.dbInterface.queryObject(self.dbId, estateId, __handleGetEstate)
+            else:
+                def __handleEstateCreated(newEstateId):
+                    nonlocal estateId
+                    estateId = newEstateId
+                    # Update Account object with the new estate id
+                    self.dbInterface.updateObject(self.dbId, accId, self.dclassesByName['AccountAI'],
+                                                          {'ESTATE_ID': estateId})
+
+                    self.dbInterface.queryObject(self.dbId, estateId, __handleGetEstate)
+
+                self.dbInterface.createObject(self.dbId, self.dclassesByName['DistributedEstateAI'], {},
+                                                  __handleEstateCreated)
+
+
+        def __handleGetAvatar(dclass, fields, index):
+            if dclass != self.dclassesByName['DistributedToonAI']:
+                self.notify.warning(
+                    'Account %d has avatar %d with non-Toon dclass %d!' % (accId, avIds[index], dclass))
+                # FIXME: idk what to do here? ~LC
+                return
+
+
+            fields['avId'] = avIds[index]
+            avatars[index] = fields
+            if len(avatars) == 6:
+                __gotAllAvatars()
+
+        def __handleGetAccount(dclass, fields):
+            if dclass != self.dclassesByName['AccountAI']:
+                self.notify.warning('Account %d has non-account dclass %d!' % (accId, dclass))
+                # FIXME: idk what to do here? ~LC
+                return
+
+            nonlocal estateId, avIds, avatars
+            estateId = fields.get('ESTATE_ID', 0)
+            avIds = fields.get('ACCOUNT_AV_SET', [0] * 6)
+            # HACK: Sanitize the avIds list in case its too long/short
+            avIds = avIds[:6]
+            avIds += [0] * (6 - len(avIds))
+            for index, avId in enumerate(avIds):
+                if avId == 0:
+                    avatars[index] = None
+                    continue
+
+                # Get the avatar object for each avId.
+                self.dbInterface.queryObject(self.dbId, avId,
+                                             functools.partial(__handleGetAvatar, index=index))
+
+        # Get the account object.
+        self.dbInterface.queryObject(self.dbId, accId, __handleGetAccount)
+
+    def getHouses(self, avId, accId, zoneId, estateId, estateVal, avIds, avatars, callback):
+        '''
+        Continuation of getEstate
+        '''
+        self.notify.debug(f'getHouses avId={avId}, accId={accId}, zoneId={zoneId}, estateId={estateId}, avIds={avIds}, callback={callback}')
+
+        # numHouses = 0
+        houseIds = [0] * len(avIds)
+        houseVal = [None] * len(avIds) # [packedHouseValues]
+
+        def __gotAllHouses():
+            # Get pet ids
+            petIds = [0] * len(avIds)
+            for index in avatars:
+                if avatars[index] != None:
+                    petId = avatars[index].get('setPetId', [0])[0]
+                    if petId != 0:
+                        petIds[index] = petId
+
+            # Get Gardens started.
+            gardensStarted = [False] * len(avIds)
+            for index in avatars:
+                if avatars[index] != None:
+                    gardenStarted = avatars[index].get('setGardenStarted', [0])[0]
+                    if gardenStarted:
+                        gardensStarted[index] = True
+
+            self.notify.debug(f'__gotAllHouses {estateId, estateVal, len(houseIds), houseIds, houseVal, petIds, gardensStarted, estateVal}')
+
+            # That's a lot of work, time to finally call our callback.  Whew!
+            callback(estateId, estateVal, len(houseIds), houseIds, houseVal,
+                     petIds, gardensStarted, estateVal)
+
+        def __handleGetHouse(dclass, fields, index):
+            nonlocal houseVal
+            if dclass != self.dclassesByName['DistributedHouseAI']:
+                self.notify.warning('Avatar %d has non-house object %d with dclass %d!' % (avIds[index], houseId, dclass))
+                return
+
+            # Set the most important fields here.
+            fields['setAvatarId'] = [avIds[index]]
+            fields['setName'] = avatars[index]['setName']
+
+            # Convert Astron response to OTP
+            houseVal[index] = self.packDclassValueDict(dclass, fields)
+
+            if None not in houseVal:
+                __gotAllHouses()
+
+        def __handleHouseCreated(houseId, index):
+            nonlocal houseIds, houseVal
+
+            houseIds[index] = houseId
+            av = self.doId2do.get(avIds[index])
+            if av:
+                # Update house id
+                av.b_setHouseId(houseId)
+            else:
+                self.dbInterface.updateObject(self.dbId, avIds[index],
+                                                      self.dclassesByName['DistributedToonAI'],
+                                                      {'setHouseId': [houseId]})
+
+            # self.dbInterface.queryObject(self.dbId, houseId,
+                                         # functools.partial(__handleGetHouse, index=index))
+            __handleGetHouse(self.dclassesByName['DistributedHouseAI'], {}, index)
+
+
+        for index in avatars:
+            if avatars[index] == None:
+                # No avatar, no house. Allocate an ID in it's place
+                # (it'll be generated into an empty house)
+                houseId = self.allocateChannel()
+                houseIds[index] = houseId
+                houseVal[index] = {}
+                if None not in houseVal:
+                    __gotAllHouses()
+                    return
+                else:
+                    continue
+            houseId = avatars[index].get('setHouseId', [0])[0]
+            if houseId == 0:
+                # No house
+                self.dbInterface.createObject(self.dbId, self.dclassesByName['DistributedHouseAI'],
+                                              {},
+                                              #{'setName': [avatars[index]['setName'][0]],
+                                              # 'setAvatarId': [avatars[index]['avId']]},
+                                              functools.partial(__handleHouseCreated, index=index))
+            else:
+                houseIds[index] = houseId
+                self.dbInterface.queryObject(self.dbId, houseId,
+                                             functools.partial(__handleGetHouse, index=index))
+

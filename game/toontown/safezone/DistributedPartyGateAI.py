@@ -6,7 +6,7 @@
 #          parties.
 #-------------------------------------------------------------------------------
 
-#from otp.ai.AIBase import *
+#from game.otp.ai.AIBase import *
 
 from direct.distributed import DistributedObjectAI
 from direct.task import Task

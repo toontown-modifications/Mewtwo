@@ -1,55 +1,93 @@
-from direct.directnotify.DirectNotifyGlobal import directNotify
-from direct.distributed.DistributedSmoothNodeAI import DistributedSmoothNodeAI
-
+from game.otp.ai.AIBaseGlobal import *
+from direct.distributed import DistributedObjectAI
+from direct.directnotify import DirectNotifyGlobal
+from direct.fsm import ClassicFSM
+from direct.distributed import ClockDelta
+from direct.fsm import State
 from game.toontown.catalog import CatalogItem
-from game.toontown.estate import HouseGlobals
+import random
+from . import HouseGlobals
+from . import DistributedHouseItemAI
+from direct.distributed import DistributedSmoothNodeAI
 
-class DistributedFurnitureItemAI(DistributedSmoothNodeAI):
-    notify = directNotify.newCategory('DistributedFurnitureItemAI')
+class DistributedFurnitureItemAI(DistributedHouseItemAI.DistributedHouseItemAI,
+                                 DistributedSmoothNodeAI.\
+                                 DistributedSmoothNodeAI):
 
-    def __init__(self, air, furnitureMgr, catalogItem):
-        DistributedSmoothNodeAI.__init__(self, air)
+    """
+    This is the AI class for furniture items that you can move around your rooms
+    """
+
+    notify = DirectNotifyGlobal.directNotify.newCategory("DistributedFurnitureItemAI")
+
+    def __init__(self, air, furnitureMgr, item):
+        DistributedHouseItemAI.DistributedHouseItemAI.__init__(self, air)
+        DistributedSmoothNodeAI.DistributedSmoothNodeAI.__init__(self, air)
         self.furnitureMgr = furnitureMgr
-        self.catalogItem = catalogItem
-        self.mode = 0
-        self.avId = 0
+        self.item = item
+        self.posHpr = item.posHpr
+        self.mode = HouseGlobals.FURNITURE_MODE_OFF
+        self.directorAvId = 0
 
-    def announceGenerate(self):
-        DistributedSmoothNodeAI.announceGenerate(self)
-
-        self.b_setPosHpr(*self.catalogItem.posHpr)
+    def delete(self):
+        del self.furnitureMgr
+        del self.item
+        DistributedSmoothNodeAI.DistributedSmoothNodeAI.delete(self)
+        DistributedHouseItemAI.DistributedHouseItemAI.delete(self)
 
     def getItem(self):
-        return [self.furnitureMgr.doId, self.catalogItem.getBlob(store = CatalogItem.Customization)]
+        return (self.furnitureMgr.doId, self.item.getBlob(store = CatalogItem.Customization))
 
-    def requestPosHpr(self, final, x, y, z, h, p, r, t):
-        senderId = self.air.getAvatarIdFromSender()
-        posHpr = (x, y, z, h, p, r)
-        if senderId != self.furnitureMgr.house.ownerId:
-            # Hey! What are you doing!?
-            self.notify.warning(f'{senderId} tried to move furniture of house owned by {self.house.ownerId}!')
-            return
+    def d_setSmPosHpr(self, x, y, z, h, p, r, t):
+        self.sendUpdate("setSmPosHpr", [x, y, z, h, p, r, t])
 
-        if not final and self.mode != HouseGlobals.FURNITURE_MODE_START:
-            self.b_setMode(HouseGlobals.FURNITURE_MODE_START, senderId)
-        elif final and self.mode == HouseGlobals.FURNITURE_MODE_START:
-            self.b_setMode(HouseGlobals.FURNITURE_MODE_STOP, senderId)
-            self.b_setMode(HouseGlobals.FURNITURE_MODE_OFF, senderId)
-            self.b_setPosHpr(*posHpr)
+    def b_setMode(self, mode, directorAvId):
+        self.setMode(mode, directorAvId)
+        self.d_setMode(mode, directorAvId)
 
-        self.catalogItem.posHpr = posHpr
-        self.sendUpdate('setSmPosHpr', [x, y, z, h, p, r, t])
+    def d_setMode(self, mode, directorAvId):
+        self.sendUpdate("setMode", (mode, directorAvId))
 
-    def setMode(self, mode, avId):
+    def setMode(self, mode, directorAvId):
         self.mode = mode
-        self.avId = avId
-
-    def d_setMode(self, mode, avId):
-        self.sendUpdate('setMode', [mode, avId])
-
-    def b_setMode(self, mode, avId):
-        self.setMode(mode, avId)
-        self.d_setMode(mode, avId)
+        self.directorAvId = directorAvId
 
     def getMode(self):
-        return self.mode, self.avId
+        return (self.mode, self.directorAvId)
+
+    def requestPosHpr(self, final, x, y, z, h, p, r, timestamp):
+        directorAvId = self.air.getAvatarIdFromSender()
+
+        # check to see if this avId has permission to change this furniture
+        if self.furnitureMgr.requestControl(self, directorAvId):
+            if not self.directorAvId:
+                self.b_setMode(HouseGlobals.FURNITURE_MODE_START, directorAvId)
+            self.posHpr = (x,y,z,h,p,r)
+            # TODO: should we trust the av timestamp, or generate our own?
+            # Broadcast down the new poshpr
+            self.d_setSmPosHpr(x,y,z,h,p,r,timestamp)
+            if final:
+                # Write these properties to the database.
+                self.__savePosition()
+                # Stop this piece
+                self.b_setMode(HouseGlobals.FURNITURE_MODE_STOP, directorAvId)
+                # And turn it off too, clearing the director
+                self.b_setMode(HouseGlobals.FURNITURE_MODE_OFF, 0)
+        else:
+            self.air.writeServerEvent('suspicious', directorAvId, 'DistributedFurnitureItem no permission to move')
+            self.notify.warning("setPosHpr: avId: %s tried to move item: %s without permission" %
+                                (directorAvId, self.item))
+
+    def removeDirector(self):
+        # Forcibly removes the current director.  This is called from
+        # DistributedFurnitureManagerAI.  The item is left where it
+        # is.
+        if self.directorAvId != 0:
+            oldDirector = self.directorAvId
+            self.__savePosition()
+            self.b_setMode(HouseGlobals.FURNITURE_MODE_STOP, oldDirector)
+            self.b_setMode(HouseGlobals.FURNITURE_MODE_OFF, 0)
+
+
+    def __savePosition(self):
+        self.furnitureMgr.saveItemPosition(self)

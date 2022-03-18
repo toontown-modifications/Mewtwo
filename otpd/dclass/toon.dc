@@ -1206,21 +1206,23 @@ dclass DistributedEstate : DistributedObject {
 };
 
 dclass DistributedHouse : DistributedObject {
+  // NOTE: The default values for these fields
+  // are stored in the DistributedHouseAI file.
   string DcObjectType db;
-  setHousePos(uint8 = 0) required broadcast;
-  setHouseType(uint8 type = 0) required broadcast db;
-  setGardenPos(uint8 index = 0) required broadcast db;
-  setAvatarId(uint32 toonId = 0) required broadcast db;
-  setName(string toonName = "") required broadcast db;
-  setColor(uint8 colorIndex = 0) required broadcast db;
-  setAtticItems(blob = "") required db;
-  setInteriorItems(blob = "") required db;
-  setAtticWallpaper(blob = "") required db;
-  setInteriorWallpaper(blob = "") required db;
-  setAtticWindows(blob = "") required db;
-  setInteriorWindows(blob = "") required db;
-  setDeletedItems(blob = "") required db;
-  setCannonEnabled(uint8 = 0) required;
+  setHousePos(uint8) required broadcast;
+  setHouseType(uint8) required broadcast db;
+  setGardenPos(uint8) required broadcast db;
+  setAvatarId(uint32) required broadcast db;
+  setName(string) required broadcast db;
+  setColor(uint8) required broadcast db;
+  setAtticItems(blob) required db;
+  setInteriorItems(blob) required db;
+  setAtticWallpaper(blob) required db;
+  setInteriorWallpaper(blob) required db;
+  setAtticWindows(blob) required db;
+  setInteriorWindows(blob) required db;
+  setDeletedItems(blob) required db;
+  setCannonEnabled(uint8) required;
   setHouseReady() broadcast ram;
 };
 

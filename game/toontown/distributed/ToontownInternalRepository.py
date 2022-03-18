@@ -4,6 +4,7 @@ from direct.distributed import MsgTypes
 from direct.distributed.PyDatagram import PyDatagram
 from game.otp.ai import AIMsgTypes
 from game.toontown.toonbase import TTLocalizer
+from panda3d.direct import DCPacker
 import traceback
 
 class ToontownInternalRepository(AstronInternalRepository):
@@ -134,6 +135,65 @@ class ToontownInternalRepository(AstronInternalRepository):
 
     def getSenderReturnChannel(self):
         return self.getMsgSender()
+
+    def packDclassValueDict(self, dclass, fieldDict):
+        '''
+        Converts {fieldName: fieldValue} dictionaries to
+        {fieldName: packedFieldValue} dictionary.
+
+        Useful for converting values returned from from Astron's Database
+        interface to something more OTP compatible (for dObj.directUpdate or
+        dObj.initFromServerResponse calls).
+        '''
+
+        valueDict = {}
+        packer = DCPacker()
+
+        for fieldName in fieldDict:
+            field = dclass.getFieldByName(fieldName)
+
+            packer.beginPack(field)
+            field.packArgs(packer, fieldDict[fieldName])
+            packer.endPack()
+
+            valueDict[fieldName] = packer.getBytes()
+            packer.clearData()
+
+        return valueDict
+
+    def generateObjectFromDatabase(self, doId, callback, fieldNames=()):
+        '''
+        Fetches the specified object's fields from the database
+        and generates a class with them.
+
+        Calls the callback with an distributed object instance
+        if doId exists in database, None otherwise.
+        '''
+
+        def __getQuery(dclass, fields):
+            if (dclass, fields) == (None, None):
+                self.notify.warning(f'generateObjectFromDatabase returned None for doId {doId}!')
+                callback(None)
+                return
+
+            self.notify.info(f'generateObjectFromDatabase: Generating {dclass.getName()} with doId {doId}.')
+
+            valueDict = self.packDclassValueDict(dclass, fields)
+
+            classDef = dclass.getClassDef()
+            dObj = classDef(self)
+            dObj.doId = doId
+            dObj.dclass = dclass
+            dObj.doNotDeallocateChannel = 1
+
+            dObj.generate()
+            dObj.initFromServerResponse(valueDict)
+            dObj.announceGenerate()
+
+            callback(dObj)
+
+        # Query the object fields from the database.
+        self.dbInterface.queryObject(self.dbId, doId, __getQuery, fieldNames)
 
     def readerPollOnce(self):
         avatarId = self.getAvatarIdFromSender()

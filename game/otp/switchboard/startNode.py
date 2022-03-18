@@ -1,5 +1,5 @@
-from otp.switchboard.sbNode import sbNode
-from otp.switchboard.xd.ChannelManager import *
+from game.otp.switchboard.sbNode import sbNode
+from game.otp.switchboard.xd.ChannelManager import *
 import sys
 import getopt
 

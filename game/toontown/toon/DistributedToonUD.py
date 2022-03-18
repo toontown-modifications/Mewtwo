@@ -1,553 +1,533 @@
-from direct.directnotify import DirectNotifyGlobal
 from direct.distributed.DistributedObjectUD import DistributedObjectUD
+from game.toontown.catalog import CatalogItemList
+from game.toontown.catalog import CatalogItem
+from game.toontown.catalog import CatalogItemTypes
+from game.toontown.catalog import CatalogClothingItem
+from game.toontown.catalog import CatalogAccessoryItem
+from game.toontown.toonbase import ToontownGlobals, TTLocalizer
+from . import ToonDNA
 
 
 class DistributedToonUD(DistributedObjectUD):
-    notify = DirectNotifyGlobal.directNotify.newCategory("DistributedToonUD")
+    def __init__(self, air):
+        DistributedObjectUD.__init__(self, air)
+        self.dna = ToonDNA.ToonDNA()
+        self.clothesTopsList = []
+        self.clothesBottomsList = []
+        self.hatList = []
+        self.glassesList = []
+        self.backpackList = []
+        self.shoesList = []
+        self.hat = (0, 0, 0)
+        self.glasses = (0, 0, 0)
+        self.backpack = (0, 0, 0)
+        self.shoes = (0, 0, 0)
+        self.emoteAccess = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+        self.fishingRod = 0
 
-    def setDNAString(self, todo0):
-        pass
+        if simbase.wantPets:
+            self.petTrickPhrases = []
 
-    def setGM(self, todo0):
-        pass
+        if simbase.wantBingo:
+            self.bingoCheat = False
 
-    def setMaxBankMoney(self, todo0):
-        pass
+        self.customMessages = []
 
-    def setBankMoney(self, todo0):
-        pass
+        self.mailboxContents = CatalogItemList.CatalogItemList(store = CatalogItem.Customization)
+        #self.deliveryboxContents = CatalogItemList.CatalogItemList(store = CatalogItem.Customization | CatalogItem.GiftTag)
 
-    def setMaxMoney(self, todo0):
-        pass
 
-    def setMoney(self, todo0):
-        pass
+    def d_setGiftSchedule(self, onOrder):
+        #self.sendUpdate("setGiftSchedule", [onOrder.getBlob(store = CatalogItem.Customization | CatalogItem.DeliveryDate | CatalogItem.GiftTag)])
+        self.sendUpdate("setGiftSchedule", [onOrder.getBlob(store = CatalogItem.Customization | CatalogItem.DeliveryDate)])
 
-    def setMaxHp(self, todo0):
-        pass
+    """
+    def b_setGiftSchedule(self, onOrder, doUpdateLater = True):
+        self.setGiftSchedule(onOrder, doUpdateLater)
+        self.d_setGiftSchedule(onOrder)
+    """
 
-    def setHp(self, todo0):
-        pass
 
-    def toonUp(self, todo0):
-        pass
+    def setGiftSchedule(self, onGiftOrder, doUpdateLater = True):
+        #self.onGiftOrder = CatalogItemList.CatalogItemList(onGiftOrder, store = CatalogItem.Customization | CatalogItem.DeliveryDate | CatalogItem.GiftTag)
+        self.onGiftOrder = CatalogItemList.CatalogItemList(onGiftOrder, store = CatalogItem.Customization | CatalogItem.DeliveryDate)
 
-    def takeDamage(self, todo0):
-        pass
+    def getGiftSchedule(self):
+        #return self.onGiftOrder.getBlob(store = CatalogItem.Customization | CatalogItem.DeliveryDate | CatalogItem.GiftTag)
+        return self.onGiftOrder.getBlob(store = CatalogItem.Customization | CatalogItem.DeliveryDate)
 
-    def setBattleId(self, todo0):
-        pass
 
-    def setExperience(self, todo0):
-        pass
+    def setDeliverySchedule(self, onOrder, doUpdateLater = True):
 
-    def setMaxCarry(self, todo0):
-        pass
+        self.onOrder = CatalogItemList.CatalogItemList(onOrder, store = CatalogItem.Customization | CatalogItem.DeliveryDate)
 
-    def setTrackAccess(self, todo0):
-        pass
+    def getDeliverySchedule(self):
+        return self.onOrder.getBlob(store = CatalogItem.Customization | CatalogItem.DeliveryDate)
 
-    def setTrackProgress(self, todo0, todo1):
-        pass
 
-    def setTrackBonusLevel(self, todo0):
-        pass
+    def setCatalog(self, monthlyCatalog, weeklyCatalog, backCatalog):
+        self.monthlyCatalog = CatalogItemList.CatalogItemList(monthlyCatalog)
+        self.weeklyCatalog = CatalogItemList.CatalogItemList(weeklyCatalog)
+        self.backCatalog = CatalogItemList.CatalogItemList(backCatalog)
 
-    def setInventory(self, todo0):
-        pass
+    def setName(self, name):
+        self.name = name
 
-    def setMaxNPCFriends(self, todo0):
-        pass
+    def getName(self):
+        return self.name
 
-    def setNPCFriendsDict(self, todo0):
-        pass
+    def setMoney(self, money):
+        self.money = money
 
-    def setDefaultShard(self, todo0):
-        pass
+    def getMoney(self):
+        return self.money
 
-    def setDefaultZone(self, todo0):
-        pass
+    def getTotalMoney(self):
+        return (self.money + self.bankMoney)
 
-    def setShtickerBook(self, todo0):
-        pass
+    def setBankMoney(self, money):
+        self.bankMoney = money
 
-    def setZonesVisited(self, todo0):
-        pass
+    def getBankMoney(self):
+        return self.bankMoney
 
-    def setHoodsVisited(self, todo0):
-        pass
+    def setMailboxContents(self, mailboxContents):
+        self.notify.debug("Setting mailboxContents to %s." % (mailboxContents))
+        self.mailboxContents = CatalogItemList.CatalogItemList(mailboxContents, store = CatalogItem.Customization)
+        self.notify.debug("mailboxContents is %s." % (self.mailboxContents))
 
-    def setInterface(self, todo0):
-        pass
+    def getMailboxContents(self):
+        return self.mailboxContents.getBlob(store = CatalogItem.Customization)
 
-    def setLastHood(self, todo0):
-        pass
 
-    def setTutorialAck(self, todo0):
-        pass
+    def setAwardMailboxContents(self, awardMailboxContents):
+        self.notify.debug("Setting awardMailboxContents to %s." % (awardMailboxContents))
+        self.awardMailboxContents = CatalogItemList.CatalogItemList(awardMailboxContents, store = CatalogItem.Customization )
+        self.notify.debug("awardMailboxContents is %s." % (self.awardMailboxContents))
 
-    def setMaxClothes(self, todo0):
-        pass
+    def getAwardMailboxContents(self):
+        return self.awardMailboxContents.getBlob(store = CatalogItem.Customization  )
 
-    def setClothesTopsList(self, todo0):
-        pass
+    def setAwardSchedule(self, onOrder, doUpdateLater = True):
 
-    def setClothesBottomsList(self, todo0):
-        pass
-
-    def setMaxAccessories(self, todo0):
-        pass
-
-    def setHatList(self, todo0):
-        pass
-
-    def setGlassesList(self, todo0):
-        pass
-
-    def setBackpackList(self, todo0):
-        pass
-
-    def setShoesList(self, todo0):
-        pass
-
-    def setHat(self, todo0, todo1, todo2):
-        pass
-
-    def setGlasses(self, todo0, todo1, todo2):
-        pass
-
-    def setBackpack(self, todo0, todo1, todo2):
-        pass
-
-    def setShoes(self, todo0, todo1, todo2):
-        pass
-
-    def setGardenSpecials(self, todo0):
-        pass
-
-    def setEarnedExperience(self, todo0):
-        pass
-
-    def setTunnelIn(self, todo0, todo1, todo2, todo3, todo4, todo5):
-        pass
-
-    def setTunnelOut(self, todo0, todo1, todo2, todo3, todo4, todo5, todo6):
-        pass
-
-    def setAnimState(self, todo0, todo1, todo2):
-        pass
-
-    def setEmoteState(self, todo0, todo1, todo2):
-        pass
-
-    def setEmoteAccess(self, todo0):
-        pass
-
-    def setCustomMessages(self, todo0):
-        pass
-
-    def setSleepAutoReply(self, todo0):
-        pass
-
-    def setResistanceMessages(self, todo0):
-        pass
-
-    def setPetTrickPhrases(self, todo0):
-        pass
-
-    def setCatalogSchedule(self, todo0, todo1):
-        pass
-
-    def setCatalog(self, todo0, todo1, todo2):
-        pass
-
-    def setMailboxContents(self, todo0):
-        pass
-
-    def setDeliverySchedule(self, todo0):
-        pass
-
-    def setGiftSchedule(self, todo0):
-        pass
-
-    def setAwardMailboxContents(self, todo0):
-        pass
-
-    def setAwardSchedule(self, todo0):
-        pass
-
-    def setAwardNotify(self, todo0):
-        pass
-
-    def setCatalogNotify(self, todo0, todo1):
-        pass
-
-    def playSplashEffect(self, todo0, todo1, todo2):
-        pass
-
-    def setWhisperSCToontaskFrom(self, todo0, todo1, todo2, todo3, todo4):
-        pass
-
-    def setSCToontask(self, todo0, todo1, todo2, todo3):
-        pass
-
-    def reqSCResistance(self, todo0, todo1):
-        pass
-
-    def setSCResistance(self, todo0, todo1):
-        pass
-
-    def setSpeedChatStyleIndex(self, todo0):
-        pass
-
-    def setTrophyScore(self, todo0):
-        pass
-
-    def setTeleportAccess(self, todo0):
-        pass
-
-    def checkTeleportAccess(self, todo0):
-        pass
-
-    def battleSOS(self, todo0):
-        pass
-
-    def teleportQuery(self, todo0):
-        pass
-
-    def teleportResponse(self, todo0, todo1, todo2, todo3, todo4):
-        pass
-
-    def teleportResponseToAI(self, todo0, todo1, todo2, todo3, todo4, todo5):
-        pass
-
-    def teleportGiveup(self, todo0):
-        pass
-
-    def teleportGreeting(self, todo0):
-        pass
-
-    def setCogStatus(self, todo0):
-        pass
-
-    def setCogCount(self, todo0):
-        pass
-
-    def setCogRadar(self, todo0):
-        pass
-
-    def setBuildingRadar(self, todo0):
-        pass
-
-    def setCogLevels(self, todo0):
-        pass
-
-    def setCogTypes(self, todo0):
-        pass
-
-    def setCogParts(self, todo0):
-        pass
-
-    def setCogMerits(self, todo0):
-        pass
-
-    def setCogIndex(self, todo0):
-        pass
-
-    def setDisguisePageFlag(self, todo0):
-        pass
-
-    def setSosPageFlag(self, todo0):
-        pass
-
-    def setHouseId(self, todo0):
-        pass
-
-    def setQuests(self, todo0):
-        pass
-
-    def setQuestHistory(self, todo0):
-        pass
-
-    def setRewardHistory(self, todo0, todo1):
-        pass
-
-    def setQuestCarryLimit(self, todo0):
-        pass
-
-    def requestDeleteQuest(self, todo0):
-        pass
-
-    def setCheesyEffect(self, todo0, todo1, todo2):
-        pass
-
-    def setGhostMode(self, todo0):
-        pass
-
-    def setPosIndex(self, todo0):
-        pass
-
-    def setFishCollection(self, todo0, todo1, todo2):
-        pass
-
-    def setMaxFishTank(self, todo0):
-        pass
-
-    def setFishTank(self, todo0, todo1, todo2):
-        pass
-
-    def setFishingRod(self, todo0):
-        pass
-
-    def setFishingTrophies(self, todo0):
-        pass
-
-    def setFlowerCollection(self, todo0, todo1):
-        pass
-
-    def setFlowerBasket(self, todo0, todo1):
-        pass
-
-    def setMaxFlowerBasket(self, todo0):
-        pass
-
-    def setGardenTrophies(self, todo0):
-        pass
-
-    def setShovel(self, todo0):
-        pass
-
-    def setShovelSkill(self, todo0):
-        pass
-
-    def setWateringCan(self, todo0):
-        pass
-
-    def setWateringCanSkill(self, todo0):
-        pass
-
-    def promoteShovel(self, todo0):
-        pass
-
-    def promoteWateringCan(self, todo0):
-        pass
-
-    def reactivateWater(self):
-        pass
-
-    def presentPie(self, todo0, todo1, todo2, todo3, todo4, todo5, todo6):
-        pass
-
-    def tossPie(self, todo0, todo1, todo2, todo3, todo4, todo5, todo6, todo7,
-                todo8):
-        pass
-
-    def pieSplat(self, todo0, todo1, todo2, todo3, todo4, todo5):
-        pass
-
-    def setPieType(self, todo0):
-        pass
-
-    def setNumPies(self, todo0):
-        pass
-
-    def catalogGenClothes(self, todo0):
-        pass
-
-    def catalogGenAccessories(self, todo0):
-        pass
-
-    def setPetId(self, todo0):
-        pass
-
-    def setPetMovie(self, todo0, todo1):
-        pass
-
-    def setPetTutorialDone(self, todo0):
-        pass
-
-    def setFishBingoTutorialDone(self, todo0):
-        pass
-
-    def setFishBingoMarkTutorialDone(self, todo0):
-        pass
-
-    def setKartBodyType(self, todo0):
-        pass
-
-    def setKartBodyColor(self, todo0):
-        pass
-
-    def setKartAccessoryColor(self, todo0):
-        pass
-
-    def setKartEngineBlockType(self, todo0):
-        pass
-
-    def setKartSpoilerType(self, todo0):
-        pass
-
-    def setKartFrontWheelWellType(self, todo0):
-        pass
-
-    def setKartBackWheelWellType(self, todo0):
-        pass
-
-    def setKartRimType(self, todo0):
-        pass
-
-    def setKartDecalType(self, todo0):
-        pass
-
-    def updateKartDNAField(self, todo0, todo1):
-        pass
-
-    def addOwnedAccessory(self, todo0):
-        pass
-
-    def removeOwnedAccessory(self, todo0):
-        pass
-
-    def setTickets(self, todo0):
-        pass
-
-    def setKartingHistory(self, todo0):
-        pass
-
-    def setKartingTrophies(self, todo0):
-        pass
-
-    def setKartingPersonalBest(self, todo0):
-        pass
-
-    def setKartingPersonalBest2(self, todo0):
-        pass
-
-    def setKartAccessoriesOwned(self, todo0):
-        pass
-
-    def setCurrentKart(self, todo0):
-        pass
-
-    def squish(self, todo0):
-        pass
-
-    def announceBingo(self):
-        pass
-
-    def trickOrTreatTargetMet(self, todo0):
-        pass
-
-    def trickOrTreatMilestoneMet(self):
-        pass
-
-    def winterCarolingTargetMet(self, todo0):
-        pass
-
-    def setCogSummonsEarned(self, todo0):
-        pass
-
-    def reqCogSummons(self, todo0, todo1):
-        pass
-
-    def cogSummonsResponse(self, todo0, todo1, todo2):
-        pass
-
-    def reqUseSpecial(self, todo0):
-        pass
-
-    def useSpecialResponse(self, todo0):
-        pass
-
-    def setGardenStarted(self, todo0):
-        pass
-
-    def sendToGolfCourse(self, todo0):
-        pass
-
-    def setGolfHistory(self, todo0):
-        pass
-
-    def setPackedGolfHoleBest(self, todo0):
-        pass
-
-    def setGolfCourseBest(self, todo0):
-        pass
-
-    def setUnlimitedSwing(self, todo0):
-        pass
-
-    def logSuspiciousEvent(self, todo0):
-        pass
-
-    def logMessage(self, todo0):
-        pass
-
-    def forceLogoutWithNotify(self):
-        pass
-
-    def setPinkSlips(self, todo0):
-        pass
-
-    def setNametagStyle(self, todo0):
-        pass
-
-    def setMail(self, todo0):
-        pass
-
-    def setNumMailItems(self, todo0):
-        pass
-
-    def setSimpleMailNotify(self, todo0):
-        pass
-
-    def setInvites(self, todo0):
-        pass
-
-    def setPartiesInvitedTo(self, todo0):
-        pass
-
-    def setHostedParties(self, todo0):
-        pass
-
-    def setPartyReplies(self, todo0):
-        pass
-
-    def updateInvite(self, todo0, todo1):
-        pass
-
-    def updateReply(self, todo0, todo1, todo2):
-        pass
-
-    def setPartyCanStart(self, todo0):
-        pass
-
-    def setPartyStatus(self, todo0, todo1):
-        pass
-
-    def announcePartyStarted(self, todo0):
-        pass
-
-    def setNeverStartedPartyRefunded(self, todo0, todo1, todo2):
-        pass
-
-    def setModuleInfo(self, todo0):
-        pass
-
-    def setDISLname(self, todo0):
-        pass
-
-    def setDISLid(self, todo0):
-        pass
-
-    def flagAv(self, todo0, todo1, todo2):
-        pass
-
-    def requestPing(self, todo0):
-        pass
-
-    def ping(self, todo0):
-        pass
-
-    def pingresp(self, todo0):
-        pass
+        self.onAwardOrder = CatalogItemList.CatalogItemList(onOrder, store = CatalogItem.Customization | CatalogItem.DeliveryDate)
+
+    def getAwardSchedule(self):
+        return self.onAwardOrder.getBlob(store = CatalogItem.Customization | CatalogItem.DeliveryDate)
+
+    """
+    def setDeliveryboxContents(self, deliveryboxContents):
+        self.deliveryboxContents = CatalogItemList.CatalogItemList(deliveryboxContents, store = CatalogItem.Customization | CatalogItem.GiftTag)
+
+    def getDeliveryboxContents(self):
+        return self.deliveryboxContents.getBlob(store = CatalogItem.Customization | CatalogItem.GiftTag)
+    """
+    def setDNAString(self, string):
+            self.dna.makeFromNetString(string)
+
+    def getDNAString( self ):
+        """
+        Function:    retrieve the dna information from this suit, called
+                     whenever a client needs to create this suit
+        Returns:     netString representation of this suit's dna
+        """
+        return self.dna.makeNetString()
+
+    def getStyle(self):
+        return self.dna
+
+    def setClothesTopsList(self, clothesList):
+        self.clothesTopsList = clothesList
+
+    def getClothesTopsList(self):
+        return self.clothesTopsList
+
+    def setClothesBottomsList(self, clothesList):
+        self.clothesBottomsList = clothesList
+
+    def getClothesBottomsList(self):
+        return self.clothesBottomsList
+
+    def setEmoteAccess(self, bits):
+        if len(bits) != len(self.emoteAccess):
+            self.notify.warning("New emote access list must be the same size as the old one.")
+            return
+        self.emoteAccess = bits
+
+    def getEmoteAccess(self):
+        return self.emoteAccess
+
+    def setCustomMessages(self, customMessages):
+        self.customMessages = customMessages
+
+    def getCustomMessages(self):
+        return self.customMessages
+
+    def setPetTrickPhrases(self, tricks):
+        self.petTrickPhrases = tricks
+
+    def getPetTrickPhrases(self):
+        return self.petTrickPhrases
+
+    def setFishingRod(self, rodId):
+        self.fishingRod = rodId
+
+    def getFishingRod(self):
+        return self.fishingRod
+
+    def getGardenSpecials(self):
+        return self.gardenSpecials
+
+    def setGardenSpecials(self, specials):
+        self.gardenSpecials = specials
+
+    def checkForItemInCloset(self, clothingItem):
+        """Returns None if the clothing item is not in the closet."""
+        result = None
+        clothingTypeInfo = CatalogClothingItem.ClothingTypes[clothingItem.clothingType]
+        styleStr = clothingTypeInfo[1]
+        if clothingItem.isShirt():
+            # ok check the tops list
+            # we have the style str, check TOON DNA to get shirt and sleeve indices
+            shirtStyleInfo = ToonDNA.ShirtStyles[styleStr]
+            topTex= shirtStyleInfo[0]
+            sleeveTex = shirtStyleInfo[1]
+            topTexColor = shirtStyleInfo[2][clothingItem.colorIndex][0]
+            sleeveTexColor = shirtStyleInfo[2][clothingItem.colorIndex][1]
+            # See if this top is already there
+            for i in range(0, len(self.clothesTopsList), 4):
+                if (self.clothesTopsList[i] == topTex and
+                    self.clothesTopsList[i+1] == topTexColor and
+                    self.clothesTopsList[i+2] == sleeveTex and
+                    self.clothesTopsList[i+3] == sleeveTexColor):
+                    result = ToontownGlobals.P_ItemInCloset
+                    break
+        else:
+            bottomStyleInfo = ToonDNA.BottomStyles[styleStr]
+            botTex= bottomStyleInfo[0]
+            botTexColor = bottomStyleInfo[1][clothingItem.colorIndex]
+            # See if this bottom is already there
+            for i in range(0, len(self.clothesBottomsList), 2):
+                if (self.clothesBottomsList[i] == botTex and
+                    self.clothesBottomsList[i+1] == botTexColor):
+                    result = ToontownGlobals.P_ItemInCloset
+                    break
+        return result
+
+    def checkForItemAlreadyWorn(self, clothingItem):
+        """Returns None if the toon is not wearing the clothing item."""
+        result = None
+        clothingTypeInfo = CatalogClothingItem.ClothingTypes[clothingItem.clothingType]
+        styleStr = clothingTypeInfo[1]
+        if clothingItem.isShirt():
+            # ok check the tops list
+            # we have the style str, check TOON DNA to get shirt and sleeve indices
+            shirtStyleInfo = ToonDNA.ShirtStyles[styleStr]
+            topTex= shirtStyleInfo[0]
+            sleeveTex = shirtStyleInfo[1]
+            topTexColor = shirtStyleInfo[2][clothingItem.colorIndex][0]
+            sleeveTexColor = shirtStyleInfo[2][clothingItem.colorIndex][1]
+            # See if this top is already being worn
+            if self.dna.topTex == topTex and \
+               self.dna.sleeveTex == sleeveTex and \
+               self.dna.topTexColor == topTexColor and \
+               self.dna.sleeveTexColor == sleeveTexColor:
+                result = ToontownGlobals.P_ItemAlreadyWorn
+        else:
+            bottomStyleInfo = ToonDNA.BottomStyles[styleStr]
+            bottomTex= bottomStyleInfo[0]
+            bottomTexColor = bottomStyleInfo[1][clothingItem.colorIndex]
+            # See if this bottom is already being worn
+            if self.dna.botTex == bottomTex and \
+                self.dna.botTexColor == bottomTexColor:
+                result = ToontownGlobals.P_ItemAlreadyWorn
+        return result
+
+    def checkForDuplicateItem(self, catalogItem):
+        """Return None if the catalog item is not in his mailbox, or on him somehow"""
+        result = None
+        # go through his mailbox
+        if catalogItem in self.mailboxContents:
+            result = ToontownGlobals.P_ItemInMailbox
+        elif catalogItem in self.onOrder:
+            result = ToontownGlobals.P_ItemOnOrder
+        elif catalogItem in self.onGiftOrder:
+            result = ToontownGlobals.P_ItemOnGiftOrder
+        elif catalogItem in self.awardMailboxContents:
+            result = ToontownGlobals.P_ItemInAwardMailbox
+        elif catalogItem in self.onAwardOrder:
+            result = ToontownGlobals.P_ItemOnAwardOrder
+
+        # now based on the item type do some other checking
+        if not result:
+            if catalogItem.getTypeCode() == CatalogItemTypes.CLOTHING_ITEM:
+                result = self.checkForItemInCloset(catalogItem)
+                if not result:
+                    result = self.checkForItemAlreadyWorn(catalogItem)
+            elif catalogItem.getTypeCode() == CatalogItemTypes.CHAT_ITEM:
+                speedChatIndex = catalogItem.customIndex
+                if speedChatIndex in self.customMessages:
+                    result = ToontownGlobals.P_ItemInMyPhrases
+            elif catalogItem.getTypeCode() == CatalogItemTypes.PET_TRICK_ITEM:
+                trickId = catalogItem.trickId
+                if trickId in self.petTrickPhrases:
+                    result = ToontownGlobals.P_ItemInPetTricks
+        return result
+
+    def setHat(self, idx, textureIdx, colorIdx):
+        if not self.checkAccessorySanity(ToonDNA.HAT, idx, textureIdx, colorIdx):
+            pass
+        self.hat = (idx, textureIdx, colorIdx)
+
+    def getHat(self):
+        return self.hat
+
+    def setGlasses(self, idx, textureIdx, colorIdx):
+        if not self.checkAccessorySanity(ToonDNA.GLASSES, idx, textureIdx, colorIdx):
+            pass
+        self.glasses = (idx, textureIdx, colorIdx)
+
+    def getGlasses(self):
+        return self.glasses
+
+    def setBackpack(self, idx, textureIdx, colorIdx):
+        if not self.checkAccessorySanity(ToonDNA.BACKPACK, idx, textureIdx, colorIdx):
+            pass
+        self.backpack = (idx, textureIdx, colorIdx)
+
+    def getBackpack(self):
+        return self.backpack
+
+    def setShoes(self, idx, textureIdx, colorIdx):
+        if not self.checkAccessorySanity(ToonDNA.SHOES, idx, textureIdx, colorIdx):
+            pass
+        self.shoes = (idx, textureIdx, colorIdx)
+
+    def getShoes(self):
+        return self.shoes
+
+    def checkAccessorySanity(self, accessoryType, idx, textureIdx, colorIdx):
+        if idx == 0 and textureIdx == 0 and colorIdx == 0:
+            return 1
+        if accessoryType == ToonDNA.HAT:
+            stylesDict = ToonDNA.HatStyles
+            accessoryTypeStr = 'Hat'
+        elif accessoryType == ToonDNA.GLASSES:
+            stylesDict = ToonDNA.GlassesStyles
+            accessoryTypeStr = 'Glasses'
+        elif accessoryType == ToonDNA.BACKPACK:
+            stylesDict = ToonDNA.BackpackStyles
+            accessoryTypeStr = 'Backpack'
+        elif accessoryType == ToonDNA.SHOES:
+            stylesDict = ToonDNA.ShoesStyles
+            accessoryTypeStr = 'Shoes'
+        else:
+            return 0
+        try:
+            styleStr = list(stylesDict.keys())[list(stylesDict.values()).index([idx, textureIdx, colorIdx])]
+            accessoryItemId = 0
+            for itemId in list(CatalogAccessoryItem.AccessoryTypes.keys()):
+                if styleStr == CatalogAccessoryItem.AccessoryTypes[itemId][CatalogAccessoryItem.ATString]:
+                    accessoryItemId = itemId
+                    break
+
+            if accessoryItemId == 0:
+                self.air.writeServerEvent('suspicious', self.doId, 'Toon tried to wear invalid %s %d %d %d' % (accessoryTypeStr,
+                 idx,
+                 textureIdx,
+                 colorIdx))
+                return 0
+            if not simbase.config.GetBool('want-check-accessory-sanity', False):
+                return 1
+            accessoryItem = CatalogAccessoryItem.CatalogAccessoryItem(accessoryItemId)
+            result = self.air.catalogManager.isItemReleased(accessoryItem)
+            if result == 0:
+                self.air.writeServerEvent('suspicious', self.doId, 'Toon wore unreleased accessoryItem %d' % accessoryItemId)
+            return result
+        except:
+            self.air.writeServerEvent('suspicious', self.doId, 'Toon tried to wear invalid %s %d %d %d' % (accessoryTypeStr,
+             idx,
+             textureIdx,
+             colorIdx))
+            return 0
+
+    def setMaxAccessories(self, max):
+        self.maxAccessories = max
+
+    def getMaxAccessories(self):
+        return self.maxAccessories
+
+    def isTrunkFull(self, extraAccessories = 0):
+        numAccessories = (len(self.hatList) + len(self.glassesList) + len(self.backpackList) + len(self.shoesList)) / 3
+        return numAccessories + extraAccessories >= self.maxAccessories
+
+    def setHatList(self, clothesList):
+        self.hatList = clothesList
+
+    def getHatList(self):
+        return self.hatList
+
+    def setGlassesList(self, clothesList):
+        self.glassesList = clothesList
+
+    def getGlassesList(self):
+        return self.glassesList
+
+    def setBackpackList(self, clothesList):
+        self.backpackList = clothesList
+
+    def getBackpackList(self):
+        return self.backpackList
+
+    def setShoesList(self, clothesList):
+        self.shoesList = clothesList
+
+    def getShoesList(self):
+        return self.shoesList
+
+    def addToAccessoriesList(self, accessoryType, geomIdx, texIdx, colorIdx):
+        if self.isTrunkFull():
+            return 0
+        if accessoryType == ToonDNA.HAT:
+            itemList = self.hatList
+        elif accessoryType == ToonDNA.GLASSES:
+            itemList = self.glassesList
+        elif accessoryType == ToonDNA.BACKPACK:
+            itemList = self.backpackList
+        elif accessoryType == ToonDNA.SHOES:
+            itemList = self.shoesList
+        else:
+            return 0
+        index = 0
+        for i in range(0, len(itemList), 3):
+            if itemList[i] == geomIdx and itemList[i + 1] == texIdx and itemList[i + 2] == colorIdx:
+                return 0
+
+        if accessoryType == ToonDNA.HAT:
+            self.hatList.append(geomIdx)
+            self.hatList.append(texIdx)
+            self.hatList.append(colorIdx)
+        elif accessoryType == ToonDNA.GLASSES:
+            self.glassesList.append(geomIdx)
+            self.glassesList.append(texIdx)
+            self.glassesList.append(colorIdx)
+        elif accessoryType == ToonDNA.BACKPACK:
+            self.backpackList.append(geomIdx)
+            self.backpackList.append(texIdx)
+            self.backpackList.append(colorIdx)
+        elif accessoryType == ToonDNA.SHOES:
+            self.shoesList.append(geomIdx)
+            self.shoesList.append(texIdx)
+            self.shoesList.append(colorIdx)
+        return 1
+
+    def replaceItemInAccessoriesList(self, accessoryType, geomIdxA, texIdxA, colorIdxA, geomIdxB, texIdxB, colorIdxB):
+        if accessoryType == ToonDNA.HAT:
+            itemList = self.hatList
+        elif accessoryType == ToonDNA.GLASSES:
+            itemList = self.glassesList
+        elif accessoryType == ToonDNA.BACKPACK:
+            itemList = self.backpackList
+        elif accessoryType == ToonDNA.SHOES:
+            itemList = self.shoesList
+        else:
+            return 0
+        index = 0
+        for i in range(0, len(itemList), 3):
+            if itemList[i] == geomIdxA and itemList[i + 1] == texIdxA and itemList[i + 2] == colorIdxA:
+                if accessoryType == ToonDNA.HAT:
+                    self.hatList[i] = geomIdxB
+                    self.hatList[i + 1] = texIdxB
+                    self.hatList[i + 2] = colorIdxB
+                elif accessoryType == ToonDNA.GLASSES:
+                    self.glassesList[i] = geomIdxB
+                    self.glassesList[i + 1] = texIdxB
+                    self.glassesList[i + 2] = colorIdxB
+                elif accessoryType == ToonDNA.BACKPACK:
+                    self.backpackList[i] = geomIdxB
+                    self.backpackList[i + 1] = texIdxB
+                    self.backpackList[i + 2] = colorIdxB
+                else:
+                    self.shoesList[i] = geomIdxB
+                    self.shoesList[i + 1] = texIdxB
+                    self.shoesList[i + 2] = colorIdxB
+                return 1
+
+        return 0
+
+    def hasAccessory(self, accessoryType, geomIdx, texIdx, colorIdx):
+        if accessoryType == ToonDNA.HAT:
+            itemList = self.hatList
+            cur = self.hat
+        elif accessoryType == ToonDNA.GLASSES:
+            itemList = self.glassesList
+            cur = self.glasses
+        elif accessoryType == ToonDNA.BACKPACK:
+            itemList = self.backpackList
+            cur = self.backpack
+        elif accessoryType == ToonDNA.SHOES:
+            itemList = self.shoesList
+            cur = self.shoes
+        else:
+            raise 'invalid accessory type %s' % accessoryType
+        if cur == (geomIdx, texIdx, colorIdx):
+            return True
+        for i in range(0, len(itemList), 3):
+            if itemList[i] == geomIdx and itemList[i + 1] == texIdx and itemList[i + 2] == colorIdx:
+                return True
+
+        return False
+
+    def isValidAccessorySetting(self, accessoryType, geomIdx, texIdx, colorIdx):
+        if not geomIdx and not texIdx and not colorIdx:
+            return True
+        return self.hasAccessory(accessoryType, geomIdx, texIdx, colorIdx)
+
+    def removeItemInAccessoriesList(self, accessoryType, geomIdx, texIdx, colorIdx):
+        if accessoryType == ToonDNA.HAT:
+            itemList = self.hatList
+        elif accessoryType == ToonDNA.GLASSES:
+            itemList = self.glassesList
+        elif accessoryType == ToonDNA.BACKPACK:
+            itemList = self.backpackList
+        elif accessoryType == ToonDNA.SHOES:
+            itemList = self.shoesList
+        else:
+            return 0
+        listLen = len(itemList)
+        if listLen < 3:
+            self.notify.warning('Accessory list is not long enough to delete anything')
+            return 0
+        index = 0
+        for i in range(0, len(itemList), 3):
+            if itemList[i] == geomIdx and itemList[i + 1] == texIdx and itemList[i + 2] == colorIdx:
+                itemList = itemList[0:i] + itemList[i + 3:listLen]
+                if accessoryType == ToonDNA.HAT:
+                    self.hatList = itemList[:]
+                    styles = ToonDNA.HatStyles
+                    descDict = TTLocalizer.HatStylesDescriptions
+                elif accessoryType == ToonDNA.GLASSES:
+                    self.glassesList = itemList[:]
+                    styles = ToonDNA.GlassesStyles
+                    descDict = TTLocalizer.GlassesStylesDescriptions
+                elif accessoryType == ToonDNA.BACKPACK:
+                    self.backpackList = itemList[:]
+                    styles = ToonDNA.BackpackStyles
+                    descDict = TTLocalizer.BackpackStylesDescriptions
+                elif accessoryType == ToonDNA.SHOES:
+                    self.shoesList = itemList[:]
+                    styles = ToonDNA.ShoesStyles
+                    descDict = TTLocalizer.ShoesStylesDescriptions
+                styleName = 'none'
+                for style in list(styles.items()):
+                    if style[1] == [geomIdx, texIdx, colorIdx]:
+                        styleName = style[0]
+                        break
+
+                if styleName == 'none' or styleName not in descDict:
+                    self.air.writeServerEvent('suspicious', self.doId, ' tried to remove wrong accessory code %d %d %d' % (geomIdx, texIdx, colorIdx))
+                else:
+                    self.air.writeServerEvent('accessory', self.doId, ' removed accessory %s' % descDict[styleName])
+                return 1
+
+        return 0

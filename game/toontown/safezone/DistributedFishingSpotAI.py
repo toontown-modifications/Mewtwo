@@ -1,208 +1,223 @@
-from direct.directnotify.DirectNotifyGlobal import directNotify
-from direct.distributed.DistributedObjectAI import DistributedObjectAI
+from game.otp.ai.AIBase import *
+
+from direct.distributed import DistributedObjectAI
+from direct.directnotify import DirectNotifyGlobal
 
 from game.toontown.fishing import FishGlobals
 from game.toontown.toonbase import ToontownGlobals
 
-class DistributedFishingSpotAI(DistributedObjectAI):
-    notify = directNotify.newCategory('DistributedFishingSpotAI')
 
-    def __init__(self, air):
-        DistributedObjectAI.__init__(self, air)
-        self.pondDoId = 0
-        self.posHpr = [0, 0, 0, 0, 0, 0]
-        self.avId = None
-        self.lastFish = [None, None, None]
-        self.cast = False
+class DistributedFishingSpotAI(DistributedObjectAI.DistributedObjectAI):
+    notify = DirectNotifyGlobal.directNotify.newCategory("DistributedFishingSpotAI")
 
-    def generate(self):
-        DistributedObjectAI.generate(self)
-        pond = self.air.doId2do.get(self.pondDoId)
-        if pond:
-            pond.addSpot(self)
+    def __init__(self, air, pond, x, y, z, h, p, r):
+        DistributedObjectAI.DistributedObjectAI.__init__(self, air)
+        self.notify.debug("init")
+        self.posHpr = (x, y, z, h, p, r)
+        self.avId = 0
+        self.timeoutTask = None
+        self.pond = pond
+        self.wantTimeouts = simbase.config.GetBool("want-fishing-timeouts", 1)
 
-    def setPondDoId(self, pondDoId):
-        self.pondDoId = pondDoId
-
-    def d_setPondDoId(self, pondDoId):
-        self.sendUpdate('setPondDoId', [pondDoId])
-
-    def b_setPondDoId(self, pondDoId):
-        self.setPondDoId(pondDoId)
-        self.d_setPondDoId(pondDoId)
+    def delete(self):
+        self.notify.debug("delete")
+        taskMgr.remove(self.taskName("clearEmpty"))
+        self.ignore(self.air.getAvatarExitEvent(self.avId))
+        self.__stopTimeout()
+        self.d_setMovie(FishGlobals.ExitMovie)
+        self.avId = 0
+        self.pond = None
+        DistributedObjectAI.DistributedObjectAI.delete(self)
 
     def getPondDoId(self):
-        return self.pondDoId
-
-    def setPosHpr(self, x, y, z, h, p, r):
-        self.posHpr = [x, y, z, h, p, r]
-
-    def d_setPosHpr(self, x, y, z, h, p, r):
-        self.sendUpdate('setPosHpr', [x, y, z, h, p, r])
-
-    def b_setPosHpr(self, x, y, z, h, p, r):
-        self.setPosHpr(x, y, z, h, p, r)
-        self.d_setPosHpr(x, y, z, h, p, r)
-
-    def getPosHpr(self):
-        return self.posHpr
+        return self.pond.getDoId()
 
     def requestEnter(self):
+        # A client is requesting sole use of the fishing spot.  If
+        # it's available, he can have it.
         avId = self.air.getAvatarIdFromSender()
-        if not avId:
+        self.notify.debug("requestEnter: avId: %s" % (avId))
+        if self.avId == avId:
+            # This seems to happen in the estates when we get a double request
+            # coming out of fishing directly onto the dock
+            self.notify.debug("requestEnter: avId %s is already fishing here" % (avId))
             return
 
-        if self.avId is not None:
-            if self.avId == avId:
-                self.air.writeServerEvent('suspicious', avId, 'Toon requested to enter a fishing spot twice!')
-
-            self.sendUpdateToAvatarId(avId, 'rejectEnter', [])
-            return
-
-        event = self.air.getAvatarExitEvent(avId)
-        self.acceptOnce(event, self.__handleUnexpectedExit)
-        self.b_setOccupied(avId)
-        self.d_setMovie(FishGlobals.EnterMovie, 0, 0, 0, 0, 0, 0)
-        taskMgr.remove('cancel-animation-%d' % self.doId)
-        taskMgr.doMethodLater(2, self.d_setMovie, 'cancel-animation-%d' % self.doId,
-                              [FishGlobals.NoMovie, 0, 0, 0, 0, 0, 0])
-        taskMgr.remove('time-out-%d' % self.doId)
-        taskMgr.doMethodLater(FishGlobals.CastTimeout + 2.5, self.removeFromFishingSpotWithAnim,
-                              'time-out-%d' % self.doId)
-        taskMgr.remove('bingo-status-%d' % self.doId)
-        taskMgr.doMethodLater(2, self.sendBingoStatus, 'bingo-status-%d' % self.doId)
-        self.lastFish = [None, None, None]
-        self.cast = False
-
-    def sendBingoStatus(self, _= None):
-        # Send bingo status to avatar
-        pond = self.air.doId2do.get(self.pondDoId)
-        if not pond:
-            return
-
-        if pond.bingoMgr:
-            pond.bingoMgr.sendStatesToAvatar(self.avId)
+        if self.avId == 0:
+            self.avId = avId
+            # Tell the pond we are here
+            self.pond.addAvSpot(avId, self)
+            self.acceptOnce(self.air.getAvatarExitEvent(self.avId),
+                            self.unexpectedExit)
+            self.__stopTimeout()
+            self.d_setOccupied(self.avId)
+            self.d_setMovie(FishGlobals.EnterMovie)
+            self.__startTimeout(FishGlobals.CastTimeout)
+            taskMgr.remove('poker-status-%d' % self.doId)
+            taskMgr.doMethodLater(2.65, self.sendPokerStatus, 'poker-status-%d' % self.doId, extraArgs=[1])
+            self.air.writeServerEvent("fished_enter", self.avId, "%s" % (self.zoneId))
+        else:
+            self.sendUpdateToAvatarId(avId, "rejectEnter", [])
 
     def requestExit(self):
+        # The client within the spot is ready to leave.
         avId = self.air.getAvatarIdFromSender()
-        if not avId:
+        self.notify.debug("requestExit: avId: %s" % (avId))
+        if not self.validate(avId, (self.avId == avId), "requestExit: avId is not fishing in this spot"):
             return
+        self.normalExit()
 
-        if self.avId != avId:
-            self.air.writeServerEvent('suspicious', avId, 'Toon requested to exit a fishing spot they\'re not on!')
-            return
-
-        event = self.air.getAvatarExitEvent(avId)
-        self.ignore(event)
-        self.removeFromFishingSpotWithAnim()
-
-    def setOccupied(self, avId):
-        self.avId = avId
+    def sendPokerStatus(self, entryStatus):
+        # Send poker status to avatar
+        if self.air.holidayManager.isHolidayRunning(ToontownGlobals.FISH_POKER):
+            if entryStatus:
+                method = 'enterFishing'
+            else:
+                method = 'exitFishing'
+            self.air.fishPokerManager.sendUpdateToAvatarId(self.avId, method, [])
 
     def d_setOccupied(self, avId):
-        self.sendUpdate('setOccupied', [avId])
+        self.notify.debug("setOccupied: %s" % (avId))
+        self.sendUpdate("setOccupied", [avId])
 
-    def b_setOccupied(self, avId):
-        self.setOccupied(avId)
-        self.d_setOccupied(avId)
-
-    def doCast(self, p, h):
+    def doCast(self, power, heading):
+        # The client begins a cast.
         avId = self.air.getAvatarIdFromSender()
-        if not avId:
+        self.notify.debug("doCast: avId: %s" % (avId))
+        if not self.validate(avId, (self.avId == avId),
+                             "doCast: avId is not fishing in this spot"):
             return
-
-        if self.avId != avId:
-            self.air.writeServerEvent('suspicious', avId, 'Toon tried to cast from a fishing spot they\'re not on!')
+        if not self.validate(avId, (0.0 <= power <= 1.0),
+                             ("doCast: power: %s is out of range" % power)):
             return
-
-        av = self.air.doId2do.get(avId)
-        if not av:
-            self.air.writeServerEvent('suspicious', avId, 'Toon tried to cast, but they don\'t exist on this shard!')
-            return
-
-        money = av.getMoney()
-        cost = FishGlobals.getCastCost(av.getFishingRod())
-        if money < cost:
-            self.air.writeServerEvent('suspicious', avId, 'Toon tried to cast without enough jellybeans!')
-            return
-
-        if len(av.fishTank) >= av.getMaxFishTank():
-            self.air.writeServerEvent('suspicious', avId, 'Toon tried to cast with too many fish!')
-            return
-
-        av.takeMoney(cost, False)
-        self.d_setMovie(FishGlobals.CastMovie, 0, 0, 0, 0, p, h)
-        taskMgr.remove('cancel-animation-%d' % self.doId)
-        taskMgr.doMethodLater(2, self.d_setMovie, 'cancel-animation-%d' % self.doId,
-                              [FishGlobals.NoMovie, 0, 0, 0, 0, 0, 0])
-        taskMgr.remove('time-out-%d' % self.doId)
-        taskMgr.doMethodLater(FishGlobals.CastTimeout, self.removeFromFishingSpotWithAnim, 'time-out-%d' % self.doId)
-        self.cast = True
-
-    def __allowSellFish(self):
-        pond = self.air.doId2do.get(self.pondDoId)
-        if pond and pond.bingoMgr and pond.getArea() == ToontownGlobals.MyEstate:
-            return True
-
-        return False
-
-    def sellFish(self):
-        avId = self.air.getAvatarIdFromSender()
-        if not avId:
-            return
-
-        if self.avId != avId:
-            self.air.writeServerEvent('suspicious', avId, 'Toon tried to sell from a fishing spot they\'re not on!')
-            return
-
-        av = self.air.doId2do.get(avId)
-        if not av:
-            self.air.writeServerEvent('suspicious', avId, 'Toon tried to sell, but they don\'t exist on this shard!')
-            return
-
-        if not self.__allowSellFish():
-            self.air.writeServerEvent('suspicious', avId, 'Toon tried to sell, but they\'re not allowed too!')
-            return
-
-        trophyResult = self.air.fishManager.creditFishTank(av)
-        self.sendUpdateToAvatarId(self.avId, 'sellFishComplete', [trophyResult, len(av.fishCollection)])
-
-    def __handleUnexpectedExit(self):
-        self.removeFromFishingSpot()
-
-    def removeFromFishingSpot(self, task=None):
-        taskMgr.remove('time-out-%d' % self.doId)
-        self.d_setMovie(FishGlobals.NoMovie, 0, 0, 0, 0, 0, 0)
-        self.d_setOccupied(0)
-        self.avId = None
-        if task:
-            return task.done
-
-    def d_setMovie(self, mode, code, genus, species, weight, p, h):
-        self.sendUpdate('setMovie', [mode, code, genus, species, weight, p, h])
-
-    def removeFromFishingSpotWithAnim(self, task=None):
-        taskMgr.remove('cancel-animation-%d' % self.doId)
-        self.d_setMovie(FishGlobals.ExitMovie, 0, 0, 0, 0, 0, 0)
-        taskMgr.doMethodLater(1.5, self.removeFromFishingSpot, 'remove-%d' % self.doId)
-        if task:
-            return task.done
-
-    def considerReward(self, target):
-        if not self.cast:
-            self.air.writeServerEvent('suspicious', self.avId, 'Toon tried to fish without casting!')
+        if not self.validate(avId,
+                             (-FishGlobals.FishingAngleMax <= heading <= FishGlobals.FishingAngleMax),
+                             ("doCast: heading: %s is out of range" % heading)):
             return
 
         av = self.air.doId2do.get(self.avId)
-        if not av:
+        if not self.validate(avId, (av), "doCast: avId not currently logged in to this AI"):
             return
 
-        pond = self.air.doId2do.get(self.pondDoId)
-        if not pond:
+        self.__stopTimeout()
+        money = av.getMoney()
+        # cast cost is based on rod now
+        castCost = FishGlobals.getCastCost(av.getFishingRod())
+
+        if money < castCost:
+            # Not enough money to cast
+            self.normalExit()
             return
 
-        area = pond.getArea()
-        catch = self.air.fishManager.generateCatch(av, area)
-        self.lastFish = catch
-        self.d_setMovie(FishGlobals.PullInMovie, catch[0], catch[1], catch[2], catch[3], 0, 0)
-        self.cast = False
+        self.air.writeServerEvent("fished_cast", avId, "%s|%s" % (av.getFishingRod(), castCost))
+        av.b_setMoney(money - castCost)
+        self.d_setMovie(FishGlobals.CastMovie, power=power, h=heading)
+        self.__startTimeout(FishGlobals.CastTimeout)
+
+    def d_setMovie(self, mode, code=0, itemDesc1=0, itemDesc2=0, itemDesc3=0, power=0, h=0):
+        self.notify.debug(
+            "setMovie: mode:%s code:%s itemDesc1:%s itemDesc2:%s itemDesc3:%s power:%s h:%s" %
+            (mode, code, itemDesc1, itemDesc2, itemDesc3, power, h))
+        self.sendUpdate("setMovie", [mode, code, itemDesc1, itemDesc2, itemDesc3, power, h])
+
+    def getPosHpr(self):
+        # This is needed because setPosHpr is a required field.
+        return self.posHpr
+
+    def __startTimeout(self, timeLimit):
+        self.notify.debug("__startTimeout")
+        # Sets the timeout counter running.  If __stopTimeout() is not
+        # called before the time expires, we'll exit the avatar.  This
+        # prevents avatars from hanging out in the fishing spot all
+        # day.
+        self.__stopTimeout()
+        if self.wantTimeouts:
+            self.timeoutTask = taskMgr.doMethodLater(timeLimit,
+                                                     self.__handleTimeout,
+                                                     self.taskName("timeout"))
+
+    def __stopTimeout(self):
+        self.notify.debug("__stopTimeout")
+        # Stops a previously-set timeout from expiring.
+        if self.timeoutTask:
+            taskMgr.remove(self.timeoutTask)
+            self.timeoutTask = None
+
+    def __handleTimeout(self, task):
+        self.notify.debug("__handleTimeout")
+        # Called when a timeout expires, this sends the avatar home.
+        self.normalExit()
+
+    def cleanupAvatar(self):
+        # Tell the pond we are leaving
+        self.air.writeServerEvent("fished_exit", self.avId, "%s" % (self.zoneId))
+        self.pond.removeAvSpot(self.avId, self)
+        self.ignore(self.air.getAvatarExitEvent(self.avId))
+        self.__stopTimeout()
+        self.sendPokerStatus(0)
+        self.avId = 0
+
+    def normalExit(self):
+        self.notify.debug("normalExit")
+        # Send the avatar out of the fishing spot, either because of
+        # his own request or due to some other cause (like a timeout).
+        self.cleanupAvatar()
+        self.d_setMovie(FishGlobals.ExitMovie)
+        # Give everyone enough time to play the goodbye movie,
+        # then dump the avatar.
+        taskMgr.doMethodLater(1.2, self.__clearEmpty,
+                              self.taskName("clearEmpty"))
+
+    def __clearEmpty(self, task=None):
+        self.notify.debug("__clearEmpty")
+        self.d_setOccupied(0)
+
+    def unexpectedExit(self):
+        self.notify.debug("unexpectedExit")
+        # Called when the avatar in the fishing spot vanishes.
+        # Tell the pond we are leaving
+        self.cleanupAvatar()
+        self.d_setOccupied(0)
+
+    def hitTarget(self, code, item):
+        self.notify.debug("hitTarget: code: %s item: %s" % (code, item))
+        if code == FishGlobals.QuestItem:
+            self.d_setMovie(FishGlobals.PullInMovie, code, item)
+        elif code in (FishGlobals.FishItem,
+                      FishGlobals.FishItemNewEntry,
+                      FishGlobals.FishItemNewRecord):
+            genus, species, weight = item.getVitals()
+            if self.air.holidayManager.isHolidayRunning(ToontownGlobals.FISH_POKER):
+                self.air.fishPokerManager.sendUpdateToAvatarId(self.avId, 'caughtSomething', [genus, species, weight])
+            self.d_setMovie(FishGlobals.PullInMovie, code, genus, species, weight)
+        elif code == FishGlobals.BootItem:
+            self.d_setMovie(FishGlobals.PullInMovie, code)
+        elif code == FishGlobals.JellybeanItem:
+            self.d_setMovie(FishGlobals.PullInMovie, code, item)
+        else:
+            self.d_setMovie(FishGlobals.PullInMovie, code)
+        self.__startTimeout(FishGlobals.CastTimeout)
+
+    def d_sellFishComplete(self, avId, trophyResult, numFishCaught):
+        self.sendUpdateToAvatarId(avId, "sellFishComplete", [trophyResult, numFishCaught])
+
+    def sellFish(self):
+        # The client asks to sell his fish
+        gotTrophy = -1
+        avId = self.air.getAvatarIdFromSender()
+        av = self.air.doId2do.get(self.avId)
+        self.notify.debug("sellFish: avId: %s" % (avId))
+        if not self.validate(avId, (simbase.wantBingo), "sellFish: Currently, you can only do this if bingo is turned on"):
+            gotTrophy = False
+        elif not self.validate(avId, (self.pond.hasPondBingoManager()), "sellFish: Currently, you can only do this during bingo night"):
+            gotTrophy = False
+        elif not self.validate(avId, (self.avId == avId), "sellFish: avId is not fishing in this spot"):
+            gotTrophy = False
+        elif not self.validate(avId, (av), "sellFish: avId not currently logged in to this AI"):
+            gotTrophy = False
+
+        if gotTrophy ==4 -1:
+            gotTrophy = self.air.fishManager.creditFishTank(av)
+            self.d_sellFishComplete(avId, gotTrophy, len(av.fishCollection))
+        else:
+            self.d_sellFishComplete(avId, False, 0)
