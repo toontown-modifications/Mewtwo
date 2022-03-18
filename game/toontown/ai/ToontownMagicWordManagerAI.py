@@ -25,6 +25,7 @@ from game.toontown.effects import FireworkShows
 from game.toontown.effects.DistributedFireworkShowAI import DistributedFireworkShowAI
 from game.toontown.pets.DistributedPetAI import DistributedPetAI
 from game.toontown.uberdog.ExtAgent import ServerGlobals
+from game.toontown.toon.DistributedToonAI import DistributedToonAI
 
 import random, time, os, traceback, requests, limeade
 

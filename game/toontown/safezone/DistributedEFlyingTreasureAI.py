@@ -1,7 +1,9 @@
-from direct.directnotify import DirectNotifyGlobal
-from game.toontown.safezone.DistributedTreasureAI import DistributedTreasureAI
+from . import DistributedSZTreasureAI
 
+class DistributedEFlyingTreasureAI(DistributedSZTreasureAI.DistributedSZTreasureAI):
 
-class DistributedEFlyingTreasureAI(DistributedTreasureAI):
-    notify = DirectNotifyGlobal.directNotify.newCategory(
-        "DistributedEFlyingTreasureAI")
+    def __init__(self, air, treasurePlanner, x, y, z):
+        DistributedSZTreasureAI.DistributedSZTreasureAI.__init__(self, air,
+                                                                 treasurePlanner,
+                                                                 x, y, z)
+        

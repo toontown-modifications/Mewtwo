@@ -291,3 +291,23 @@ class QuestManagerAI:
 
         if toon.quests:
             toon.d_setQuests(toon.getQuests())
+
+    def toonOpenedMailbox(self, av):
+        # This is notifying us that a toon has opened his mailbox
+        # See if this toon has a mailbox quest.  If so, update the progress.
+        avQuests = av.quests
+        avId = av.getDoId()
+        changed = 0
+        for questDesc in avQuests:
+            questClass = Quests.getQuestClass(questDesc[0])
+            if (questClass == Quests.MailboxQuest):
+                # Set progress
+                questDesc[4] = 1
+                changed = 1
+        # Now send the quests back to the avatar if the status changed
+        if changed:
+            self.notify.debug("toonOpenedMailbox: av %s made progress" % (avId))
+            av.b_setQuests(avQuests)
+        else:
+            self.notify.debug("toonOpenedMailbox: av %s made NO progress" % (avId))
+        return
