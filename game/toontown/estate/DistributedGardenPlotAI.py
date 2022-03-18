@@ -8,6 +8,7 @@ from direct.showbase.ShowBase import *
 class DistributedGardenPlotAI(DistributedLawnDecorAI.DistributedLawnDecorAI):
     notify = DirectNotifyGlobal.directNotify.newCategory('DistributedPlantBaseAI')
 
+
     def __init__(self, typeIndex = 0, ownerIndex = 0, plot = 0):
         DistributedLawnDecorAI.DistributedLawnDecorAI.__init__(self, simbase.air, ownerIndex, plot)
         self.type = typeIndex
@@ -78,7 +79,7 @@ class DistributedGardenPlotAI(DistributedLawnDecorAI.DistributedLawnDecorAI):
     def burnSpecial(self, species):
         variety = 0
 
-        if not species in GardenGlobals.PlantAttributes:
+        if not species in GardenGlobals.PlantAttributes or not variety in GardenGlobals.PlantAttributes[species]['varieties']:
             self.notify.warning("Suspicious: Calling on a species does not exist.")
             return
 
@@ -208,8 +209,7 @@ class DistributedGardenPlotAI(DistributedLawnDecorAI.DistributedLawnDecorAI):
                                                 plot = self.plot,
                                                 water = 0,
                                                 growth = 0,
-                                                optional = variety,
-                                                box = self.box)
+                                                optional = variety)
 
                     # tell the new tree to tell the avatar to finish up the planting movie
                     flower = simbase.air.doId2do.get(itemId)
@@ -238,3 +238,11 @@ class DistributedGardenPlotAI(DistributedLawnDecorAI.DistributedLawnDecorAI):
                 # tell the gardenplot to tell the toon to clear the movie
                 item = simbase.air.doId2do.get(itemId)
                 item.setMovie(GardenGlobals.MOVIE_CLEAR, avId)
+
+
+
+
+
+
+
+
