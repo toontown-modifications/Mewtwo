@@ -1,13 +1,15 @@
 from game.otp.ai.AIBase import *
 
 from direct.distributed import DistributedObjectAI
+import random
+
+from game.toontown.toonbase import ToontownAccessAI
+from game.toontown.toonbase import TTLocalizer
 from direct.directnotify import DirectNotifyGlobal
-
 from game.toontown.fishing import FishGlobals
-from game.toontown.toonbase import ToontownGlobals
-
 
 class DistributedFishingSpotAI(DistributedObjectAI.DistributedObjectAI):
+
     notify = DirectNotifyGlobal.directNotify.newCategory("DistributedFishingSpotAI")
 
     def __init__(self, air, pond, x, y, z, h, p, r):
@@ -43,6 +45,11 @@ class DistributedFishingSpotAI(DistributedObjectAI.DistributedObjectAI):
             self.notify.debug("requestEnter: avId %s is already fishing here" % (avId))
             return
 
+        # Check that player has full access
+        if not ToontownAccessAI.canAccess(avId, self.zoneId):
+            self.sendUpdateToAvatarId(avId, "rejectEnter", [])
+            return
+
         if self.avId == 0:
             self.avId = avId
             # Tell the pond we are here
@@ -53,9 +60,7 @@ class DistributedFishingSpotAI(DistributedObjectAI.DistributedObjectAI):
             self.d_setOccupied(self.avId)
             self.d_setMovie(FishGlobals.EnterMovie)
             self.__startTimeout(FishGlobals.CastTimeout)
-            taskMgr.remove('poker-status-%d' % self.doId)
-            taskMgr.doMethodLater(2.65, self.sendPokerStatus, 'poker-status-%d' % self.doId, extraArgs=[1])
-            self.air.writeServerEvent("fished_enter", self.avId, "%s" % (self.zoneId))
+            self.air.writeServerEvent("fished_enter",self.avId, "%s" % (self.zoneId))
         else:
             self.sendUpdateToAvatarId(avId, "rejectEnter", [])
 
@@ -66,15 +71,6 @@ class DistributedFishingSpotAI(DistributedObjectAI.DistributedObjectAI):
         if not self.validate(avId, (self.avId == avId), "requestExit: avId is not fishing in this spot"):
             return
         self.normalExit()
-
-    def sendPokerStatus(self, entryStatus):
-        # Send poker status to avatar
-        if self.air.holidayManager.isHolidayRunning(ToontownGlobals.FISH_POKER):
-            if entryStatus:
-                method = 'enterFishing'
-            else:
-                method = 'exitFishing'
-            self.air.fishPokerManager.sendUpdateToAvatarId(self.avId, method, [])
 
     def d_setOccupied(self, avId):
         self.notify.debug("setOccupied: %s" % (avId))
@@ -109,12 +105,12 @@ class DistributedFishingSpotAI(DistributedObjectAI.DistributedObjectAI):
             self.normalExit()
             return
 
-        self.air.writeServerEvent("fished_cast", avId, "%s|%s" % (av.getFishingRod(), castCost))
+        self.air.writeServerEvent("fished_cast", avId, "%s|%s" %(av.getFishingRod(), castCost))
         av.b_setMoney(money - castCost)
         self.d_setMovie(FishGlobals.CastMovie, power=power, h=heading)
         self.__startTimeout(FishGlobals.CastTimeout)
 
-    def d_setMovie(self, mode, code=0, itemDesc1=0, itemDesc2=0, itemDesc3=0, power=0, h=0):
+    def d_setMovie(self, mode, code=0, itemDesc1=0, itemDesc2=0, itemDesc3=0,  power=0, h=0):
         self.notify.debug(
             "setMovie: mode:%s code:%s itemDesc1:%s itemDesc2:%s itemDesc3:%s power:%s h:%s" %
             (mode, code, itemDesc1, itemDesc2, itemDesc3, power, h))
@@ -150,11 +146,10 @@ class DistributedFishingSpotAI(DistributedObjectAI.DistributedObjectAI):
 
     def cleanupAvatar(self):
         # Tell the pond we are leaving
-        self.air.writeServerEvent("fished_exit", self.avId, "%s" % (self.zoneId))
+        self.air.writeServerEvent("fished_exit",self.avId, "%s" % (self.zoneId))
         self.pond.removeAvSpot(self.avId, self)
         self.ignore(self.air.getAvatarExitEvent(self.avId))
         self.__stopTimeout()
-        self.sendPokerStatus(0)
         self.avId = 0
 
     def normalExit(self):
@@ -187,8 +182,6 @@ class DistributedFishingSpotAI(DistributedObjectAI.DistributedObjectAI):
                       FishGlobals.FishItemNewEntry,
                       FishGlobals.FishItemNewRecord):
             genus, species, weight = item.getVitals()
-            if self.air.holidayManager.isHolidayRunning(ToontownGlobals.FISH_POKER):
-                self.air.fishPokerManager.sendUpdateToAvatarId(self.avId, 'caughtSomething', [genus, species, weight])
             self.d_setMovie(FishGlobals.PullInMovie, code, genus, species, weight)
         elif code == FishGlobals.BootItem:
             self.d_setMovie(FishGlobals.PullInMovie, code)
@@ -216,7 +209,7 @@ class DistributedFishingSpotAI(DistributedObjectAI.DistributedObjectAI):
         elif not self.validate(avId, (av), "sellFish: avId not currently logged in to this AI"):
             gotTrophy = False
 
-        if gotTrophy ==4 -1:
+        if gotTrophy == -1:
             gotTrophy = self.air.fishManager.creditFishTank(av)
             self.d_sellFishComplete(avId, gotTrophy, len(av.fishCollection))
         else:
