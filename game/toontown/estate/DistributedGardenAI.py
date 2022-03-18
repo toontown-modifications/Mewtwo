@@ -3,7 +3,7 @@ from direct.distributed.ClockDelta import *
 from direct.distributed import DistributedObjectAI
 from direct.task import Task
 import random
-import HouseGlobals
+from . import HouseGlobals
 
 class DistributedGardenAI(DistributedObjectAI.DistributedObjectAI):
 
