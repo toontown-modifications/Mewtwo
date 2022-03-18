@@ -39,7 +39,7 @@ class DistributedEstateAI(DistributedObjectAI.DistributedObjectAI):
     """
 
     notify = directNotify.newCategory("DistributedEstateAI")
-    #notify.setDebug(True)
+    # notify.setDebug(True)
 
     printedLs = 0
 
@@ -501,8 +501,7 @@ class DistributedEstateAI(DistributedObjectAI.DistributedObjectAI):
         tupleLastDay = tuple(listLastDay)
 
         randomDelay = random.random() * 5 * 60 # random five minute range
-        gardeningDay = self.dayInSeconds
-        whenNextEpoch = (time.mktime(tupleLastDay) + self.epochHourInSeconds + gardeningDay + randomDelay)
+        whenNextEpoch = (time.mktime(tupleLastDay) + self.epochHourInSeconds + self.dayInSeconds + randomDelay)
         secondsNextEpoch = whenNextEpoch - currentTime
         if secondsNextEpoch >= 0:
             secondsNextEpoch += self.dayInSeconds

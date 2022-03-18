@@ -4,7 +4,7 @@ from . import GardenGlobals
 
 class DistributedGagTreeAI(DistributedPlantBaseAI.DistributedPlantBaseAI):
     notify = DirectNotifyGlobal.directNotify.newCategory('DistributedGagTreeAI')
-    
+
     def __init__(self, typeIndex = 0, waterLevel = 0, growthLevel = 0, optional = False, ownerIndex = 0, plot = 0):
         DistributedPlantBaseAI.DistributedPlantBaseAI.__init__(self, typeIndex, waterLevel, growthLevel, optional, ownerIndex, plot)
 
@@ -48,7 +48,7 @@ class DistributedGagTreeAI(DistributedPlantBaseAI.DistributedPlantBaseAI):
                                                                self.gagLevel)
                 if lowestPlotIndex != self.plot:
                     # aha we are a duplicate tree, force us not to fruit
-                    if growthLevel >= self.growthThresholds[2]:                        
+                    if growthLevel >= self.growthThresholds[2]:
                         growthLevel = self.growthThresholds[2] -1
             self.b_setGrowthLevel(growthLevel, False)
 
@@ -60,10 +60,10 @@ class DistributedGagTreeAI(DistributedPlantBaseAI.DistributedPlantBaseAI):
             growthLevel = self.growthThresholds[2]-1
 
         return growthLevel
-        
+
     def getWilted(self):
         return self.optional
-    
+
     def setWilted(self, wilted, finalize):
         self.optional = wilted
         self.updateEstate(variety=wilted, finalize=finalize)
@@ -89,18 +89,18 @@ class DistributedGagTreeAI(DistributedPlantBaseAI.DistributedPlantBaseAI):
         estateOwnerDoId = simbase.air.estateMgr.zone2owner.get(zoneId)
         if not senderId == estateOwnerDoId:
             self.notify.warning("how did this happen, harvesting a flower you don't own")
-            self.sendInteractionDenied(senderId)            
+            self.sendInteractionDenied(senderId)
             return
-        
+
         if not self.isFruiting() or self.isWilted():
             self.notify.warning("how did this happen, this tree isn't fruiting")
-            self.sendInteractionDenied(senderId)            
+            self.sendInteractionDenied(senderId)
             return
 
 
         if not self.requestInteractingToon(senderId):
             self.sendInteractionDenied(senderId)
-            return        
+            return
 
         # add the fruit to the toon's inventory
         for i in range(self.maxFruit):
@@ -108,7 +108,7 @@ class DistributedGagTreeAI(DistributedPlantBaseAI.DistributedPlantBaseAI):
 
         toon.d_setInventory(toon.inventory.makeNetString())
 
-        # set the tree back to 'full grown' state... 
+        # set the tree back to 'full grown' state...
         growthLevel = self.growthThresholds[2] - 1
         self.b_setGrowthLevel(growthLevel)
 
@@ -117,7 +117,7 @@ class DistributedGagTreeAI(DistributedPlantBaseAI.DistributedPlantBaseAI):
 
         #log that he's harvesting gags
         self.air.writeServerEvent("garden_gag_harvest", senderId, '%d|%d|%d' % (self.doId,self.gagTrack, self.gagLevel))
-        
+
     def hasGagBonus(self):
         """
         gag trees give a bonus when they are 1 day away from fruiting, are not wilted.

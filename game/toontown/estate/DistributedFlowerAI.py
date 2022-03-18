@@ -4,8 +4,8 @@ from . import GardenGlobals
 
 class DistributedFlowerAI(DistributedPlantBaseAI.DistributedPlantBaseAI):
     notify = DirectNotifyGlobal.directNotify.newCategory('DistributedFlowerAI')
-    
-    
+
+
     def __init__(self, typeIndex = 0, waterLevel = 0, growthLevel = 0, optional = None, ownerIndex = 0, plot = 0):
         DistributedPlantBaseAI.DistributedPlantBaseAI.__init__(self, typeIndex, waterLevel, growthLevel, optional, ownerIndex, plot)
 
@@ -18,7 +18,7 @@ class DistributedFlowerAI(DistributedPlantBaseAI.DistributedPlantBaseAI):
                     ['varieties'][self.optional][0]
         recipe = GardenGlobals.Recipes[recipeKey]
         #find out how many beans the toon can plant
-        
+
         shovelIndex = toon.getShovel()
         shovelPower = GardenGlobals.getShovelPower(shovelIndex, toon.getShovelSkill())
         giveSkillUp = 1
@@ -43,7 +43,7 @@ class DistributedFlowerAI(DistributedPlantBaseAI.DistributedPlantBaseAI):
         # what his shovel is,  and what his new shovel skill is
         self.air.writeServerEvent("garden_flower_pick", toon.doId,
                                   '%d|%d|%d' % (giveSkillUp,toon.getShovel(), toon.getShovelSkill()))
-        
+
 
     def handleFlowerBasket(self, toon):
         addToBasket = True
@@ -62,7 +62,7 @@ class DistributedFlowerAI(DistributedPlantBaseAI.DistributedPlantBaseAI):
     def removeItem(self):
         #import pdb; pdb.set_trace()
         senderId = self.air.getAvatarIdFromSender()
-        
+
         zoneId = self.zoneId
         estateOwnerDoId = simbase.air.estateMgr.zone2owner.get(zoneId)
 
@@ -74,14 +74,25 @@ class DistributedFlowerAI(DistributedPlantBaseAI.DistributedPlantBaseAI):
         if not self.requestInteractingToon(senderId):
             self.sendInteractionDenied(senderId)
             return
-            
-        
+
+
         if estateOwnerDoId:
             estate = simbase.air.estateMgr.estate.get(estateOwnerDoId)
             if estate:
                 #we should have a valid DistributedEstateAI at this point
                 self.setMovie(GardenGlobals.MOVIE_REMOVE, senderId)
-                
+
+    def forceRemoveItem(self, avId):
+        # Assuming avId is the owner
+        estate = self.air.estateMgr.estate.get(avId)
+        if estate:
+            itemId = estate.removePlantAndPlaceGardenPlot(self.ownerIndex, self.plot, self.box)
+
+            toon = self.air.doId2do.get(avId)
+            if toon:
+                self.handleSkillUp(toon)
+                self.handleFlowerBasket(toon)
+
 
     def movieDone(self):
         if self.lastMovie == GardenGlobals.MOVIE_REMOVE:
@@ -91,7 +102,7 @@ class DistributedFlowerAI(DistributedPlantBaseAI.DistributedPlantBaseAI):
             estateOwnerDoId = simbase.air.estateMgr.zone2owner.get(zoneId)
             estate = simbase.air.estateMgr.estate.get(estateOwnerDoId)
             if estate:
-                itemId = estate.removePlantAndPlaceGardenPlot(self.ownerIndex, self.plot)
+                itemId = estate.removePlantAndPlaceGardenPlot(self.ownerIndex, self.plot, self.box)
 
                 # tell the gardenplot to tell the toon to finish 'removing'
                 item = simbase.air.doId2do.get(itemId)
@@ -113,7 +124,4 @@ class DistributedFlowerAI(DistributedPlantBaseAI.DistributedPlantBaseAI):
                 # tell the gardenplot to tell the toon to clear the movie, so the
                 # results dialog doesn't come up again when he exits from his house
                 item = simbase.air.doId2do.get(itemId)
-                item.setMovie(GardenGlobals.MOVIE_CLEAR, avId)                
-
-
-
+                item.setMovie(GardenGlobals.MOVIE_CLEAR, avId)

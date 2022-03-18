@@ -11,7 +11,7 @@ from game.toontown.pets import DistributedPetAI
 class PetManagerAI(DirectObject.DirectObject):
 
     notify = DirectNotifyGlobal.directNotify.newCategory("PetManagerAI")
-    notify.setDebug(1)
+    # notify.setDebug(1)
 
     def __init__(self, air):
         self.air = air
@@ -195,10 +195,6 @@ class PetManagerAI(DirectObject.DirectObject):
         petDO = simbase.air.doId2do.get(petId)
         if not petDO:
             self.notfy.warning(f'movePetToZone called, but Pet {petId} doesn\'t exist!')
-        if petDO.leashMode:
-            # This pet is on a leash, it'll change zones automatically.
-            self.notify.debug('movePetToZone caled on pet who has a leash, not doing anything.')
-            return
         if hasattr(petDO,'hasRequestedDelete') and petDO.hasRequestedDelete():
             self.notify.info('movePetToZone NOT calling requestDelete again')
         else:
@@ -373,7 +369,8 @@ class PetManagerAI(DirectObject.DirectObject):
         It creates the list of toons that are available here.
         """
 
-        import random, time
+        from libsunrise import random
+        import time
         S = random.getstate()
 
         curDay = int( time.time() / 60.0 / 60.0 / 24.0 )

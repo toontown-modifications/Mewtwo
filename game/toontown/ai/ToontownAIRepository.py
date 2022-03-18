@@ -39,7 +39,6 @@ from game.toontown.ai.NewsManagerAI import NewsManagerAI
 from game.toontown.estate.EstateManagerAI import EstateManagerAI
 from game.toontown.safezone.SafeZoneManagerAI import SafeZoneManagerAI
 from game.toontown.fishing.FishManagerAI import FishManagerAI
-from game.toontown.fishing.FishBingoManagerAI import FishBingoManagerAI
 from game.toontown.coghq.FactoryManagerAI import FactoryManagerAI
 from game.toontown.coghq.MintManagerAI import MintManagerAI
 from game.toontown.coghq.LawOfficeManagerAI import LawOfficeManagerAI
@@ -237,7 +236,6 @@ class ToontownAIRepository(ToontownInternalRepository, ServerBase):
         self.suitInvasionManager = SuitInvasionManagerAI(self)
 
         self.fishManager = FishManagerAI(self)
-        self.fishBingoManager = FishBingoManagerAI(self)
 
         self.factoryMgr = FactoryManagerAI(self)
 

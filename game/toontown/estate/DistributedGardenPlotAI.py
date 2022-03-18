@@ -7,13 +7,12 @@ from direct.showbase.ShowBase import *
 
 class DistributedGardenPlotAI(DistributedLawnDecorAI.DistributedLawnDecorAI):
     notify = DirectNotifyGlobal.directNotify.newCategory('DistributedPlantBaseAI')
-    
-    
+
     def __init__(self, typeIndex = 0, ownerIndex = 0, plot = 0):
         DistributedLawnDecorAI.DistributedLawnDecorAI.__init__(self, simbase.air, ownerIndex, plot)
         self.type = typeIndex
         self.occupied = False
-        
+
     def plantNothing(self, burntBeans):
         senderId = self.air.getAvatarIdFromSender()
         toon = simbase.air.doId2do.get(senderId)
@@ -25,7 +24,7 @@ class DistributedGardenPlotAI(DistributedLawnDecorAI.DistributedLawnDecorAI):
     def plantFlower(self, species, variety):
         print("planting flower species=%d variety=%d" % (species, variety))
         senderId = self.air.getAvatarIdFromSender()
-        
+
         zoneId = self.zoneId
         estateOwnerDoId = simbase.air.estateMgr.zone2owner.get(zoneId)
 
@@ -36,7 +35,7 @@ class DistributedGardenPlotAI(DistributedLawnDecorAI.DistributedLawnDecorAI):
         if not species in GardenGlobals.PlantAttributes:
             self.air.writeServerEvent('suspicious', senderId, 'Planting a species %s that does not exist.' % (species))
             return
-            
+
         if estateOwnerDoId:
             estate = simbase.air.estateMgr.estate.get(estateOwnerDoId)
             if estate:
@@ -70,23 +69,23 @@ class DistributedGardenPlotAI(DistributedLawnDecorAI.DistributedLawnDecorAI):
                 else:
                     self.notify.warning("Not enough beans for recipe!!! fool!")
                     allOk = 0
-                    
+
                 #if all goes well plant the flower
                 if allOk:
                     self.setMovie(GardenGlobals.MOVIE_PLANT, senderId, (species, variety))
-         
-                    
+
+
     def burnSpecial(self, species):
         variety = 0
-        
-        if not species in GardenGlobals.PlantAttributes or not variety in GardenGlobals.PlantAttributes[species]['varieties']:
+
+        if not species in GardenGlobals.PlantAttributes:
             self.notify.warning("Suspicious: Calling on a species does not exist.")
             return
-        
+
         recipeKey = GardenGlobals.PlantAttributes[species]['varieties'][variety][0]
         recipe = GardenGlobals.Recipes[recipeKey]
         special = recipe['special']
-        
+
         senderId = self.air.getAvatarIdFromSender()
         toon = simbase.air.doId2do.get(senderId)
         toon.removeGardenItem(special, 1)
@@ -120,20 +119,20 @@ class DistributedGardenPlotAI(DistributedLawnDecorAI.DistributedLawnDecorAI):
             self.doGardenAccelerator()
         else:
             self.plantFlower(species, variety)
-            
+
         self.burnSpecial(species)
 
     def plantGagTree(self, gagTrack, gagLevel):
         self.notify.info("Planting GagTree: %s %s" % (gagTrack, gagLevel))
         senderId = self.air.getAvatarIdFromSender()
-        
+
         zoneId = self.zoneId
         estateOwnerDoId = simbase.air.estateMgr.zone2owner.get(zoneId)
 
         if not senderId == estateOwnerDoId:
             self.notify.warning("how did this happen, planting in a plot you don't own")
             return
-        
+
         if estateOwnerDoId:
             estate = simbase.air.estateMgr.estate.get(estateOwnerDoId)
             if estate:
@@ -162,9 +161,9 @@ class DistributedGardenPlotAI(DistributedLawnDecorAI.DistributedLawnDecorAI):
                     self.setMovie(GardenGlobals.MOVIE_PLANT_REJECTED, senderId, (gagTrack, gagLevel))
 
 
-                                   
+
     def movieDone(self):
-        self.clearInteractingToon()        
+        self.clearInteractingToon()
         if self.lastMovie == GardenGlobals.MOVIE_PLANT:
             type = GardenGlobals.whatCanBePlanted(self.ownerIndex, self.plot)
             if type == GardenGlobals.GAG_TREE_TYPE:
@@ -193,7 +192,7 @@ class DistributedGardenPlotAI(DistributedLawnDecorAI.DistributedLawnDecorAI):
 
                     #log we are planting a tree
                     self.air.writeServerEvent("garden_plant_tree", avId,
-                                                  '%d|%d' % (gagTrack,gagLevel))                    
+                                                  '%d|%d' % (gagTrack,gagLevel))
             else:
                 self.lastMovie = None
                 avId = self.lastMovieAvId
@@ -209,7 +208,8 @@ class DistributedGardenPlotAI(DistributedLawnDecorAI.DistributedLawnDecorAI):
                                                 plot = self.plot,
                                                 water = 0,
                                                 growth = 0,
-                                                optional = variety)
+                                                optional = variety,
+                                                box = self.box)
 
                     # tell the new tree to tell the avatar to finish up the planting movie
                     flower = simbase.air.doId2do.get(itemId)
@@ -235,15 +235,6 @@ class DistributedGardenPlotAI(DistributedLawnDecorAI.DistributedLawnDecorAI):
             estate = simbase.air.estateMgr.estate.get(estateOwnerDoId)
             if estate:
                 itemId = self.doId
-                # tell the gardenplot to tell the toon to clear the movie 
+                # tell the gardenplot to tell the toon to clear the movie
                 item = simbase.air.doId2do.get(itemId)
-                item.setMovie(GardenGlobals.MOVIE_CLEAR, avId)                
-
-
-
-
-    
-                    
-
-
-
+                item.setMovie(GardenGlobals.MOVIE_CLEAR, avId)
