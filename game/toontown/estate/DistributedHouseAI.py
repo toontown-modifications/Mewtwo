@@ -194,9 +194,7 @@ class DistributedHouseAI(DistributedObjectAI.DistributedObjectAI):
 
 
         self.resetFurniture()
-        self.setupPetCollision()
 
-    def setupPetCollision(self):
         if simbase.wantPets:
             if 0:#__dev__:
                 from panda3d.core import ProfileTimer
@@ -206,22 +204,14 @@ class DistributedHouseAI(DistributedObjectAI.DistributedObjectAI):
 
             # add ourselves to the estate model
             if not DistributedHouseAI.HouseModel:
-                if DistributedHouseAI.HouseModel:
-                    DistributedHouseAI.HouseModel.removeNode()
                 DistributedHouseAI.HouseModel = loader.loadModel(
                     HouseGlobals.houseModels[self.houseType])
             estate = simbase.air.doId2do[self.estateId]
-            if hasattr(self, 'houseNode'):
-                self.houseNode.removeNode()
-                del self.houseNode
             self.houseNode = estate.geom.attachNewNode(
                 'esHouse_%s' % self.housePosInd)
             self.houseNode.setPosHpr(
                 *HouseGlobals.houseDrops[self.housePosInd])
             DistributedHouseAI.HouseModel.instanceTo(self.houseNode)
-
-            if hasattr(estate, 'petColls'):
-                estate.createPetCollisions()
 
             if 0:#__dev__:
                 pt.mark('loaded house model')
@@ -355,14 +345,6 @@ class DistributedHouseAI(DistributedObjectAI.DistributedObjectAI):
     def setHouseType(self, houseType):
         self.notify.debug("setHouseType(%s): %s" % (houseType, self.doId))
         self.houseType = houseType
-
-        if hasattr(self, 'houseNode'):
-            self.setupPetCollision(True)
-
-        if self.ownerId:
-            estate = self.air.doId2do[self.estateId]
-            if estate.gardenBoxList[self.housePosInd]:
-                estate.moveGardenBoxes(self.housePosInd)
 
     def getHouseType(self):
         self.notify.debug("getHouseType")
