@@ -1,5 +1,4 @@
 from game.otp.ai.AIBase import *
-from game.otp.otpbase import OTPGlobals
 from direct.interval.IntervalGlobal import *
 from direct.directnotify import DirectNotifyGlobal
 from direct.distributed import ClockDelta
@@ -9,17 +8,8 @@ from direct.distributed import DistributedObjectAI
 from direct.distributed import DistributedNodeAI
 from game.toontown.estate import GardenGlobals
 
-def recurseParent(intoNode, ParentName):
-    parent = intoNode.getParent(0)
-    if not parent or parent.getName() == 'render':
-        return 0
-    elif parent.getName() == ParentName:
-        return 1
-    else:
-        return recurseParent(parent, ParentName)
-
 class DistributedLawnDecorAI(DistributedNodeAI.DistributedNodeAI):
-    notify = DirectNotifyGlobal.directNotify.newCategory('DistributedLawnDecorAI')
+    notify = DirectNotifyGlobal.directNotify.newCategory('DistributedLawnDecorAi')
 
     def __init__(self, air, ownerIndex = 0, plot = 0):
         DistributedNodeAI.DistributedNodeAI.__init__(self, air)
@@ -29,8 +19,7 @@ class DistributedLawnDecorAI(DistributedNodeAI.DistributedNodeAI):
         self.estateId = 0
         self.occupantId = None
         self.lastMovie = None
-        self.box = None
-        self.colNode = None
+
         #self.node = hidden.attachNewNode('DistributedPlantAI')
 
         #only one toon can be interacting with it
@@ -43,8 +32,6 @@ class DistributedLawnDecorAI(DistributedNodeAI.DistributedNodeAI):
         #del self.pos
         #taskMgr.remove(self.detectName)
         self.ignoreAll()
-        if self.colNode:
-            self.colNode.removeNode()
         DistributedNodeAI.DistributedNodeAI.delete(self)
 
     def destroy(self):
@@ -60,15 +47,6 @@ class DistributedLawnDecorAI(DistributedNodeAI.DistributedNodeAI):
 
     def getPlot(self):
         return self.plot
-
-    def setBox(self, box):
-        self.box = box
-
-    def getBox(self):
-        return self.box.doId if self.box else 0
-
-    def getIndex(self):
-        return self.box.objects.index(self) if self.box else 0
 
     def setOwnerIndex(self, index):
         self.ownerIndex = index
@@ -221,49 +199,3 @@ class DistributedLawnDecorAI(DistributedNodeAI.DistributedNodeAI):
     def sendInteractionDenied(self, toonId):
         self.notify.debug('sending interaction denied to %d' % toonId)
         self.sendUpdate('interactionDenied', [toonId])
-
-    def setupPetCollision(self):
-        if simbase.wantPets:
-            collSphereOffset = 0.0
-            collSphereRadius = 1.0
-            estate = self.air.doId2do[self.estateId]
-            if collSphereOffset <= 0.1:
-                colSphere = CollisionSphere(0, 0, 0, collSphereRadius)
-            else:
-                colSphere = CollisionTube(0, -collSphereOffset, 0, 0, collSphereOffset, 0, collSphereRadius)
-            colSphere.setTangible(1)
-            colNode = CollisionNode(f'petColl-{self.plot}')
-            colNode.addSolid(colSphere)
-            self.colNode = self.attachNewNode(colNode)
-            self.colNode.wrtReparentTo(estate.petColls)
-
-    def stick2Ground(self, estate):
-        if simbase.wantPets:
-            if self.isEmpty():
-                return
-            geomPreviouslyStashed = False
-            if estate.geom.isStashed():
-                geomPreviouslyStashed = True
-                estate.geom.unstash()
-            testPath = NodePath('testPath')
-            testPath.reparentTo(estate.geom)
-            cRay = CollisionRay(0.0, 0.0, 40000.0, 0.0, 0.0, -1.0)
-            cRayNode = CollisionNode(f'estate-FloorRay-{self.plot}')
-            cRayNode.addSolid(cRay)
-            cRayNode.setFromCollideMask(OTPGlobals.FloorBitmask)
-            cRayNode.setIntoCollideMask(BitMask32.allOff())
-            cRayNodePath = testPath.attachNewNode(cRayNode)
-            queue = CollisionHandlerQueue()
-            picker = CollisionTraverser()
-            picker.addCollider(cRayNodePath, queue)
-
-            testPath.setPos(self.getX(), self.getY(), 0)
-            picker.traverse(estate.geom)
-            if queue.getNumEntries() > 0:
-                queue.sortEntries()
-                for index in range(queue.getNumEntries()):
-                    entry = queue.getEntry(index)
-                    if recurseParent(entry.getIntoNode(), 'terrain_DNARoot'):
-                        self.setZ(entry.getSurfacePoint(estate.geom)[2] + 0.1)
-            if geomPreviouslyStashed:
-                estate.geom.stash()

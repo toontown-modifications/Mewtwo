@@ -6,6 +6,7 @@ from . import GardenGlobals
 class DistributedStatuaryAI(DistributedLawnDecorAI.DistributedLawnDecorAI):
     notify = DirectNotifyGlobal.directNotify.newCategory('DistributedStatuaryAI')
 
+
     def __init__(self, typeIndex = 201, waterLevel = 0, growthLevel = 0, optional = None, ownerIndex = 0, plot = 0):
         DistributedLawnDecorAI.DistributedLawnDecorAI.__init__(self, simbase.air, ownerIndex, plot)
         self.typeIndex = typeIndex
@@ -22,15 +23,6 @@ class DistributedStatuaryAI(DistributedLawnDecorAI.DistributedLawnDecorAI):
 
     def setTypeIndex(self, typeIndex):
         self.typeIndex = typeIndex
-        self.name = GardenGlobals.PlantAttributes[typeIndex]['name']
-        self.plantType = GardenGlobals.PlantAttributes[typeIndex]['plantType']
-        self.modelPath = GardenGlobals.PlantAttributes[typeIndex]['model']
-        self.pinballScore = None
-        if 'pinballScore' in GardenGlobals.PlantAttributes[typeIndex]:
-            self.pinballScore = GardenGlobals.PlantAttributes[typeIndex]['pinballScore']
-        self.worldScale = 1.0
-        if 'worldScale' in GardenGlobals.PlantAttributes[typeIndex]:
-            self.worldScale = GardenGlobals.PlantAttributes[typeIndex]['worldScale']
 
     def getTypeIndex(self):
         return self.typeIndex
@@ -46,12 +38,3 @@ class DistributedStatuaryAI(DistributedLawnDecorAI.DistributedLawnDecorAI):
 
     def getGrowthLevel(self):
         return self.growthLevel
-
-    def setupPetCollision(self):
-        if simbase.wantPets:
-            estate = self.air.doId2do[self.estateId]
-            model = loader.loadModel(self.modelPath)
-            self.colNode = model.find('**/+CollisionNode')
-            self.colNode.reparentTo(self)
-            self.colNode.wrtReparentTo(estate.petColls)
-            model.removeNode()

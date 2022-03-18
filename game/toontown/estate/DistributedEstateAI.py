@@ -790,7 +790,7 @@ class DistributedEstateAI(DistributedObjectAI.DistributedObjectAI):
             for index in range(self.toonsPerAccount):
                 if self.getToonId(index) == avId:
                     self.removePlant(index, plot)
-                    itemId = self.addLawnDecorItem(index, type, plot, water, growth, optional)
+                    itemId = self.addLawnDecorItem(index, type, plot, water, growth,optional)
                     itemList = self.getItems(index)
                     itemList.append((type, plot, water, growth, optional))
                     self.b_setItems(index, itemList)
@@ -800,7 +800,7 @@ class DistributedEstateAI(DistributedObjectAI.DistributedObjectAI):
             for index in range(self.toonsPerAccount):
                 if self.getToonId(index) == avId:
                     self.removePlant(index, plot)
-                    itemDoId = self.addLawnDecorItem(index, type, plot, water, growth, optional)
+                    itemDoId = self.addLawnDecorItem(index, type, plot, water, growth,optional)
                     itemList = self.getItems(index)
                     itemList.append((type, plot, water, growth, optional))
                     self.b_setItems(index, itemList)
@@ -894,25 +894,12 @@ class DistributedEstateAI(DistributedObjectAI.DistributedObjectAI):
                 #pass
                 self.addGardenPlot(toonIndex, plotPointIndex)
 
-    def moveGardenBoxes(self, toonIndex):
-        """
-        This moves the garden boxes when the house type gets changed.
-        Usually through SetHouse Magic Word
-        """
-        house = self.houseList[toonIndex]
-        boxList = GardenGlobals.estateBoxes[house.houseType]
-        for index, boxPlace in enumerate(boxList):
-            box = self.gardenBoxList[toonIndex][index]
-            box.b_setPosition(boxPlace[0], boxPlace[1], 16)
-
-            # TODO: Adjust pet collisions
-
-    def removePlantAndPlaceGardenPlot(self, slot, hardPoint, box = None):
+    def removePlantAndPlaceGardenPlot(self, slot, hardPoint):
         """
         This removes it on the AI side, places a gardenPlot, then updates the client
         """
         self.removePlant(slot, hardPoint)
-        itemId = self.addGardenPlot(slot, hardPoint, box)
+        itemId = self.addGardenPlot(slot,hardPoint)
         return itemId
 
     def addGardenPlot(self, slot, hardPoint):
@@ -941,8 +928,6 @@ class DistributedEstateAI(DistributedObjectAI.DistributedObjectAI):
 
     def removeGardenPlot(self, slot, plot):
         if self.gardenTable[slot][plot]:
-            if self.gardenTable[slot][plot].box:
-                self.gardenTable[slot][plot].box.objects = [None if plant is self.gardenTable[slot][plot] else plant for plant in self.gardenTable[slot][plot].box.objects]
             self.gardenTable[slot][plot].requestDelete()
             self.gardenTable[slot][plot] = None
 
