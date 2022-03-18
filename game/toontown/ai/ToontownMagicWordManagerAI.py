@@ -766,34 +766,19 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
         self.sendResponseMessage(avId, response)
 
     def d_growFlowers(self, avId):
-        av = self.air.doId2do.get(avId)
-
-        if not avId:
-            return
-
-        estate = self.air.estateMgr._lookupEstate(av)
+        estate = self.air.estateMgr.estate.get(avId)
 
         if not estate:
             response = 'Estate not found!'
             self.sendResponseMessage(avId, response)
 
-        house = estate.getAvHouse(avId)
-        garden = house.gardenManager.gardens.get(avId)
+        flowers = estate.getFlowers(avId)
 
-        if not garden:
-            response = 'Garden not found!'
-            self.sendResponseMessage(avId, response)
-
-        now = int(time.time())
-        i = 0
-
-        for flower in garden.flowers:
+        for flower in flowers:
             flower.b_setWaterLevel(5)
             flower.b_setGrowthLevel(2)
-            flower.update()
-            i += 1
 
-        response = f'{i} flowers grown.'
+        response = f'{len(flowers)} flowers grown.'
         self.sendResponseMessage(avId, response)
 
     def writeUsageOfInjection(self, filename, code):
