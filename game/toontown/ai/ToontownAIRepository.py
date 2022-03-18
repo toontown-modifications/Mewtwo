@@ -55,7 +55,7 @@ from game.toontown.racing.DistributedLeaderBoardAI import DistributedLeaderBoard
 from game.toontown.racing.RaceManagerAI import RaceManagerAI
 from game.toontown.ai.ToontownMagicWordManagerAI import ToontownMagicWordManagerAI
 from game.toontown.parties import ToontownTimeManager
-from game.toontown.ai.QuestManagerAI import QuestManagerAI
+from game.toontown.quest import QuestManagerAI
 from game.toontown.tutorial.TutorialManagerAI import TutorialManagerAI
 from game.toontown.safezone.DistributedPartyGateAI import DistributedPartyGateAI
 from game.otp.ai.BanManagerAI import BanManagerAI
@@ -250,11 +250,12 @@ class ToontownAIRepository(ToontownInternalRepository, ServerBase):
         self.raceMgr = RaceManagerAI(self)
 
         self.toontownTimeManager = ToontownTimeManager.ToontownTimeManager()
-        self.toontownTimeManager.updateLoginTimes(time.time(), time.time(), globalClock.getRealTime())   
+        self.toontownTimeManager.updateLoginTimes(time.time(), time.time(), globalClock.getRealTime())
 
         self.banManager = BanManagerAI() # Disney's BanManager
 
-        self.questManager = QuestManagerAI(self)
+        # The Quest manager
+        self.questManager = QuestManagerAI.QuestManagerAI(self)
 
         self.promotionMgr = PromotionManagerAI(self)
 

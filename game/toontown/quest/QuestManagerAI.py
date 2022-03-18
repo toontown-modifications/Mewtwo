@@ -1,8 +1,8 @@
-from otp.ai.AIBaseGlobal import *
+from game.otp.ai.AIBaseGlobal import *
 from direct.task import Task
 from direct.directnotify import DirectNotifyGlobal
-import Quests
-from toontown.toon import NPCToons
+from . import Quests
+from game.toontown.toon import NPCToons
 import random
 from direct.showbase import PythonUtil
 
@@ -109,7 +109,7 @@ class QuestManagerAI:
                     npc.assignQuest(av.getDoId(), *quests[0])
                 else:
                     # if this avatar requested a quest, include it
-                    if self.NextQuestDict.has_key(avId):
+                    if avId in self.NextQuestDict:
                         questId = self.NextQuestDict[avId]
                         # if it's already in the list of quests,
                         # we're all set
