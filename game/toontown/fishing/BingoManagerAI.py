@@ -25,13 +25,13 @@ from direct.task import Task
 #################################################################
 # Toontown Specific Modules
 #################################################################
-from toontown.estate import DistributedEstateAI
-from toontown.fishing import BingoGlobals
-from toontown.fishing import DistributedFishingPondAI
-from toontown.fishing import DistributedPondBingoManagerAI
+from game.toontown.estate import DistributedEstateAI
+from game.toontown.fishing import BingoGlobals
+from game.toontown.fishing import DistributedFishingPondAI
+from game.toontown.fishing import DistributedPondBingoManagerAI
 from direct.showbase import RandomNumGen
-from toontown.toonbase import ToontownGlobals
-from toontown.hood import ZoneUtil
+from game.toontown.toonbase import ToontownGlobals
+from game.toontown.hood import ZoneUtil
 
 #################################################################
 # Python Specific Modules

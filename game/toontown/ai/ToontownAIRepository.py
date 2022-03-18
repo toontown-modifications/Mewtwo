@@ -294,6 +294,9 @@ class ToontownAIRepository(ToontownInternalRepository, ServerBase):
         self.estateMgr = EstateManagerAI(self)
         self.estateMgr.generateWithRequired(OtpDoGlobals.OTP_ZONE_ID_MANAGEMENT)
 
+        # HACK: Start listening to estate events in the pet manager...
+        self.petMgr.listenEvents()
+
         self.safeZoneManager = SafeZoneManagerAI(self)
         self.safeZoneManager.generateWithRequired(OtpDoGlobals.OTP_ZONE_ID_MANAGEMENT)
 

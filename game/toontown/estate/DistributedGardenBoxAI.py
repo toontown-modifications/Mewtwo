@@ -26,6 +26,7 @@ class DistributedGardenBoxAI(DistributedLawnDecorAI.DistributedLawnDecorAI):
         self.plotModel = None
         self.boxNode  = None
         self.coll = None
+        self.objects = [] # may contain plots or flowers
 
     def delete(self):
         if self.coll:
@@ -72,6 +73,11 @@ class DistributedGardenBoxAI(DistributedLawnDecorAI.DistributedLawnDecorAI):
             boxNode.setHpr(self.getHpr())
             boxNode.setScale(2.0, 1.5, 3.0)
             boxNode.setZ(-3)
+
+            house = estate.geom.find('**/esHouse_%d' % self.ownerIndex)
+            boxNode.reparentTo(house)
+            boxNode.wrtReparentTo(estate.petColls)
+
             self.coll = coll.instanceTo(boxNode)
 
             self.boxNode = boxNode
@@ -91,5 +97,3 @@ class DistributedGardenBoxAI(DistributedLawnDecorAI.DistributedLawnDecorAI):
 
     def getTypeIndex(self):
         return self.typeIndex
-
-

@@ -1,254 +1,322 @@
-from direct.directnotify.DirectNotifyGlobal import directNotify
-from direct.distributed.DistributedObjectAI import DistributedObjectAI
-from direct.fsm.FSM import FSM
+from otp.ai.AIBaseGlobal import *
+from pandac.PandaModules import *
+from direct.distributed import DistributedObjectAI
+from direct.directnotify import DirectNotifyGlobal
+from toontown.building import TutorialBuildingAI
+from toontown.building import TutorialHQBuildingAI
+import SuitPlannerTutorialAI
+from toontown.toonbase import ToontownBattleGlobals
+from toontown.toon import NPCToons
+from toontown.toonbase import TTLocalizer
+from toontown.ai import BlackCatHolidayMgrAI
+from toontown.ai import DistributedBlackCatMgrAI
 
-from game.toontown.ai.DistributedBlackCatMgrAI import DistributedBlackCatMgrAI, BlackCatDayHolidayAI
-from game.toontown.building import DoorTypes
-from game.toontown.building import FADoorCodes
-from game.toontown.building.DistributedDoorAI import DistributedDoorAI
-from game.toontown.building.DistributedTutorialInteriorAI import DistributedTutorialInteriorAI
-from game.toontown.building.HQBuildingAI import HQBuildingAI
-from game.toontown.quest import Quests
-from game.toontown.suit.DistributedTutorialSuitAI import DistributedTutorialSuitAI
-from game.toontown.toon import NPCToons
-from game.toontown.toonbase import TTLocalizer
-from game.toontown.toonbase import ToontownBattleGlobals
+class TutorialManagerAI(DistributedObjectAI.DistributedObjectAI):
+    notify = DirectNotifyGlobal.directNotify.newCategory("TutorialManagerAI")
 
-class TutorialZones:
-    BRANCH = 0
-    STREET = 0
-    SHOP = 0
-    HQ = 0
-
-class TutorialBuildingAI:
-    notify = directNotify.newCategory('TutorialBuildingAI')
-
-    def __init__(self, air, street, interior, npcId):
-        self.air = air
-
-        self.interior = DistributedTutorialInteriorAI(self.air, interior, npcId)
-        self.interior.generateWithRequired(interior)
-
-        self.door0 = DistributedDoorAI(self.air, 2, DoorTypes.EXT_STANDARD, doorIndex = 0)
-        self.insideDoor0 = DistributedDoorAI(self.air, 0, DoorTypes.INT_STANDARD, doorIndex = 0)
-
-        self.door0.setOtherDoor(self.insideDoor0)
-
-        self.insideDoor0.setOtherDoor(self.door0)
-
-        self.door0.zoneId = street
-        self.insideDoor0.zoneId = interior
-
-        self.door0.generateWithRequired(street)
-        self.door0.sendUpdate('setDoorIndex', [self.door0.getDoorIndex()])
-
-        self.insideDoor0.generateWithRequired(interior)
-        self.insideDoor0.sendUpdate('setDoorIndex', [self.insideDoor0.getDoorIndex()])
-
-    def cleanup(self):
-        self.door0.requestDelete()
-        self.insideDoor0.requestDelete()
-        self.interior.requestDelete()
-
-class TutorialFSM(FSM):
-    notify = directNotify.newCategory('TutorialFSM')
-
-    def __init__(self, air, zones, avId):
-        FSM.__init__(self, 'TutorialFSM')
-
-        self.air = air
-        self.zones = zones
-        self.avId = avId
-
-        self.suit = None
-        self.flippy = None
-        self.blackCatMgr = None
-
-        tutorialTomDesc = NPCToons.NPCToonDict.get(20000)
-        self.tutorialTom = NPCToons.createNPC(self.air, 20000, tutorialTomDesc, self.zones.SHOP, 0)
-        self.tutorialTom.setTutorial(1)
-
-        hqHarryDesc = (-1, TTLocalizer.TutorialHQOfficerName, ('dls', 'ms', 'm', 'm', 6, 0, 6, 6, 0, 10, 0, 10, 0, 9), 'm', 1, NPCToons.NPC_HQ)
-        self.hqHarry = NPCToons.createNPC(self.air, 20002, hqHarryDesc, self.zones.HQ, 0)
-        self.hqHarry.setTutorial(1)
-
-        self.building = TutorialBuildingAI(self.air, zones.STREET, zones.SHOP, self.tutorialTom.getDoId())
-        self.hq = HQBuildingAI(self.air, zones.STREET, zones.HQ, 1)
-
-        self.forceTransition('Introduction')
-
-    def enterIntroduction(self):
-        self.building.insideDoor0.setDoorLock(FADoorCodes.TALK_TO_TOM)
-
-    def exitIntroduction(self):
-        self.building.insideDoor0.setDoorLock(FADoorCodes.UNLOCKED)
-
-    def enterBattle(self):
-        self.suit = DistributedTutorialSuitAI(self.air)
-        self.suit.generateWithRequired(self.zones.STREET)
-        self.building.door0.setDoorLock(FADoorCodes.DEFEAT_FLUNKY_TOM)
-        self.hq.door0.setDoorLock(FADoorCodes.DEFEAT_FLUNKY_HQ)
-
-    def exitBattle(self):
-        if self.suit:
-            self.suit.requestDelete()
-
-    def enterHQ(self):
-        self.building.door0.setDoorLock(FADoorCodes.TALK_TO_HQ_TOM)
-        self.hq.door0.setDoorLock(FADoorCodes.UNLOCKED)
-        self.hq.insideDoor0.setDoorLock(FADoorCodes.TALK_TO_HQ)
-        self.hq.insideDoor1.setDoorLock(FADoorCodes.TALK_TO_HQ)
-
-    def enterTunnel(self):
-        flippyDesc = NPCToons.NPCToonDict.get(20001)
-        self.flippy = NPCToons.createNPC(self.air, 20001, flippyDesc, self.zones.STREET, 0)
-
-        if bboard.get(BlackCatDayHolidayAI.PostName):
-            self.blackCatMgr = DistributedBlackCatMgrAI(self.air)
-            self.blackCatMgr.setAvId(self.avId)
-            self.blackCatMgr.generateWithRequired(self.zones.STREET)
-
-        self.hq.insideDoor1.setDoorLock(FADoorCodes.UNLOCKED)
-        self.hq.door1.setDoorLock(FADoorCodes.GO_TO_PLAYGROUND)
-        self.hq.insideDoor0.setDoorLock(FADoorCodes.WRONG_DOOR_HQ)
-
-    def exitTunnel(self):
-        self.flippy.requestDelete()
-        if self.blackCatMgr:
-            self.blackCatMgr.requestDelete()
-
-    def enterCleanup(self):
-        self.building.cleanup()
-        self.hq.cleanup()
-
-        self.tutorialTom.requestDelete()
-        self.hqHarry.requestDelete()
-
-        self.air.deallocateZone(self.zones.BRANCH)
-        self.air.deallocateZone(self.zones.STREET)
-        self.air.deallocateZone(self.zones.SHOP)
-        self.air.deallocateZone(self.zones.HQ)
-
-        del self.air.tutorialManager.playerDict[self.avId]
-
-class TutorialManagerAI(DistributedObjectAI):
-    notify = directNotify.newCategory('TutorialManagerAI')
+    # how many seconds do we wait for the toon to appear on AI before we
+    # nuke his skip tutorial request
+    WaitTimeForSkipTutorial = 5.0
 
     def __init__(self, air):
-        DistributedObjectAI.__init__(self, air)
-
+        DistributedObjectAI.DistributedObjectAI.__init__(self, air)
+        # This is a dictionary of all the players who are currently in
+        # tutorials. We need to create things when someone requests
+        # a tutorial, and destroy them when they leave.
         self.playerDict = {}
 
+        # There are only two blocks in the tutorial. One for the gag shop
+        # building, and one for the Toon HQ. If there aren't, something
+        # is wrong. 
+        self.dnaStore = DNAStorage()
+
+        dnaFile = simbase.air.lookupDNAFileName("tutorial_street.dna")
+        self.air.loadDNAFileAI(self.dnaStore, dnaFile)
+        numBlocks = self.dnaStore.getNumBlockNumbers()
+        assert numBlocks == 2
+        # Assumption: the only block that isn't an HQ is the gag shop block.
+        self.hqBlock = None
+        self.gagBlock = None
+        for blockIndex in range (0, numBlocks):
+            blockNumber = self.dnaStore.getBlockNumberAt(blockIndex)
+            buildingType = self.dnaStore.getBlockBuildingType(blockNumber)
+            if (buildingType == 'hq'):
+                self.hqBlock = blockNumber
+            else:
+                self.gagBlock = blockNumber
+                
+        assert self.hqBlock and self.gagBlock
+
+        # key is avId, value is real time when the request was made
+        self.avIdsRequestingSkip = {}
+        self.accept("avatarEntered", self.waitingToonEntered )
+                                                                  
+        return None
+
     def requestTutorial(self):
+        # TODO: possible security breach: what if client is repeatedly
+        # requesting tutorial? can client request tutorial from playground?
+        # can client request tutorial if hp is at least 16? How do we
+        # handle these cases?
         avId = self.air.getAvatarIdFromSender()
-
-        if not avId:
-            accountId = self.air.getAccountIdFromSender()
-            self.air.writeServerEvent('suspicious', accountId, 'TutorialManagerAI.requestTutorial client did not have an avId.')
-            return
-
-        if avId in self.playerDict:
-            self.air.writeServerEvent('suspicious', avId, 'TutorialManagerAI.requestTutorial toon already in playerDict.')
-            return
-
-        zones = TutorialZones()
-        zones.BRANCH = self.air.allocateZone()
-        zones.STREET = self.air.allocateZone()
-        zones.SHOP = self.air.allocateZone()
-        zones.HQ = self.air.allocateZone()
-
-        self.playerDict[avId] = TutorialFSM(self.air, zones, avId)
-
-        event = self.air.getAvatarExitEvent(avId)
-        self.acceptOnce(event, self.__unexpectedExit, extraArgs=[avId])
-
-        self.d_enterTutorial(avId, zones.STREET, zones.STREET, zones.SHOP, zones.HQ)
-
-    def __unexpectedExit(self, avId):
-        fsm = self.playerDict.get(avId)
-        if fsm:
-            fsm.demand('Cleanup')
-
-    def rejectTutorial(self):
-        # This is never used by the client.
-        pass
-
-    def requestSkipTutorial(self):
-        avId = self.air.getAvatarIdFromSender()
-        av = self.air.doId2do.get(avId)
-        if av:
-            av.b_setTutorialAck(1)
-            av.b_setQuestHistory([101])
-            av.b_setRewardHistory(0, [100])
-            av.addQuest((110, Quests.getQuestFromNpcId(110), Quests.getQuestToNpcId(110), Quests.getQuestReward(110, av), 0), 0)
-            self.air.questManager.toonRodeTrolleyFirstTime(av)
-            self.d_skipTutorialResponse(avId, 1)
-        else:
-            self.d_skipTutorialResponse(avId, 0)
-
-    def d_skipTutorialResponse(self, avId, allOk):
-        self.sendUpdateToAvatarId(avId, 'skipTutorialResponse', [allOk])
-
-    def d_enterTutorial(self, avId, branchZone, streetZone, shopZone, hqZone):
-        self.sendUpdateToAvatarId(avId, 'enterTutorial', [branchZone, streetZone, shopZone, hqZone])
+        # Handle unexpected exits
+        self.acceptOnce(self.air.getAvatarExitEvent(avId),
+                        self.__handleUnexpectedExit,
+                        extraArgs=[avId])
+        # allocate tutorial objects and zones
+        zoneDict = self.__createTutorial(avId)
+        # Tell the player to enter the zone
+        self.d_enterTutorial(avId,
+                             zoneDict["branchZone"],
+                             zoneDict["streetZone"],
+                             zoneDict["shopZone"],
+                             zoneDict["hqZone"]
+                             )
+        self.air.writeServerEvent('startedTutorial', avId, '')
 
     def toonArrived(self):
         avId = self.air.getAvatarIdFromSender()
+        # Make sure the avatar exists
         av = self.air.doId2do.get(avId)
-
-        if not av:
-            return
-
-        if av.getTutorialAck():
-            if avId in self.playerDict:
-                self.playerDict[avId].demand('Cleanup')
-            self.air.writeServerEvent('suspicious', avId, 'Attempted to request tutorial when it would be impossible to do so')
-            return
-
-        # Reset Toon so that their stats are appropriate for the tutorial.
-        av.b_setQuests([])
-        av.b_setQuestHistory([])
-        av.b_setRewardHistory(0, [])
-        av.b_setHp(15)
-        av.b_setMaxHp(15)
-
-        av.inventory.zeroInv()
-        if av.inventory.numItem(ToontownBattleGlobals.THROW_TRACK, 0) == 0:
+        # Clear out the avatar's quests, hp, inventory, and everything else in case
+        # he made it half way through the tutorial last time.
+        if av:
+            # No quests
+            av.b_setQuests([])
+            av.b_setQuestHistory([])
+            av.b_setRewardHistory(0, [])
+            av.b_setQuestCarryLimit(1)
+            # Starting HP
+            av.b_setMaxHp(15)
+            av.b_setHp(15)
+            # No exp
+            av.experience.zeroOutExp()
+            av.d_setExperience(av.experience.makeNetString())
+            # One cupcake and one squirting flower
+            av.inventory.zeroInv()
             av.inventory.addItem(ToontownBattleGlobals.THROW_TRACK, 0)
-
-        if av.inventory.numItem(ToontownBattleGlobals.SQUIRT_TRACK, 0) == 0:
             av.inventory.addItem(ToontownBattleGlobals.SQUIRT_TRACK, 0)
-
-        av.d_setInventory(av.inventory.makeNetString())
-        av.experience.zeroOutExp()
-        av.d_setExperience(av.experience.makeNetString())
-
-    def blackCatStart(self):
-        for fsm in list(self.playerDict.values()):
-            if fsm.getCurrentOrNextState() == 'Tunnel' and not fsm.blackCatMgr:
-                fsm.blackCatMgr = DistributedBlackCatMgrAI(self.air)
-                fsm.blackCatMgr.setAvId(fsm.avId)
-                fsm.blackCatMgr.generateWithRequired(fsm.zones.STREET)
-
-    def blackCatEnd(self):
-        for fsm in list(self.playerDict.values()):
-            if fsm.blackCatMgr:
-                fsm.blackCatMgr.requestDelete()
-                fsm.blackCatMgr = None
+            av.d_setInventory(av.inventory.makeNetString())
+            # No cogs defeated
+            av.b_setCogStatus([1] * 32)
+            av.b_setCogCount([0] * 32)
+        return
 
     def allDone(self):
         avId = self.air.getAvatarIdFromSender()
+        # No need to worry further about unexpected exits
+        self.ignore(self.air.getAvatarExitEvent(avId))
+        # Make sure the avatar exists
         av = self.air.doId2do.get(avId)
-
         if av:
+            self.air.writeServerEvent('finishedTutorial', avId, '')
+            av.b_setTutorialAck(1)
+            self.__destroyTutorial(avId)
+        else:
+            self.notify.warning(
+                "Toon " +
+                str(avId) +
+                " isn't here, but just finished a tutorial. " +
+                "I will ignore this."
+                )
+        return
+
+    def __createTutorial(self, avId):
+        if self.playerDict.get(avId):
+            self.notify.warning(str(avId) + " is already in the playerDict!")
+        
+        branchZone = self.air.allocateZone()
+        streetZone = self.air.allocateZone()
+        shopZone = self.air.allocateZone()
+        hqZone = self.air.allocateZone()
+        # Create a building object
+        building = TutorialBuildingAI.TutorialBuildingAI(self.air,
+                                                         streetZone,
+                                                         shopZone,
+                                                         self.gagBlock)
+        # Create an HQ object
+        hqBuilding = TutorialHQBuildingAI.TutorialHQBuildingAI(self.air,
+                                                               streetZone,
+                                                               hqZone,
+                                                               self.hqBlock)
+
+        def battleOverCallback(zoneId):
+            hqBuilding.battleOverCallback()
+            building.battleOverCallback()
+        
+        # Create a suit planner
+        suitPlanner = SuitPlannerTutorialAI.SuitPlannerTutorialAI(
+            self.air,
+            streetZone,
+            battleOverCallback)
+
+        # Create the NPC blocking the tunnel to the playground
+        blockerNPC = NPCToons.createNPC(self.air, 20001, NPCToons.NPCToonDict[20001], streetZone,
+                                        questCallback=self.__handleBlockDone)
+        blockerNPC.setTutorial(1)
+
+        # is the black cat holiday enabled?
+        blackCatMgr = None
+        if bboard.has(BlackCatHolidayMgrAI.BlackCatHolidayMgrAI.PostName):
+            blackCatMgr = DistributedBlackCatMgrAI.DistributedBlackCatMgrAI(
+                self.air, avId)
+            blackCatMgr.generateWithRequired(streetZone)
+            
+        zoneDict={"branchZone" : branchZone,
+                  "streetZone" : streetZone,
+                  "shopZone" : shopZone,
+                  "hqZone" : hqZone,
+                  "building" : building,
+                  "hqBuilding" : hqBuilding,
+                  "suitPlanner" : suitPlanner,
+                  "blockerNPC" : blockerNPC,
+                  "blackCatMgr" : blackCatMgr,
+                  }
+        self.playerDict[avId] = zoneDict
+        return zoneDict
+
+    def __handleBlockDone(self):
+        return None
+
+    def __destroyTutorial(self, avId):
+        zoneDict = self.playerDict.get(avId)
+        if zoneDict:
+            zoneDict["building"].cleanup()
+            zoneDict["hqBuilding"].cleanup()
+            zoneDict["blockerNPC"].requestDelete()
+            if zoneDict["blackCatMgr"]:
+                zoneDict["blackCatMgr"].requestDelete()
+            self.air.deallocateZone(zoneDict["branchZone"])
+            self.air.deallocateZone(zoneDict["streetZone"])
+            self.air.deallocateZone(zoneDict["shopZone"])
+            self.air.deallocateZone(zoneDict["hqZone"])
+            zoneDict["suitPlanner"].cleanup()
+            del self.playerDict[avId]
+        else:
+            self.notify.warning("Tried to deallocate zones for " +
+                                str(avId) +
+                                " but none were present in playerDict.")
+
+    def rejectTutorial(self):
+        avId = self.air.getAvatarIdFromSender()
+        # Make sure the avatar exists
+        av = self.air.doId2do.get(avId)
+        if av:
+            # Acknowlege that the player has seen a tutorial
+            self.air.writeServerEvent('finishedTutorial', avId, '')
             av.b_setTutorialAck(1)
 
-        event = self.air.getAvatarExitEvent(avId)
-        self.ignore(event)
-
-        fsm = self.playerDict.get(avId)
-
-        if fsm:
-            fsm.demand('Cleanup')
+            self.sendUpdateToAvatarId(avId, "skipTutorialResponse", [1])
         else:
-            self.air.writeServerEvent('suspicious', avId, 'Attempted to exit a non-existent tutorial.')
+            self.notify.warning(
+                "Toon " +
+                str(avId) +
+                " isn't here, but just rejected a tutorial. " +
+                "I will ignore this."
+                )
+        return
+
+    def respondToSkipTutorial(self, avId, av):
+        """Reply to the client if we let him skip the tutorial."""
+        self.notify.debugStateCall(self)
+        assert avId
+        assert av
+        response = 1
+        if av:
+            if av.tutorialAck:
+                self.air.writeServerEvent('suspicious', avId, 'requesting skip tutorial, but tutorialAck is 1')
+                response = 0
+
+        if av and response:
+            # Acknowlege that the player has seen a tutorial
+            self.air.writeServerEvent('skippedTutorial', avId, '')
+            av.b_setTutorialAck(1)
+            # these values were taken by running a real tutorial            
+            self.air.questManager.assignQuest(avId,
+                                              20000,
+                                              101,
+                                              100,
+                                              1000,
+                                              1
+                                              )
+            
+            self.air.questManager.completeAllQuestsMagically(av)
+            av.removeQuest(101)
+            self.air.questManager.assignQuest(avId,
+                                              1000,
+                                              110,
+                                              2,
+                                              1000,
+                                              0
+                                              )
+            self.air.questManager.completeAllQuestsMagically(av)
+
+            # do whatever needs to be done to make his quest state good
+        elif av:
+            self.notify.debug("%s requestedSkipTutorial, but tutorialAck is 1")
+        else:
+            response = 0
+            self.notify.warning(
+                "Toon " +
+                str(avId) +
+                " isn't here, but requested to skip tutorial. " +
+                "I will ignore this."
+                )
+        self.sendUpdateToAvatarId(avId, "skipTutorialResponse", [response])
+        return
+
+    def waitingToonEntered(self, av):
+        """Check if the avatar is someone who's requested to skip, then proceed accordingly."""
+        avId = av.doId
+        if avId in self.avIdsRequestingSkip:
+            requestTime = self.avIdsRequestingSkip[avId]
+            
+            curTime = globalClock.getFrameTime()
+            if (curTime - requestTime) <= self.WaitTimeForSkipTutorial:
+                self.respondToSkipTutorial(avId, av)
+            else:
+                self.notify.warning("waited too long for toon %d responding no to skip tutorial request" % avId)
+                self.sendUpdateToAvatarId(avId, "skipTutorialResponse", [0])
+            del self.avIdsRequestingSkip[avId]
+            self.removeTask("skipTutorialToon-%d" % avId)
+                
+
+    def waitForToonToEnter(self,avId):
+        """Mark our toon as requesting to skip, and start a task to timeout for it."""
+        self.notify.debugStateCall(self)
+        self.avIdsRequestingSkip[avId] = globalClock.getFrameTime()
+        self.doMethodLater(self.WaitTimeForSkipTutorial, self.didNotGetToon, "skipTutorialToon-%d" % avId, [avId])
+
+    def didNotGetToon(self, avId):
+        """Just say no since the AI didn't get it."""
+        self.notify.debugStateCall(self)
+        if avId in self.avIdsRequestingSkip:
+            del self.avIdsRequestingSkip[avId]
+        self.sendUpdateToAvatarId(avId, "skipTutorialResponse", [0])
+        return Task.done
+
+    def requestSkipTutorial(self):
+        """We are requesting to skip tutorial,  add other quest history to be consistent."""
+        self.notify.debugStateCall(self)
+        avId = self.air.getAvatarIdFromSender()
+        # Make sure the avatar exists
+        av = self.air.doId2do.get(avId)        
+        if av:
+            self.respondToSkipTutorial(avId,av)
+        else:
+            self.waitForToonToEnter(avId)
+    
+    def d_enterTutorial(self, avId, branchZone, streetZone, shopZone, hqZone):
+        self.sendUpdateToAvatarId(avId, "enterTutorial", [branchZone,
+                                                          streetZone,
+                                                          shopZone,
+                                                          hqZone])
+        return
+
+    def __handleUnexpectedExit(self, avId):
+        self.notify.warning("Avatar: " + str(avId) +
+                            " has exited unexpectedly")
+        self.__destroyTutorial(avId)
+        return
+    
+        

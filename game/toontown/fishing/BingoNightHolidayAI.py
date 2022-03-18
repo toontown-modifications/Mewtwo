@@ -34,9 +34,9 @@ from direct.task import Task
 #################################################################
 # Toontown Specific Modules
 #################################################################
-from toontown.ai import HolidayBaseAI
-from toontown.fishing import BingoGlobals
-from toontown.fishing import BingoManagerAI
+from game.toontown.ai import HolidayBaseAI
+from game.toontown.fishing import BingoGlobals
+from game.toontown.fishing import BingoManagerAI
 
 #################################################################
 # Python Specific Modules
