@@ -1,17 +1,34 @@
-from direct.directnotify.DirectNotifyGlobal import directNotify
-from direct.distributed.DistributedObjectAI import DistributedObjectAI
+from direct.directnotify import DirectNotifyGlobal
+from direct.distributed import DistributedObjectAI
 
-class DistributedTutorialInteriorAI(DistributedObjectAI):
-    notify = directNotify.newCategory('DistributedTutorialInteriorAI')
+from game.toontown.toon import NPCToons
 
-    def __init__(self, air, zoneId, npcId, block = 0):
-        DistributedObjectAI.__init__(self, air)
-        self.zoneId = zoneId
+
+class DistributedTutorialInteriorAI(DistributedObjectAI.DistributedObjectAI):
+    notify = DirectNotifyGlobal.directNotify.newCategory('DistributedTutorialInteriorAI')
+
+    def __init__(self, block, air, zoneId, building, npcId):
+        """blockNumber: the landmark building number (from the name)"""
+        DistributedObjectAI.DistributedObjectAI.__init__(self, air)
         self.block = block
-        self.npcId = npcId
+        self.zoneId = zoneId
+        self.building = building
+        self.tutorialNpcId = npcId
+
+        # Make any npcs that may be in this interior zone
+        # If there are none specified, this will just be an empty list
+        self.npcs = NPCToons.createNpcsInZone(air, zoneId)
+
+    def delete(self):
+        self.ignoreAll()
+        for npc in self.npcs:
+            npc.requestDelete()
+        del self.npcs
+        del self.building
+        DistributedObjectAI.DistributedObjectAI.delete(self)
 
     def getZoneIdAndBlock(self):
-        return (self.zoneId, self.block)
+        return [self.zoneId, self.block]
 
     def getTutorialNpcId(self):
-        return self.npcId
+        return self.tutorialNpcId

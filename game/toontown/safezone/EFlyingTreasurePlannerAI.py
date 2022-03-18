@@ -1,4 +1,4 @@
-from toontown.toonbase.ToontownGlobals import *
+from game.toontown.toonbase.ToontownGlobals import *
 from . import RegenTreasurePlannerAI
 from . import DistributedEFlyingTreasureAI
 

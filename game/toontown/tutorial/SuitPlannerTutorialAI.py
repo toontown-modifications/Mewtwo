@@ -2,20 +2,21 @@
     which handles management of the suit you will fight during the
     tutorial."""
 
-from otp.ai.AIBaseGlobal import *
-
 from direct.directnotify import DirectNotifyGlobal
-from toontown.suit import DistributedTutorialSuitAI
-import TutorialBattleManagerAI
+
+from game.toontown.suit import DistributedTutorialSuitAI
+
+from . import TutorialBattleManagerAI
+
+from panda3d.core import Vec3
+
 
 class SuitPlannerTutorialAI:
     """
     SuitPlannerTutorialAI: manages the single suit that you fight during
     the tutorial.
     """
-
-    notify = DirectNotifyGlobal.directNotify.newCategory(
-        'SuitPlannerTutorialAI')
+    notify = DirectNotifyGlobal.directNotify.newCategory('SuitPlannerTutorialAI')
 
     def __init__(self, air, zoneId, battleOverCallback):
         # Store these things
@@ -27,8 +28,7 @@ class SuitPlannerTutorialAI:
         self.battleOverCallback = battleOverCallback
 
         # Create a battle manager
-        self.battleMgr = TutorialBattleManagerAI.TutorialBattleManagerAI(
-            self.air)
+        self.battleMgr = TutorialBattleManagerAI.TutorialBattleManagerAI(self.air)
 
         # Create a flunky
         newSuit = DistributedTutorialSuitAI.DistributedTutorialSuitAI(self.air, self)
@@ -48,7 +48,7 @@ class SuitPlannerTutorialAI:
             #RAU made to kill the mem leak when you close the window in the middle of the battle tutorial
             cellId = self.battle.battleCellId
             battleMgr = self.battle.battleMgr
-            if battleMgr.cellId2battle.has_key(cellId):
+            if cellId in battleMgr.cellId2battle:
                 battleMgr.destroy(self.battle)
             
             self.battle = None
@@ -62,15 +62,10 @@ class SuitPlannerTutorialAI:
 
     def requestBattle(self, zoneId, suit, toonId):
         # 70, 20, 0 is a battle cell position that I just made up.
-        self.battle = self.battleMgr.newBattle(
-            zoneId, zoneId, Vec3(35, 20, 0),
-            suit, toonId,
-            finishCallback=self.battleOverCallback)
+        self.battle = self.battleMgr.newBattle(zoneId, zoneId, Vec3(35, 20, 0), suit, toonId, finishCallback=self.battleOverCallback)
         return 1
 
     def removeSuit(self, suit):
         # Get rid of the suit.
         suit.requestDelete()
         self.suit = None
-        
-        
