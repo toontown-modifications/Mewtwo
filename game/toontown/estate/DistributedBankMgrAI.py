@@ -70,10 +70,10 @@ class DistributedBankMgrAI(DistributedObjectAI.DistributedObjectAI):
                                    walletBalance, av.getMoney(), maxWalletBalance,
                                    bankBalance, av.getBankMoney(), maxBankBalance))
                 return 1
-                
+
         else:
             # amount was 0, nothing to do here
-            return 1        
+            return 1
 
     def transferMoney(self, amount):
         # A client would like to transfer money to or from his bank
