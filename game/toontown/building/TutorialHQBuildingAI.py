@@ -41,9 +41,6 @@ class TutorialHQBuildingAI:
         self.interior = DistributedHQInteriorAI.DistributedHQInteriorAI(
             blockNumber, self.air, self.interiorZone)
 
-        # hide the periscope
-        self.interior.setTutorial(1)
-
         # We do not use a standard npc toon here becuase these npcs are created on
         # the fly for as many tutorials as we need. The interior zone is not known
         # until the ai allocates a zone, so we fabricate the description here.
@@ -103,6 +100,8 @@ class TutorialHQBuildingAI:
         self.door1 = door1
         self.insideDoor0 = insideDoor0
         self.insideDoor1 = insideDoor1
+        # hide the periscope
+        self.interior.setTutorial(1)
         return
 
     def unlockDoor(self, door):

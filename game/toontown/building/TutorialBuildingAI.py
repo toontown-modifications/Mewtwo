@@ -82,15 +82,3 @@ class TutorialBuildingAI:
         # place.
         if hasattr(self, "door"):
             self.door.setDoorLock(FADoorCodes.TALK_TO_HQ_TOM)
-
-    def isSuitBlock(self):
-        return 0
-
-    def isSuitBuilding(self):
-        return 0
-
-    def isCogdo(self):
-        return 0
-
-    def isEstablishedSuitBlock(self):
-        return 0
