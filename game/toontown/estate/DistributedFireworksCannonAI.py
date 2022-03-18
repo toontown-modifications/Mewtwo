@@ -1,67 +1,112 @@
-from direct.directnotify.DirectNotifyGlobal import directNotify
-from direct.distributed.ClockDelta import globalClockDelta
+from game.toontown.toonbase.ToontownGlobals import *
+from game.otp.ai.AIBase import *
+from direct.task.Task import Task
+from .HouseGlobals import *
+from game.toontown.effects import DistributedFireworkShowAI
+from direct.fsm import ClassicFSM
+from direct.distributed import ClockDelta
 
-from game.toontown.effects.DistributedFireworkShowAI import DistributedFireworkShowAI
+class DistributedFireworksCannonAI(DistributedFireworkShowAI.DistributedFireworkShowAI):
 
-from game.toontown.estate import HouseGlobals
+    """
+    DistributedFireworksCannon is derived from DistributedFireworkShow so
+    we can add a collision object to bring up a gui:
+    When a user bumps into a fireworks cannon, an interface will pop up
+    giving the user a choice of which firework/color he wants to shoot.
+    """
 
-class DistributedFireworksCannonAI(DistributedFireworkShowAI):
-    notify = directNotify.newCategory('DistributedFireworksCannonAI')
+    notify = directNotify.newCategory("DistributedFireworksCannonAI")
 
-    def __init__(self, air):
-        DistributedFireworkShowAI.__init__(self, air)
+    def __init__(self, air, x, y, z):
+        DistributedFireworkShowAI.DistributedFireworkShowAI.__init__(self, air)
+        self.pos = [x,y,z]
+        self.busy = 0
 
-        self.pos = (22.334, -70.012, 0.786)
+    def delete(self):
+        assert(self.notify.debug("delete()"))
+        self.ignoreAll()
+        DistributedFireworkShowAI.DistributedFireworkShowAI.delete(self)
 
-    def announceGenerate(self):
-        DistributedFireworkShowAI.announceGenerate(self)
-
-        self.d_setPosition(*self.pos)
-
-    def __verifyAvatarInMyZone(self, av):
-        return av.getLocation() == self.getLocation()
-
-    def getPosition(self):
-        return self.pos
-
-    def setPosition(self, x, y, z):
-        self.pos = (x, y, z)
-
-    def b_setPosition(self, x, y, z):
-        self.setPosition(x, y, z)
-        self.d_setPosition(x, y, z)
-
-    def d_setPosition(self, x, y, z):
-        self.sendUpdate('setPosition', [x, y, z])
+    def freeAvatar(self, avId):
+        # Free this avatar, probably because he requested interaction while
+        # I was busy. This can happen when two avatars request interaction
+        # at the same time. The AI will accept the first, sending a setMovie,
+        # and free the second
+        self.sendUpdateToAvatarId(avId, "freeAvatar", [])
+        return
 
     def avatarEnter(self):
+        self.notify.debug("avatarEnter")
         avId = self.air.getAvatarIdFromSender()
-        av = self.air.doId2do.get(avId)
+        # this avatar has come within range
+        self.notify.debug("avatarEnter: %s" % (avId))
 
+        # If we are busy, free this new avatar
+        if self.busy:
+            self.notify.debug("already busy with: %s" % (self.busy))
+            self.freeAvatar(avId)
+            return
+
+        # Fetch the actual avatar object
+        av = self.air.doId2do.get(avId)        
         if not av:
-            self.air.writeServerEvent('suspicious', avId, 'Not in same shard as Fireworks Cannon!')
+            self.notify.warning("av %s not in doId2do tried to transfer money" % (avId))
             return
 
-        if not self.__verifyAvatarInMyZone(av):
-            self.air.writeServerEvent('suspicious', avId, 'Not in same zone as Fireworks Cannon!')
-            return
+        # Flag us as busy with this avatar Id
+        self.busy = avId
 
-        self.d_setMovie(HouseGlobals.FIREWORKS_MOVIE_GUI, avId, globalClockDelta.getRealNetworkTime(bits = 16))
+        # Handle unexpected exit
+        self.acceptOnce(self.air.getAvatarExitEvent(avId),
+                        self.__handleUnexpectedExit, extraArgs=[avId])
+        self.acceptOnce("bootAvFromEstate-"+str(avId),
+                        self.__handleBootMessage, extraArgs=[avId])
+
+        # Tell the client how to react
+        # We need to eventually restrict this to the estate owners
+        self.sendUpdate("setMovie", [FIREWORKS_MOVIE_GUI, avId,
+                                     ClockDelta.globalClockDelta.getRealNetworkTime()])
 
     def avatarExit(self):
+        self.notify.debug("avatarExit")
         avId = self.air.getAvatarIdFromSender()
 
-        if not avId:
+        if self.busy == avId:
+            self.sendClearMovie(None)
+        self.freeAvatar(avId)
+
+        
+    def __handleUnexpectedExit(self, avId):
+        self.notify.warning('avatar:' + str(avId) + ' has exited unexpectedly')
+        self.sendClearMovie(None)
+
+    def __handleBootMessage(self, avId):
+        self.notify.warning('avatar:' + str(avId) + ' got booted ')
+        self.sendClearMovie(None)
+
+    def sendClearMovie(self, task):
+        assert(self.notify.debug('sendClearMovie()'))
+        # Ignore unexpected exits on whoever I was busy with
+        self.ignoreAll()
+        self.busy = 0
+        self.sendUpdate("setMovie", [FIREWORKS_MOVIE_CLEAR, 0,
+                                     ClockDelta.globalClockDelta.getRealNetworkTime()])
+        return Task.done
+
+    def doneShooting(self):
+        avId = self.air.getAvatarIdFromSender()
+        av = self.air.doId2do.get(avId)
+        
+        if not av:
+            self.notify.warning("av %s not in doId2do tried to transfer money" % (avId))
             return
+        
+        self.sendClearMovie(None)
+        self.freeAvatar(avId)
 
-        self.d_freeAvatar(avId)
-        self.resetMovie(avId)
+    def getPosition(self):
+        # This is needed because setPosition is a required field.
+        return self.pos
 
-    def resetMovie(self, avId):
-        taskMgr.doMethodLater(2, self.d_setMovie, f'resetMovie-{self.doId}', extraArgs = [HouseGlobals.FIREWORKS_MOVIE_CLEAR, avId, 0])
-
-    def d_freeAvatar(self, avId):
-        self.sendUpdateToAvatarId(avId, 'freeAvatar', [])
-
-    def d_setMovie(self, mode, avId, time):
-        self.sendUpdate('setMovie', [mode, avId, time])
+    
+    
