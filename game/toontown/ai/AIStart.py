@@ -59,7 +59,7 @@ finally:
         from game.toontown.uberdog.ExtAgent import ServerGlobals
 
         # Grab the server type.
-        serverId = ServerGlobals.FINAL_TOONTOWN
+        serverId = ServerGlobals.TEST_TOONTOWN_2012
         serverType = ServerGlobals.serverToName[serverId]
 
         # Let staff know this district is down.
