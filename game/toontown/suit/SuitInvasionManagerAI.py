@@ -59,38 +59,6 @@ class SuitInvasionManagerAI:
         if task:
             return task.done
 
-    def updateDiscord(self, task = None):
-        fields = [{
-            'name': 'Cog Type',
-            'value': self.cogType,
-            'inline': True
-        },
-        {
-            'name': 'Cog Amount',
-            'value': self.numCogs,
-            'inline': True
-        },
-        {
-            'name': 'District',
-            'value': self.air.districtName,
-            'inline': True
-        },
-        {
-            'name': 'Server Type',
-            'value': ServerGlobals.FINAL_TOONTOWN,
-            'inline': True
-        }]
-
-        message = Webhook()
-        message.setDescription('A new invasion has started!')
-        message.setFields(fields)
-        message.setColor(14177041)
-        message.setWebhook(self.webhookUrl)
-        message.finalize()
-
-        if task:
-            return task.again
-
     def sendToServer(self, actionType = 'updateInvasion'):
         data = {
             'token': config.GetString('api-token', ''),
