@@ -301,8 +301,12 @@ class ExtAgent(ServerBase):
 
         banRequest = requests.post(banEndpoint, banData, headers = self.requestHeaders)
 
+        self.notify.info(f'Response of ban attempt: {banReason.text}')
+
         if not silent:
             emailRequest = requests.post(emailDispatchEndpoint, emailData, headers = self.requestHeaders)
+
+            self.notify.info(f'Response of email attempt: {emailRequest.text}')
 
     def approveName(self, avId):
         toonDC = simbase.air.dclassesByName['DistributedToonUD']
