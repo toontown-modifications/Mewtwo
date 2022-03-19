@@ -82,17 +82,6 @@ class DistributedFlowerAI(DistributedPlantBaseAI.DistributedPlantBaseAI):
                 #we should have a valid DistributedEstateAI at this point
                 self.setMovie(GardenGlobals.MOVIE_REMOVE, senderId)
 
-    def forceRemoveItem(self, avId):
-        # Assuming avId is the owner
-        estate = self.air.estateMgr.estate.get(avId)
-        if estate:
-            itemId = estate.removePlantAndPlaceGardenPlot(self.ownerIndex, self.plot, self.box)
-
-            toon = self.air.doId2do.get(avId)
-            if toon:
-                self.handleSkillUp(toon)
-                self.handleFlowerBasket(toon)
-
 
     def movieDone(self):
         if self.lastMovie == GardenGlobals.MOVIE_REMOVE:
@@ -102,7 +91,7 @@ class DistributedFlowerAI(DistributedPlantBaseAI.DistributedPlantBaseAI):
             estateOwnerDoId = simbase.air.estateMgr.zone2owner.get(zoneId)
             estate = simbase.air.estateMgr.estate.get(estateOwnerDoId)
             if estate:
-                itemId = estate.removePlantAndPlaceGardenPlot(self.ownerIndex, self.plot, self.box)
+                itemId = estate.removePlantAndPlaceGardenPlot(self.ownerIndex, self.plot)
 
                 # tell the gardenplot to tell the toon to finish 'removing'
                 item = simbase.air.doId2do.get(itemId)
@@ -125,3 +114,5 @@ class DistributedFlowerAI(DistributedPlantBaseAI.DistributedPlantBaseAI):
                 # results dialog doesn't come up again when he exits from his house
                 item = simbase.air.doId2do.get(itemId)
                 item.setMovie(GardenGlobals.MOVIE_CLEAR, avId)
+
+
