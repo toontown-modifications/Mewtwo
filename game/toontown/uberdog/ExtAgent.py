@@ -232,7 +232,7 @@ class ExtAgent(ServerBase):
 
     def getStatus(self):
         try:
-            serverType = ServerGlobals.serverToName[ServerGlobals.FINAL_TOONTOWN]
+            serverType = ServerGlobals.serverToName[ServerGlobals.TEST_TOONTOWN_2012]
             endpoint = f'https://api.sunrise.games/api/getStatusForServer?serverType={serverType}'
             request = requests.get(endpoint.format(serverType), headers = self.requestHeaders)
             return request.text
@@ -1361,7 +1361,7 @@ class ExtAgent(ServerBase):
                     },
                     {
                         'name': 'Server Type',
-                        'value': ServerGlobals.FINAL_TOONTOWN,
+                        'value': ServerGlobals.TEST_TOONTOWN_2012,
                         'inline': True
                     }]
 
@@ -1380,7 +1380,7 @@ class ExtAgent(ServerBase):
                         'name': name,
                         'secretKey': self.rpcKey,
                         'avatarId': avId,
-                        'serverName': ServerGlobals.serverToName[ServerGlobals.FINAL_TOONTOWN]
+                        'serverName': ServerGlobals.serverToName[ServerGlobals.TEST_TOONTOWN_2012]
                     }
 
                     request = requests.post('https://sunrise.games/panel/names/approve.php', data, headers = headers).json()
