@@ -223,10 +223,22 @@ class ToontownAIRepository(ToontownInternalRepository, ServerBase):
         self.notify.info('Creating zones...')
         self.createZones()
 
+        # mark district as avaliable
         self.district.b_setAvailable(1)
+
+        # Now that everything's created, start checking the leader
+        # boards for correctness.  We only need to check every 30
+        # seconds or so.
+        self.__leaderboardFlush(None)
+        taskMgr.doMethodLater(30, self.__leaderboardFlush,
+                              'leaderboardFlush', appendTask = True)
 
         # Inform the ExtAgent of us.
         self.netMessenger.send('registerShard', [self.districtId, self.districtName])
+
+    def __leaderboardFlush(self, task):
+        messenger.send('leaderboardFlush')
+        return Task.again
 
     def createLocals(self):
         self.holidayManager = HolidayManagerAI(self)
