@@ -4,6 +4,7 @@ from panda3d.toontown import DNAStorage, loadDNAFileAI, DNAGroup, DNAVisGroup, l
 from direct.directnotify.DirectNotifyGlobal import directNotify
 from direct.distributed.DistributedObjectAI import DistributedObjectAI
 from direct.distributed.PyDatagram import PyDatagram
+from direct.task import Task
 
 from game.otp.ai import TimeManagerAI
 from game.toontown.distributed.ToontownDistrictAI import ToontownDistrictAI
