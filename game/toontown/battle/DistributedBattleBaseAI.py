@@ -16,7 +16,7 @@ from game.toontown.toon import InventoryBase
 from game.toontown.toonbase import ToontownGlobals
 import random
 from game.toontown.toon import NPCToons
-from game.toontown.pets import DistributedPetProxyAI
+from game.toontown.pets.DistributedPetProxyAI import DistributedPetProxyAI
 
 class DistributedBattleBaseAI(DistributedObjectAI.DistributedObjectAI, BattleBase):
     notify = DirectNotifyGlobal.directNotify.newCategory('DistributedBattleBaseAI')
@@ -1130,7 +1130,7 @@ class DistributedBattleBaseAI(DistributedObjectAI.DistributedObjectAI, BattleBas
 
                 def handleGetPetProxy(success, pet, petId = petId, zoneId = zoneId, toonId = toonId):
                     if success:
-                        petProxy = DistributedPetProxyAI.DistributedPetProxyAI(self.air)
+                        petProxy = DistributedPetProxyAI(self.air)
                         petProxy.setOwnerId(pet.getOwnerId())
                         petProxy.setPetName(pet.getPetName())
                         petProxy.setTraitSeed(pet.getTraitSeed())
@@ -1182,9 +1182,9 @@ class DistributedBattleBaseAI(DistributedObjectAI.DistributedObjectAI, BattleBas
 
                         self.acceptOnce(self.air.getAvatarExitEvent(petId),
                                         lambda: taskMgr.doMethodLater(0, handlePetDeleted,
-                                                                      self.uniqueName('pet-%s-deleted' % petId)))
+                                                                      self.uniqueName(f'pet-{petId}-deleted')))
                     else:
-                        self.notify.warning('error generating petProxy: %s' % petId)
+                        self.notify.warning(f'error generating petProxy: {petId}')
 
                 self.getPetProxyObject(petId, handleGetPetProxy)
         return
@@ -1874,10 +1874,16 @@ class DistributedBattleBaseAI(DistributedObjectAI.DistributedObjectAI, BattleBas
         return None
 
     def getPetProxyObject(self, petId, callback):
-        doneEvent = 'generate-%d' % petId
+        doneEvent = f'generate-{petId}'
 
         def handlePetProxyRead(pet):
             callback(1, pet)
+
+        if petId in self.air.doId2do:
+            print(f'Deleting {petId} before sending activate')
+
+            petProxy = self.air.doId2do[petId]
+            petProxy.requestDelete()
 
         self.air.sendActivate(petId, self.air.districtId, 0)
         self.acceptOnce(doneEvent, handlePetProxyRead)
