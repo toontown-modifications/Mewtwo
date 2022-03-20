@@ -32,7 +32,7 @@ from game.toontown.hood.GSHoodDataAI import GSHoodDataAI
 from game.toontown.hood.OZHoodDataAI import OZHoodDataAI
 from game.toontown.hood.GZHoodDataAI import GZHoodDataAI
 from game.toontown.hood import ZoneUtil
-from toontown.building import DistributedTrophyMgrAI
+from game.toontown.building import DistributedTrophyMgrAI
 from game.toontown.pets.PetManagerAI import PetManagerAI
 from game.toontown.suit.SuitInvasionManagerAI import SuitInvasionManagerAI
 from game.toontown.ai.NewsManagerAI import NewsManagerAI
