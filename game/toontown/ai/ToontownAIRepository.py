@@ -32,7 +32,7 @@ from game.toontown.hood.GSHoodDataAI import GSHoodDataAI
 from game.toontown.hood.OZHoodDataAI import OZHoodDataAI
 from game.toontown.hood.GZHoodDataAI import GZHoodDataAI
 from game.toontown.hood import ZoneUtil
-from game.toontown.building.DistributedTrophyMgrAI import DistributedTrophyMgrAI
+from toontown.building import DistributedTrophyMgrAI
 from game.toontown.pets.PetManagerAI import PetManagerAI
 from game.toontown.suit.SuitInvasionManagerAI import SuitInvasionManagerAI
 from game.toontown.ai.NewsManagerAI import NewsManagerAI
@@ -283,8 +283,10 @@ class ToontownAIRepository(ToontownInternalRepository, ServerBase):
         self.inGameNewsMgr = DistributedInGameNewsMgrAI(self)
         self.inGameNewsMgr.generateWithRequired(OtpDoGlobals.OTP_ZONE_ID_MANAGEMENT)
 
-        self.trophyMgr = DistributedTrophyMgrAI(self)
-        self.trophyMgr.generateWithRequired(OtpDoGlobals.OTP_ZONE_ID_MANAGEMENT)
+        # The trophy manager should be created before the building
+        # managers.
+        self.trophyMgr = DistributedTrophyMgrAI.DistributedTrophyMgrAI(self)
+        self.trophyMgr.generateWithRequired(OTPGlobals.UberZone)
 
         self.newsManager = NewsManagerAI(self)
         self.newsManager.generateWithRequired(OtpDoGlobals.OTP_ZONE_ID_MANAGEMENT)

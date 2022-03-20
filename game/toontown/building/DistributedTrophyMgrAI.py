@@ -6,6 +6,7 @@ from game.toontown.toonbase import TTLocalizer
 class DistributedTrophyMgrAI(DistributedObjectAI.DistributedObjectAI):
 
     notify = DirectNotifyGlobal.directNotify.newCategory('DistributedTrophyMgrAI')
+    notify.setDebug(True)
 
     def __init__(self, air):
         DistributedObjectAI.DistributedObjectAI.__init__(self, air)
