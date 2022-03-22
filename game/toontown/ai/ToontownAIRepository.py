@@ -460,9 +460,6 @@ class ToontownAIRepository(ToontownInternalRepository, ServerBase):
         )
         self.createHood(GZHoodDataAI, ToontownGlobals.GolfZone)
 
-        # Welcome Valley hoods (Toontown Central & Goofy Speedway)
-        self.welcomeValleyManager.createWelcomeValleyHoods()
-
         # Assign the initial suit buildings.
         self.notify.info('Assigning initial Cog buildings and Field Offices...')
 
@@ -481,14 +478,23 @@ class ToontownAIRepository(ToontownInternalRepository, ServerBase):
         # Let our user know we have finished starting up.
         self.notify.info(f'{self.districtName} has finished starting up.')
 
-    def loadDNAFileAI(self, dnaStore, dnaFileName):
-        return loadDNAFileAI(dnaStore, dnaFileName)
+    def loadDNAFileAI(self, dnaStore, dnaFile):
+        return loadDNAFileAI(dnaStore, dnaFile, CSDefault)
 
+    #AIGEOM
     def loadDNAFile(self, dnaStore, dnaFile, cs=CSDefault):
         """
         load everything, including geometry
         """
         return loadDNAFile(dnaStore, dnaFile, cs)
+
+    def startupHood(self, hoodDataAI):
+        hoodDataAI.startup()
+        self.hoods.append(hoodDataAI)
+
+    def shutdownHood(self, hoodDataAI):
+        hoodDataAI.shutdown()
+        self.hoods.remove(hoodDataAI)
 
     def genDNAFileName(self, zoneId):
         zoneId = ZoneUtil.getCanonicalZoneId(zoneId)

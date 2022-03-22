@@ -262,7 +262,7 @@ class DistributedToonAI(DistributedPlayerAI.DistributedPlayerAI, DistributedSmoo
         DistributedPlayerAI.DistributedPlayerAI.setLocation(self, parentId, zoneId)
 
         if self.isPlayerControlled():
-            if 100 <= zoneId < ToontownGlobals.DynamicZonesBegin:
+            if 100 <= zoneId < ToontownGlobals.WelcomeValleyBegin:
                 hood = ZoneUtil.getHoodId(zoneId)
 
                 self.b_setLastHood(hood)
