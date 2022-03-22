@@ -1,7 +1,6 @@
 from direct.directnotify.DirectNotifyGlobal import directNotify
 
 from game.toontown.toonbase import ToontownGlobals
-from game.toontown.discord.Webhook import Webhook
 from game.toontown.uberdog.ExtAgent import ServerGlobals
 
 import random, requests
@@ -50,16 +49,10 @@ class SuitInvasionManagerAI:
 
         self.startInvasion(cogType, numCogs, skeleton)
 
-        if self.air.isProdServer():
-            # Send our invasion to the Discord channel.
-            self.sendInitialInvasion()
-            self.sendToServer('setInvasion')
-            taskMgr.doMethodLater(30, self.sendToServer, 'Update Invasion', extraArgs = ['updateInvasion'])
-
         if task:
             return task.done
 
-    def sendToServer(self, actionType = 'updateInvasion'):
+    def sendToAPI(self, actionType = 'updateInvasion'):
         data = {
             'token': config.GetString('api-token', ''),
             'serverType': ServerGlobals.serverToName[ServerGlobals.FINAL_TOONTOWN],
@@ -73,7 +66,8 @@ class SuitInvasionManagerAI:
         }
 
         try:
-            requests.post(f'https://api.sunrise.games/api/{actionType}', json = data, headers = headers)
+            req = requests.post(f'https://api.sunrise.games/api/{actionType}', json = data, headers = headers)
+            self.notify.info(f'Got response of {req.text} from API.')
         except:
             self.notify.warning('Failed to send to server!')
 
@@ -97,30 +91,6 @@ class SuitInvasionManagerAI:
 
         return cogType
 
-    def sendInitialInvasion(self):
-        fields = [{
-            'name': 'Cog Type',
-            'value': self.cogType,
-            'inline': True
-        },
-        {
-            'name': 'Cog Amount',
-            'value': self.numCogs,
-            'inline': True
-        },
-        {
-            'name': 'District',
-            'value': self.air.districtName,
-            'inline': True
-        }]
-
-        message = Webhook()
-        message.setDescription('A new invasion has started!')
-        message.setFields(fields)
-        message.setColor(14177041)
-        message.setWebhook(self.webhookUrl)
-        message.finalize()
-
     def setInvadingCog(self, suitName, skeleton):
         self.invadingCog = (suitName, skeleton)
 
@@ -143,6 +113,10 @@ class SuitInvasionManagerAI:
         if not self.getInvading():
             return
 
+        if self.air.isProdServer():
+            # Remove our invasion from the API.
+            self.sendToAPI('removeInvasion')
+
         self.air.newsManager.d_setInvasionStatus(ToontownGlobals.SuitInvasionEnd, self.invadingCog[0], self.numCogs, self.invadingCog[1])
         if task:
             task.remove()
@@ -162,6 +136,11 @@ class SuitInvasionManagerAI:
     def startInvasion(self, cogType, numCogs, skeleton):
         if not self.constantInvasionsDistrict and self.getInvading():
             return False
+
+        if self.air.isProdServer():
+            # Setup our invasion for the API.
+            self.sendToAPI('setInvasion')
+            taskMgr.doMethodLater(30, self.sendToAPI, 'Update Invasion', extraArgs = ['updateInvasion'])
 
         self.numCogs = numCogs
         self.cogType = self.getCogType(cogType)
