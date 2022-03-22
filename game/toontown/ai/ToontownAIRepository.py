@@ -14,7 +14,7 @@ from game.toontown.toonbase import ToontownGlobals
 from game.toontown.catalog.CatalogManagerAI import CatalogManagerAI
 from game.otp.distributed import OtpDoGlobals
 from game.otp.ai.AIZoneData import AIZoneDataStore
-from game.toontown.ai.WelcomeValleyManagerAI import WelcomeValleyManagerAI
+from game.toontown.ai import WelcomeValleyManagerAI
 from game.toontown.uberdog.DistributedInGameNewsMgrAI import DistributedInGameNewsMgrAI
 from game.toontown.toon import NPCToons
 from game.toontown.hood.TTHoodDataAI import TTHoodDataAI
@@ -287,11 +287,13 @@ class ToontownAIRepository(ToontownInternalRepository, ServerBase):
         # (particularly likely if the AI crashed while players were
         # in) will get a chance to synchronize.
         self.timeManager = TimeManagerAI.TimeManagerAI(self)
-        self.timeManager.generateOtpObject(
-            self.district.getDoId(), OTPGlobals.UberZone)
+        # self.timeManager.generateOtpObject(
+            # self.district.getDoId(), OTPGlobals.UberZone)
+        # TODO: Why can't we use generateOtpObject here?
+        self.timeManager.generateWithRequired(OTPGlobals.UberZone)
 
-        self.welcomeValleyManager = WelcomeValleyManagerAI(self)
-        self.welcomeValleyManager.generateWithRequired(OtpDoGlobals.OTP_ZONE_ID_MANAGEMENT)
+        self.welcomeValleyManager = WelcomeValleyManagerAI.WelcomeValleyManagerAI(self)
+        self.welcomeValleyManager.generateWithRequired(OTPGlobals.UberZone)
 
         self.inGameNewsMgr = DistributedInGameNewsMgrAI(self)
         self.inGameNewsMgr.generateWithRequired(OtpDoGlobals.OTP_ZONE_ID_MANAGEMENT)
