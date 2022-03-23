@@ -92,7 +92,7 @@ class SuitInvasionManagerAI:
         self.numCogs -= 1
 
         if self.air.isProdServer():
-            # Setup our invasion for the API.
+            # Update our invasion for the API.
             self.sendToAPI('updateInvasion')
 
         if self.numCogs <= 0:
