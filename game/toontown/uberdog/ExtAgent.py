@@ -301,8 +301,6 @@ class ExtAgent(ServerBase):
 
         banRequest = requests.post(banEndpoint, banData, headers = self.requestHeaders)
 
-        self.notify.info(f'Got: {banRequest.text} from server!')
-
         if not silent:
             emailRequest = requests.post(emailDispatchEndpoint, emailData, headers = self.requestHeaders)
 
