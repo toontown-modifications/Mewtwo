@@ -2,6 +2,7 @@ from direct.directnotify.DirectNotifyGlobal import directNotify
 
 from game.toontown.toonbase import ToontownGlobals
 from game.toontown.uberdog.ExtAgent import ServerGlobals
+from game.toontown.battle import SuitBattleGlobals
 
 import random, requests
 
@@ -72,24 +73,7 @@ class SuitInvasionManagerAI:
             self.notify.warning('Failed to send to server!')
 
     def getCogType(self, cogType):
-        if cogType == 'f':
-            return 'Flunky'
-        elif cogType == 'cc':
-            return 'Cold Caller'
-        elif cogType == 'nd':
-            return 'Name Dropper'
-        elif cogType == 'b':
-            return 'Bloodsucker'
-        elif cogType == 'sc':
-            return 'Short Change'
-        elif cogType == 'pp':
-            return 'Penny Pincher'
-        elif cogType == 'bf':
-            return 'Bottom Feeder'
-        elif cogType == 'p':
-            return 'Pencil Pusher'
-
-        return cogType
+        return SuitBattleGlobals.SuitAttributes.get(cogType)['name']
 
     def setInvadingCog(self, suitName, skeleton):
         self.invadingCog = (suitName, skeleton)
