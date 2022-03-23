@@ -8,6 +8,7 @@ import random, requests
 
 class SuitInvasionManagerAI:
     notify = directNotify.newCategory('SuitInvasionManagerAI')
+    notify.setInfo(True)
 
     def __init__(self, air):
         self.air = air
@@ -23,7 +24,6 @@ class SuitInvasionManagerAI:
         if self.air.districtName == 'Nutty River':
             self.constantInvasionsDistrict = True
             self.invading = True
-            self.webhookUrl = config.GetString('discord-invasions-webhook')
         else:
             self.invading = False
 
