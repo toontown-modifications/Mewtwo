@@ -36,7 +36,7 @@ districtNames = [
 startingNum = 401000000
 
 isWindows = sys.platform == 'win32'
-isLinux = sys.platform == 'linux2'
+isLinux = sys.platform == 'linux'
 
 if isWindows:
     os.chdir('startup/win32')
