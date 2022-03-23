@@ -1,6 +1,6 @@
 services:
   mewtwo:
-    build: game
+    build: .
     scale: 1
     ports:
       - 6665:6665
