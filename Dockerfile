@@ -28,4 +28,4 @@ WORKDIR /server
 RUN pip install -r requirements.txt
 
 # Run the server
-CMD chmod +x ./entrypoint.sh && ./game/entrypoint.sh
+CMD chmod +x ./entrypoint.sh && ./entrypoint.sh
