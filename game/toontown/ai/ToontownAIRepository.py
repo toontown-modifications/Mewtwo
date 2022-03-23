@@ -290,7 +290,7 @@ class ToontownAIRepository(ToontownInternalRepository, ServerBase):
         # self.timeManager.generateOtpObject(
             # self.district.getDoId(), OTPGlobals.UberZone)
         # TODO: Why can't we use generateOtpObject here?
-        self.timeManager.generateWithRequired(OTPGlobals.UberZone)
+        self.timeManager.generateWithRequired(OtpDoGlobals.OTP_ZONE_ID_MANAGEMENT)
 
         self.welcomeValleyManager = WelcomeValleyManagerAI.WelcomeValleyManagerAI(self)
         self.welcomeValleyManager.generateWithRequired(OTPGlobals.UberZone)
