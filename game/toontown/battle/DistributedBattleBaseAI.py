@@ -1880,8 +1880,7 @@ class DistributedBattleBaseAI(DistributedObjectAI.DistributedObjectAI, BattleBas
             callback(1, pet)
 
         if petId in self.air.doId2do:
-            print(f'Deleting {petId} before sending activate')
-
+            # Delete the pet proxy object before activating a new one.
             petProxy = self.air.doId2do[petId]
             petProxy.requestDelete()
 
