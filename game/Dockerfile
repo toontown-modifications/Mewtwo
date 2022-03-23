@@ -20,10 +20,9 @@ RUN cd /panda3d \
     && dpkg -i py3_a.deb
 RUN cd /panda3d && cp FSM.py /usr/share/panda3d/direct/fsm/FSM.py
 
-# Migrate all files into root
+# Copy all files into Docker image
+COPY . /server
 WORKDIR /server
-RUN git clone https://oauth2:NBSQjuVLzk3XkAxAPTuj@gitlab.com/rocketstoontownonline/Game-OTP/Mewtwo /server
-COPY ./ .
 
 # Install pip dependencies
 RUN pip install -r requirements.txt

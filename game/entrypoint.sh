@@ -1,2 +1,2 @@
 #!/bin/bash
-python3 -u ServerStarter.py && tail -f /dev/null
+python3 -u DistrictStarter.py && tail -f /dev/null
