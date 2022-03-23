@@ -14,7 +14,6 @@ class CentralLoggerUD(DistributedObjectGlobalUD, ServerBase):
         DistributedObjectGlobalUD.__init__(self, air)
         ServerBase.__init__(self)
 
-        self.wantPartialProd = config.GetBool('want-partial-prod', False)
         self.stateMap = {}
 
     def getCategory(self, category):
@@ -59,7 +58,7 @@ class CentralLoggerUD(DistributedObjectGlobalUD, ServerBase):
             data = json.dumps(event)
             print(data)
 
-        if self.isProdServer() or self.wantPartialProd:
+        if self.isProdServer():
             category = self.getCategory(category)
 
             # Report this to our Discord channel.

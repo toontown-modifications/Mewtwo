@@ -90,6 +90,11 @@ class SuitInvasionManagerAI:
 
     def decrementNumCogs(self):
         self.numCogs -= 1
+
+        if self.air.isProdServer():
+            # Setup our invasion for the API.
+            self.sendToAPI('updateInvasion')
+
         if self.numCogs <= 0:
             self.stopInvasion()
 
@@ -124,7 +129,6 @@ class SuitInvasionManagerAI:
         if self.air.isProdServer():
             # Setup our invasion for the API.
             self.sendToAPI('setInvasion')
-            taskMgr.doMethodLater(30, self.sendToAPI, 'Update Invasion', extraArgs = ['updateInvasion'])
 
         self.numCogs = numCogs
         self.cogType = self.getCogType(cogType)
