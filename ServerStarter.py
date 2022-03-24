@@ -17,7 +17,7 @@ os.system('screen -dmS External ./run_server_ext.sh')
 # Wait until the external server starts.
 time.sleep(5)
 
-os.system('cd ../.. && screen -dmS Districts python3 -m ServerStarter')
+os.system('cd ../.. && screen -dmS Districts python3 -m DistrictStarter')
 
 if isProduction:
     os.system('screen -dmS Stunnel ./run_stunnel.sh')
