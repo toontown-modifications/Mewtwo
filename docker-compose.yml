@@ -7,8 +7,3 @@ services:
       - 19135:19135
     volumes:
         - ./otpd/databases/otpdb:/server/otpd/databases/otpdb
-
-# Storage Volumes
-volumes:
-  database:
-    driver: local
