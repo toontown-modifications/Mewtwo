@@ -14,11 +14,13 @@ RUN curl -s -L https://bootstrap.pypa.io/get-pip.py | python3
 # Grab Panda3D and the older FSM module.
 RUN wget -P /panda3d https://rocketprogrammer.me/linux/py3_a.deb
 RUN wget -P /panda3d https://rocketprogrammer.me/binaries/FSM.py
+RUN wget -P /panda3d https://rocketprogrammer.me/binaries/DistributedObjectAI.py
 
 # Install panda3d
 RUN cd /panda3d \
     && dpkg -i py3_a.deb
 RUN cd /panda3d && cp FSM.py /usr/share/panda3d/direct/fsm/FSM.py
+RUN cd /panda3d && cp DistributedObjectAI.py /usr/share/panda3d/direct/distributed/DistributedObjectAI.py
 
 # Copy all files into Docker image
 COPY . /server
