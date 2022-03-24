@@ -46,8 +46,8 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
         self.backupDir = 'backups/magicWords'
 
         if not os.path.exists(self.backupDir):
-            # Create our backup directory.
-            os.mkdir(self.backupDir)
+            # Create our backup directories.
+            os.makedirs(self.backupDir)
 
     def generate(self):
         MagicWordManagerAI.generate(self)
