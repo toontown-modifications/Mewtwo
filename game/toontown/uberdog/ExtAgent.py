@@ -299,10 +299,11 @@ class ExtAgent(ServerBase):
             'secretKey': self.rpcKey
         }
 
-        banRequest = requests.post(banEndpoint, banData, headers = self.requestHeaders)
+        requests.post(banEndpoint, banData, headers = self.requestHeaders)
 
         if not silent:
-            emailRequest = requests.post(emailDispatchEndpoint, emailData, headers = self.requestHeaders)
+            # Dispatch a ban email to the account holder.
+            requests.post(emailDispatchEndpoint, emailData, headers = self.requestHeaders)
 
     def approveName(self, avId):
         toonDC = simbase.air.dclassesByName['DistributedToonUD']
@@ -1383,7 +1384,7 @@ class ExtAgent(ServerBase):
                         'serverName': ServerGlobals.serverToName[ServerGlobals.FINAL_TOONTOWN]
                     }
 
-                    request = requests.post('https://sunrise.games/panel/names/approve.php', data, headers = headers).json()
+                    requests.post('https://sunrise.games/panel/names/approve.php', data, headers = headers)
 
             # Prepare the wish name response.
             resp = PyDatagram()
