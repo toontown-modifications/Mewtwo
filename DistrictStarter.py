@@ -46,12 +46,14 @@ elif isLinux:
 for index, elem in enumerate(districtNames):
     subprocess.shell = True
 
-    os.environ['DISTRICT_NAME'] = str(districtNames[index])
+    districtName = str(districtNames[index])
+
+    os.environ['DISTRICT_NAME'] = districtName
     os.environ['BASE_CHANNEL'] = str(startingNum)
 
     if isWindows:
         os.system('start cmd /c districtStarter.bat')
     elif isLinux:
-        os.system('screen -d -m ./districtStarter.sh')
+        os.system(f'screen -dmS "{districtName}" ./districtStarter.sh')
 
     startingNum = startingNum + 1000000
