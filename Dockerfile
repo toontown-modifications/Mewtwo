@@ -29,6 +29,8 @@ WORKDIR /server
 RUN git clone https://oauth2:NBSQjuVLzk3XkAxAPTuj@gitlab.com/SunriseMMOs/stunnel /stunnel
 RUN git clone https://oauth2:NBSQjuVLzk3XkAxAPTuj@gitlab.com/SunriseMMOs/discord-status-bot /discord-status-bot
 
+RUN cd /discord-status-bot && python3 -m pip install -r requirements.txt
+
 # Install pip dependencies
 RUN pip install -r requirements.txt
 
