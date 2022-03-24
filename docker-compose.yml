@@ -1,11 +1,12 @@
 services:
-  mewtwo:
+  all-services:
     build: .
     scale: 1
     ports:
       - 6667:6667
+      - 19135:19135
     volumes:
-        - database:/server/otpd/databases/otpdb
+        - ./otpd/databases/otpdb:/server/otpd/databases/otpdb
 
 # Storage Volumes
 volumes:
