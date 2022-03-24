@@ -192,7 +192,7 @@ class ExtAgent(ServerBase):
         }
 
         # If you truly need these, ask Rocket.
-        self.rpcKey = config.GetString('rpc-key')
+        self.rpcKey = config.GetString('api-token')
         self.playTokenDecryptKey = config.GetString('token-key')
 
         # Do we want to tokens to expire after a specific amount of time?

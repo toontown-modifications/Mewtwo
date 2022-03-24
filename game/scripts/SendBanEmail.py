@@ -10,7 +10,7 @@ playToken = eval(input('Playtoken: '))
 chatMessages = eval(input('Chat messages: '))
 
 # If you truly need this key, ask Rocket.
-secretKey = config.GetString('rpc-key')
+secretKey = config.GetString('api-token')
 
 headers = {
     'User-Agent': 'Sunrise Games - SendBanEmail'

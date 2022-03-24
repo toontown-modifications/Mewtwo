@@ -241,7 +241,7 @@ class TTCodeRedemptionMgrAI(DistributedObjectAI):
     def getCodeRedeemers(self, code):
         data = {
             'redeemCode': code,
-            'secretKey': config.GetString('rpc-key'),
+            'secretKey': config.GetString('api-token'),
             'serverName': ServerGlobals.serverToName[ServerGlobals.FINAL_TOONTOWN]
         }
 
@@ -251,7 +251,7 @@ class TTCodeRedemptionMgrAI(DistributedObjectAI):
     def setRedeemedCode(self, code, avId):
         data = {
             'redeemCode': code,
-            'secretKey': config.GetString('rpc-key'),
+            'secretKey': config.GetString('api-token'),
             'avatarId': avId,
             'serverName': ServerGlobals.serverToName[ServerGlobals.FINAL_TOONTOWN]
         }

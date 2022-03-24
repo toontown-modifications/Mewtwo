@@ -30,7 +30,7 @@ class RPCServerUD:
         return Response(response.json, mimetype = 'application/json')
 
     def handleAction(self, secretKey, action, arguments):
-        if secretKey != config.GetString('rpc-key'):
+        if secretKey != config.GetString('api-token'):
             return 'Nice try.'
 
         if action == 'systemMessage':

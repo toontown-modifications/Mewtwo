@@ -10,7 +10,7 @@ username = eval(input('Username: '))
 reason = eval(input('Reason for Ban: '))
 
 # If you truly need this key, ask Rocket.
-secretKey = config.GetString('rpc-key')
+secretKey = config.GetString('api-token')
 
 headers = {
     'User-Agent': 'Sunrise Games - AccountBanner'
