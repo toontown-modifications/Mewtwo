@@ -11,7 +11,7 @@ RUN apt install -y build-essential curl wget git python3 python3-distutils pytho
 # Install pip
 RUN curl -s -L https://bootstrap.pypa.io/get-pip.py | python3
 
-# Grab Panda3D and the older FSM module.
+# Grab Panda3D and the older FSM module & modified DistributedObjectAI.
 RUN wget -P /panda3d https://rocketprogrammer.me/linux/py3_a.deb
 RUN wget -P /panda3d https://rocketprogrammer.me/binaries/FSM.py
 RUN wget -P /panda3d https://rocketprogrammer.me/binaries/DistributedObjectAI.py
