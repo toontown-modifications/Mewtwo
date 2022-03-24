@@ -8,7 +8,6 @@ import random, requests
 
 class SuitInvasionManagerAI:
     notify = directNotify.newCategory('SuitInvasionManagerAI')
-    notify.setInfo(True)
 
     def __init__(self, air):
         self.air = air
@@ -68,7 +67,6 @@ class SuitInvasionManagerAI:
 
         try:
             req = requests.post(f'https://api.sunrise.games/api/{actionType}', json = data, headers = headers)
-            self.notify.info(f'Got response of {req.text} from API.')
         except:
             self.notify.warning('Failed to send to server!')
 
