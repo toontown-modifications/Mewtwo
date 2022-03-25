@@ -9,4 +9,4 @@ services:
       - 7969:7969 # JSON RPC service
       - 4500:4500 # Web Endpoints (EndpointManager)
     volumes:
-        - ./otpd/databases/otpdb:/server/otpd/databases/otpdb
+      - ./otpd/databases/otpdb:/server/otpd/databases/otpdb
