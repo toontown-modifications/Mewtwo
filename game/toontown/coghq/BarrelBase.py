@@ -1,4 +1,4 @@
-import random
+from libsunrise import random
 
 class BarrelBase:
 
