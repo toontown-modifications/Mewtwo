@@ -3,9 +3,10 @@ services:
     build: .
     scale: 1
     ports:
-      - 6667:6667
-      - 19135:19135
-      - 7199:7199
-      - 7969:7969
+      - 6667:6667 # ClientAgent
+      - 19135:19135 # Discord info API
+      - 7199:7199 # Discord bot integration server
+      - 7969:7969 # JSON RPC service
+      - 4500:4500 # Web Endpoints (EndpointManager)
     volumes:
         - ./otpd/databases/otpdb:/server/otpd/databases/otpdb
