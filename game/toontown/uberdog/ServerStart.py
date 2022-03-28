@@ -18,7 +18,7 @@ builtins.isClient = lambda: PythonUtil.isClient()
 from game.otp.uberdog.UberDogGlobal import *
 from game.toontown.uberdog import PartiesUdConfig
 
-uber.mysqlhost = ConfigVariableString("mysql-host", PartiesUdConfig.ttDbHost).value
+uber.mysqlhost = ConfigVariableString("mysql-host", PartiesUdConfig.ttDbHost).getValue()
 
 if os.getenv('USE_EXT_AGENT') == '1':
     # We want to use ExtAgent for messages.
@@ -29,7 +29,7 @@ else:
     from .ToontownServerRepository import ToontownServerRepository
     uber.air = ToontownServerRepository()
 
-host = ConfigVariableString('air-connect', '127.0.0.1').value
+host = ConfigVariableString('air-connect', '127.0.0.1').getValue()
 port = 7100
 if ':' in host:
     host, port = host.split(':', 1)

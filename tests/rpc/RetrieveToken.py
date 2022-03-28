@@ -5,7 +5,7 @@ loadPrcFile('../../config/local.prc')
 
 def main():
     url = 'http://127.0.0.1:7969/jsonrpc'
-    secretKey = ConfigVariableString('secret-key').value
+    secretKey = ConfigVariableString('secret-key').getValue()
 
     params = {}
     params['secretKey'] = secretKey

@@ -29,7 +29,7 @@ districtName = os.getenv('DISTRICT_NAME')
 
 simbase.air = ToontownAIRepository(int(os.getenv('BASE_CHANNEL')), districtName)
 
-host = ConfigVariableString('air-connect', '127.0.0.1').value
+host = ConfigVariableString('air-connect', '127.0.0.1').getValue()
 port = 7100
 if ':' in host:
     host, port = host.split(':', 1)
@@ -51,7 +51,7 @@ except Exception:
         log.write(info + '\n')
     raise
 finally:
-    isProdServer = ConfigVariableString('server-type', 'dev').value == 'prod'
+    isProdServer = ConfigVariableString('server-type', 'dev').getValue() == 'prod'
 
     if isProdServer:
         # Finally, send to to our Discord.
