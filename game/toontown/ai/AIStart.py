@@ -76,7 +76,7 @@ finally:
 
         # Send this message to Discord.
         message = Webhook()
-        messageObj.setRequestType('post')
+        message.setRequestType('post')
         message.setDescription('District has gone down!')
         message.setFields(hookFields)
         message.setColor(1127128)
