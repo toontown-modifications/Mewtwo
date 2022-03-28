@@ -90,6 +90,7 @@ class CentralLoggerUD(DistributedObjectGlobalUD, ServerBase):
 
             if category != 'Unknown Category':
                 messageObj = Webhook()
+                messageObj.setRequestType('post')
                 messageObj.setDescription('Someone is reporting to us!')
                 messageObj.setFields(hookFields)
                 messageObj.setColor(1127128)

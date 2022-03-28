@@ -79,6 +79,6 @@ class DiscordIntegrationServer:
                 simbase.air.extAgent.warnPlayer(avClientChannel, reason)
 
     def startServer(self):
-        serverThread = Thread(target = self.setupServer, args = ()).start()
+        serverThread = Thread(target = self.setupServer).start()
 
         self.notify.info('Successfully started socket server.')

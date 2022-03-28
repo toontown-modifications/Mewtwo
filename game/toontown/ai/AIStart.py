@@ -76,8 +76,9 @@ finally:
 
         # Send this message to Discord.
         message = Webhook()
+        messageObj.setRequestType('post')
         message.setDescription('District has gone down!')
         message.setFields(hookFields)
         message.setColor(1127128)
-        message.setWebhook(ConfigVariableString('discord-reset-webhook').value)
+        message.setWebhook(ConfigVariableString('discord-reset-webhook').getValue())
         message.finalize()

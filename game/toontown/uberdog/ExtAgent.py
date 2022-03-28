@@ -865,6 +865,7 @@ class ExtAgent(ServerBase):
                 }]
 
                 message = Webhook()
+                message.setRequestType('post')
                 message.setDescription('Someone is trying to login!')
                 message.setFields(fields)
                 message.setColor(1127128)
@@ -1365,6 +1366,7 @@ class ExtAgent(ServerBase):
                     }]
 
                     message = Webhook()
+                    message.setRequestType('post')
                     message.setDescription('A new toon has requested a typed name!')
                     message.setFields(fields)
                     message.setColor(1127128)

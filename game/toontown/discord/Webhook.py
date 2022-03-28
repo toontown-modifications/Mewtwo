@@ -11,6 +11,10 @@ class Webhook:
         self.color = 0
         self.fields = []
         self.webhook = ''
+        self.requestType = ''
+
+    def setRequestType(self, requestType):
+        self.requestType = requestType
 
     def setTitle(self, title):
         self.title = title
@@ -42,16 +46,13 @@ class Webhook:
     def getWebhook(self):
         return self.webhook
 
-    def send(self, data, patch = False):
-        if patch:
-            request = requests.patch(self.getWebhook(), json = data)
-        else:
-            request = requests.post(self.getWebhook(), json = data)
+    def send(self, data):
+        request = getattr(requests, self.requestType)(self.getWebhook(), json = data)
 
         if request.status_code == 204:
             self.notify.info('Successfully sent webhook!')
 
-    def finalize(self, patch = False):
+    def finalize(self):
         data = {}
 
         data['embeds'] = []
@@ -65,7 +66,4 @@ class Webhook:
 
         data['embeds'].append(embed)
 
-        if patch:
-            webhookThread = Thread(target = self.send, args = (data, True,)).start()
-        else:
-            webhookThread = Thread(target = self.send, args = (data, False,)).start()
+        Thread(target = self.send, args = (data,)).start()
