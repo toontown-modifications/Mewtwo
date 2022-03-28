@@ -669,6 +669,13 @@ class ExtAgent(ServerBase):
 
         return fieldPacker.getBytes()
 
+    def onInvalidDatagram(self, clientChannel):
+        errorCode = 122
+        message = 'You have been ejected for attempting to send a incorrectly formatted datagram.'
+
+        self.sendBoot(clientChannel, errorCode, message)
+        self.sendEject(clientChannel, errorCode, message)
+
     def handleDatagram(self, dgi):
         """
         This handles datagrams coming directly from the Toontown 2013 client.
@@ -682,10 +689,7 @@ class ExtAgent(ServerBase):
             msgType = dgi.getUint16()
         except:
             # Invalid datagram.
-            errorCode = 122
-            message = 'You have been ejected for attempting to send a incorrectly formatted datagram.'
-            self.sendBoot(clientChannel, errorCode, message)
-            self.sendEject(clientChannel, errorCode, message)
+            self.onInvalidDatagram(clientChannel)
             return
 
         if msgType == 3: # CLIENT_GET_AVATARS
@@ -794,9 +798,7 @@ class ExtAgent(ServerBase):
                 tokenType = dgi.getInt32()
                 wantMagicWords = dgi.getString()
             except:
-                message = 'You have been ejected for attempting to send a incorrectly formatted datagram.'
-                self.sendBoot(clientChannel, 122, message)
-                self.sendEject(clientChannel, 122, message)
+                self.onInvalidDatagram(clientChannel)
                 return
 
             if self.isProdServer():
@@ -1236,9 +1238,7 @@ class ExtAgent(ServerBase):
                 p4 = dgi.getInt16()
                 f4 = dgi.getInt16()
             except:
-                message = 'You have been ejected for attempting to send a incorrectly formatted datagram.'
-                self.sendBoot(clientChannel, 122, message)
-                self.sendEject(clientChannel, 122, message)
+                self.onInvalidDatagram(clientChannel)
                 return
 
             # Construct a pattern.
@@ -1301,9 +1301,7 @@ class ExtAgent(ServerBase):
                 avId = dgi.getUint32()
                 name = dgi.getString()
             except:
-                message = 'You have been ejected for attempting to send a incorrectly formatted datagram.'
-                self.sendBoot(clientChannel, 122, message)
-                self.sendEject(clientChannel, 122, message)
+                self.onInvalidDatagram(clientChannel)
                 return
 
             pendingName = name
@@ -1562,9 +1560,7 @@ class ExtAgent(ServerBase):
             try:
                 message = dgi.getString()
             except:
-                message = 'You have been ejected for attempting to send a incorrectly formatted datagram.'
-                self.sendBoot(clientChannel, 122, message)
-                self.sendEject(clientChannel, 122, message)
+                self.onInvalidDatagram(clientChannel)
                 return
 
             resp = PyDatagram()
