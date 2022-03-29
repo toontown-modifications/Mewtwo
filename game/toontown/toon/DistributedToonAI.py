@@ -2235,6 +2235,8 @@ class DistributedToonAI(DistributedPlayerAI.DistributedPlayerAI, DistributedSmoo
         for i in range(len(msgs)):
             if msgs[i][0] == textId:
                 msgs[i][1] += 1
+                if msgs[i][1] > 32767:
+                    msgs[i][1] = 32767
                 self.b_setResistanceMessages(msgs)
                 return
 
