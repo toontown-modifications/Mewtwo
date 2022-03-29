@@ -2236,6 +2236,8 @@ class DistributedToonAI(DistributedPlayerAI.DistributedPlayerAI, DistributedSmoo
             if msgs[i][0] == textId:
                 msgs[i][1] += 1
                 if msgs[i][1] > 32767:
+                    # Prevents a district reset.
+                    # Caused by staff that have used magic words to obtain unites.
                     msgs[i][1] = 32767
                 self.b_setResistanceMessages(msgs)
                 return
