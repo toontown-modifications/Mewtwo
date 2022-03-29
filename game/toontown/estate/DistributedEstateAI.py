@@ -951,13 +951,9 @@ class DistributedEstateAI(DistributedObjectAI.DistributedObjectAI):
 
     if simbase.wantPets:
         def createPetCollisions(self):
-            # call this after the world geom is all set up or updated
+            # call this after the world geom is all set up
             render=self.getRender()
-            if self.geom.isStashed():
-                self.geom.unstash()
             # find the collisions and make copies of them, centered at Z=0
-            if hasattr(self, 'petColls'):
-                self.petColls.removeNode()
             self.petColls = render.attachNewNode('petColls')
             colls = self.geom.findAllMatches('**/+CollisionNode')
             for coll in colls:
