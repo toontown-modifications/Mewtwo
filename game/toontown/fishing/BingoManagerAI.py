@@ -52,7 +52,7 @@ class BingoManagerAI(object):
     notify = DirectNotifyGlobal.directNotify.newCategory("BingoManagerAI")
     #notify.setDebug(True)
     #notify.setInfo(True)
-    serverDataFolder = simbase.config.GetString('server-data-folder', "")
+    serverDataFolder = simbase.config.GetString('bingo-server-data-folder', "")
 
     DefaultReward = { TTG.DonaldsDock: [BG.MIN_SUPER_JACKPOT, 1],
                       TTG.ToontownCentral: [BG.MIN_SUPER_JACKPOT, 1],
@@ -429,7 +429,10 @@ class BingoManagerAI(object):
     ############################################################
     def getFileName(self):
         """Figure out the path to the saved state"""
-        f = "%s%s.jackpot" % (self.serverDataFolder, self.shard)
+        if not os.path.exists(self.serverDataFolder):
+            os.makedirs(self.serverDataFolder)
+
+        f = "%s/%s.jackpot" % (self.serverDataFolder, self.shard)
         return f
 
     ############################################################
