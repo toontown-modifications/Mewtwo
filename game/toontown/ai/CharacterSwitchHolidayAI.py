@@ -1,5 +1,7 @@
 from .HolidayBaseAI import HolidayBaseAI
+
 from direct.directnotify.DirectNotifyGlobal import directNotify
+from direct.showbase.DirectObject import DirectObject
 
 from game.toontown.toonbase import TTLocalizer
 from game.toontown.toonbase import ToontownGlobals
@@ -51,11 +53,16 @@ switchRollback = {
     TTLocalizer.Goofy : DistributedGoofySpeedwayAI,
 }
 
-class CharacterSwitchHolidayAI(HolidayBaseAI):
+class CharacterSwitchHolidayAI(HolidayBaseAI, DirectObject):
     notify = directNotify.newCategory('CharacterSwitchHolidayAI')
 
     def __init__(self, air, holidayId):
         HolidayBaseAI.__init__(self, air, holidayId)
+
+        self.accept('TTHoodSpawned', self.onWelcomeValleySpawn)
+        self.accept('TTHoodDestroyed', self.onWelcomeValleyDestroy)
+        self.accept('GSHoodSpawned', self.onWelcomeValleySpawn)
+        self.accept('GSHoodDestroyed', self.onWelcomeValleyDestroy)
 
     def start(self):
         HolidayBaseAI.start(self)
@@ -78,6 +85,10 @@ class CharacterSwitchHolidayAI(HolidayBaseAI):
                                                                       ToontownGlobals.SPOOKY_COSTUMES):
                 # Special case for Chip 'n Dale.
                 self.switchChipDale(hood, True)
+
+                # Do it in Welcome Valley as well.
+                self.ignore('TTHoodSpawned')
+                self.ignore('GSHoodSpawned')
 
     def triggerSwitch(self, curWalkNode, char):
         # Called by a classic character when the transition process has started.
@@ -188,3 +199,17 @@ class CharacterSwitchHolidayAI(HolidayBaseAI):
         hood.addDistObj(dale)
         hood.classicChars.append(dale)
         chip.setDaleId(dale.doId)
+
+    def onWelcomeValleySpawn(self, hood):
+        if hasattr(hood, 'classicChar'):
+            hood.classicChar.transitionCostume()
+        elif hasattr(hood, 'classicChars') and self.holidayId in (ToontownGlobals.HALLOWEEN_COSTUMES, ToontownGlobals.SPOOKY_COSTUMES):
+            # Special case for Chip 'n Dale.
+            self.switchChipDale(hood)
+
+    def onWelcomeValleyDestroy(self, hood):
+        if hasattr(hood, 'classicChar'):
+            self.rollbackCharacter(hood, newHood.classicChar)
+        elif hasattr(hood, 'classicChars') and self.holidayId in (ToontownGlobals.HALLOWEEN_COSTUMES, ToontownGlobals.SPOOKY_COSTUMES):
+            # Special case for Chip 'n Dale.
+            self.switchChipDale(hood, True)
