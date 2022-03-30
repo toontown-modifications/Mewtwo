@@ -59,36 +59,26 @@ class CharacterSwitchHolidayAI(HolidayBaseAI, DirectObject):
     def __init__(self, air, holidayId):
         HolidayBaseAI.__init__(self, air, holidayId)
 
-        self.accept('TTHoodSpawned', self.onWelcomeValleySpawn)
-        self.accept('TTHoodDestroyed', self.onWelcomeValleyDestroy)
-        self.accept('GSHoodSpawned', self.onWelcomeValleySpawn)
-        self.accept('GSHoodDestroyed', self.onWelcomeValleyDestroy)
+        self.accept('TTHoodSpawned', self.onHoodSpawn)
+        self.accept('TTHoodDestroyed', self.onHoodDestroy)
+        self.accept('GSHoodSpawned', self.onHoodSpawn)
+        self.accept('GSHoodDestroyed', self.onHoodDestroy)
 
     def start(self):
         HolidayBaseAI.start(self)
         # Let the classic characters know that
         # they need to transition soon.
         for hood in self.air.hoods:
-            if hasattr(hood, 'classicChar'):
-                hood.classicChar.transitionCostume()
-            elif hasattr(hood, 'classicChars') and self.holidayId in (ToontownGlobals.HALLOWEEN_COSTUMES, \
-                                                                      ToontownGlobals.SPOOKY_COSTUMES):
-                # Special case for Chip 'n Dale.
-                self.switchChipDale(hood)
+            self.onHoodStartup(hood)
 
     def stop(self):
         HolidayBaseAI.stop(self)
         for hood in self.air.hoods:
-            if hasattr(hood, 'classicChar'):
-                self.rollbackCharacter(hood, hood.classicChar)
-            elif hasattr(hood, 'classicChars') and self.holidayId in (ToontownGlobals.HALLOWEEN_COSTUMES, \
-                                                                      ToontownGlobals.SPOOKY_COSTUMES):
-                # Special case for Chip 'n Dale.
-                self.switchChipDale(hood, True)
+            self.onHoodDestroy(hood)
 
-                # Do it in Welcome Valley as well.
-                self.ignore('TTHoodSpawned')
-                self.ignore('GSHoodSpawned')
+            # Do it in Welcome Valley as well.
+            self.ignore('TTHoodSpawned')
+            self.ignore('GSHoodSpawned')
 
     def triggerSwitch(self, curWalkNode, char):
         # Called by a classic character when the transition process has started.
@@ -200,16 +190,16 @@ class CharacterSwitchHolidayAI(HolidayBaseAI, DirectObject):
         hood.classicChars.append(dale)
         chip.setDaleId(dale.doId)
 
-    def onWelcomeValleySpawn(self, hood):
+    def onHoodSpawn(self, hood):
         if hasattr(hood, 'classicChar'):
             hood.classicChar.transitionCostume()
         elif hasattr(hood, 'classicChars') and self.holidayId in (ToontownGlobals.HALLOWEEN_COSTUMES, ToontownGlobals.SPOOKY_COSTUMES):
             # Special case for Chip 'n Dale.
             self.switchChipDale(hood)
 
-    def onWelcomeValleyDestroy(self, hood):
+    def onHoodDestroy(self, hood):
         if hasattr(hood, 'classicChar'):
-            self.rollbackCharacter(hood, newHood.classicChar)
+            self.rollbackCharacter(hood, hood.classicChar)
         elif hasattr(hood, 'classicChars') and self.holidayId in (ToontownGlobals.HALLOWEEN_COSTUMES, ToontownGlobals.SPOOKY_COSTUMES):
             # Special case for Chip 'n Dale.
             self.switchChipDale(hood, True)
