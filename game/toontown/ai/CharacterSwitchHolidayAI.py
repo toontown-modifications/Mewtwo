@@ -69,7 +69,7 @@ class CharacterSwitchHolidayAI(HolidayBaseAI, DirectObject):
         # Let the classic characters know that
         # they need to transition soon.
         for hood in self.air.hoods:
-            self.onHoodStartup(hood)
+            self.onHoodSpawn(hood)
 
     def stop(self):
         HolidayBaseAI.stop(self)
