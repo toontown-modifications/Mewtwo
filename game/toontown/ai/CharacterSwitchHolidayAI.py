@@ -146,19 +146,26 @@ class CharacterSwitchHolidayAI(HolidayBaseAI, DirectObject):
 
         # Fade into obscurity, like Oswald the Lucky Rabbit.
         char.fadeAway()
+
         # Delete the character from existance. Er-, I mean obscurity.
         char.requestDelete()
-        # Let the hood know.
-        hood.removeDistObj(char)
+
+        if hasattr(hood, 'doId2do'):
+            # Let the hood know.
+            hood.removeDistObj(char)
 
         # Load up the original character to take it's place.
         hood.classicChar = rollbackChar(self.air)
+
         # Now we generate...
         hood.classicChar.generateWithRequired(hood.zoneId)
+
         # Start...
         hood.classicChar.start()
-        # And lastly, let the hood know its existance.
-        hood.addDistObj(hood.classicChar)
+
+        if hasattr(hood, 'doId2do'):
+            # And lastly, let the hood know its existance.
+            hood.addDistObj(hood.classicChar)
 
     def switchChipDale(self, hood, rollback = False):
         # Special function for Chip 'n Dale for Halloween.
