@@ -2,22 +2,17 @@ from direct.directnotify import DirectNotifyGlobal
 from game.toontown.fishing import BingoGlobals
 from game.toontown.fishing import BingoCardBase
 
-
 class BlockoutBingo(BingoCardBase.BingoCardBase):
     notify = DirectNotifyGlobal.directNotify.newCategory('BlockoutBingo')
 
-    def __init__(self,
-                 cardSize=BingoGlobals.CARD_SIZE,
-                 rowSize=BingoGlobals.CARD_ROWS,
-                 colSize=BingoGlobals.CARD_COLS):
+    def __init__(self, cardSize = BingoGlobals.CARD_SIZE, rowSize = BingoGlobals.CARD_ROWS, colSize = BingoGlobals.CARD_COLS):
         BingoCardBase.BingoCardBase.__init__(self, cardSize, rowSize, colSize)
         self.gameType = BingoGlobals.BLOCKOUT_CARD
 
-    def checkForWin(self, id=0):
+    def checkForWin(self, id = 0):
         for i in range(self.rowSize):
             if not self.rowCheck(i):
                 return BingoGlobals.NO_UPDATE
-                continue
 
         return BingoGlobals.WIN
 
@@ -25,7 +20,4 @@ class BlockoutBingo(BingoCardBase.BingoCardBase):
         return 1
 
     def checkForBingo(self):
-        if self.checkForWin():
-            return BingoGlobals.WIN
-
-        return BingoGlobals.NO_UPDATE
+        return self.checkForWin()
