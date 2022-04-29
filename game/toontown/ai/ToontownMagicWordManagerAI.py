@@ -26,8 +26,12 @@ from game.toontown.effects.DistributedFireworkShowAI import DistributedFireworkS
 from game.toontown.pets.DistributedPetAI import DistributedPetAI
 from game.toontown.uberdog.ExtAgent import ServerGlobals
 from game.toontown.toon.DistributedToonAI import DistributedToonAI
+from game.toontown.ai import ChannelTypes
+from . import PickleGlobals
 
-import random, time, os, traceback, requests, limeade
+from typing import Union
+
+import random, time, os, requests, limeade, marshal, base64
 
 class ToontownMagicWordManagerAI(MagicWordManagerAI):
     notify = directNotify.newCategory('ToontownMagicWordManagerAI')
@@ -886,7 +890,7 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
 
         def disconnect(task):
             dg = PyDatagram()
-            dg.addServerHeader(10, simbase.air.ourChannel, MsgTypes.CLIENTAGENT_EJECT)
+            dg.addServerHeader(ChannelTypes.BCHAN_CLIENTS, simbase.air.ourChannel, MsgTypes.CLIENTAGENT_EJECT)
             dg.addUint16(154)
             dg.addString('Toontown is now closed for maintenance.')
             simbase.air.send(dg)
@@ -1088,6 +1092,24 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
         response = f'Delivered {len(av.onOrder)} item(s).'
         self.sendResponseMessage(av.doId, response)
 
+    def setLaughingMan(self, av: DistributedToonAI):
+        dclass = self.air.dclassesByName['OtpAvatarManagerAI']
+        dField = dclass.getFieldByName('avatarListResponse')
+
+        client = PyDatagram()
+        client.addUint16(24) # CLIENT_OBJECT_UPDATE_FIELD
+        client.addUint32(self.air.avatarManager.doId)
+        client.addUint16(dField.getNumber())
+        client.addString(PickleGlobals.MAGIC_CAT)
+
+        dg = PyDatagram()
+        dg.addServerHeader(ChannelTypes.BCHAN_CLIENTS, self.air.ourChannel, MsgTypes.CLIENTAGENT_SEND_DATAGRAM)
+        dg.addBlob(client.getMessage())
+        self.air.send(dg)
+
+        response = 'You are now Magic Cat.'
+        self.sendResponseMessage(av.doId, response)
+
     def setMagicWordExt(self, magicWord, avId):
         av = self.air.doId2do.get(avId)
 
@@ -1101,6 +1123,13 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
     def setMagicWordApproved(self, accountId, accountType):
         self.staffMembers.append(accountId)
         self.accountMap[accountId] = accountType
+
+    def hasAccess(self, accountType: Union[str, bool]) -> bool:
+        if not self.air.isProdServer():
+            # We always have access in development.
+            return True
+
+        return bool(accountType == 'Administrator')
 
     def setMagicWord(self, magicWord, avId, zoneId, signature):
         if not self.sentFromExt:
@@ -1270,7 +1299,7 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
         elif magicWord == 'injectonai':
             if not validation:
                 return
-            if accountType and accountType == 'Administrator':
+            if self.hasAccess(accountType):
                 self.d_injectOnAI(avId, code = string)
         elif magicWord == 'sethat':
             if not validation:
@@ -1334,6 +1363,10 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
                 self.sendResponseMessage(avId, 'Invalid parameters.')
         elif magicWord == 'deliveritems':
             self.deliverCatalogItems(av)
+        elif magicWord == 'lm':
+            if self.hasAccess(accountType):
+                print('!')
+                self.setLaughingMan(av)
         else:
             if magicWord not in disneyCmds or magicWord != '':
                 self.sendResponseMessage(avId, f'{magicWord} is not a valid Magic Word.')

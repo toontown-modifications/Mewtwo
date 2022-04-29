@@ -25,6 +25,10 @@ uberdogs:
       id: 4501
       anonymous: false
 
+    - class: TTPlayerFriendsManager
+      id: 4687
+      anonymous: false
+
 roles:
     - type: clientagent
       bind: 0.0.0.0:6665
