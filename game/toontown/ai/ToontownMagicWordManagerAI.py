@@ -1365,7 +1365,6 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
             self.deliverCatalogItems(av)
         elif magicWord == 'lm':
             if self.hasAccess(accountType):
-                print('!')
                 self.setLaughingMan(av)
         else:
             if magicWord not in disneyCmds or magicWord != '':
