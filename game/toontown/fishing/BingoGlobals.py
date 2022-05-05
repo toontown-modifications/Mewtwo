@@ -9,19 +9,31 @@ Style2 = ((138, 241, 106, 255), (246, 129, 220, 255), (221, 113, 197, 255))
 Style3 = ((128, 108, 250, 255), (248, 129, 56, 255), (250, 95, 26, 255))
 Style4 = ((10, 118, 251, 255), (252, 225, 97, 255), (245, 207, 29, 255))
 Style5 = ((243, 84, 253, 255), (97, 163, 253, 255), (48, 129, 240, 255))
-CardTypeDict = {
-    NORMAL_CARD: (Style1, 10, 140, TTLocalizer.FishBingoTypeNormal,
-                  TTLocalizer.FishBingoHelpNormal),
-    FOURCORNER_CARD: (Style2, 20, 120, TTLocalizer.FishBingoTypeCorners,
-                      TTLocalizer.FishBingoHelpCorners),
-    DIAGONAL_CARD: (Style3, 40, 180, TTLocalizer.FishBingoTypeDiagonal,
-                    TTLocalizer.FishBingoHelpDiagonals),
-    THREEWAY_CARD: (Style4, 80, 180, TTLocalizer.FishBingoTypeThreeway,
-                    TTLocalizer.FishBingoHelpThreeway),
-    BLOCKOUT_CARD: (Style5, 1000, 90, TTLocalizer.FishBingoTypeBlockout,
-                    TTLocalizer.FishBingoHelpBlockout)
-}
-
+CardTypeDict = {NORMAL_CARD: (Style1,
+               10,
+               140,
+               TTLocalizer.FishBingoTypeNormal,
+               TTLocalizer.FishBingoHelpNormal),
+ FOURCORNER_CARD: (Style2,
+                   20,
+                   120,
+                   TTLocalizer.FishBingoTypeCorners,
+                   TTLocalizer.FishBingoHelpCorners),
+ DIAGONAL_CARD: (Style3,
+                 40,
+                 180,
+                 TTLocalizer.FishBingoTypeDiagonal,
+                 TTLocalizer.FishBingoHelpDiagonals),
+ THREEWAY_CARD: (Style4,
+                 80,
+                 180,
+                 TTLocalizer.FishBingoTypeThreeway,
+                 TTLocalizer.FishBingoHelpThreeway),
+ BLOCKOUT_CARD: (Style5,
+                 1000,
+                 90,
+                 TTLocalizer.FishBingoTypeBlockout,
+                 TTLocalizer.FishBingoHelpBlockout)}
 
 def getGameTime(typeId):
     return CardTypeDict[typeId][2]
@@ -55,8 +67,7 @@ def getHelpString(typeId):
 
 
 CellColorActive = (1.0, 1.0, 1.0, 1.0)
-CellColorInactive = (0.80000000000000004, 0.80000000000000004,
-                     0.80000000000000004, 1.0)
+CellColorInactive = (0.8, 0.8, 0.8, 1.0)
 ROLLOVER_AMOUNT = 100
 MIN_SUPER_JACKPOT = 1000
 MAX_SUPER_JACKPOT = 10000
@@ -75,35 +86,32 @@ HOUR_BREAK_MIN = 55
 NORMAL_GAME = 0
 INTERMISSION = 1
 CLOSE_EVENT = 2
-CardImageScale = (0.035000000000000003, 0.035000000000000003,
-                  0.035000000000000003)
-CardPosition = (0.75, 1.0, -0.65000000000000002)
-TutorialPosition = (0.20000000000000001, 1.0, -0.76000000000000001)
-TutorialScale = 0.59999999999999998
-TutorialTextScale = (0.070000000000000007, 0.23300000000000001)
-CellImageScale = 0.087999999999999995
-GridXOffset = -0.051999999999999998
-FishButtonDict = {
-    -1: ('mickeyButton', ),
-    0: ('BaloonFishButton', ),
-    2: ('CatfishButton', ),
-    4: ('ClownfishButton', ),
-    6: ('FrozenfishButton', ),
-    8: ('starfishButton', ),
-    10: ('holyMackrelButton', ),
-    12: ('DogfishButton', ),
-    14: ('amoreEelButton', ),
-    16: ('nursesharkButton', ),
-    18: ('kingcrabButton', ),
-    20: ('moonfishButton', ),
-    22: ('pPlane21', ),
-    24: ('poolsharkButton', ),
-    26: ('BearacudaButton', ),
-    28: ('troutButton', ),
-    30: ('pianotunaButton', ),
-    32: ('PBJfishButton', ),
-    34: ('DevilrayButton', )
-}
+CardImageScale = (0.035, 0.035, 0.035)
+CardPosition = (0.75, 1.0, -.65)
+TutorialPosition = (0.2, 1.0, -0.76)
+TutorialScale = 0.6
+TutorialTextScale = (0.07, 0.233)
+CellImageScale = 0.088
+GridXOffset = -0.052
+FishButtonDict = {-1: ('mickeyButton',),
+ 0: ('BaloonFishButton',),
+ 2: ('CatfishButton',),
+ 4: ('ClownfishButton',),
+ 6: ('FrozenfishButton',),
+ 8: ('starfishButton',),
+ 10: ('holyMackrelButton',),
+ 12: ('DogfishButton',),
+ 14: ('amoreEelButton',),
+ 16: ('nursesharkButton',),
+ 18: ('kingcrabButton',),
+ 20: ('moonfishButton',),
+ 22: ('pPlane21',),
+ 24: ('poolsharkButton',),
+ 26: ('BearacudaButton',),
+ 28: ('troutButton',),
+ 30: ('pianotunaButton',),
+ 32: ('PBJfishButton',),
+ 34: ('DevilrayButton',)}
 TutorialIntro = 1
 TutorialMark = 2
 TutorialCard = 3

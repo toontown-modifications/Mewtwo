@@ -18,7 +18,6 @@ class FishManagerAI:
 
     def __init__(self, air):
         self.air = air
-        self.requestedFish = {}
 
     def __chooseItem(self, av, zoneId):
         rodId = av.getFishingRod()
@@ -32,15 +31,9 @@ class FishManagerAI:
         return FishGlobals.BootItem
 
     def __chooseFish(self, av, zoneId):
-        if av.doId in self.requestedFish:
-            success = 1
-            genus, species = self.requestedFish[av.doId]
-            weight = FishGlobals.getRandomWeight(genus, species)
-            del self.requestedFish[av.doId]
-        else:
-            rodId = av.getFishingRod()
-            branchZone = ZoneUtil.getCanonicalBranchZone(zoneId)
-            success, genus, species, weight = FishGlobals.getRandomFishVitals(branchZone, rodId)
+        rodId = av.getFishingRod()
+        branchZone = ZoneUtil.getCanonicalBranchZone(zoneId)
+        success, genus, species, weight = FishGlobals.getRandomFishVitals(branchZone, rodId)
         return (success, genus, species, weight)
 
     def recordCatch(self, avId, zoneId, pondZoneId):
