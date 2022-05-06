@@ -59,7 +59,7 @@ from game.toontown.quest import QuestManagerAI
 from game.toontown.tutorial.TutorialManagerAI import TutorialManagerAI
 from game.toontown.safezone.DistributedPartyGateAI import DistributedPartyGateAI
 from game.otp.ai.BanManagerAI import BanManagerAI
-from game.toontown.ai.CogPageManagerAI import CogPageManagerAI
+from game.toontown.shtiker import CogPageManagerAI
 from game.otp.friends.FriendManagerAI import FriendManagerAI
 from game.toontown.coderedemption.TTCodeRedemptionMgrAI import TTCodeRedemptionMgrAI
 from game.toontown.uberdog.DistributedPartyManagerAI import DistributedPartyManagerAI
@@ -270,7 +270,8 @@ class ToontownAIRepository(ToontownInternalRepository, ServerBase):
 
         self.promotionMgr = PromotionManagerAI(self)
 
-        self.cogPageManager = CogPageManagerAI(self)
+        # The Cog Page manager
+        self.cogPageManager = CogPageManagerAI.CogPageManagerAI(self)
 
         self.cogSuitMgr = CogSuitManagerAI(self)
 
