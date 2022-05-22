@@ -1,27 +1,26 @@
 from direct.directnotify import DirectNotifyGlobal
 from game.toontown.uberdog.DataStore import *
 
-
 class ScavengerHuntDataStore(DataStore):
     QueryTypes = DataStore.addQueryTypes(['GetGoals', 'AddGoal'])
-    notify = DirectNotifyGlobal.directNotify.newCategory(
-        'ScavengerHuntDataStore')
+    notify = DirectNotifyGlobal.directNotify.newCategory('ScavengerHuntDataStore')
 
     def __init__(self, filepath):
         DataStore.__init__(self, filepath)
 
     def handleQuery(self, query):
-        (qId, qData) = query
+        qId, qData = query
         if qId == self.QueryTypes['GetGoals']:
-            (avId, goal) = qData
-            goals = self._ScavengerHuntDataStore__getGoalsForAvatarId(avId)
+            avId, goal = qData
+            goals = self.__getGoalsForAvatarId(avId)
             return (qId, (avId, goal, goals))
         elif qId == self.QueryTypes['AddGoal']:
-            (avId, goal) = qData
-            self._ScavengerHuntDataStore__addGoalToAvatarId(avId, goal)
-            return (qId, (avId, ))
+            avId, goal = qData
+            self.__addGoalToAvatarId(avId, goal)
+            return (qId, (avId,))
+        return None
 
-    def _ScavengerHuntDataStore__addGoalToAvatarId(self, avId, goal):
+    def __addGoalToAvatarId(self, avId, goal):
         if self.wantAnyDbm:
             pAvId = cPickle.dumps(avId)
             pGoal = cPickle.dumps(goal)
@@ -37,8 +36,9 @@ class ScavengerHuntDataStore(DataStore):
             self.data.setdefault(avId, set())
             self.data[avId].add(goal)
         self.incrementWriteCount()
+        return
 
-    def _ScavengerHuntDataStore__getGoalsForAvatarId(self, avId):
+    def __getGoalsForAvatarId(self, avId):
         if self.wantAnyDbm:
             pAvId = cPickle.dumps(avId)
             pData = self.data.get(pAvId, None)
@@ -49,3 +49,4 @@ class ScavengerHuntDataStore(DataStore):
             return data
         else:
             return list(self.data.get(avId, []))
+        return
