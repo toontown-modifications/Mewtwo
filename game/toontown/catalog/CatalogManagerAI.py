@@ -180,6 +180,10 @@ class CatalogManagerAI(DistributedObjectAI.DistributedObjectAI):
                         for item in stickList:
                             backCatalog.append(item)
                     #import pdb; pdb.set_trace()
+                    if type(backCatalog) == list:
+                        # HACK: Probably a Python 3 error, turn the back catalog
+                        # back to a CatalogItemList
+                        backCatalog = CatalogItemList.CatalogItemList(backCatalog)
             else:
                 weeklyCatalog = avatar.weeklyCatalog
                 backCatalog = avatar.backCatalog
