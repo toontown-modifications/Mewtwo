@@ -507,7 +507,7 @@ def getShovelPower(shovel, shovelSkill):
         else:
             numBoxes += curBoxes
 
-    return numBoxes
+    return int(numBoxes)
 
 
 def getMaxShovelSkill():
