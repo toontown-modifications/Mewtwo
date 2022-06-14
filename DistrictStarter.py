@@ -1,4 +1,6 @@
-import os, subprocess, sys
+import os, subprocess, sys, random
+
+NUM_DISTRICTS = 4
 
 districtNames = [
     'Boingy Acres',
@@ -33,6 +35,8 @@ districtNames = [
     'Zany Acres'
 ]
 
+cutDistrictNames = random.sample(districtNames, NUM_DISTRICTS)
+
 startingNum = 401000000
 
 isWindows = sys.platform == 'win32'
@@ -43,10 +47,10 @@ if isWindows:
 elif isLinux:
     os.chdir('startup/unix')
 
-for index, elem in enumerate(districtNames):
+for index, elem in enumerate(cutDistrictNames):
     subprocess.shell = True
 
-    districtName = str(districtNames[index])
+    districtName = str(cutDistrictNames[index])
 
     os.environ['DISTRICT_NAME'] = districtName
     os.environ['BASE_CHANNEL'] = str(startingNum)
