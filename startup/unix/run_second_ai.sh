@@ -2,6 +2,6 @@
 cd ../..
 
 export DISTRICT_NAME="Nutty River"
-export BASE_CHANNEL=402000000
+export BASE_CHANNEL=403000000
 
-python3 -m game.toontown.ai.AIStart config/Config.prc
+screen -dmS "$DISTRICT_NAME" python3 -m game.toontown.ai.AIStart config/Config.prc

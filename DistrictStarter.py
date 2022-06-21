@@ -37,9 +37,9 @@ districtNames = [
 
 cutDistrictNames = random.sample(districtNames, NUM_DISTRICTS)
 
-if districtNames[21] not in cutDistrictNames:
+# if districtNames[21] not in cutDistrictNames:
     # Add Nutty River to the district list.
-    cutDistrictNames.append(districtNames[21])
+    # cutDistrictNames.append(districtNames[21])
 
 startingNum = 401000000
 
