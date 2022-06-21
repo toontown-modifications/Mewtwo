@@ -1,6 +1,6 @@
 import os, subprocess, sys, random
 
-NUM_DISTRICTS = 4
+NUM_DISTRICTS = 2
 
 districtNames = [
     'Boingy Acres',
@@ -36,6 +36,10 @@ districtNames = [
 ]
 
 cutDistrictNames = random.sample(districtNames, NUM_DISTRICTS)
+
+if districtNames[21] not in cutDistrictNames:
+    # Add Nutty River to the district list.
+    cutDistrictNames.append(districtNames[21])
 
 startingNum = 401000000
 
