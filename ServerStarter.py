@@ -15,7 +15,7 @@ else:
 os.system('screen -dmS External ./run_server_ext.sh')
 
 # Wait until the external server starts.
-time.sleep(5)
+time.sleep(15)
 
 os.system('cd ../.. && screen -dmS Districts python3 -m DistrictStarter')
 
