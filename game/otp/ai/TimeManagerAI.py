@@ -92,6 +92,9 @@ class TimeManagerAI(DistributedObjectAI.DistributedObjectAI):
         the detailed CPU information to the server for logging.
         """
         requesterId = self.air.getAvatarIdFromSender()
+
+        # A Sunrise member has garbage data in their CPU information.
+        # We will just do this to workaround it.
         info = info.decode('utf-8', 'ignore')
         
         self.notify.info('client-cpu %s|%s' % (requesterId, info))
