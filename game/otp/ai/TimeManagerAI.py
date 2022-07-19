@@ -75,7 +75,7 @@ class TimeManagerAI(DistributedObjectAI.DistributedObjectAI):
             requesterId = self.air.getAvatarIdFromSender()
             prcHash = HashVal()
             prcHash.setFromBin(hash)
-            info = '%s|%s' % (signature, prcHash.asHex())
+            info = '%s|%s' % (signature.decode(), prcHash.asHex())
             self.notify.info('Client %s signature: %s' % (requesterId, info))
             self.air.writeServerEvent('client-signature', requesterId, info)
 
