@@ -92,6 +92,7 @@ class TimeManagerAI(DistributedObjectAI.DistributedObjectAI):
         the detailed CPU information to the server for logging.
         """
         requesterId = self.air.getAvatarIdFromSender()
+        info = info.decode()
         
         self.notify.info('client-cpu %s|%s' % (requesterId, info))
         self.air.writeServerEvent('client-cpu', requesterId, info)
