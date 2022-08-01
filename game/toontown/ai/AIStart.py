@@ -39,7 +39,7 @@ simbase.air.connect(host, port)
 
 try:
     run()
-except Exception:
+except:
     # Grab the exception data.
     info = traceback.format_exc()
 
