@@ -514,7 +514,7 @@ class ExtAgent(ServerBase):
                     # Add this avatar id to our pending avatars.
                     pendingAvatars.add(avId)
 
-                    def handleAvRetrieve(dclass, fields, avId=avId):
+                    def handleAvRetrieve(dclass, fields, avId = avId):
                         if dclass != self.air.dclassesByName['DistributedToonUD']:
                             # This is not a valid avatar object.
                             self.sendEject(clientChannel, 122, 'An Avatar object in the account is invalid.')
