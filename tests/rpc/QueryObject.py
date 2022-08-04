@@ -1,14 +1,14 @@
 from panda3d.core import loadPrcFile, ConfigVariableString
-import requests, json
+import requests
 
 loadPrcFile('../../config/local.prc')
 
 def main():
-    url = 'http://127.0.0.1:7969/jsonrpc'
-    secretKey = ConfigVariableString('secret-key').getValue()
+    url = 'http://unite.sunrise.games:7969/jsonrpc'
+    apiToken = ConfigVariableString('api-token').getValue()
 
     params = {}
-    params['secretKey'] = secretKey
+    params['secretKey'] = apiToken
     params['action'] = 'queryObject'
     params['arguments'] = [100000000]
 
@@ -25,6 +25,8 @@ def main():
 
     for fieldName in responseData[1]:
         value = responseData[1][fieldName]
+
+        print(f'{fieldName}:{value}')
 
 if __name__ == '__main__':
     main()
