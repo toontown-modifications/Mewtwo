@@ -2,8 +2,6 @@ from panda3d.core import UniqueIdAllocator, CSDefault, DSearchPath, Filename
 from panda3d.toontown import DNAStorage, loadDNAFileAI, DNAGroup, DNAVisGroup, loadDNAFile, DNAProp
 
 from direct.directnotify.DirectNotifyGlobal import directNotify
-from direct.distributed.DistributedObjectAI import DistributedObjectAI
-from direct.distributed.PyDatagram import PyDatagram
 from direct.task import Task
 
 from game.otp.ai import TimeManagerAI
@@ -645,19 +643,26 @@ class ToontownAIRepository(ToontownInternalRepository, ServerBase):
 
         return startingBlocks
 
-    def findLeaderBoards(self, dnaData, zoneId):
-        leaderboards = []
-        if 'leaderBoard' in dnaData.getName():
-            x, y, z = dnaData.getPos()
-            h, p, r = dnaData.getHpr()
-            leaderboard = DistributedLeaderBoardAI(self, dnaData.getName(), x, y, z, h, p, r)
-            leaderboard.generateWithRequired(zoneId)
-            leaderboards.append(leaderboard)
-        for i in range(dnaData.getNumChildren()):
-            foundLeaderBoards = self.findLeaderBoards(dnaData.at(i), zoneId)
-            leaderboards.extend(foundLeaderBoards)
+    def findLeaderBoards(self, dnaPool, zoneID):
+        '''
+        Find and return leader boards
+        '''
+        leaderBoards = []
+        if (dnaPool.getName().find('leaderBoard') >= 0):
+            #found a leader board
+            pos = dnaPool.getPos()
+            hpr = dnaPool.getHpr()
 
-        return leaderboards
+            lb = DistributedLeaderBoardAI(self, dnaPool.getName(), zoneID, [], pos, hpr)
+            lb.generateWithRequired(zoneID)
+            leaderBoards.append(lb)
+        else:
+            for i in range(dnaPool.getNumChildren()):
+                result = self.findLeaderBoards(dnaPool.at(i), zoneID)
+                if result:
+                    leaderBoards += result
+
+        return leaderBoards
 
     def findPartyHats(self, dnaData, zoneId):
         partyHats = []
