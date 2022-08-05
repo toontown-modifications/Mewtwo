@@ -1124,12 +1124,12 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
         self.staffMembers.append(accountId)
         self.accountMap[accountId] = accountType
 
-    def hasAccess(self, accountType: Union[str, bool]) -> bool:
+    def hasAccess(self, accountType: Union[str, bool], requiredAccess: str) -> bool:
         if not self.air.isProdServer():
             # We always have access in development.
             return True
 
-        return bool(accountType == 'Administrator')
+        return bool(accountType == requiredAccess)
 
     def setMagicWord(self, magicWord, avId, zoneId, signature):
         if not self.sentFromExt:
@@ -1273,7 +1273,8 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
                 return
             self.d_setFireworks(avId, showName = args[0])
         elif magicWord == 'doodletest':
-            self.d_doodleTest(avId, av)
+            if self.hasAccess(accountType, 'Rocket'):
+                self.d_doodleTest(avId, av)
         elif magicWord == 'stresstestdoodles':
             self.d_doodleTest(avId, av, stress = True)
         elif magicWord == 'maxdoodle':
@@ -1299,7 +1300,7 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
         elif magicWord == 'injectonai':
             if not validation:
                 return
-            if self.hasAccess(accountType):
+            if self.hasAccess(accountType, 'Rocket'):
                 self.d_injectOnAI(avId, code = string)
         elif magicWord == 'sethat':
             if not validation:
@@ -1364,7 +1365,7 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
         elif magicWord == 'deliveritems':
             self.deliverCatalogItems(av)
         elif magicWord == 'lm':
-            if self.hasAccess(accountType):
+            if self.hasAccess(accountType, 'Rocket'):
                 self.setLaughingMan(av)
         else:
             if magicWord not in disneyCmds or magicWord != '':

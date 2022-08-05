@@ -877,7 +877,7 @@ class ExtAgent(ServerBase):
 
                 self.air.getNetworkAddress(self.air.getMsgSender(), callback)
 
-                if accountType in ('Administrator', 'Developer', 'Moderator'):
+                if accountType in ('Administrator', 'Developer', 'Moderator', 'Rocket'):
                     # This is a staff member.
                     self.staffMembers[playToken] = accountType
 
