@@ -336,7 +336,7 @@ class DistributedPartyManagerAI(DistributedObjectAI):
                             -1))
 
         # The result list should be the same size as given.
-        assert len(result) == size, "Bad result range: c=%s s=%s result=%s" % (centerGridY, size, result)
+        # assert len(result) == size, "Bad result range: c=%s s=%s result=%s" % (centerGridY, size, result)
 
         return result
 
@@ -350,7 +350,7 @@ class DistributedPartyManagerAI(DistributedObjectAI):
                            -1))
 
         # The result list should be the same size as given.
-        assert len(result) == size, "Bad result range: c=%s s=%s result=%s" % (centerGridX, size, result)
+        # assert len(result) == size, "Bad result range: c=%s s=%s result=%s" % (centerGridX, size, result)
 
         return result
 
