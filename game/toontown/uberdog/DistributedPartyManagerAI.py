@@ -331,8 +331,8 @@ class DistributedPartyManagerAI(DistributedObjectAI):
         if size == 1:
             result = [centerGridY]
         else:
-            result =  list(range(int(centerGridY + size//2),
-                            int(centerGridY - (size//2)),
+            result =  list(range(int(centerGridY + size/2),
+                            int(centerGridY - (size/2)),
                             -1))
 
         # The result list should be the same size as given.
@@ -345,8 +345,8 @@ class DistributedPartyManagerAI(DistributedObjectAI):
         if size == 1:
             result = [centerGridX]
         else:
-            result = list(range(int(centerGridX + size//2),
-                           int(centerGridX - (size//2)),
+            result = list(range(int(centerGridX + size/2),
+                           int(centerGridX - (size/2)),
                            -1))
 
         # The result list should be the same size as given.
