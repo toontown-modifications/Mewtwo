@@ -1,4 +1,4 @@
-import random
+from libsunrise import random
 from game.toontown.toonbase import ToontownGlobals
 from game.toontown.toonbase import TTLocalizer
 import os

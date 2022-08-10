@@ -2,6 +2,8 @@ from game.toontown.toon import ToonDNA
 from pandac.PandaModules import VBase4
 from game.toontown.toonbase import TTLocalizer, ToontownGlobals
 from direct.showbase import PythonUtil
+from collections import OrderedDict
+
 NumFields = 9
 Fields = {'head': 0,
  'ears': 1,
@@ -55,7 +57,7 @@ PetRarities2 = (('leopard', 0.005),
  ('dots', 0.265),
  ('tummy', 0.525),
  ('threeStripe', 1.0))
-PetRarities = {'body': {ToontownGlobals.ToontownCentral: {'threeStripe': 50,
+PetRarities = OrderedDict({'body': {ToontownGlobals.ToontownCentral: {'threeStripe': 50,
                                             'tummy': 30,
                                             'dots': 20},
           ToontownGlobals.DonaldsDock: {'threeStripe': 35,
@@ -84,7 +86,7 @@ PetRarities = {'body': {ToontownGlobals.ToontownCentral: {'threeStripe': 50,
                                              'tigerStripe': 20,
                                              'turtle': 25,
                                              'giraffe': 20,
-                                             'leopard': 10}}}
+                                             'leopard': 10}}})
 BodyTextures = {'dots': 'phase_4/maps/BeanbodyDots6.jpg',
  'threeStripe': 'phase_4/maps/Beanbody3stripes6.jpg',
  'tigerStripe': 'phase_4/maps/BeanbodyZebraStripes6.jpg',
