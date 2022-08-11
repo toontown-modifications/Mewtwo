@@ -1,7 +1,11 @@
 #!/bin/sh
 cd ../..
 
-export DISTRICT_NAME="Zany Acres"
+export DISTRICT_NAME="Crazyham"
 export BASE_CHANNEL=403000000
 
-screen -dmS "Zany Acres" python3 -m game.toontown.ai.AIStart config/Config.prc
+while true
+do
+  python3 -m game.toontown.ai.AIStart config/Config.prc
+  sleep 5
+done
