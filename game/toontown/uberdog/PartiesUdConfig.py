@@ -29,5 +29,5 @@ elif language == "french":
 else:
 	ttDbName = "toontownTopDb"
 
-ttDbUser = config.GetString('mysql-username', 'ttDb_user')
+ttDbUser = config.GetString('mysql-user', 'ttDb_user')
 ttDbPasswd = config.GetString('mysql-password', 'toontastic2008')
