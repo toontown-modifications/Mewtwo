@@ -29,11 +29,5 @@ elif language == "french":
 else:
 	ttDbName = "toontownTopDb"
 
-if config.GetString('server-type') == 'prod':
-	# This is the production server.
-	ttDbUser = "web"
-	ttDbPasswd = "zHRyZo5hebU2uhjBuKt9PsPAGiswV9K8"
-else:
-	# This is a development environment.
-	ttDbUser = "root"
-	ttDbPasswd = "klnbZS9Jca4PLaWIMEED77zwQzL0EfaX"
+ttDbUser = config.GetString('mysql-username', 'ttDb_user')
+ttDbPasswd = config.GetString('mysql-password', 'toontastic2008')
