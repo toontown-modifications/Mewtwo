@@ -30,4 +30,4 @@ else:
 	ttDbName = "toontownTopDb"
 
 ttDbUser = config.GetString('mysql-user', 'ttDb_user')
-ttDbPasswd = config.GetString('mysql-password', 'toontastic2008')
+ttDbPasswd = config.GetString('mysql-passwd', 'toontastic2008')
