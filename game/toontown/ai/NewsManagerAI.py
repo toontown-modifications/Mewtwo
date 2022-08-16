@@ -11,6 +11,8 @@ class NewsManagerAI(DistributedObjectAI):
     def __init__(self, air):
         DistributedObjectAI.__init__(self, air)
 
+        self.everyoneChats = simbase.config.GetBool("everyone-chats", 0)
+
         self.weeklyCalendarHolidays = []
         self.yearlyCalendarHolidays = []
         self.oncelyCalendarHolidays = []
@@ -47,18 +49,19 @@ class NewsManagerAI(DistributedObjectAI):
         taskMgr.remove(self.uniqueName('start-silly-saturday-circuit'))
         taskMgr.remove(self.uniqueName('start-weekly-calendar-holiday'))
 
-    def handleAvatarEntered(self, av):
+    def handleAvatarEntered(self, avatar):
         if self.air.suitInvasionManager.getInvading():
-            self.sendUpdateToAvatarId(av.getDoId(), 'setInvasionStatus', [ToontownGlobals.SuitInvasionBulletin,
-                                                                          self.air.suitInvasionManager.invadingCog[0],
-                                                                          self.air.suitInvasionManager.numCogs,
-                                                                          self.air.suitInvasionManager.invadingCog[1]])
+            # Let this poor avatar who just came in the game know that there
+            # is a Cog Invasion taking place
+            cogType, skeleton = self.air.suitInvasionManager.getCogType()
+            numRemaining = self.air.suitInvasionManager.getNumCogsRemaining()
+            self.sendAvatarInvasionStatus(avatar.getDoId(), cogType, numRemaining, skeleton)
 
-        if self.air.holidayManager.isHolidayRunning(ToontownGlobals.SILLY_SATURDAY_BINGO) or \
-                self.air.holidayManager.isHolidayRunning(ToontownGlobals.SILLY_SATURDAY_CIRCUIT) or \
-                self.air.holidayManager.isHolidayRunning(ToontownGlobals.SILLY_SATURDAY_TROLLEY) or \
-                self.air.holidayManager.isHolidayRunning(ToontownGlobals.ROAMING_TRIALER_WEEKEND):
-            self.sendUpdateToAvatarId(av.getDoId(), 'holidayNotify', [])
+        # let them know about all holidays actually...
+        self.sendUpdateToAvatarId(avatar.getDoId(), "holidayNotify", [])
+
+        if self.everyoneChats:
+            avatar.d_setCommonChatFlags(ToontownGlobals.CommonChat)
 
     def setupWeeklyCalendarHolidays(self):
         # Get our current list of weekly calendar holidays.
@@ -387,8 +390,23 @@ class NewsManagerAI(DistributedObjectAI):
     def getMultipleStartHolidays(self):
         return self.multipleStartHolidays
 
-    def d_setInvasionStatus(self, msgType, cogType, numRemaining, skeleton):
-        self.sendUpdate('setInvasionStatus', [msgType, cogType, numRemaining, skeleton])
+    def invasionBegin(self, cogType, numRemaining, skeleton):
+        self.sendUpdate("setInvasionStatus",
+                        [ToontownGlobals.SuitInvasionBegin, cogType, numRemaining, skeleton])
+
+    def invasionEnd(self, cogType, numRemaining, skeleton):
+        self.sendUpdate("setInvasionStatus",
+                        [ToontownGlobals.SuitInvasionEnd, cogType, numRemaining, skeleton])
+
+    def invasionUpdate(self, cogType, numRemaining, skeleton):
+        # Broadcast an invasion update to all players
+        self.sendUpdate("setInvasionStatus",
+                        [ToontownGlobals.SuitInvasionUpdate, cogType, numRemaining, skeleton])
+
+    def sendAvatarInvasionStatus(self, avId, cogType, numRemaining, skeleton):
+        # Send an invasion update to only one avatar
+        self.sendUpdateToAvatarId(avId, "setInvasionStatus",
+                                  [ToontownGlobals.SuitInvasionBulletin, cogType, numRemaining, skeleton])
 
     def d_setHolidayIdList(self, holidayIdList):
         self.sendUpdate('setHolidayIdList', [holidayIdList])
