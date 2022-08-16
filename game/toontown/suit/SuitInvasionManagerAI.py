@@ -1,133 +1,151 @@
-from direct.directnotify.DirectNotifyGlobal import directNotify
-
-from game.toontown.toonbase import ToontownGlobals
-from game.toontown.uberdog.ExtAgent import ServerGlobals
-from game.toontown.battle import SuitBattleGlobals
-from game.toontown.suit import SuitDNA
-
-import random, requests
+from direct.directnotify import DirectNotifyGlobal
+from toontown.battle import SuitBattleGlobals
+import random
+from direct.task import Task
 
 class SuitInvasionManagerAI:
-    notify = directNotify.newCategory('SuitInvasionManagerAI')
+    """
+    Manages invasions of Suits
+    """
+
+    notify = DirectNotifyGlobal.directNotify.newCategory('SuitInvasionManagerAI')
 
     def __init__(self, air):
         self.air = air
+        self.invading = 0
+        self.cogType = None
+        self.skeleton = 0
+        self.totalNumCogs = 0
+        self.numCogsRemaining = 0
 
-        self.invadingCog = (None, 0)
-        self.numCogs = 0
-        self.cogType = ''
+        # Set of cog types to choose from See
+        # SuitBattleGlobals.SuitAttributes.keys() for all choices I did not
+        # put the highest level Cogs from each track in here to keep them
+        # special and only found in buildings. I threw in the Flunky just
+        # for fun.
+        self.invadingCogTypes = (
+            # Corporate
+            'f', # Flunky
+            'hh', # Head Hunter
+            'cr', # Corporate Raider
+            # Sales
+            'tf', # Two-faced
+            'm', # Mingler
+            # Money
+            'mb', # Money Bags
+            'ls', # Loan shark
+            # Legal
+            'sd', # Spin Doctor
+            'le', # Legal Eagle
+            )
+        
+        # Picked from randomly how many cogs will invade
+        # This might need to be adjusted based on population(?)
+        self.invadingNumList = (1000, 2000, 3000, 4000)
 
-        self.constantInvasionsDistrict = False
+        # Minimum time between invasions on this shard (in seconds)
+        # No more than 1 per 2 days
+        self.invasionMinDelay = 2 * 24 * 60 * 60
+        # Maximum time between invasions on this shard (in seconds)
+        # At least once every 7 days
+        self.invasionMaxDelay = 7 * 24 * 60 * 60
 
-        self.queuedSuits = []
+        # Kick off the first invasion
+        self.waitForNextInvasion()
 
-        if self.air.districtName == 'Nutty River':
-            self.constantInvasionsDistrict = True
-            self.invading = True
+    def delete(self):
+        taskMgr.remove(self.taskName("cogInvasionMgr"))
+
+    def computeInvasionDelay(self):
+        # Compute the delay until the next invasion
+        return ((self.invasionMaxDelay - self.invasionMinDelay) * random.random()
+                + self.invasionMinDelay)
+
+    def tryInvasionAndWaitForNext(self, task):
+        # Start the invasion if there is not one already
+        if self.getInvading():
+            self.notify.warning("invasionTask: tried to start random invasion, but one is in progress")
         else:
-            self.invading = False
+            self.notify.info("invasionTask: starting random invasion")
+            cogType = random.choice(self.invadingCogTypes)
+            totalNumCogs = random.choice(self.invadingNumList)
+            self.startInvasion(cogType, totalNumCogs)
+        # In either case, fire off the next invasion
+        self.waitForNextInvasion()
+        return Task.done
 
-    def generateInitialInvasion(self, task = None):
-        if self.queuedSuits:
-            cogType = self.queuedSuits[0]
-            del self.queuedSuits[0]
-        else:
-            cogType = random.choice(SuitDNA.suitHeadTypes)
-
-        numCogs = random.randint(1000, 3000)
-
-        skeleton = 0
-
-        self.startInvasion(cogType, numCogs, skeleton)
-
-        if task:
-            return task.done
-
-    def sendToAPI(self, actionType = 'updateInvasion'):
-        data = {
-            'token': config.GetString('api-token', ''),
-            'serverType': ServerGlobals.serverToName[ServerGlobals.FINAL_TOONTOWN],
-            'districtName': self.air.districtName,
-            'cogType': self.cogType,
-            'numCogs': self.numCogs
-        }
-
-        headers = {
-            'User-Agent': 'Sunrise Games - SuitInvasionManagerAI'
-        }
-
-        try:
-            req = requests.post(f'https://api.sunrise.games/api/{actionType}', json = data, headers = headers)
-        except:
-            self.notify.warning('Failed to send to server!')
-
-    def getCogType(self, cogType):
-        return SuitBattleGlobals.SuitAttributes.get(cogType)['name']
-
-    def setInvadingCog(self, suitName, skeleton):
-        self.invadingCog = (suitName, skeleton)
-
-    def getInvadingCog(self):
-        return self.invadingCog
+    def waitForNextInvasion(self):
+        taskMgr.remove(self.taskName("cogInvasionMgr"))
+        delay = self.computeInvasionDelay()
+        self.notify.info("invasionTask: waiting %s seconds until next invasion" % delay)
+        taskMgr.doMethodLater(delay, self.tryInvasionAndWaitForNext,
+                              self.taskName("cogInvasionMgr"))
 
     def getInvading(self):
         return self.invading
 
-    def _spGetOut(self):
-        for suitPlanner in list(self.air.suitPlanners.values()):
+    def getCogType(self):
+        return self.cogType, self.isSkeleton
+
+    def getNumCogsRemaining(self):
+        return self.numCogsRemaining
+
+    def getTotalNumCogs(self):
+        return self.totalNumCogs
+
+    def startInvasion(self, cogType, totalNumCogs, skeleton=0):
+        if self.invading:
+            self.notify.warning("startInvasion: already invading cogType: %s numCogsRemaining: %s" %
+                                (cogType, self.numCogsRemaining))
+            return 0
+        if not SuitBattleGlobals.SuitAttributes.get(cogType):
+            self.notify.warning("startInvasion: unknown cogType: %s" % cogType)
+            return 0
+        
+        self.notify.info("startInvasion: cogType: %s totalNumCogs: %s skeleton: %s" %
+                          (cogType, totalNumCogs, skeleton))
+        self.invading = 1
+        self.cogType = cogType
+        self.isSkeleton = skeleton
+        self.totalNumCogs = totalNumCogs
+        self.numCogsRemaining = self.totalNumCogs
+
+        # Tell the news manager that an invasion is beginning
+        self.air.newsManager.invasionBegin(self.cogType, self.totalNumCogs, self.isSkeleton)
+
+        # Get rid of all the current cogs on the streets
+        # (except those already in battle, they can stay)
+        for suitPlanner in self.air.suitPlanners.values():
+            suitPlanner.flySuits()
+        # Success!
+        return 1
+
+    def getInvadingCog(self):
+        if self.invading:
+            self.numCogsRemaining -= 1
+            if self.numCogsRemaining <= 0:
+                self.stopInvasion()
+            self.notify.debug("getInvadingCog: returned cog: %s, num remaining: %s" %
+                              (self.cogType, self.numCogsRemaining))
+            return self.cogType, self.isSkeleton
+        else:
+            self.notify.debug("getInvadingCog: not currently invading")
+            return None, None
+
+    def stopInvasion(self):
+        self.notify.info("stopInvasion: invasion is over now")
+        # Tell the news manager that an invasion is ending
+        self.air.newsManager.invasionEnd(self.cogType, 0, self.isSkeleton)
+        self.invading = 0
+        self.cogType = None
+        self.isSkeleton = 0
+        self.totalNumCogs = 0
+        self.numCogsRemaining = 0
+        # Get rid of all the current invasion cogs on the streets
+        # (except those already in battle, they can stay)
+        for suitPlanner in self.air.suitPlanners.values():
             suitPlanner.flySuits()
 
-    def decrementNumCogs(self):
-        self.numCogs -= 1
-
-        if self.air.isProdServer():
-            # Update our invasion for the API.
-            self.sendToAPI('updateInvasion')
-
-        if self.numCogs <= 0:
-            self.stopInvasion()
-
-    def stopInvasion(self, task = None):
-        if not self.getInvading():
-            return
-
-        if self.air.isProdServer():
-            # Remove our invasion from the API.
-            self.sendToAPI('removeInvasion')
-
-        self.air.newsManager.d_setInvasionStatus(ToontownGlobals.SuitInvasionEnd, self.invadingCog[0], self.numCogs, self.invadingCog[1])
-        if task:
-            task.remove()
-        else:
-            taskMgr.remove('invasion-timeout')
-
-        self.numCogs = 0
-        self.cogType = ''
-
-        if self.constantInvasionsDistrict:
-            self.generateInitialInvasion()
-        else:
-            self.setInvadingCog(None, 0)
-            self.invading = False
-            self._spGetOut()
-
-    def startInvasion(self, cogType, numCogs, skeleton):
-        if not self.constantInvasionsDistrict and self.getInvading():
-            return False
-
-        if self.air.isProdServer():
-            # Setup our invasion for the API.
-            self.sendToAPI('setInvasion')
-
-        self.numCogs = numCogs
-        self.cogType = self.getCogType(cogType)
-        self.setInvadingCog(cogType, skeleton)
-        self.invading = True
-        self.air.newsManager.d_setInvasionStatus(ToontownGlobals.SuitInvasionBegin, self.invadingCog[0], self.numCogs, self.invadingCog[1])
-        self._spGetOut()
-        timePerSuit = config.GetFloat('invasion-time-per-suit', 1.2)
-        taskMgr.doMethodLater(self.numCogs * timePerSuit, self.stopInvasion, 'invasion-timeout')
-        return True
-
-    def queueInvasion(self, cogType):
-        self.queuedSuits.append(cogType)
+    # Need this here since this is not a distributed object
+    def taskName(self, taskString):
+        return (taskString + "-" + str(hash(self)))
