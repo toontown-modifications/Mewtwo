@@ -467,11 +467,6 @@ class ToontownAIRepository(ToontownInternalRepository, ServerBase):
         for suitPlanner in list(self.suitPlanners.values()):
             suitPlanner.assignInitialSuitBuildings()
 
-        if self.districtName == 'Nutty River':
-            # This is our constant invasions district.
-            # We need to setup the initial invasion.
-            self.suitInvasionManager.generateInitialInvasion()
-
         # These are required so the scientists can talk.
         self.holidayManager.startHoliday(ToontownGlobals.SILLYMETER_HOLIDAY)
         self.holidayManager.startHoliday(ToontownGlobals.SILLYMETER_EXT_HOLIDAY)
