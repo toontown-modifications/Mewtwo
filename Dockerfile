@@ -29,8 +29,8 @@ RUN cd /panda3d && cp DistributedObjectAI.py /usr/share/panda3d/direct/distribut
 COPY . /server
 WORKDIR /server
 
-RUN git clone https://oauth2:NBSQjuVLzk3XkAxAPTuj@gitlab.com/SunriseMMOs/stunnel /stunnel
-RUN git clone https://oauth2:NBSQjuVLzk3XkAxAPTuj@gitlab.com/SunriseMMOs/discord-status-bot /discord-status-bot
+RUN git clone https://gitlab.com/SunriseMMOs/stunnel /stunnel
+RUN git clone https://gitlab.com/SunriseMMOs/discord-status-bot /discord-status-bot
 
 # Install the Discord bot's dependencies
 RUN cd /discord-status-bot && python3 -m pip install -r requirements.txt
