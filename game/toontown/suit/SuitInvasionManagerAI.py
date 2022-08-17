@@ -1,5 +1,5 @@
 from direct.directnotify import DirectNotifyGlobal
-from toontown.battle import SuitBattleGlobals
+from game.toontown.battle import SuitBattleGlobals
 import random
 from direct.task import Task
 
