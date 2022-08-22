@@ -45,7 +45,7 @@ ActivityRequestStatus = IntEnum('ActivityRequestStatus', ('Joining', 'Exiting'))
 InviteStatus = IntEnum('InviteStatus', ('NotRead',
  'ReadButNotReplied',
  'Accepted',
- 'Rejected'))
+ 'Rejected'), start = 0)
 InviteTheme = IntEnum('InviteTheme', ('Birthday',
  'GenericMale',
  'GenericFemale',
@@ -58,7 +58,7 @@ PartyStatus = IntEnum('PartyStatus', ('Pending',
  'Finished',
  'CanStart',
  'Started',
- 'NeverStarted'))
+ 'NeverStarted'), start = 0)
 AddPartyErrorCode = IntEnum('AddPartyErrorCode', ('AllOk',
  'ValidationError',
  'DatabaseError',

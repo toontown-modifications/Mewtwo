@@ -82,7 +82,7 @@ class ttInviteDb:
                 for index in range(len(PartyGlobals.InviteStatus)):
                     cursor.execute(\
                         "INSERT INTO ttInviteStatus(statusId, description) VALUES (%d, '%s')" %
-                    (index, PartyGlobals.InviteStatus.getString(index)))
+                    (index, PartyGlobals.InviteStatus(index).name))
 
             # TODO is it better to do a show tables than to do a try create Table except block?
             cursor.execute("""

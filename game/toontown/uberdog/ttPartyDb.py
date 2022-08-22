@@ -83,7 +83,7 @@ class ttPartyDb:
                 for index in range(len(PartyGlobals.PartyStatus)):
                     cursor.execute(\
                         "INSERT INTO ttPartyStatus(statusId, description) VALUES (%d, '%s')" %
-                    (index, PartyGlobals.PartyStatus.getString(index)))
+                    (index, PartyGlobals.PartyStatus(index).name))
 
             # TODO is it better to do a show tables than to do a try create Table except block?
             cursor.execute("""
@@ -193,7 +193,7 @@ class ttPartyDb:
 
         isRetry indicates whether this attempt is a retry or not.
         """
-        self.notify.debug("putParty( hostId=%s, startTime=%s, endTime=%s, isPrivate=%s, inviteTheme=%s, ... status=%s, isRetry=%s )" %(hostId, startTime, endTime, isPrivate, InviteTheme.getString(inviteTheme), PartyStatus.getString(status), isRetry) )
+        self.notify.debug("putParty( hostId=%s, startTime=%s, endTime=%s, isPrivate=%s, inviteTheme=%s, ... status=%s, isRetry=%s )" %(hostId, startTime, endTime, isPrivate, InviteTheme(inviteTheme).name, PartyStatus(status).name, isRetry) )
         if not self.sqlAvailable:
             self.notify.warning("sqlAvailable is False in putParty call.")
             return False
