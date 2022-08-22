@@ -1,8 +1,8 @@
 from game.toontown.suit import SuitDNA
-import types
 from game.toontown.toonbase import TTLocalizer
-from direct.showbase import PythonUtil
 from game.otp.otpbase import OTPGlobals
+from enum import IntEnum
+
 PartsPerSuit = (17,
  14,
  12,
@@ -429,7 +429,8 @@ PartsQueryNames = ({1: PartNameStrings[0],
   16384: PartNameStrings[14],
   32768: PartNameStrings[15],
   65536: PartNameStrings[15]})
-suitTypes = PythonUtil.Enum(('NoSuit', 'NoMerits', 'FullSuit'))
+
+suitTypes = IntEnum('suitTypes', ('NoSuit', 'NoMerits', 'FullSuit'))
 
 def getNextPart(parts, partIndex, dept):
     dept = dept2deptIndex(dept)
@@ -440,14 +441,12 @@ def getNextPart(parts, partIndex, dept):
     nextPart = nextPart + 1 >> 1
     return nextPart
 
-
 def getPartName(partArray):
     index = 0
     for part in partArray:
         if part:
             return PartsQueryNames[index][part]
         index += 1
-
 
 def isSuitComplete(parts, dept):
     dept = dept2deptIndex(dept)
@@ -456,7 +455,6 @@ def isSuitComplete(parts, dept):
             return 0
 
     return 1
-
 
 def isPaidSuitComplete(av, parts, dept):
     isPaid = 0
@@ -468,7 +466,6 @@ def isPaidSuitComplete(av, parts, dept):
             return 1
     return 0
 
-
 def getTotalMerits(toon, index):
     from game.toontown.battle import SuitBattleGlobals
     cogIndex = toon.cogTypes[index] + SuitDNA.suitsPerDept * index
@@ -478,14 +475,12 @@ def getTotalMerits(toon, index):
     cogLevel = max(min(cogLevel, len(MeritsPerLevel[cogIndex]) - 1), 0)
     return MeritsPerLevel[cogIndex][cogLevel]
 
-
 def getTotalParts(bitString, shiftWidth = 32):
     sum = 0
     for shift in range(0, shiftWidth):
         sum = sum + (bitString >> shift & 1)
 
     return sum
-
 
 def asBitstring(number):
     array = []

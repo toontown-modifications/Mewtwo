@@ -1,12 +1,10 @@
+from enum import Enum
 from direct.directnotify import DirectNotifyGlobal
-from direct.showbase.PythonUtil import list2dict, Enum
 from game.toontown.pets import PetTricks
-import types
 notify = DirectNotifyGlobal.directNotify.newCategory('PetObserve')
 
 def getEventName(zoneId):
     return 'PetObserve-%s' % zoneId
-
 
 def send(zoneIds, petObserve):
     if petObserve.isValid():
@@ -15,9 +13,8 @@ def send(zoneIds, petObserve):
         for zoneId in zoneIds:
             messenger.send(getEventName(zoneId), [petObserve])
 
-
-Phrases = Enum('HI, BYE, YES, NO, SOOTHE, PRAISE, CRITICISM, HAPPY,SAD, ANGRY, HURRY, QUESTION, FRIENDLY, LETS_PLAY,COME, FOLLOW_ME, STAY, NEED_LAFF, NEED_GAGS, NEED_JB,GO_AWAY, DO_TRICK,')
-Actions = Enum('FEED, SCRATCH,ATTENDED_START, ATTENDED_STOP,ATTENDING_START, ATTENDING_STOP,CHANGE_ZONE, LOGOUT,GARDEN')
+Phrases = Enum('Phrases', ('HI', 'BYE', 'YES', 'NO', 'SOOTHE', 'PRAISE', 'CRITICISM', 'HAPPY', 'SAD', 'ANGRY', 'HURRY', 'QUESTION', 'FRIENDLY', 'LETS_PLAY', 'COME', 'FOLLOW_ME', 'STAY', 'NEED_LAFF', 'NEED_GAGS', 'NEED_JB', 'GO_AWAY', 'DO_TRICK'))
+Actions = Enum('Actions', ('FEED', 'SCRATCH', 'ATTENDED_START', 'ATTENDED_STOP', 'ATTENDING_START', 'ATTENDING_STOP', 'CHANGE_ZONE', 'LOGOUT', 'GARDEN'))
 
 class PetObserve:
 
@@ -32,7 +29,6 @@ class PetObserve:
 
     def __repr__(self):
         return '%s()' % self.__class__.__name__
-
 
 class PetActionObserve(PetObserve):
 
@@ -54,8 +50,7 @@ class PetActionObserve(PetObserve):
         petBrain._handleActionObserve(self)
 
     def __repr__(self):
-        return '%s(%s,%s)' % (self.__class__.__name__, Actions.getString(self.action), self.avId)
-
+        return '%s(%s,%s)' % (self.__class__.__name__, getattr(Actions, self.action).name, self.avId)
 
 class PetPhraseObserve(PetObserve):
 
@@ -76,7 +71,7 @@ class PetPhraseObserve(PetObserve):
         petBrain._handlePhraseObserve(self)
 
     def __repr__(self):
-        return '%s(%s,%s)' % (self.__class__.__name__, Phrases.getString(self.petPhrase), self.avId)
+        return '%s(%s,%s)' % (self.__class__.__name__, getattr(Actions, self.petPhrase).name, self.avId)
 
 
 class SCObserve(PetPhraseObserve):
@@ -87,7 +82,6 @@ class SCObserve(PetPhraseObserve):
 
     def isValid(self):
         return self.petPhrase is not None
-
 
 class TrickRequestObserve(PetPhraseObserve):
 
@@ -100,7 +94,6 @@ class TrickRequestObserve(PetPhraseObserve):
 
     def getTrickId(self):
         return self.trickId
-
 
 OP = Phrases
 _scPhrase2petPhrase = {1: OP.YES,

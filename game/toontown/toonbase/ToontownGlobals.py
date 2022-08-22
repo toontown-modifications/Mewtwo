@@ -1,8 +1,10 @@
 from game.toontown.toontowngui import TTDialog
 from . import TTLocalizer
 from game.otp.otpbase.OTPGlobals import *
-from direct.showbase.PythonUtil import Enum, invertDict
+from direct.showbase.PythonUtil import invertDict
 from pandac.PandaModules import BitMask32, Vec4
+from enum import IntEnum
+
 MapHotkeyOn = 'alt'
 MapHotkeyOff = 'alt-up'
 MapHotkey = 'alt'
@@ -977,8 +979,10 @@ gmMagicWordList = [
     'cogPageFull', 'pinkSlips', 'Tickets', 'newSummons', 'who', 'who all'
 ]
 NewsPageScaleAdjust = 0.84999999999999998
-AnimPropTypes = Enum(('Unknown', 'Hydrant', 'Mailbox', 'Trashcan'), start=-1)
-EmblemTypes = Enum(('Silver', 'Gold'))
+
+AnimPropTypes = IntEnum('AnimPropTypes', ('Unknown', 'Hydrant', 'Mailbox', 'Trashcan'), start = -1)
+EmblemTypes = IntEnum('EmblemTypes', ('Silver', 'Gold'), start = 0)
+
 NumEmblemTypes = 2
 DefaultMaxBankMoney = 12000
 DefaultBankItemId = 1350

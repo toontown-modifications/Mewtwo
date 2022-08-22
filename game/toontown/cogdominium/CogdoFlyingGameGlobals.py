@@ -1,8 +1,15 @@
-from direct.showbase import PythonUtil
-from pandac.PandaModules import VBase4, Vec3, Point3
+from enum import IntEnum
+from panda3d.core import Camera, Point3, VBase4, Vec3
 from .CogdoUtil import VariableContainer, DevVariableContainer
+
 AI = VariableContainer()
-AI.GameActions = PythonUtil.Enum(('LandOnWinPlatform', 'WinStateFinished', 'GotoWinState', 'HitWhirlwind', 'HitLegalEagle', 'HitMinion', 'DebuffInvul', 'RequestEnterEagleInterest', 'RequestExitEagleInterest', 'RanOutOfTimePenalty', 'Died', 'Spawn', 'SetBlades', 'BladeLost'))
+
+AI.GameActions = IntEnum('GameActions', ('LandOnWinPlatform', 'WinStateFinished',
+    'GotoWinState', 'HitWhirlwind', 'HitLegalEagle', 'HitMinion', 'DebuffInvul',
+    'RequestEnterEagleInterest', 'RequestExitEagleInterest', 'RanOutOfTimePenalty',
+    'Died', 'Spawn', 'SetBlades', 'BladeLost')
+)
+
 AI.BroadcastPeriod = 0.3
 AI.SafezoneId2DeathDamage = {2000: 1,
  1000: 2,
@@ -106,7 +113,9 @@ Gameplay.DepleteFuelStates = ['FlyingUp']
 Gameplay.FuelNormalAmt = 1.0
 Gameplay.FuelLowAmt = 0.66
 Gameplay.FuelVeryLowAmt = 0.33
-Gameplay.FuelStates = PythonUtil.Enum(('FuelNoPropeller', 'FuelEmpty', 'FuelVeryLow', 'FuelLow', 'FuelNormal'))
+
+Gameplay.FuelStates = IntEnum('FuelStates', ('FuelNoPropeller', 'FuelEmpty', 'FuelVeryLow', 'FuelLow', 'FuelNormal'))
+
 Gameplay.RefuelPropSpeed = 5.0
 Gameplay.OverdrivePropSpeed = 2.5
 Gameplay.NormalPropSpeed = 1.5
@@ -116,7 +125,9 @@ Gameplay.TargetedWarningBlinkTime = 3.0
 Gameplay.HitKnockbackDist = 15.0
 Gameplay.HitKnockbackTime = 0.5
 Gameplay.HitCooldownTime = 2.0
-Gameplay.BackpackStates = PythonUtil.Enum(('Normal', 'Targeted', 'Attacked', 'Refuel'))
+
+Gameplay.BackpackStates = IntEnum('BackpackStates', ('Normal', 'Targeted', 'Attacked', 'Refuel'))
+
 Gameplay.BackpackRefuelDuration = 4.0
 Gameplay.BackpackState2TextureName = {Gameplay.BackpackStates.Normal: 'tt_t_ara_cfg_propellerPack',
  Gameplay.BackpackStates.Targeted: 'tt_t_ara_cfg_propellerPack_eagleTarget',
@@ -199,10 +210,13 @@ Audio.SfxFiles = {'propeller': 'phase_4/audio/sfx/TB_propeller.wav',
  'refuelSpin': 'phase_4/audio/sfx/clock12.mp3',
  'cogDialogue': 'phase_3.5/audio/dial/COG_VO_statement.mp3',
  'toonDialogue': 'phase_3.5/audio/dial/AV_dog_long.mp3'}
+
 Level = VariableContainer()
-Level.GatherableTypes = PythonUtil.Enum(('Memo', 'Propeller', 'LaffPowerup', 'InvulPowerup'))
-Level.ObstacleTypes = PythonUtil.Enum(('Whirlwind', 'Fan', 'Minion'))
-Level.PlatformTypes = PythonUtil.Enum(('Platform', 'StartPlatform', 'EndPlatform'))
+
+Level.GatherableTypes = IntEnum('GatherableTypes', ('Memo', 'Propeller', 'LaffPowerup', 'InvulPowerup'))
+Level.ObstacleTypes = IntEnum('ObstacleTypes', ('Whirlwind', 'Fan', 'Minion'))
+Level.PlatformTypes = IntEnum('PlatformTypes', ('Platform', 'StartPlatform', 'EndPlatform'))
+
 Level.PlatformType2SpawnOffset = {Level.PlatformTypes.Platform: 2.5,
  Level.PlatformTypes.StartPlatform: 5.0,
  Level.PlatformTypes.EndPlatform: 5.0}

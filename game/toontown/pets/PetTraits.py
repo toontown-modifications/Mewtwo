@@ -1,4 +1,5 @@
-from direct.showbase.PythonUtil import randFloat, normalDistrib, Enum
+from enum import IntEnum
+from direct.showbase.PythonUtil import randFloat, normalDistrib
 from direct.showbase.PythonUtil import clampScalar
 from game.toontown.toonbase import TTLocalizer, ToontownGlobals
 from libsunrise import random
@@ -21,8 +22,9 @@ def gaussian(min, max, rng):
     return normalDistrib(min, max, rng.gauss)
 
 class TraitDistribution:
-    TraitQuality = Enum('VERY_BAD, BAD, AVERAGE, GOOD, VERY_GOOD')
-    TraitTypes = Enum('INCREASING, DECREASING')
+    TraitQuality = IntEnum('TraitQuality', ('VERY_BAD', 'BAD', 'AVERAGE', 'GOOD', 'VERY_GOOD'))
+    TraitTypes = IntEnum('TraitTypes', ('INCREASING', 'DECREASING'))
+
     Sz2MinMax = None
     TraitType = None
     TraitCutoffs = {TraitTypes.INCREASING: {TraitQuality.VERY_BAD: 0.1,
@@ -172,7 +174,7 @@ class PetTraits:
         def __repr__(self):
             return 'Trait: %s, %s, %s, %s' % (self.name,
              self.value,
-             TraitDistribution.TraitQuality.getString(self.quality),
+             TraitDistribution.TraitQuality(self.quality).name,
              self.howExtreme)
 
     def __init__(self, traitSeed, safeZoneId, traitValueList = []):
