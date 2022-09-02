@@ -1192,7 +1192,7 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
             if not validation:
                 return
             self.d_endHoliday(avId, holidayId = int(args[0]))
-        elif magicWord == 'smsg':
+        elif self.hasAccess(accountType, 'Rocket') and magicWord == 'smsg':
             if not validation:
                 return
             self.d_sendSystemMessage(message = string)
@@ -1272,9 +1272,8 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
             if not validation:
                 return
             self.d_setFireworks(avId, showName = args[0])
-        elif magicWord == 'doodletest':
-            if self.hasAccess(accountType, 'Rocket'):
-                self.d_doodleTest(avId, av)
+        elif self.hasAccess(accountType, 'Rocket') and magicWord == 'doodletest':
+            self.d_doodleTest(avId, av)
         elif magicWord == 'stresstestdoodles':
             self.d_doodleTest(avId, av, stress = True)
         elif magicWord == 'maxdoodle':
@@ -1318,7 +1317,7 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
             self.d_setRegularToon(avId)
         elif magicWord == 'superchat':
             self.d_setSuperChat(av)
-        elif magicWord == 'maintenance':
+        elif self.hasAccess(accountType, 'Rocket') and magicWord == 'maintenance':
             if not validation:
                 return
             try:
@@ -1364,8 +1363,7 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
                 self.sendResponseMessage(avId, 'Invalid parameters.')
         elif magicWord == 'deliveritems':
             self.deliverCatalogItems(av)
-        elif magicWord == 'lm':
-            if self.hasAccess(accountType, 'Rocket'):
+        elif self.hasAccess(accountType, 'Rocket') and magicWord == 'lm':
                 self.setLaughingMan(av)
         else:
             if magicWord not in disneyCmds or magicWord != '':
