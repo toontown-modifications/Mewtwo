@@ -1274,7 +1274,7 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
             self.d_setFireworks(avId, showName = args[0])
         elif self.hasAccess(accountType, 'Rocket') and magicWord == 'doodletest':
             self.d_doodleTest(avId, av)
-        elif magicWord == 'stresstestdoodles':
+        elif self.hasAccess(accountType, 'Rocket') and magicWord == 'stresstestdoodles':
             self.d_doodleTest(avId, av, stress = True)
         elif magicWord == 'maxdoodle':
             self.d_setMaxDoodle(avId, av)
