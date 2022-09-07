@@ -2,7 +2,7 @@
 # I cannot get parameters from the endpoint requests in PHP.
 
 from aiohttp import web
-import asyncio, requests, lxml.etree as et, random
+import asyncio, requests, lxml.etree as et, random, sys
 
 deleteEndpoint = 'https://toontastic.sunrise.games/api/authDelete'
 usernameAvailabilityEndpoint = 'https://toontastic.sunrise.games/api/checkUsernameAvailability'
@@ -11,6 +11,18 @@ regEndpoint = 'https://toontastic.sunrise.games/register'
 headers = {
     'User-Agent': 'Sunrise Games - EndpointManager'
 }
+
+isDevelopment = '--dev' in sys.argv
+
+if isDevelopment:
+    # openssl req -config openssl.cnf -new -out sunrise.csr -keyout sunrise.pem
+    # openssl rsa -in sunrise.pem -out sunrise.key
+    # openssl x509 -in sunrise.csr -out sunrise.cert -req -signkey sunrise.key -days 365
+    import os, urllib3
+    urllib3.disable_warnings()
+
+    os.environ['REQUESTS_CA_BUNDLE'] = os.getcwd() + r'\config\web\toontastic-sunrise-games-chain.pem'
+    os.environ['SSL_CERT_FILE'] = os.getcwd() + r'\config\web\toontastic-sunrise-games-chain.pem'
 
 async def crossdomain(request):
     data = open('data/web/crossdomain.xml').read()

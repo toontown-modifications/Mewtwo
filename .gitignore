@@ -17,3 +17,6 @@ trickOrTreat-anydbm
 .DS_Store
 config/local.prc
 *.trackRecords
+
+# Web development
+config/web/toontastic-sunrise-games-chain.pem
