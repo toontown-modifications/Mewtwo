@@ -6,7 +6,7 @@ import asyncio, requests, lxml.etree as et, random, sys
 
 deleteEndpoint = 'https://toontastic.sunrise.games/api/authDelete'
 usernameAvailabilityEndpoint = 'https://toontastic.sunrise.games/api/checkUsernameAvailability'
-regEndpoint = 'https://toontastic.sunrise.games/register'
+regEndpoint = 'https://toontastic.sunrise.games/register/'
 
 headers = {
     'User-Agent': 'Sunrise Games - EndpointManager'
