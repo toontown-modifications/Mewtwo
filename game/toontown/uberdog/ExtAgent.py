@@ -1170,7 +1170,7 @@ class ExtAgent(ServerBase):
                 if fields['setAccountName'][0] == '':
                     accountName = self.accId2playToken.get(target, '')
 
-                    self.notify.info(f'Setting {accountName} for {toonName}.')
+                    self.notify.info(f'Setting account name {accountName} for {toonName}.')
 
                     fields['setAccountName'] = (accountName,)
 
