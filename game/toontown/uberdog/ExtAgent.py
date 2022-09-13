@@ -1167,7 +1167,6 @@ class ExtAgent(ServerBase):
                     self.air.dbInterface.updateObject(self.air.dbId, avId, self.air.dclassesByName['DistributedToonUD'], fields)
 
                 # Previously, we didn't store the play token on the toon object, so let's add it.
-                self.notify.info(fields['setAccountName'])
                 if fields['setAccountName'][0] == '':
                     accountName = self.accId2playToken.get(target, '')
 
