@@ -1172,7 +1172,7 @@ class ExtAgent(ServerBase):
 
                     self.notify.info(f'Setting {accountName} for {toonName}.')
 
-                    fields['setAccountName'] = [accountName],
+                    fields['setAccountName'] = (accountName,)
 
                     self.air.dbInterface.updateObject(self.air.dbId, avId, self.air.dclassesByName['DistributedToonUD'], fields)
 
