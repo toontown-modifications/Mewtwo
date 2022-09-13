@@ -49,7 +49,7 @@ class DiscordIntegrationServer:
                         return
 
                     accountId = fields['setDISLid'][0]
-                    playToken = simbase.air.extAgent.accId2playToken.get(accountId, '')
+                    playToken = fields['setAccountName'][0]
 
                     simbase.air.extAgent.sendKick(avId, 'N/A')
                     simbase.air.extAgent.banAccount(playToken, 'N/A', 'N/A', True)

@@ -149,8 +149,13 @@ class ExtAgent(ServerBase):
         self.dnaStores = {}
         self.zoneVisDict = {}
         self.chatOffenses = {}
+
+        # Temporary storage of accId -> playToken for toon creation.
         self.accId2playToken = {}
+
+        # Temporary storage of accId -> playToken so we know we have a membership.
         self.memberInfo = {}
+
         self.staffMembers = {}
 
         self.friendsManager = FriendsManagerUD(self)
@@ -222,7 +227,7 @@ class ExtAgent(ServerBase):
                 return
 
             accountId = fields['setDISLid'][0]
-            playToken = self.accId2playToken.get(accountId, '')
+            playToken = fields['setAccountName'][0]
 
             self.sendKick(avatarId, message)
             self.banAccount(playToken, message, reason, True)
@@ -404,6 +409,8 @@ class ExtAgent(ServerBase):
         if self.isProdServer():
             if isPaid:
                 resp.addString('FULL') # access
+
+                # Store accountId -> playToken for usage later on.
                 self.memberInfo[accountId] = playToken
             else:
                 resp.addString('unpaid')
@@ -428,10 +435,12 @@ class ExtAgent(ServerBase):
         # Dispatch the response to the client.
         self.sendDatagram(clientChannel, resp)
 
+        # Store accId -> playToken for usage later on.
         self.accId2playToken[accountId] = playToken
 
     def loadVisZones(self):
         self.notify.info('Loading DNA files...')
+
         for zoneId in self.validVisZones:
             self.loadVisZone(zoneId)
 
@@ -554,10 +563,9 @@ class ExtAgent(ServerBase):
 
         return cleanMesssage, modifications
 
-    def filterBlacklist(self, doId, accId, message):
+    def filterBlacklist(self, doId, message, playToken):
         avClientChannel = self.air.GetPuppetConnectionChannel(doId)
         flagged = None
-        playToken = self.accId2playToken.get(accId)
 
         for word in message.split(' '):
             cleanWord = self.whiteList.cleanText(word).decode()
@@ -999,7 +1007,7 @@ class ExtAgent(ServerBase):
                         self.air.netMessenger.send('magicWord', [message, doId])
                         return
 
-                blacklisted = self.filterBlacklist(doId, accId, message)
+                blacklisted = self.filterBlacklist(doId, message, playToken)
 
                 if blacklisted:
                     cleanMessage, modifications = '', []
@@ -1147,13 +1155,24 @@ class ExtAgent(ServerBase):
                     'setAccess': [access]
                 }
 
-                # DB patch for Kart accessories.
-                if fields['setKartAccessoriesOwned'][0] == [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]:
-                    toonName = fields['setName'][0]
+                # DB patches
+                toonName = fields['setName'][0]
 
+                # Kart accessories were using invalid defaults.
+                if fields['setKartAccessoriesOwned'][0] == [0 for _ in range(16)]:
                     self.notify.info(f'Updating kart accessories for {toonName}.')
 
-                    fields['setKartAccessoriesOwned'] = [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1],
+                    fields['setKartAccessoriesOwned'] = [-1 for _ in range(16)],
+
+                    self.air.dbInterface.updateObject(self.air.dbId, avId, self.air.dclassesByName['DistributedToonUD'], fields)
+
+                # Previously, we didn't store the play token on the toon object, so let's add it.
+                if fields['setAccountName'][0] == '':
+                    accountName = self.accId2playToken.get(target, '')
+
+                    self.notify.info(f'Setting {accountName} for {toonName}.')
+
+                    fields['setAccountName'] = [accountName],
 
                     self.air.dbInterface.updateObject(self.air.dbId, avId, self.air.dclassesByName['DistributedToonUD'], fields)
 
