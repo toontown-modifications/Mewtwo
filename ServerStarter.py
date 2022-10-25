@@ -20,7 +20,7 @@ time.sleep(15)
 # os.system('cd ../.. && screen -dmS Districts python3 -m DistrictStarter')
 os.system('screen -dmS Sillyville ./run_first_ai.sh')
 os.system('screen -dmS Sillyham ./run_second_ai.sh')
-os.system('screen -dmS Crazyham ./run_third_ai.sh')
+# os.system('screen -dmS Crazyham ./run_third_ai.sh')
 
 if isProduction:
     os.system('screen -dmS Stunnel ./run_stunnel.sh')
