@@ -31,9 +31,7 @@ class BlackCatDayHolidayAI(HolidayBaseAI):
     def start(self):
         HolidayBaseAI.start(self)
         bboard.post(self.PostName, True)
-        self.air.tutorialManager.blackCatStart()
 
     def stop(self):
         HolidayBaseAI.stop(self)
         bboard.remove(self.PostName)
-        self.air.tutorialManager.blackCatEnd()
