@@ -5,7 +5,7 @@ GameActions = IntEnum('GameActions', ('EnterDoor',
  'RevealDoor',
  'OpenDoor',
  'Countdown',
- 'TimeAlert'))
+ 'TimeAlert'), start = 0)
 
 SecondsUntilTimeout = 4.0 * 60.0
 SecondsUntilGameEnds = 60.0
