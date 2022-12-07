@@ -19,7 +19,7 @@ GiveAwardErrors = IntEnum('GiveAwardErrors', (
     'GenericAlreadyHaveError',
     'UnknownError',
     'UnknownToon',
-    'NonToon'))
+    'NonToon'), start = 0)
 
 GiveAwardErrorStrings = {GiveAwardErrors.Success: 'success',
  GiveAwardErrors.WrongGender: 'wrong gender',
