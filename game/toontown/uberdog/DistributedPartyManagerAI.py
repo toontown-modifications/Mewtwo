@@ -198,12 +198,12 @@ class DistributedPartyManagerAI(DistributedObjectAI):
             # check for unreleased activity
             if activityTuple[0] in PartyGlobals.UnreleasedActivityIds:
                 self.air.writeServerEvent('suspicious', hostId, "trying to buy unreleased activity %s" %
-                                          PartyGlobals.ActivityIds.getString(activityTuple[0]))
+                                          PartyGlobals.ActivityIds(activityTuple[0].name))
                 self.notify.warning("%d trying to buy unreleased activity %s" %
-                                    (hostId, PartyGlobals.ActivityIds.getString(activityTuple[0])))
+                                    (hostId, PartyGlobals.ActivityIds(activityTuple[0]).name))
                 if not self.allowUnreleasedServer():
                     return (False, "Activity %s is not released" %
-                            PartyGlobals.ActivityIds.getString(activityTuple[0]))
+                            PartyGlobals.ActivityIds(activityTuple[0]).name)
 
             # check if the grid squares are valid
             gridSize = PartyGlobals.ActivityInformationDict[activityId]["gridsize"]
@@ -246,7 +246,7 @@ class DistributedPartyManagerAI(DistributedObjectAI):
             if decorId not in PartyGlobals.DecorationIds:
                 return (False,"%s is not a valid decoration" % decorId)
             # Check if decorId is a holiday specific decoration.
-            decorName = PartyGlobals.DecorationIds.getString(decorId)
+            decorName = PartyGlobals.DecorationIds(decorId).name
             if (decorName == "HeartTarget") \
             or (decorName == "HeartBanner") \
             or (decorName == "FlyingHeart"):
@@ -273,12 +273,12 @@ class DistributedPartyManagerAI(DistributedObjectAI):
             # check for unreleased decoration
             if decorationTuple[0] in PartyGlobals.UnreleasedDecorationIds:
                 self.air.writeServerEvent('suspicious', hostId, "trying to buy unreleased decoration %s" %
-                                          PartyGlobals.DecorationIds.getString(decorationTuple[0]))
+                                          PartyGlobals.DecorationIds(decorationTuple[0]).name)
                 self.notify.warning("%d trying to buy unreleased decoration %s" %
-                                    (hostId, PartyGlobals.DecorationIds.getString(decorationTuple[0])))
+                                    (hostId, PartyGlobals.DecorationIds(decorationTuple[0]).name))
                 if not self.allowUnreleasedServer():
                     return (False, "Decoration %s is not released" %
-                            PartyGlobals.DecorationIds.getString(decorationTuple[0]))
+                            PartyGlobals.DecorationIds(decorationTuple[0]).name)
             # check if the grid squares are valid
             gridSize = PartyGlobals.DecorationInformationDict[decorId]["gridsize"]
             centerGridX = decorationTuple[1]

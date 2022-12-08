@@ -103,7 +103,7 @@ class DistributedPartyManagerUD(DistributedObjectGlobalUD):
 
     def addParty(self, pmDoId, hostId, startTime, endTime, isPrivate, inviteTheme, activities, decorations, inviteeIds, costOfParty):
         """Add a party to the the invite and party dbs."""
-        DistributedPartyManagerUD.notify.debug( "addParty( hostId=%d, startTime=%s, endTime=%s, isPrivate=%s, inviteTheme=%s, invitees=%s... )" %(hostId, startTime, endTime, isPrivate, PartyGlobals.InviteTheme.getString(inviteTheme),str(inviteeIds))  )
+        DistributedPartyManagerUD.notify.debug( "addParty( hostId=%d, startTime=%s, endTime=%s, isPrivate=%s, inviteTheme=%s, invitees=%s... )" %(hostId, startTime, endTime, isPrivate, PartyGlobals.InviteTheme(inviteTheme).name,str(inviteeIds))  )
         putSucceeded = self.partyDb.putParty(hostId, startTime, endTime, isPrivate, inviteTheme, activities, decorations, PartyGlobals.PartyStatus.Pending)
         if not putSucceeded:
             DistributedPartyManagerUD.notify.warning( "putParty call for party with hostID %s failed." % hostId )
@@ -158,7 +158,7 @@ class DistributedPartyManagerUD(DistributedObjectGlobalUD):
         # tell the Invitee DistributedToon
         inviteeId = invite[0]['guestId']
 
-        DistributedPartyManagerUD.notify.debug( "Calling DistributedToon::updateInvite( inviteKey=%s, newStatus=%s ) across the network with inviteeId %d." %(inviteKey, PartyGlobals.InviteStatus.getString(newStatus), inviteeId ) )
+        DistributedPartyManagerUD.notify.debug( "Calling DistributedToon::updateInvite( inviteKey=%s, newStatus=%s ) across the network with inviteeId %d." %(inviteKey, PartyGlobals.InviteStatus(newStatus).name, inviteeId ) )
         self.air.sendUpdateToDoId(
             "DistributedToon",
             "updateInvite",
@@ -169,7 +169,7 @@ class DistributedPartyManagerUD(DistributedObjectGlobalUD):
         # tell the host, he might not be logged in
         hostId = party[0]['hostId']
 
-        DistributedPartyManagerUD.notify.debug( "Calling DistributedToon::updateReply( partyId=%d, inviteeId=%d, newStatus=%s ) across the network with hostId %d." %(partyId, inviteeId, PartyGlobals.InviteStatus.getString(newStatus), hostId ) )
+        DistributedPartyManagerUD.notify.debug( "Calling DistributedToon::updateReply( partyId=%d, inviteeId=%d, newStatus=%s ) across the network with hostId %d." %(partyId, inviteeId, PartyGlobals.InviteStatus(newStatus).name, hostId ) )
         self.air.sendUpdateToDoId(
             "DistributedToon",
             "updateReply",
@@ -179,7 +179,7 @@ class DistributedPartyManagerUD(DistributedObjectGlobalUD):
 
     def respondToInvite(self, partyManagerDoId, mailboxDoId, context, inviteKey, newStatus):
         """Handle accepting/rejecting an invite."""
-        DistributedPartyManagerUD.notify.debug( "respondToInvite( partyManagerDoId=%d, mailboxDoId=%d, ..., inviteKey=%d, newStatus=%s )" %(partyManagerDoId, mailboxDoId, inviteKey, PartyGlobals.InviteStatus.getString(newStatus) ) )
+        DistributedPartyManagerUD.notify.debug( "respondToInvite( partyManagerDoId=%d, mailboxDoId=%d, ..., inviteKey=%d, newStatus=%s )" %(partyManagerDoId, mailboxDoId, inviteKey, PartyGlobals.InviteStatus(newStatus).name ) )
         replyToChannelAI = self.air.getSenderReturnChannel()
         retcode = ToontownGlobals.P_InvalidIndex
         invite = self.inviteDb.getOneInvite(inviteKey)
