@@ -154,15 +154,15 @@ class DistributedPartyManagerAI(DistributedObjectAI):
         if isPrivate not in (0,1):
             return (False,"Invalid isPrivate %s" % isPrivate)
 
-        if inviteTheme not in PartyGlobals.InviteTheme:
+        if (inviteTheme not in {n.value for n in PartyGlobals.InviteTheme}):
             return (False,"Invalid inviteTheme %s" % inviteTheme)
 
         if hasattr(simbase.air, "holidayManager"):
             if ToontownGlobals.VALENTINES_DAY not in simbase.air.holidayManager.currentHolidays:
-                if inviteTheme == PartyGlobals.InviteTheme.Valentoons:
+                if inviteTheme == PartyGlobals.InviteTheme.Valentoons.value:
                     return (False,"Invalid inviteTheme %s" % inviteTheme)
             if ToontownGlobals.VICTORY_PARTY_HOLIDAY not in simbase.air.holidayManager.currentHolidays:
-                if inviteTheme == PartyGlobals.InviteTheme.VictoryParty:
+                if inviteTheme == PartyGlobals.InviteTheme.VictoryParty.value:
                     return (False,"Invalid inviteTheme %s" % inviteTheme)
 
         costOfParty = 0
@@ -170,7 +170,7 @@ class DistributedPartyManagerAI(DistributedObjectAI):
         usedGridSquares = {} # key is a tuple (x,y), value isn't that important
         actSet = set([])
         for activityTuple in activities:
-            if activityTuple[0] not in PartyGlobals.ActivityIds:
+            if (activityTuple[0] not in {n.value for n in PartyGlobals.ActivityIds}):
                 return (False,"Invalid activity id %s"%activityTuple[0])
 
             activityId = activityTuple[0]
@@ -353,7 +353,6 @@ class DistributedPartyManagerAI(DistributedObjectAI):
         # assert len(result) == size, "Bad result range: c=%s s=%s result=%s" % (centerGridX, size, result)
 
         return result
-
 
     def sendAddPartyResponse(self, hostId, errorCode):
         """Tell the client if he's add party request got accepted."""
