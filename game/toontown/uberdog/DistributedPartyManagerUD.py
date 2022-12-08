@@ -104,16 +104,16 @@ class DistributedPartyManagerUD(DistributedObjectGlobalUD):
     def addParty(self, pmDoId, hostId, startTime, endTime, isPrivate, inviteTheme, activities, decorations, inviteeIds, costOfParty):
         """Add a party to the the invite and party dbs."""
         DistributedPartyManagerUD.notify.debug( "addParty( hostId=%d, startTime=%s, endTime=%s, isPrivate=%s, inviteTheme=%s, invitees=%s... )" %(hostId, startTime, endTime, isPrivate, PartyGlobals.InviteTheme(inviteTheme).name,str(inviteeIds))  )
-        putSucceeded = self.partyDb.putParty(hostId, startTime, endTime, isPrivate, inviteTheme, activities, decorations, PartyGlobals.PartyStatus.Pending)
+        putSucceeded = self.partyDb.putParty(hostId, startTime, endTime, isPrivate, inviteTheme, activities, decorations, PartyGlobals.PartyStatus.Pending.value)
         if not putSucceeded:
             DistributedPartyManagerUD.notify.warning( "putParty call for party with hostID %s failed." % hostId )
             # TODO having too many parties is not the only reason putParty can fail
             # add those cases too
             # case 1: too many decors
-            self.sendAddPartyResponse(pmDoId, hostId, PartyGlobals.AddPartyErrorCode.TooManyHostedParties)
+            self.sendAddPartyResponse(pmDoId, hostId, PartyGlobals.AddPartyErrorCode.TooManyHostedParties.value)
             return
 
-        errorCode = PartyGlobals.AddPartyErrorCode.AllOk
+        errorCode = PartyGlobals.AddPartyErrorCode.AllOk.value
         partiesTuple = self.partyDb.getPartiesOfHost(hostId)
         if len(partiesTuple) > 0:
             partyId = partiesTuple[-1]['partyId'] # TODO-parties: is getting the -1 index guranteed to get the party we just pushed to the database?
@@ -133,7 +133,7 @@ class DistributedPartyManagerUD(DistributedObjectGlobalUD):
             self._updatePartyReplies(hostId, [partyId], hostedPartyInfo)
         else:
             DistributedPartyManagerUD.notify.warning( "Unable to find a party for hostId %s in the party database." % hostId )
-            errorCode = PartyGlobals.AddPartyErrorCode.DatabaseError
+            errorCode = PartyGlobals.AddPartyErrorCode.DatabaseError.value
         self.sendAddPartyResponse(pmDoId, hostId, errorCode, costOfParty)
 
     def markInviteAsReadButNotReplied( self, partyManagerDoId, inviteKey):
@@ -150,8 +150,8 @@ class DistributedPartyManagerUD(DistributedObjectGlobalUD):
         if not party:
             return
 
-        updateResult = self.inviteDb.updateInvite(inviteKey, PartyGlobals.InviteStatus.ReadButNotReplied)
-        self.updateHostAndInviteeStatus(inviteKey, partyId, invite, party, PartyGlobals.InviteStatus.ReadButNotReplied )
+        updateResult = self.inviteDb.updateInvite(inviteKey, PartyGlobals.InviteStatus.ReadButNotReplied.value)
+        self.updateHostAndInviteeStatus(inviteKey, partyId, invite, party, PartyGlobals.InviteStatus.ReadButNotReplied.value )
 
     def updateHostAndInviteeStatus(self, inviteKey, partyId, invite, party, newStatus):
         """Tell the invitee and host toons of the change in inviteStatus."""
@@ -270,9 +270,9 @@ class DistributedPartyManagerUD(DistributedObjectGlobalUD):
                 continue
             inviteKey = item['inviteId']
             status = item['statusId']
-            if status == PartyGlobals.InviteStatus.NotRead:
+            if status == PartyGlobals.InviteStatus.NotRead.value:
                 numNew += 1
-            elif status == PartyGlobals.InviteStatus.ReadButNotReplied:
+            elif status == PartyGlobals.InviteStatus.ReadButNotReplied.value:
                 numOld += 1
             # send even the rejected invites, it will show up in invites tab
             formattedInvites.append( (inviteKey, partyId, status) )
