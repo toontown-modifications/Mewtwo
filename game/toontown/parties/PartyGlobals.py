@@ -41,7 +41,7 @@ AvailableGridSquares = 202
 TrashCanPosition = (-0.24, 0.0, -0.65)
 TrashCanScale = 0.7
 PartyEditorTrashBounds = ((-0.16, -0.38), (-0.05, -0.56))
-ActivityRequestStatus = IntEnum('ActivityRequestStatus', ('Joining', 'Exiting'))
+ActivityRequestStatus = IntEnum('ActivityRequestStatus', ('Joining', 'Exiting'), start=0)
 InviteStatus = IntEnum('InviteStatus', ('NotRead',
  'ReadButNotReplied',
  'Accepted',
@@ -62,14 +62,14 @@ PartyStatus = IntEnum('PartyStatus', ('Pending',
 AddPartyErrorCode = IntEnum('AddPartyErrorCode', ('AllOk',
  'ValidationError',
  'DatabaseError',
- 'TooManyHostedParties'))
+ 'TooManyHostedParties'), start=0)
 ChangePartyFieldErrorCode = IntEnum('ChangePartyFieldErrorCode', ('AllOk',
  'ValidationError',
  'DatabaseError',
  'AlreadyStarted',
- 'AlreadyRefunded'))
-ActivityTypes = IntEnum('ActivityTypes', ('HostInitiated', 'GuestInitiated', 'Continuous'))
-PartyGateDenialReasons = IntEnum('PartyGateDenialReasons', ('Unavailable', 'Full'))
+ 'AlreadyRefunded'), start=0)
+ActivityTypes = IntEnum('ActivityTypes', ('HostInitiated', 'GuestInitiated', 'Continuous'), start=0)
+PartyGateDenialReasons = IntEnum('PartyGateDenialReasons', ('Unavailable', 'Full'), start=0)
 ActivityIds = IntEnum('ActivityIds', ('PartyJukebox',
  'PartyCannon',
  'PartyTrampoline',
@@ -89,7 +89,7 @@ ActivityIds = IntEnum('ActivityIds', ('PartyJukebox',
  'PartyValentineDance20',
  'PartyValentineJukebox',
  'PartyValentineJukebox40',
- 'PartyValentineTrampoline'))
+ 'PartyValentineTrampoline'), start=0)
 PartyEditorActivityOrder = [ActivityIds.PartyCog,
  ActivityIds.PartyWinterCog,
  ActivityIds.PartyJukebox,
@@ -156,7 +156,7 @@ DecorationIds = IntEnum('DecorationIds', ('BalloonAnvil',
  'CogStatueWinter',
  'snowman',
  'snowDoodle',
- 'BalloonAnvilValentine'))
+ 'BalloonAnvilValentine'), start=0)
 DECORATION_VOLUME = 1.0
 DECORATION_CUTOFF = 45
 VictoryPartyDecorationIds = frozenset([DecorationIds.Hydra,
@@ -181,7 +181,7 @@ GoToPartyStatus = IntEnum('GoToPartyStatus', ('AllowedToGo',
  'PartyFull',
  'PrivateParty',
  'PartyOver',
- 'PartyNotActive'))
+ 'PartyNotActive'), start=0)
 PlayGroundToPartyClockColors = {'the_burrrgh': (53.0 / 255.0,
                  116.0 / 255.0,
                  148.0 / 255.0,
@@ -500,8 +500,8 @@ DecorationInformationDict = {DecorationIds.BalloonAnvil: {'cost': int(10 * Party
                             'paidOnly': False,
                             'gridAsset': 'decoration_1x1'}}
 DefaultRulesTimeout = 10.0
-DenialReasons = IntEnum('DenialReasons', ('Default', 'Full', 'SilentFail'), start = 0)
-FireworkShows = IntEnum('FireworkShows', ('Summer',), start = 200)
+DenialReasons = IntEnum('DenialReasons', ('Default', 'Full', 'SilentFail'), start=0)
+FireworkShows = IntEnum('FireworkShows', ('Summer',), start=200)
 FireworksGlobalXOffset = 160.0
 FireworksGlobalYOffset = -20.0
 FireworksPostLaunchDelay = 5.0
@@ -510,7 +510,7 @@ RocketDirectionDelay = 2.0
 FireworksStartedEvent = 'PartyFireworksStarted'
 FireworksFinishedEvent = 'PartyFireworksFinished'
 FireworksTransitionToDisabledDelay = 3.0
-TeamActivityTeams = IntEnum('TeamActivityTeams', ('LeftTeam', 'RightTeam'), start = 0)
+TeamActivityTeams = IntEnum('TeamActivityTeams', ('LeftTeam', 'RightTeam'), start=0)
 TeamActivityNeitherTeam = 3
 TeamActivityTextScale = 0.135
 TeamActivityStartDelay = 8.0
@@ -733,7 +733,7 @@ DanceReverseLoopAnims = ['left',
 ToonDancingStates = IntEnum('ToonDancingStates', ('Init',
  'DanceMove',
  'Run',
- 'Cleanup'))
+ 'Cleanup'), start=0)
 JUKEBOX_TIMEOUT = 30.0
 MUSIC_PATH = 'phase_%s/audio/bgm/'
 MUSIC_MIN_LENGTH_SECONDS = 50.0
