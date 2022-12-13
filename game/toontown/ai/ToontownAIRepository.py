@@ -242,6 +242,7 @@ class ToontownAIRepository(ToontownInternalRepository, ServerBase):
         if self.suitInvasionManager.getInvading() and self.air.isProdServer():
             # Update our invasion status for the API.
             self.air.suitInvasionManager.sendToAPI("updateInvasion")
+        return Task.again
 
     def __leaderboardFlush(self, task):
         messenger.send('leaderboardFlush')
