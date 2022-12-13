@@ -1,7 +1,9 @@
 from direct.directnotify import DirectNotifyGlobal
 from game.toontown.battle import SuitBattleGlobals
 import random
+import requests
 from direct.task import Task
+from game.toontown.uberdog.ExtAgent import ServerGlobals
 
 class SuitInvasionManagerAI:
     """
@@ -14,6 +16,7 @@ class SuitInvasionManagerAI:
         self.air = air
         self.invading = 0
         self.cogType = None
+        self.cogName = ""
         self.skeleton = 0
         self.totalNumCogs = 0
         self.numCogsRemaining = 0
@@ -38,7 +41,7 @@ class SuitInvasionManagerAI:
             'sd', # Spin Doctor
             'le', # Legal Eagle
             )
-        
+
         # Picked from randomly how many cogs will invade
         # This might need to be adjusted based on population(?)
         self.invadingNumList = (1000, 2000, 3000, 4000)
@@ -52,6 +55,27 @@ class SuitInvasionManagerAI:
 
         # Kick off the first invasion
         self.waitForNextInvasion()
+
+    def sendToAPI(self, actionType="updateInvasion"):
+        data = {
+            "token": config.GetString("api-token", ""),
+            "serverType": ServerGlobals.serverToName[ServerGlobals.FINAL_TOONTOWN],
+            "districtName": self.air.districtName,
+            "cogType": self.cogName,
+            "numCogs": self.numCogsRemaining
+        }
+
+        headers = {
+            "User-Agent": "Sunrise Games - SuitInvasionManagerAI"
+        }
+
+        try:
+            req = requests.post(f"https://api.sunrise.games/api/{actionType}", json=data, headers=headers)
+        except:
+            self.notify.warning("Failed to send to server!")
+
+    def getCogName(self, cogType):
+        return SuitBattleGlobals.SuitAttributes.get(cogType)["name"]
 
     def delete(self):
         taskMgr.remove(self.taskName("cogInvasionMgr"))
@@ -101,7 +125,7 @@ class SuitInvasionManagerAI:
         if not SuitBattleGlobals.SuitAttributes.get(cogType):
             self.notify.warning("startInvasion: unknown cogType: %s" % cogType)
             return 0
-        
+
         self.notify.info("startInvasion: cogType: %s totalNumCogs: %s skeleton: %s" %
                           (cogType, totalNumCogs, skeleton))
         self.invading = 1
@@ -109,6 +133,7 @@ class SuitInvasionManagerAI:
         self.isSkeleton = skeleton
         self.totalNumCogs = totalNumCogs
         self.numCogsRemaining = self.totalNumCogs
+        self.cogName = self.getCogName(cogType)
 
         # Tell the news manager that an invasion is beginning
         self.air.newsManager.invasionBegin(self.cogType, self.totalNumCogs, self.isSkeleton)
@@ -117,6 +142,11 @@ class SuitInvasionManagerAI:
         # (except those already in battle, they can stay)
         for suitPlanner in self.air.suitPlanners.values():
             suitPlanner.flySuits()
+
+        if self.air.isProdServer():
+            # Setup our invasion for the API.
+            self.sendToAPI("setInvasion")
+
         # Success!
         return 1
 
@@ -141,10 +171,15 @@ class SuitInvasionManagerAI:
         self.isSkeleton = 0
         self.totalNumCogs = 0
         self.numCogsRemaining = 0
+        self.cogName = ""
         # Get rid of all the current invasion cogs on the streets
         # (except those already in battle, they can stay)
         for suitPlanner in self.air.suitPlanners.values():
             suitPlanner.flySuits()
+
+        if self.air.isProdServer():
+            # Remove our invasion from the API.
+            self.sendToAPI("removeInvasion")
 
     # Need this here since this is not a distributed object
     def taskName(self, taskString):

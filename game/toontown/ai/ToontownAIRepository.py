@@ -235,6 +235,14 @@ class ToontownAIRepository(ToontownInternalRepository, ServerBase):
         # Inform the ExtAgent of us.
         self.netMessenger.send('registerShard', [self.districtId, self.districtName])
 
+        # Start our invasion API task.
+        taskMgr.doMethodLater(15, self.updateInvasionAPI, f"updateInvasionAPI-{self.districtName}")
+
+    def updateInvasionAPI(self, task):
+        if self.suitInvasionManager.getInvading() and self.air.isProdServer():
+            # Update our invasion status for the API.
+            self.air.suitInvasionManager.sendToAPI("updateInvasion")
+
     def __leaderboardFlush(self, task):
         messenger.send('leaderboardFlush')
         return Task.again
