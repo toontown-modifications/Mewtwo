@@ -239,9 +239,9 @@ class ToontownAIRepository(ToontownInternalRepository, ServerBase):
         taskMgr.doMethodLater(15, self.updateInvasionAPI, f"updateInvasionAPI-{self.districtName}")
 
     def updateInvasionAPI(self, task):
-        if self.suitInvasionManager.getInvading() and self.air.isProdServer():
+        if self.suitInvasionManager.getInvading() and self.isProdServer():
             # Update our invasion status for the API.
-            self.air.suitInvasionManager.sendToAPI("updateInvasion")
+            self.suitInvasionManager.sendToAPI("updateInvasion")
         return Task.again
 
     def __leaderboardFlush(self, task):
