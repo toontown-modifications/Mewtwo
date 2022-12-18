@@ -317,7 +317,7 @@ class ttPartyDb:
     def _setPartyStatusToCanStart(self, tupleOfResultDictionaries):
         """ Set the status on the following parties to CanStart """
         for resDict in tupleOfResultDictionaries:
-            self.changePartyStatus(resDict['partyId'], PartyGlobals.PartyStatus.CanStart)
+            self.changePartyStatus(resDict['partyId'], PartyGlobals.PartyStatus.CanStart.value)
 
     def getPartiesOfHost(self, hostId, sortedByStartTime = False, isRetry=False):
         """
@@ -367,7 +367,7 @@ class ttPartyDb:
         cursor = MySQLdb.cursors.DictCursor(self.db)
         try:
             cursor.execute("USE `%s`"%self.dbname)
-            cursor.execute(ttSQL.getPartyOfHostMatchingStatusSELECT,(hostId,PartyGlobals.PartyStatus.CanStart))
+            cursor.execute(ttSQL.getPartyOfHostMatchingStatusSELECT,(hostId,PartyGlobals.PartyStatus.CanStart.value))
             res = cursor.fetchall()
             return res
 
