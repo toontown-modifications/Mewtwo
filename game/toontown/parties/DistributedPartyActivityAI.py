@@ -31,7 +31,7 @@ class DistributedPartyActivityAI(DistributedObjectAI.DistributedObjectAI):
         self.y = y
         self.h = h
         self.activityId = activityId
-        self.activityName = PartyGlobals.ActivityIds.getString(self.activityId)
+        self.activityName = PartyGlobals.ActivityIds(self.activityId).name
         self.activityType = activityType
 
         # Actual avatars that will play the activity
