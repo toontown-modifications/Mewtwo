@@ -154,7 +154,7 @@ class DistributedPartyManagerAI(DistributedObjectAI):
         if isPrivate not in (0,1):
             return (False,"Invalid isPrivate %s" % isPrivate)
 
-        if (inviteTheme not in {n.value for n in PartyGlobals.InviteTheme}):
+        if inviteTheme not in list(PartyGlobals.InviteTheme):
             return (False,"Invalid inviteTheme %s" % inviteTheme)
 
         if hasattr(simbase.air, "holidayManager"):
@@ -170,7 +170,7 @@ class DistributedPartyManagerAI(DistributedObjectAI):
         usedGridSquares = {} # key is a tuple (x,y), value isn't that important
         actSet = set([])
         for activityTuple in activities:
-            if (activityTuple[0] not in {n.value for n in PartyGlobals.ActivityIds}):
+            if activityTuple[0] not in list(PartyGlobals.ActivityIds):
                 return (False,"Invalid activity id %s"%activityTuple[0])
 
             activityId = activityTuple[0]
@@ -243,7 +243,7 @@ class DistributedPartyManagerAI(DistributedObjectAI):
         decorationsUsedDict = {}
         for decorationTuple in decorations:
             decorId = decorationTuple[0]
-            if decorId not in PartyGlobals.DecorationIds:
+            if decorId not in list(PartyGlobals.DecorationIds):
                 return (False,"%s is not a valid decoration" % decorId)
             # Check if decorId is a holiday specific decoration.
             decorName = PartyGlobals.DecorationIds(decorId).name
