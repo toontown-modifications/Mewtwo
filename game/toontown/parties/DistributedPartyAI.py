@@ -116,7 +116,7 @@ class DistributedPartyAI(DistributedObjectAI):
             # Location and heading in the activityList is in party space, so
             # we convert them to Panda space before passing them into the
             # activities
-            #activityName = PartyGlobals.ActivityIds.getString(activity.activityId)
+            #activityName = PartyGlobals.ActivityIds(activity.activityId).name
             x = PartyUtils.convertDistanceFromPartyGrid(activity.x, 0)
             y = PartyUtils.convertDistanceFromPartyGrid(activity.y, 1)
             h = PartyUtils.convertDegreesFromPartyGrid(activity.h)

@@ -126,7 +126,7 @@ class DistributedPartyTugOfWarActivityAI(DistributedPartyTeamActivityAI):
 
 
     def reportFallIn(self, losingTeam):
-        self.notify.debug("reportFallIn( losingTeam=%s )" % PartyGlobals.TeamActivityTeams.getString(losingTeam))
+        self.notify.debug("reportFallIn( losingTeam=%s )" % PartyGlobals.TeamActivityTeams(losingTeam).name)
 
         if losingTeam not in PartyGlobals.TeamActivityTeams:
             self.notify.warning("Got an invalid losingTeam value %d" %losingTeam)
@@ -134,7 +134,7 @@ class DistributedPartyTugOfWarActivityAI(DistributedPartyTeamActivityAI):
 
         # if the losing team has already been reported and this report doesn't match
         if (self.losingTeam != PartyGlobals.TeamActivityNeitherTeam) and (losingTeam != self.losingTeam):
-            self.notify.warning("Report of %s as the losingTeam doesn't match previously reported value. Ignoring." %PartyGlobals.TeamActivityTeams.getString(losingTeam))
+            self.notify.warning("Report of %s as the losingTeam doesn't match previously reported value. Ignoring." %PartyGlobals.TeamActivityTeams(losingTeam).name)
             return
 
         curState = self.activityFSM.getCurrentOrNextState()
