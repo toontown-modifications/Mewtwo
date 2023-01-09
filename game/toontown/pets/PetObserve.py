@@ -1,4 +1,4 @@
-from enum import Enum
+from enum import IntEnum
 from direct.directnotify import DirectNotifyGlobal
 from game.toontown.pets import PetTricks
 notify = DirectNotifyGlobal.directNotify.newCategory('PetObserve')
@@ -13,8 +13,8 @@ def send(zoneIds, petObserve):
         for zoneId in zoneIds:
             messenger.send(getEventName(zoneId), [petObserve])
 
-Phrases = Enum('Phrases', ('HI', 'BYE', 'YES', 'NO', 'SOOTHE', 'PRAISE', 'CRITICISM', 'HAPPY', 'SAD', 'ANGRY', 'HURRY', 'QUESTION', 'FRIENDLY', 'LETS_PLAY', 'COME', 'FOLLOW_ME', 'STAY', 'NEED_LAFF', 'NEED_GAGS', 'NEED_JB', 'GO_AWAY', 'DO_TRICK'))
-Actions = Enum('Actions', ('FEED', 'SCRATCH', 'ATTENDED_START', 'ATTENDED_STOP', 'ATTENDING_START', 'ATTENDING_STOP', 'CHANGE_ZONE', 'LOGOUT', 'GARDEN'))
+Phrases = IntEnum('Phrases', ('HI', 'BYE', 'YES', 'NO', 'SOOTHE', 'PRAISE', 'CRITICISM', 'HAPPY', 'SAD', 'ANGRY', 'HURRY', 'QUESTION', 'FRIENDLY', 'LETS_PLAY', 'COME', 'FOLLOW_ME', 'STAY', 'NEED_LAFF', 'NEED_GAGS', 'NEED_JB','GO_AWAY', 'DO_TRICK'), start=0)
+Actions = IntEnum('Actions', ('FEED', 'SCRATCH', 'ATTENDED_START', 'ATTENDED_STOP', 'ATTENDING_START', 'ATTENDING_STOP', 'CHANGE_ZONE', 'LOGOUT', 'GARDEN'), start=0)
 
 class PetObserve:
 
@@ -71,7 +71,7 @@ class PetPhraseObserve(PetObserve):
         petBrain._handlePhraseObserve(self)
 
     def __repr__(self):
-        return '%s(%s,%s)' % (self.__class__.__name__, getattr(Actions, self.petPhrase).name, self.avId)
+        return '%s(%s,%s)' % (self.__class__.__name__, getattr(Phrases, self.petPhrase).name, self.avId)
 
 
 class SCObserve(PetPhraseObserve):
