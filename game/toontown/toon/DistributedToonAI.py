@@ -3236,7 +3236,6 @@ class DistributedToonAI(DistributedPlayerAI.DistributedPlayerAI, DistributedSmoo
             DistributedToonAI.notify.debug('setSC: %s' % msgId)
             from game.toontown.pets import PetObserve
             PetObserve.send(self.zoneId, PetObserve.getSCObserve(msgId, self.doId))
-            messenger.send('speedchat-phrase-said', [self.doId, self.zoneId, msgId])
             if msgId in [21006]:
                 self.setHatePets(1)
             elif msgId in [21000,
