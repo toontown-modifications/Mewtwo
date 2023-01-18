@@ -59,7 +59,6 @@ class DistributedMickeyAI(DistributedCCharBaseAI.DistributedCCharBaseAI):
         return ToontownGlobals.MickeySpeed
 
     def start(self):
-        self.accept('speedchat-phrase-said', self.__interpretPhrase)
         self.fsm.request('Lonely')
 
     def __decideNextState(self, doneStatus):
@@ -163,13 +162,3 @@ class DistributedMickeyAI(DistributedCCharBaseAI.DistributedCCharBaseAI):
             if ToontownGlobals.APRIL_FOOLS_COSTUMES in simbase.air.holidayManager.currentHolidays and simbase.air.holidayManager.currentHolidays[ToontownGlobals.APRIL_FOOLS_COSTUMES] != None and simbase.air.holidayManager.currentHolidays[ToontownGlobals.APRIL_FOOLS_COSTUMES].getRunningState():
                 self.diffPath = TTLocalizer.Daisy
         return
-
-    def __interpretPhrase(self, avId, zoneId, msgId):
-        if hasattr(simbase.air, 'holidayManager'):
-            if ToontownGlobals.HALLOWEEN_COSTUMES not in simbase.air.holidayManager.currentHolidays:
-                return # This is not our time.
-
-        if zoneId != self.zoneId or msgId != 905 or avId not in self.nearbyAvatars:
-            return # No way!
-        # We triggered the Mickey easter egg
-        self.sendUpdate('fadeAway', [])
