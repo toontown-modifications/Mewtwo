@@ -34,7 +34,7 @@ max-code-redemption-attempts 5
 # Backups
 buildings-server-data-folder backups/buildings
 store-server-data-folder backups/store
-true-friend-storage backups/friendCodes
+secret-friend-storage backups/friendCodes/secrets.json
 bingo-server-data-folder backups/bingo
 
 # Whitelist

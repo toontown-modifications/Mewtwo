@@ -5,7 +5,7 @@ from direct.distributed.MsgTypes import CLIENTAGENT_DECLARE_OBJECT
 
 from game.otp.otpbase import OTPGlobals
 
-import datetime, json, os, random
+import datetime, json, os, random, string, sys
 
 class FriendManagerAI(DistributedObjectAI):
     notify = directNotify.newCategory('FriendManagerAI')
@@ -16,12 +16,12 @@ class FriendManagerAI(DistributedObjectAI):
         self.currentContext = 0
 
         self.requests = {}
+        self.rngSeed = None
 
-        self.shard = str(air.districtId)
-        self.filename = self.getFilename()
-        self.tfCodes = self.loadTrueFriendCodes()
+        self.filename = simbase.config.GetString('secret-friend-storage')
+        self.secretFriendCodes = self.loadSecretFriendCodes()
 
-        taskMgr.add(self.__trueFriendCodesTask, 'tf-codes-clear-task')
+        taskMgr.add(self.__secretFriendCodesTask, 'sf-codes-clear-task')
 
     def friendQuery(self, inviteeId):
         avId = self.air.getAvatarIdFromSender()
@@ -159,6 +159,14 @@ class FriendManagerAI(DistributedObjectAI):
         del self.requests[context]
 
     def requestSecret(self):
+        if not self.rngSeed:
+            self.rngSeed = random.randrange(sys.maxsize)
+
+        random.seed(self.rngSeed)
+
+        def id_generator(size=3, chars=string.ascii_lowercase + string.digits):
+            return "".join(random.Random().choice(chars) for _ in range(size))
+
         avId = self.air.getAvatarIdFromSender()
         av = self.air.doId2do.get(avId)
 
@@ -169,20 +177,17 @@ class FriendManagerAI(DistributedObjectAI):
             self.d_requestSecretResponse(avId, 0, '')
         else:
             day = datetime.datetime.now().day
-            tfCode = self.generateTrueFriendCode()
-            self.tfCodes[tfCode] = (avId, day)
-            self.updateTrueFriendCodesFile()
-            self.d_requestSecretResponse(avId, 1, tfCode)
-            self.air.writeServerEvent('tf-code-requested', avId=avId, tfCode=tfCode)
+            secret = f"{id_generator(3)} {id_generator(3)}"
+            self.secretFriendCodes[secret] = (avId, day)
 
-    def generateTrueFriendCode(self):
-        chars = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
+            # This is a cheeky way to shuffle the seed.
+            # We don't want SF code repeats, So we reseed each time to prevent them.
+            self.rngSeed += avId
+            random.seed(self.rngSeed)
 
-        def randomChar():
-            return random.choice(chars)
-
-        tfCode = f'{randomChar()}{randomChar()}{randomChar()} {randomChar()}{randomChar()}{randomChar()}'
-        return tfCode
+            self.updateSecretFriendCodesFile()
+            self.d_requestSecretResponse(avId, 1, secret)
+            self.air.writeServerEvent('secret-code-requested', avId=avId, secret=secret)
 
     def d_requestSecretResponse(self, avId, result, secret):
         if not avId:
@@ -197,7 +202,7 @@ class FriendManagerAI(DistributedObjectAI):
         if not av:
             return
 
-        secretInfo = self.tfCodes.get(secret)
+        secretInfo = self.secretFriendCodes.get(secret)
 
         if not secretInfo:
             self.d_submitSecretResponse(avId, 0, 0)
@@ -264,7 +269,7 @@ class FriendManagerAI(DistributedObjectAI):
 
                 self.air.dbInterface.queryObject(self.air.dbId, friendId, handleAvatar)
 
-        self.air.writeServerEvent('tf-code-submitted', avId = avId, friendId = friendId, tfCode = secret)
+        self.air.writeServerEvent('secret-code-submitted', avId=avId, friendId=friendId, secret=secret)
 
     def d_submitSecretResponse(self, avId, result, friendId):
         if not avId:
@@ -273,42 +278,38 @@ class FriendManagerAI(DistributedObjectAI):
         self.sendUpdateToAvatarId(avId, 'submitSecretResponse', [result, friendId])
 
     def removeSecret(self, secret):
-        if secret in self.tfCodes:
-            del self.tfCodes[secret]
-            self.updateTrueFriendCodesFile()
+        if secret in self.secretFriendCodes:
+            del self.secretFriendCodes[secret]
+            self.updateSecretFriendCodesFile()
 
-    def getFilename(self):
-        baseFolder = simbase.config.GetString('true-friend-storage')
-        return f'{baseFolder}/{self.shard}.json'
-
-    def loadTrueFriendCodes(self):
+    def loadSecretFriendCodes(self):
         try:
-            tfCodesFile = open(self.filename, 'r')
-            tfCodesData = json.load(tfCodesFile)
-            return tfCodesData
+            secretCodesFile = open(self.filename, 'r')
+            secretCodesData = json.load(secretCodesFile)
+            return secretCodesData
         except:
             return {}
 
-    def updateTrueFriendCodesFile(self):
+    def updateSecretFriendCodesFile(self):
         try:
             if not os.path.exists(os.path.dirname(self.filename)):
                 os.makedirs(os.path.dirname(self.filename))
 
-            tfCodesFile = open(self.filename, 'w')
-            tfCodesFile.seek(0)
-            json.dump(self.tfCodes, tfCodesFile)
-            tfCodesFile.close()
+            secretCodesFile = open(self.filename, 'w')
+            secretCodesFile.seek(0)
+            json.dump(self.secretFriendCodes, secretCodesFile)
+            secretCodesFile.close()
         except:
             import traceback
             traceback.print_exc()
 
-    def __trueFriendCodesTask(self, task):
-        for tfCode in list(self.tfCodes.keys()):
-            tfCodeInfo = self.tfCodes[tfCode]
-            tfCodeDay = tfCodeInfo[1]
+    def __secretFriendCodesTask(self, task):
+        for secret in list(self.secretFriendCodes.keys()):
+            secretCodeInfo = self.secretFriendCodes[secret]
+            secretCodeDay = secretCodeInfo[1]
             today = datetime.datetime.now().day
-            if tfCodeDay + 2 == today:
-                self.notify.info(f'Removing 2-day-old True Friend code: {tfCode}')
-                self.removeSecret(tfCode)
+            if secretCodeDay + 2 == today:
+                self.notify.info(f'Removing 2-day-old Secret Friend code: {secret}')
+                self.removeSecret(secret)
 
         return task.again
