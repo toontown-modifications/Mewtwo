@@ -1017,7 +1017,7 @@ class ExtAgent(ServerBase):
                 # Construct a new aiFormatUpdate.
                 resp = toon.aiFormatUpdate('setTalk', doId, doId,
                                            self.air.ourChannel,
-                                           [0, 0, '', cleanMessage, modifications, 0])
+                                           [doId, accId, '', cleanMessage, modifications, 0])
                 self.air.send(resp)
                 return
             elif fieldNumber == setTalkWhisper.getNumber():
