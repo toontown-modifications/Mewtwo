@@ -510,7 +510,7 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
         except:
             self.sendResponseMessage(av.doId, 'Invalid parameters.')
 
-    def d_setDauntless(self, av):
+    def d_setRocket(self, av):
         dna = ToonDNA()
         dna.makeFromNetString(av.getDNAString())
 
@@ -536,10 +536,10 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
 
         # Set crown and set Toon name.
         av.b_setHat(14, 0, 0)
-        av.b_setName('Dauntless')
+        av.b_setName('Rocket')
 
         # Send out our response message.
-        self.sendResponseMessage(av.doId, 'You are now Dauntless from Toontown Planet!')
+        self.sendResponseMessage(av.doId, 'You are now Rocket!')
 
     def d_skipPhoneToonTask(self, av):
         self.air.questManager.toonCalledClarabelle(av)
@@ -1260,8 +1260,8 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
             if not validation:
                 return
             self.d_setSillyMeterPhase(av, phase = args[0])
-        elif magicWord in ('dauntless', 'ttplanetmeme', 'toontownotpmemes'):
-            self.d_setDauntless(av)
+        elif self.hasAccess(accountType, 'Rocket') and magicWord == 'rocketman':
+            self.d_setRocket(av)
         elif magicWord in ('phone-task-skip', 'phone-skip'):
             self.d_skipPhoneToonTask(av)
         elif magicWord in ('skipmovie', 'movieskip'):
