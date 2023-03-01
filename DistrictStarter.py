@@ -1,6 +1,6 @@
 import os, subprocess, sys, random
 
-NUM_DISTRICTS = 2
+NUM_DISTRICTS = 5
 
 districtNames = [
     'Boingy Acres',

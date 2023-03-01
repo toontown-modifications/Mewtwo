@@ -17,9 +17,9 @@ os.system('screen -dmS External ./run_server_ext.sh')
 # Wait until the external server starts.
 time.sleep(25)
 
-# os.system('cd ../.. && screen -dmS Districts python3 -m DistrictStarter')
-os.system('screen -dmS Sillyville ./run_first_ai.sh')
-os.system('screen -dmS Sillyham ./run_second_ai.sh')
+os.system('cd ../.. && screen -dmS Districts python3 -m DistrictStarter')
+# os.system('screen -dmS Sillyville ./run_first_ai.sh')
+# os.system('screen -dmS Sillyham ./run_second_ai.sh')
 # os.system('screen -dmS Crazyham ./run_third_ai.sh')
 
 if isProduction:
