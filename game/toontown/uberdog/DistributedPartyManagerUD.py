@@ -605,7 +605,7 @@ class DistributedPartyManagerUD(DistributedObjectGlobalUD):
             )
             return
 
-        if party[0]['statusId'] == PartyGlobals.PartyStatus.Started:
+        if party[0]['statusId'] == PartyGlobals.PartyStatus.Started.value:
             errorCode = PartyGlobals.ChangePartyFieldErrorCode.AlreadyStarted
             self.air.sendUpdateToDoId(
                 "DistributedPartyManager",
@@ -647,7 +647,7 @@ class DistributedPartyManagerUD(DistributedObjectGlobalUD):
             return errorCode
         partyDict = party[0]
         # Check to see if this is a party that has finished
-        if partyDict["statusId"] == PartyGlobals.PartyStatus.Started and newPartyStatus == PartyGlobals.PartyStatus.Finished:
+        if partyDict["statusId"] == PartyGlobals.PartyStatus.Started.value and newPartyStatus == PartyGlobals.PartyStatus.Finished.value:
             # It's over, send word to all the AIs so they can update for their public party gates
             if partyDict["hostId"] in self.hostAvIdToAllPartiesInfo:
                 self.sendUpdateToAllAis("partyHasFinishedUdToAllAi", [partyDict["hostId"]])
@@ -876,7 +876,7 @@ class DistributedPartyManagerUD(DistributedObjectGlobalUD):
         gates.
         """
         DistributedPartyManagerUD.notify.debug("partyHasStartedAiToUd : pmDoId=%s partyId=%s shardId=%s zoneId=%s hostName=%s " % (pmDoId, partyId, shardId, zoneId, hostName))
-        errorCode = self.changePartyStatusRequestAiToUd(pmDoId, partyId, PartyGlobals.PartyStatus.Started)
+        errorCode = self.changePartyStatusRequestAiToUd(pmDoId, partyId, PartyGlobals.PartyStatus.Started.value)
         if errorCode != PartyGlobals.ChangePartyFieldErrorCode.AllOk:
             return
         party = self.partyDb.getParty(partyId)
@@ -1054,7 +1054,7 @@ class DistributedPartyManagerUD(DistributedObjectGlobalUD):
         for info in inviteeDict:
             avId = info['guestId']
             if self.isOnline(avId):
-                self.sendNewPartyStatus( avId, partyId, PartyGlobals.PartyStatus.Started)
+                self.sendNewPartyStatus( avId, partyId, PartyGlobals.PartyStatus.Started.value)
 
     def _getPartyInfoSize(self, partyInfo):
         """

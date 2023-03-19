@@ -1018,8 +1018,7 @@ class DistributedSuitPlannerAI(DistributedObjectAI.DistributedObjectAI, SuitPlan
             return 0
         if toon:
             if hasattr(toon, 'doId'):
-                print((
-                 'Setting toonID ', toonId))
+                print('Setting toonID ', toonId)
                 toon.b_setBattleId(toonId)
         pos = self.battlePosDict[canonicalZoneId]
         interactivePropTrackBonus = -1

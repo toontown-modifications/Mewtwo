@@ -128,7 +128,7 @@ class DistributedPartyTugOfWarActivityAI(DistributedPartyTeamActivityAI):
     def reportFallIn(self, losingTeam):
         self.notify.debug("reportFallIn( losingTeam=%s )" % PartyGlobals.TeamActivityTeams(losingTeam).name)
 
-        if losingTeam not in PartyGlobals.TeamActivityTeams:
+        if losingTeam not in list(PartyGlobals.TeamActivityTeams):
             self.notify.warning("Got an invalid losingTeam value %d" %losingTeam)
             return
 
