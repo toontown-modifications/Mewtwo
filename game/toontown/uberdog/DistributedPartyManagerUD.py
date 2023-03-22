@@ -568,7 +568,7 @@ class DistributedPartyManagerUD(DistributedObjectGlobalUD):
             getRepliesForThisParty = True
             # we only need replies for parties in the future that are not cancelled
             # temporarily turned off as shticker book is not happy
-            #if partyInfoDict['statusId'] != PartyGlobals.PartyStatus.Cancelled and \
+            #if partyInfoDict['statusId'] != PartyGlobals.PartyStatus.Cancelled.value and \
             #   thresholdTime < partyInfoDict['startTime']:
             #   getRepliesForThisParty = True
 
@@ -591,12 +591,12 @@ class DistributedPartyManagerUD(DistributedObjectGlobalUD):
 
     def changePrivateRequestAiToUd(self, pmDoId, partyId, newPrivateStatus):
         """Handle AI requesting to change a party to public or private."""
-        errorCode = PartyGlobals.ChangePartyFieldErrorCode.AllOk
+        errorCode = PartyGlobals.ChangePartyFieldErrorCode.AllOk.value
 
         # verify the party is still there
         party = self.partyDb.getParty(partyId)
         if not party:
-            errorCode = PartyGlobals.ChangePartyFieldErrorCode.DatabaseError
+            errorCode = PartyGlobals.ChangePartyFieldErrorCode.DatabaseError.value
             self.air.sendUpdateToDoId(
                 "DistributedPartyManager",
                 'changePrivateResponseUdToAi',
@@ -606,7 +606,7 @@ class DistributedPartyManagerUD(DistributedObjectGlobalUD):
             return
 
         if party[0]['statusId'] == PartyGlobals.PartyStatus.Started.value:
-            errorCode = PartyGlobals.ChangePartyFieldErrorCode.AlreadyStarted
+            errorCode = PartyGlobals.ChangePartyFieldErrorCode.AlreadyStarted.value
             self.air.sendUpdateToDoId(
                 "DistributedPartyManager",
                 'changePrivateResponseUdToAi',
@@ -631,12 +631,12 @@ class DistributedPartyManagerUD(DistributedObjectGlobalUD):
     def changePartyStatusRequestAiToUd(self, pmDoId, partyId, newPartyStatus):
         """Handle AI requesting to change the party status."""
         DistributedPartyManagerUD.notify.debug("changePartyStatusRequestAiToUd partyId = %s, newPartyStatus = %s" % (partyId, newPartyStatus))
-        errorCode = PartyGlobals.ChangePartyFieldErrorCode.AllOk
+        errorCode = PartyGlobals.ChangePartyFieldErrorCode.AllOk.value
 
         # verify the party is still there
         party = self.partyDb.getParty(partyId)
         if not party:
-            errorCode = PartyGlobals.ChangePartyFieldErrorCode.DatabaseError
+            errorCode = PartyGlobals.ChangePartyFieldErrorCode.DatabaseError.value
             self.air.sendUpdateToDoId(
                 "DistributedPartyManager",
                 'changePartyStatusResponseUdToAi',
@@ -830,7 +830,7 @@ class DistributedPartyManagerUD(DistributedObjectGlobalUD):
             partyId = info['partyId']
             hostId = info['hostId']
             if self.isOnline(hostId):
-                status = PartyGlobals.PartyStatus.Finished
+                status = PartyGlobals.PartyStatus.Finished.value
                 self.sendNewPartyStatus(hostId, partyId, status)
 
     def forceNeverStartedForCanStart(self):
@@ -840,7 +840,7 @@ class DistributedPartyManagerUD(DistributedObjectGlobalUD):
             partyId = info['partyId']
             hostId = info['hostId']
             if self.isOnline(hostId):
-                status = PartyGlobals.PartyStatus.NeverStarted
+                status = PartyGlobals.PartyStatus.NeverStarted.value
                 self.sendNewPartyStatus(hostId, partyId, status)
 
     def sendNewPartyStatus(self, avatarId, partyId, newStatus):
@@ -877,7 +877,7 @@ class DistributedPartyManagerUD(DistributedObjectGlobalUD):
         """
         DistributedPartyManagerUD.notify.debug("partyHasStartedAiToUd : pmDoId=%s partyId=%s shardId=%s zoneId=%s hostName=%s " % (pmDoId, partyId, shardId, zoneId, hostName))
         errorCode = self.changePartyStatusRequestAiToUd(pmDoId, partyId, PartyGlobals.PartyStatus.Started.value)
-        if errorCode != PartyGlobals.ChangePartyFieldErrorCode.AllOk:
+        if errorCode != PartyGlobals.ChangePartyFieldErrorCode.AllOk.value:
             return
         party = self.partyDb.getParty(partyId)
         partyInfo = party[0]
@@ -984,17 +984,17 @@ class DistributedPartyManagerUD(DistributedObjectGlobalUD):
 
         # the toon just got kicked out, he will probably want to go back and restart
         self.partyDb.changeMultiplePartiesStatus(interruptedPartiesToCanStart,
-                                                 PartyGlobals.PartyStatus.CanStart)
+                                                 PartyGlobals.PartyStatus.CanStart.value)
         self.partyDb.changeMultiplePartiesStatus(interruptedPartiesToFinished,
-                                                 PartyGlobals.PartyStatus.Finished)
+                                                 PartyGlobals.PartyStatus.Finished.value)
 
         for index,hostId  in enumerate(interruptedHostIds):
             if self.isOnline(hostId):
                 partyId = interruptedParties[index]
                 if partyId in interruptedPartiesToCanStart:
-                    status = PartyGlobals.PartyStatus.CanStart
+                    status = PartyGlobals.PartyStatus.CanStart.value
                 else:
-                    status = PartyGlobals.PartyStatus.Finished
+                    status = PartyGlobals.PartyStatus.Finished.value
                 self.sendNewPartyStatus(hostId, partyId, status)
 
         # tell all AI servers the party has finished since it was interrupted

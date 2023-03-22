@@ -86,7 +86,7 @@ class DistributedPartyManagerAI(DistributedObjectAI):
             5.0,
             self.addPartyResponseUdToAi,
             "NoResponseFromUberdog_%d_%d"%(self.doId,hostId),
-            [hostId,PartyGlobals.AddPartyErrorCode.DatabaseError,0]
+            [hostId,PartyGlobals.AddPartyErrorCode.DatabaseError.value,0]
         )
 
     def addPartyRequest(self, hostId, startTime, endTime, isPrivate, inviteTheme, activities, decorations, inviteeIds):
@@ -121,7 +121,7 @@ class DistributedPartyManagerAI(DistributedObjectAI):
             self.sendAddParty(hostId, startTime,endTime, isPrivate, inviteTheme, activities, decorations, inviteeIds, costOfPartyOrError)
         else:
             DistributedPartyManagerAI.notify.debug('inValid party because : %s' % costOfPartyOrError)
-            self.sendAddPartyResponse(hostId, PartyGlobals.AddPartyErrorCode.ValidationError)
+            self.sendAddPartyResponse(hostId, PartyGlobals.AddPartyErrorCode.ValidationError.value)
 
     def validatePartyAndReturnCost(self, hostId, startTime, endTime, isPrivate, inviteTheme, activities, decorations, inviteeIds):
         DistributedPartyManagerAI.notify.debug( "validatePartyAndReturnCost" )
@@ -386,7 +386,7 @@ class DistributedPartyManagerAI(DistributedObjectAI):
         DistributedPartyManagerAI.notify.debug( "respondToInviteResponse" )
         mailboxAI = simbase.air.doId2do.get(mailboxDoId)
         if mailboxAI:
-            if newStatus == PartyGlobals.InviteStatus.Rejected:
+            if newStatus == PartyGlobals.InviteStatus.Rejected.value:
                 mailboxAI.respondToRejectInviteCallback(context, inviteKey, retcode)
             else:
                 mailboxAI.respondToAcceptInviteCallback(context, inviteKey, retcode)
@@ -394,7 +394,7 @@ class DistributedPartyManagerAI(DistributedObjectAI):
     def addPartyResponseUdToAi(self, hostId, errorCode, costOfParty):
         """Handle uberdog responding to our addParty message."""
         taskMgr.remove("NoResponseFromUberdog_%d_%d"%(self.doId,hostId))
-        if errorCode == PartyGlobals.AddPartyErrorCode.AllOk:
+        if errorCode == PartyGlobals.AddPartyErrorCode.AllOk.value:
             host = simbase.air.doId2do.get(hostId)
             self.air.writeServerEvent("party_buy", hostId,"%d" % costOfParty)
             if host :
@@ -418,7 +418,7 @@ class DistributedPartyManagerAI(DistributedObjectAI):
             return
 
         errorCode = self.partyFieldChangeValidate(partyId)
-        if errorCode != PartyGlobals.ChangePartyFieldErrorCode.AllOk:
+        if errorCode != PartyGlobals.ChangePartyFieldErrorCode.AllOk.value:
             # immediately say we have an error then return
             self.sendUpdateToAvatarId(senderId,'changePrivateResponse',
                             [partyId, newPrivateStatus, errorCode])
@@ -434,11 +434,11 @@ class DistributedPartyManagerAI(DistributedObjectAI):
     def partyFieldChangeValidate(self, partyId):
         """Do common validation when changing private and status fields for a party."""
         senderId = self.air.getAvatarIdFromSender()
-        errorCode = PartyGlobals.ChangePartyFieldErrorCode.AllOk
+        errorCode = PartyGlobals.ChangePartyFieldErrorCode.AllOk.value
         toon = simbase.air.doId2do.get(senderId)
         if not toon:
             # we don't have the toon for some reason
-            errorCode = PartyGlobals.ChangePartyFieldErrorCode.ValidationError
+            errorCode = PartyGlobals.ChangePartyFieldErrorCode.ValidationError.value
             return errorCode
 
         hostingThisParty = False
@@ -452,21 +452,21 @@ class DistributedPartyManagerAI(DistributedObjectAI):
             # really bad, potential hacker
             self.air.writeServerEvent('suspicious', senderId,
                                       'trying to change field of party %s but not the host' % partyId)
-            errorCode = PartyGlobals.ChangePartyFieldErrorCode.ValidationError
+            errorCode = PartyGlobals.ChangePartyFieldErrorCode.ValidationError.value
             return errorCode
 
         if party.hostId != senderId:
             # really bad, potential hacker
             self.air.writeServerEvent('suspicious', senderId,
                                       'trying to change field of party %s but not the host' % partyId)
-            errorCode = PartyGlobals.ChangePartyFieldErrorCode.ValidationError
+            errorCode = PartyGlobals.ChangePartyFieldErrorCode.ValidationError.value
             return errorCode
 
         return errorCode
 
     def changePrivateResponseUdToAi(self, hostId, partyId, newPrivateStatus, errorCode):
         """Handle the Uberdog telling us if the change private succeeded or not."""
-        if errorCode == PartyGlobals.ChangePartyFieldErrorCode.AllOk:
+        if errorCode == PartyGlobals.ChangePartyFieldErrorCode.AllOk.value:
             if hostId in self.air.doId2do:
                 av = self.air.doId2do[hostId]
                 for partyInfo in av.hostedParties:
@@ -486,7 +486,7 @@ class DistributedPartyManagerAI(DistributedObjectAI):
             DistributedPartyManagerAI.notify.debug('changePartyStatusRequest toon %d not in our district' % senderId)
             return
         errorCode = self.partyFieldChangeValidate(partyId)
-        if errorCode != PartyGlobals.ChangePartyFieldErrorCode.AllOk:
+        if errorCode != PartyGlobals.ChangePartyFieldErrorCode.AllOk.value:
             # immediately say we have an error then return
             self.sendUpdateToAvatarId(senderId,'changePartyStatusResponse',
                             [partyId, newPartyStatus, errorCode, 0])
@@ -507,7 +507,7 @@ class DistributedPartyManagerAI(DistributedObjectAI):
             for partyInfo in av.hostedParties:
                 if partyInfo.partyId == partyId:
                     partyInfo.status = newPartyStatus
-                    if newPartyStatus == PartyGlobals.PartyStatus.Cancelled:
+                    if newPartyStatus == PartyGlobals.PartyStatus.Cancelled.value:
                         beansRefunded = self.getCostOfParty(partyInfo)
                         beansRefunded = int(PartyGlobals.PartyRefundPercentage * beansRefunded)
                         av.addMoney(beansRefunded)
@@ -757,8 +757,8 @@ class DistributedPartyManagerAI(DistributedObjectAI):
             hostedParties = toon.hostedParties
             for partyInfo in hostedParties:
                 # it must not be cancelle or finished
-                if partyInfo.status in (PartyGlobals.PartyStatus.Cancelled,
-                                        PartyGlobals.PartyStatus.Finished):
+                if partyInfo.status in (PartyGlobals.PartyStatus.Cancelled.value,
+                                        PartyGlobals.PartyStatus.Finished.value):
                     continue
                 curServerTime = self.air.toontownTimeManager.getCurServerDateTimeForComparison()
                 if curServerTime < partyInfo.startTime:
@@ -1237,7 +1237,7 @@ class DistributedPartyManagerAI(DistributedObjectAI):
             "DistributedPartyManager",
             'changePartyStatusRequestAiToUd',
             OtpDoGlobals.OTP_DO_ID_TOONTOWN_PARTY_MANAGER,
-            [self.doId, self.hostAvIdToPartiesRunning[hostId].partyInfo.partyId, PartyGlobals.PartyStatus.Finished]
+            [self.doId, self.hostAvIdToPartiesRunning[hostId].partyInfo.partyId, PartyGlobals.PartyStatus.Finished.value]
         )
 
         self.hostAvIdToClosingPartyZoneId[hostId] = zoneId
