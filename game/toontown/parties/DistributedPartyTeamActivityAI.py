@@ -16,6 +16,7 @@
 # party-team-activity-duration int
 #  How long the Active states lasts in the game
 #===============================================================================
+import enum
 from direct.distributed import ClockDelta
 
 from game.toontown.toonbase import TTLocalizer
@@ -160,10 +161,10 @@ class DistributedPartyTeamActivityAI(DistributedPartyActivityAI):
             true if it successfully removed the toon from the team
         """
         self.notify.debug("_removeToonFromTeam")
-
-        if type(team) != type(1):
-            self.notify.warning("Tried to remove toonId=%s from %s, but team is not an integer" % (toonId, str(team)))
-        elif not toonId in self.toonIds[team]:
+        if not hasattr(team, "value"):
+            # self.notify.warning("Tried to remove toonId=%s from %s, but team is not an enumType" % (toonId, str(team)))
+            team = list(PartyGlobals.TeamActivityTeams)[team]
+        if toonId not in self.toonIds[team]:
             self.notify.warning("Tried to remove toonId=%s from %s when it was not on that team. Ignoring request." % (toonId, self.getTeamName(team)))
         else:
             self.ignore(self.air.getAvatarExitEvent(toonId))
@@ -727,7 +728,7 @@ class DistributedPartyTeamActivityAI(DistributedPartyActivityAI):
         Returns
             The team name
         """
-        return PartyGlobals.TeamActivityTeams(team).name
+        return list(PartyGlobals.TeamActivityTeams)[team].name
 
 
     def isTeamFull(self, team):
