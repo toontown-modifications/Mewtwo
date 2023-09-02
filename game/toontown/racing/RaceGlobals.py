@@ -1,3 +1,5 @@
+from game.toontown.toonbase import TTLocalizer
+
 TrackSignDuration = 15
 RaceCountdown = 3
 MaxRacers = 4
@@ -426,7 +428,7 @@ def getDefaultRecordTime(trackId):
     return TrackDict[trackId][2]
 
 def getDefaultRecord(trackId):
-    return getDefaultRecordTime(trackId), 0, 1, 'Goofy'
+    return getDefaultRecordTime(trackId), 0, 1, TTLocalizer.Goofy
 
 Daily = 0
 Weekly = 1
