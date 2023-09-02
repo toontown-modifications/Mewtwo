@@ -1,5 +1,3 @@
-from game.toontown.toonbase import TTLocalizer
-
 TrackSignDuration = 15
 RaceCountdown = 3
 MaxRacers = 4
