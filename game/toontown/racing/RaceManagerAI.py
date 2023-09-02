@@ -7,6 +7,13 @@ from direct.showbase import DirectObject
 from . import RaceGlobals
 import random, os, pickle
 
+def getDefaultRecord(trackId):
+    """
+    Get the default record for this track. Used for reseting records.
+    """
+    # format: time, race type, num racers, racer name
+    return (RaceGlobals.getDefaultRecordTime(trackId), 0, 1, TTLocalizer.Goofy)
+
 class RaceManagerAI(DirectObject.DirectObject):
     notify = DirectNotifyGlobal.directNotify.newCategory('RaceManagerAI')
     serverDataFolder = simbase.config.GetString('server-data-folder', '')
@@ -642,7 +649,7 @@ class RaceManagerAI(DirectObject.DirectObject):
                 for i in RaceGlobals.PeriodIds:
                     records[trackId][i] = []
                     for j in range(0, RaceGlobals.NumRecordsPerPeriod):
-                        records[trackId][i].append(RaceGlobals.getDefaultRecord(trackId))
+                        records[trackId][i].append(getDefaultRecord(trackId))
 
         self.resetLeaderboards()
         return records
@@ -665,7 +672,7 @@ class RaceManagerAI(DirectObject.DirectObject):
             for i in RaceGlobals.PeriodIds:
                 records[trackId][i] = []
                 for j in range(0, RaceGlobals.NumRecordsPerPeriod):
-                    records[trackId][i].append(RaceGlobals.getDefaultRecord(trackId))
+                    records[trackId][i].append(getDefaultRecord(trackId))
 
         return records
 
