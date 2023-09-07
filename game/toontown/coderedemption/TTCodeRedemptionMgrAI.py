@@ -178,7 +178,7 @@ class TTCodeRedemptionMgrAI(DistributedObjectAI):
             return [shirt]
 
         if code in ('gc-sbfo', 'gc sbfo', 'gcsbfo'):
-            shirt = CatalogClothingItem(1788, 0)
+            shirt = CatalogClothingItem(1776, 0)
             return [shirt]
 
         if code in ('getconnected', 'get connected', 'get_connected'):
