@@ -235,6 +235,10 @@ class ToontownAIRepository(ToontownInternalRepository, ServerBase):
         # Inform the ExtAgent of us.
         self.netMessenger.send('registerShard', [self.districtId, self.districtName])
 
+        if self.isProdServer():
+            # Register us with the API server
+            self.sendPopulation()
+
         # Start our invasion API task.
         taskMgr.doMethodLater(15, self.updateInvasionAPI, f"updateInvasionAPI-{self.districtName}")
 
