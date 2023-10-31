@@ -38,7 +38,7 @@ holidayToMgr = {
     ToontownGlobals.WINTER_CAROLING: ScavengerHuntHolidayMgrAI, # 57
     ToontownGlobals.COMBO_FIREWORKS: FireworkHolidayAI, # 112
     ToontownGlobals.IDES_OF_MARCH: GreenToonHolidayAI, # 105
-    ToontownGlobals.SPOOKY_BLACK_CAT: BlackCatDayHolidayAI, # 117
+    ToontownGlobals.SPOOKY_BLACK_CAT: BlackCatHolidayMgrAI, # 117
     ToontownGlobals.SPOOKY_TRICK_OR_TREAT: ScavengerHuntHolidayMgrAI, # 118
     ToontownGlobals.SPOOKY_COSTUMES: CharacterSwitchHolidayAI, # 120
     ToontownGlobals.SILLYMETER_HOLIDAY: SillyMeterHolidayAI, # 60
