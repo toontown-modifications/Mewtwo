@@ -5,7 +5,7 @@ from game.toontown.toonbase import ToontownGlobals
 from game.toontown.ai.HolidayBaseAI import HolidayBaseAI
 from game.toontown.effects.FireworkHolidayAI import FireworkHolidayAI
 from game.toontown.fishing.BingoNightHolidayAI import BingoNightHolidayAI
-from game.toontown.ai.BlackCatDayHolidayAI import BlackCatDayHolidayAI
+from game.toontown.ai.BlackCatHolidayMgrAI import BlackCatHolidayMgrAI
 from game.toontown.racing.RaceManagerAI import KartRecordDailyResetter, KartRecordWeeklyResetter, CircuitRaceHolidayMgr
 from game.toontown.minigame.TrolleyHolidayMgrAI import TrolleyHolidayMgrAI
 from game.toontown.minigame.TrolleyWeekendMgrAI import TrolleyWeekendMgrAI
@@ -20,7 +20,7 @@ holidayToMgr = {
     ToontownGlobals.JULY4_FIREWORKS: FireworkHolidayAI, # 1
     ToontownGlobals.NEWYEARS_FIREWORKS: FireworkHolidayAI, # 2
     ToontownGlobals.FISH_BINGO_NIGHT: BingoNightHolidayAI, # 7
-    ToontownGlobals.BLACK_CAT_DAY: BlackCatDayHolidayAI, # 9
+    ToontownGlobals.BLACK_CAT_DAY: BlackCatHolidayMgrAI, # 9
     ToontownGlobals.RESISTANCE_EVENT: ResistanceEmoteHolidayMgrAI, # 10
     ToontownGlobals.KART_RECORD_DAILY_RESET: KartRecordDailyResetter, # 11
     ToontownGlobals.KART_RECORD_WEEKLY_RESET: KartRecordWeeklyResetter, # 12
