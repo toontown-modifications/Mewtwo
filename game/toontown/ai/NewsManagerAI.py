@@ -95,6 +95,7 @@ class NewsManagerAI(DistributedObjectAI):
             [ToontownGlobals.JULY4_FIREWORKS, [6, 30, 0, 0], [7, 15, 23, 59]],
             [ToontownGlobals.HALLOWEEN_PROPS, [10, 25, 0, 0], [11, 1, 23, 59]],
             [ToontownGlobals.TRICK_OR_TREAT, [10, 25, 0, 0], [11, 1, 23, 59]],
+            [ToontownGlobals.HALLOWEEN_COSTUMES, [10, 25, 0, 0], [11, 1, 23, 59]],
             [ToontownGlobals.BLACK_CAT_DAY, [10, 31, 0, 0], [10, 31, 23, 59]],
             [ToontownGlobals.WINTER_DECORATIONS, [12, 14, 0, 0], [1, 4, 23, 59]],
             [ToontownGlobals.WINTER_CAROLING, [12, 16, 0, 0], [1, 4, 23, 59]],
