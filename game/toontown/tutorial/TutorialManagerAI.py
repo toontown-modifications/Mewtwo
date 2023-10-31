@@ -12,8 +12,8 @@ from . import SuitPlannerTutorialAI
 
 from game.toontown.toonbase import ToontownBattleGlobals
 from game.toontown.toon import NPCToons
-from game.toontown.ai.DistributedBlackCatMgrAI import DistributedBlackCatMgrAI
-from game.toontown.ai.DistributedBlackCatMgrAI import BlackCatDayHolidayAI
+from game.toontown.ai import BlackCatHolidayMgrAI
+from game.toontown.ai import DistributedBlackCatMgrAI
 
 
 class TutorialManagerAI(DistributedObjectAI.DistributedObjectAI):
