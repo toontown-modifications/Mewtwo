@@ -149,9 +149,9 @@ class TutorialManagerAI(DistributedObjectAI.DistributedObjectAI):
 
         # is the black cat holiday enabled?
         blackCatMgr = None
-        if bboard.get(BlackCatDayHolidayAI.PostName):
-            blackCatMgr = DistributedBlackCatMgrAI(self.air)
-            blackCatMgr.setAvId(avId)
+        if bboard.has(BlackCatHolidayMgrAI.BlackCatHolidayMgrAI.PostName):
+            blackCatMgr = DistributedBlackCatMgrAI.DistributedBlackCatMgrAI(
+                self.air, avId)
             blackCatMgr.generateWithRequired(streetZone)
 
         zoneDict = {"branchZone": branchZone,
