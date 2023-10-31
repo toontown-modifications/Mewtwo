@@ -5,7 +5,7 @@ from game.toontown.toonbase import ToontownGlobals
 from game.toontown.ai.HolidayBaseAI import HolidayBaseAI
 from game.toontown.effects.FireworkHolidayAI import FireworkHolidayAI
 from game.toontown.fishing.BingoNightHolidayAI import BingoNightHolidayAI
-from game.toontown.ai.DistributedBlackCatMgrAI import BlackCatDayHolidayAI
+from game.toontown.ai.BlackCatDayHolidayAI import BlackCatDayHolidayAI
 from game.toontown.racing.RaceManagerAI import KartRecordDailyResetter, KartRecordWeeklyResetter, CircuitRaceHolidayMgr
 from game.toontown.minigame.TrolleyHolidayMgrAI import TrolleyHolidayMgrAI
 from game.toontown.minigame.TrolleyWeekendMgrAI import TrolleyWeekendMgrAI
