@@ -1156,6 +1156,10 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
         magicWord = splitWord[0].lower()
         del splitWord
 
+        if magicWord == '':
+            # No need to do anything.
+            return
+
         string = ' '.join(str(x) for x in args)
         validation = self.checkArguments(args, avId)
 
@@ -1171,7 +1175,8 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
             'skipBattleMovie',
             'endgame',
             'wingame',
-            'sit'
+            'sit',
+            'ruler'
         ]
 
         if magicWord == 'maxbankmoney':
@@ -1364,12 +1369,11 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
         elif magicWord == 'deliveritems':
             self.deliverCatalogItems(av)
         elif self.hasAccess(accountType, 'Rocket') and magicWord == 'lm':
-                self.setLaughingMan(av)
-        else:
-            if magicWord not in disneyCmds or magicWord != '':
-                self.sendResponseMessage(avId, f'{magicWord} is not a valid Magic Word.')
-                self.notify.info(f'{av.getName()} ({avId}) has executed a unknown Magic Word: {magicWord}!')
-                return
+            self.setLaughingMan(av)
+        elif magicWord not in disneyCmds:
+            self.sendResponseMessage(avId, f'{magicWord} is not a valid Magic Word.')
+            self.notify.info(f'{av.getName()} ({avId}) has executed a unknown Magic Word: {magicWord}!')
+            return
 
         # Log this attempt.
         self.notify.info(f'{av.getName()} ({avId}) has executed Magic Word: {magicWord}!')
