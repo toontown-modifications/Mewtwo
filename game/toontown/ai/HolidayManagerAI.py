@@ -3,7 +3,7 @@ from direct.directnotify.DirectNotifyGlobal import directNotify
 from game.toontown.toonbase import ToontownGlobals
 
 from game.toontown.ai.HolidayBaseAI import HolidayBaseAI
-from game.toontown.effects.FireworkHolidayAI import FireworkHolidayAI
+from game.toontown.effects.FireworkManagerAI import FireworkManagerAI
 from game.toontown.fishing.BingoNightHolidayAI import BingoNightHolidayAI
 from game.toontown.ai.BlackCatHolidayMgrAI import BlackCatHolidayMgrAI
 from game.toontown.racing.RaceManagerAI import KartRecordDailyResetter, KartRecordWeeklyResetter, CircuitRaceHolidayMgr
@@ -17,8 +17,8 @@ from game.toontown.ai.DistributedResistanceEmoteMgrAI import ResistanceEmoteHoli
 from game.toontown.ai.DistributedPolarPlaceEffectMgrAI import PolarPlaceHolidayMgrAI
 
 holidayToMgr = {
-    ToontownGlobals.JULY4_FIREWORKS: FireworkHolidayAI, # 1
-    ToontownGlobals.NEWYEARS_FIREWORKS: FireworkHolidayAI, # 2
+    ToontownGlobals.JULY4_FIREWORKS: FireworkManagerAI, # 1
+    ToontownGlobals.NEWYEARS_FIREWORKS: FireworkManagerAI, # 2
     ToontownGlobals.FISH_BINGO_NIGHT: BingoNightHolidayAI, # 7
     ToontownGlobals.BLACK_CAT_DAY: BlackCatHolidayMgrAI, # 9
     ToontownGlobals.RESISTANCE_EVENT: ResistanceEmoteHolidayMgrAI, # 10
@@ -36,7 +36,7 @@ holidayToMgr = {
     ToontownGlobals.HALLOWEEN_COSTUMES: CharacterSwitchHolidayAI, # 27
     ToontownGlobals.APRIL_FOOLS_COSTUMES: CharacterSwitchHolidayAI, # 29
     ToontownGlobals.WINTER_CAROLING: ScavengerHuntHolidayMgrAI, # 57
-    ToontownGlobals.COMBO_FIREWORKS: FireworkHolidayAI, # 112
+    ToontownGlobals.COMBO_FIREWORKS: FireworkManagerAI, # 112
     ToontownGlobals.IDES_OF_MARCH: GreenToonHolidayAI, # 105
     ToontownGlobals.SPOOKY_BLACK_CAT: BlackCatHolidayMgrAI, # 117
     ToontownGlobals.SPOOKY_TRICK_OR_TREAT: ScavengerHuntHolidayMgrAI, # 118
