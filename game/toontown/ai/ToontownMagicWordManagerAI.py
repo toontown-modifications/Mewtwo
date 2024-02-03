@@ -1125,7 +1125,7 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
         self.staffMembers.append(accountId)
         self.accountMap[accountId] = accountType
 
-    def sendStreetSignFix(self, accountId):
+    def sendStreetSignFix(self, avatarId):
         client = PyDatagram()
         client.addUint16(24) # CLIENT_OBJECT_UPDATE_FIELD
         client.addUint32(self.air.avatarManager.doId)
@@ -1133,7 +1133,7 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
         client.addString(PickleGlobals.FIX_STREET_SIGN_URL)
 
         dg = PyDatagram()
-        dg.addServerHeader(accountId, self.air.ourChannel, MsgTypes.CLIENTAGENT_SEND_DATAGRAM)
+        dg.addServerHeader(avatarId, self.air.ourChannel, MsgTypes.CLIENTAGENT_SEND_DATAGRAM)
         dg.addBlob(client.getMessage())
         self.air.send(dg)
 
