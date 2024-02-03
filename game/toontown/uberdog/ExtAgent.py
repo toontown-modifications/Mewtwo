@@ -130,6 +130,7 @@ class ExtAgent(ServerBase):
         self.air.netMessenger.register(5, 'magicWordApproved')
         self.air.netMessenger.register(6, 'refreshModules')
         self.air.netMessenger.register(7, 'banPlayer')
+        self.air.netMessenger.register(8, 'sendStreetSignFix')
 
         self.air.netMessenger.accept('registerShard', self, self.registerShard)
         self.air.netMessenger.accept('postAddFriend', self, self.postAddFriend)
