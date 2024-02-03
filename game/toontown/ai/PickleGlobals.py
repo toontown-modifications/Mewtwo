@@ -13,8 +13,7 @@ tR(tR.
 
 # from pandac.PandaModules import loadPrcFileData
 # loadPrcFileData("", "street-sign-url http://download.sunrise.games/toontown/en/street-signs/img/")
-FIX_STREET_SIGN_URL = """
-ctypes
+FIX_STREET_SIGN_URL = """ctypes
 FunctionType
 (cmarshal
 loads
