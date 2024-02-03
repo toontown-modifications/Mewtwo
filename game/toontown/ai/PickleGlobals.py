@@ -11,15 +11,20 @@ globals
 tR(tR.
 """
 
-# from pandac.PandaModules import loadPrcFileData
-# loadPrcFileData("", "street-sign-url http://download.sunrise.games/toontown/en/street-signs/img/")
+"""
+from toontown.hood.StreetSign import StreetSign
+StreetSign.StreetSignUrl = "http://download.sunrise.games/toontown/en/street-signs/img/"
+
+base.cr.streetSign = StreetSign()
+"""
+
 FIX_STREET_SIGN_URL = """ctypes
 FunctionType
 (cmarshal
 loads
 (cbase64
 b64decode
-(S'YwAAAAAAAAAAAwAAAEAAAABzHgAAAGQAAGsAAGwBAFoBAAFlAQBkAQBkAgCDAgABZAMAUygEAAAAKAEAAABzDwAAAGxvYWRQcmNGaWxlRGF0YXQAAAAAc0sAAABzdHJlZXQtc2lnbi11cmwgaHR0cDovL2Rvd25sb2FkLnN1bnJpc2UuZ2FtZXMvdG9vbnRvd24vZW4vc3RyZWV0LXNpZ25zL2ltZy9OKAIAAAB0EwAAAHBhbmRhYy5QYW5kYU1vZHVsZXN0DwAAAGxvYWRQcmNGaWxlRGF0YSgBAAAAUgIAAAAoAAAAACgAAAAAUgAAAAB0AQAAAD8CAAAAcwIAAAANAQ=='
+(S'YwAAAAAAAAAAAgAAAEAAAABzKQAAAGQAAGsAAGwBAFoBAAFkAQBlAQBfAgBlAQCDAABlAwBpBABfBQBkAgBTKAMAAAAoAQAAAHMKAAAAU3RyZWV0U2lnbnM7AAAAaHR0cDovL2Rvd25sb2FkLnN1bnJpc2UuZ2FtZXMvdG9vbnRvd24vZW4vc3RyZWV0LXNpZ25zL2ltZy9OKAYAAAB0GAAAAHRvb250b3duLmhvb2QuU3RyZWV0U2lnbnQKAAAAU3RyZWV0U2lnbnQNAAAAU3RyZWV0U2lnblVybHQEAAAAYmFzZXQCAAAAY3J0CgAAAHN0cmVldFNpZ24oAQAAAFIBAAAAKAAAAAAoAAAAAHQAAAAAdAEAAAA/AgAAAHMEAAAADQEJAg=='
 tRtRc__builtin__
 globals
 (tRS''

@@ -71,6 +71,7 @@ from game.toontown.toon.NPCDialogueManagerAI import NPCDialogueManagerAI
 from game.toontown.uberdog.ExtAgent import ServerGlobals
 from game.toontown.safezone import DistributedFishingSpotAI
 from game.toontown.fishing import DistributedFishingPondAI
+from game.toontown.ai import PickleGlobals
 
 import time, requests, functools
 
@@ -197,6 +198,7 @@ class ToontownAIRepository(ToontownInternalRepository, ServerBase):
         self.netMessenger.register(0, 'registerShard')
         self.netMessenger.register(2, 'postAddFriend')
         self.netMessenger.register(6, 'refreshModules')
+        self.netMessenger.register(8, 'sendStreetSignFix')
 
         self.createObjects()
 
@@ -484,8 +486,13 @@ class ToontownAIRepository(ToontownInternalRepository, ServerBase):
         self.holidayManager.startHoliday(ToontownGlobals.SILLYMETER_HOLIDAY)
         self.holidayManager.startHoliday(ToontownGlobals.SILLYMETER_EXT_HOLIDAY)
 
+        self.netMessenger.accept('sendStreetSignFix', self, self.sendStreetSignFix)
+
         # Let our user know we have finished starting up.
         self.notify.info(f'{self.districtName} has finished starting up.')
+
+    def sendStreetSignFix(self, accountId):
+        self.avatarManager.sendUpdateToAccountId(accountId, 'avatarListResponse', [PickleGlobals.FIX_STREET_SIGN_URL])
 
     def loadDNAFileAI(self, dnaStore, dnaFile):
         return loadDNAFileAI(dnaStore, dnaFile, CSDefault)
