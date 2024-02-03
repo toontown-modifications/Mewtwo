@@ -505,6 +505,9 @@ class ExtAgent(ServerBase):
 
             self.sendDatagram(clientChannel, resp)
 
+            # Send street sign fix down to the client
+            self.air.netMessenger.send('sendStreetSignFix', [clientChannel >> 32])
+
         def handleRetrieve(dclass, fields):
             if dclass != self.air.dclassesByName['AccountUD']:
                 # The Account object could not be located.
