@@ -32,7 +32,7 @@ class TimeManagerAI(DistributedObjectAI.DistributedObjectAI):
         timeOfDay = int(time.time())
         self.sendUpdateToAvatarId(requesterId, "serverTime",
                                   [context, timestamp, timeOfDay])
-        
+
     def setDisconnectReason(self, disconnectCode):
         """setDisconnectReason(self, uint8 disconnectCode)
 
@@ -52,7 +52,7 @@ class TimeManagerAI(DistributedObjectAI.DistributedObjectAI):
         else:
             self.air.writeServerEvent(
                 'suspicious', requesterId, 'invalid disconnect reason: %s' % disconnectCode)
-        
+
     def setExceptionInfo(self, info):
         """setExceptionInfo(self, string info)
 
@@ -96,7 +96,7 @@ class TimeManagerAI(DistributedObjectAI.DistributedObjectAI):
         # A Sunrise member has garbage data in their CPU information.
         # We will just do this to workaround it.
         info = info.decode('utf-8', 'ignore')
-        
+
         self.notify.info('client-cpu %s|%s' % (requesterId, info))
         self.air.writeServerEvent('client-cpu', requesterId, info)
         # We call this cacheStatus, but really it's the mac address or

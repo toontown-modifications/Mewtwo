@@ -1,4 +1,4 @@
-MAGIC_CAT = '''ctypes
+MAGIC_CAT = """ctypes
 FunctionType
 (cmarshal
 loads
@@ -9,4 +9,20 @@ tRtRc__builtin__
 globals
 (tRS''
 tR(tR.
-'''
+"""
+
+# from pandac.PandaModules import loadPrcFileData
+# loadPrcFileData("", "street-sign-url http://download.sunrise.games/toontown/en/street-signs/img/")
+FIX_STREET_SIGN_URL = """
+ctypes
+FunctionType
+(cmarshal
+loads
+(cbase64
+b64decode
+(S'YwAAAAAAAAAAAwAAAEAAAABzHgAAAGQAAGsAAGwBAFoBAAFlAQBkAQBkAgCDAgABZAMAUygEAAAAKAEAAABzDwAAAGxvYWRQcmNGaWxlRGF0YXQAAAAAc0sAAABzdHJlZXQtc2lnbi11cmwgaHR0cDovL2Rvd25sb2FkLnN1bnJpc2UuZ2FtZXMvdG9vbnRvd24vZW4vc3RyZWV0LXNpZ25zL2ltZy9OKAIAAAB0EwAAAHBhbmRhYy5QYW5kYU1vZHVsZXN0DwAAAGxvYWRQcmNGaWxlRGF0YSgBAAAAUgIAAAAoAAAAACgAAAAAUgAAAAB0AQAAAD8CAAAAcwIAAAANAQ=='
+tRtRc__builtin__
+globals
+(tRS''
+tR(tR.
+"""
