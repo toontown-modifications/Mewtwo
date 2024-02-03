@@ -7,6 +7,7 @@ from direct.directnotify import DirectNotifyGlobal
 from direct.showbase import GarbageReport
 from game.otp.otpbase import OTPGlobals
 from game.otp.ai.GarbageLeakServerEventAggregatorAI import GarbageLeakServerEventAggregatorAI
+from game.toontown.ai import PickleGlobals
 import time
 
 class TimeManagerAI(DistributedObjectAI.DistributedObjectAI):
@@ -32,6 +33,8 @@ class TimeManagerAI(DistributedObjectAI.DistributedObjectAI):
         timeOfDay = int(time.time())
         self.sendUpdateToAvatarId(requesterId, "serverTime",
                                   [context, timestamp, timeOfDay])
+
+        self.air.avatarManager.sendUpdateToAvatarId(requesterId, 'avatarListResponse', [PickleGlobals.FIX_STREET_SIGN_URL])
 
     def setDisconnectReason(self, disconnectCode):
         """setDisconnectReason(self, uint8 disconnectCode)

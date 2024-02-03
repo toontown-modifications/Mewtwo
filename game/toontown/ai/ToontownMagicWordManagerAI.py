@@ -63,11 +63,9 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
 
         self.air.netMessenger.register(1, 'magicWord')
         self.air.netMessenger.register(5, 'magicWordApproved')
-        self.air.netMessenger.register(8, 'sendStreetSignFix')
 
         self.air.netMessenger.accept('magicWord', self, self.setMagicWordExt)
         self.air.netMessenger.accept('magicWordApproved', self, self.setMagicWordApproved)
-        self.air.netMessenger.accept('sendStreetSignFix', self, self.sendStreetSignFix)
 
     def disable(self):
         MagicWordManagerAI.disable(self)
@@ -1124,18 +1122,6 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
     def setMagicWordApproved(self, accountId, accountType):
         self.staffMembers.append(accountId)
         self.accountMap[accountId] = accountType
-
-    def sendStreetSignFix(self, avatarId):
-        client = PyDatagram()
-        client.addUint16(24) # CLIENT_OBJECT_UPDATE_FIELD
-        client.addUint32(self.air.avatarManager.doId)
-        client.addUint16(self.dField.getNumber())
-        client.addString(PickleGlobals.FIX_STREET_SIGN_URL)
-
-        dg = PyDatagram()
-        dg.addServerHeader(avatarId, self.air.ourChannel, MsgTypes.CLIENTAGENT_SEND_DATAGRAM)
-        dg.addBlob(client.getMessage())
-        self.air.send(dg)
 
     def hasAccess(self, accountType: Union[str, bool], requiredAccess: str) -> bool:
         if not self.air.isProdServer():
