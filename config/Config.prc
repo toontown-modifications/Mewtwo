@@ -38,7 +38,7 @@ secret-friend-storage backups/friendCodes/secrets.json
 bingo-server-data-folder backups/bingo
 
 # Whitelist
-whitelist-url http://cdn.toontown.disney.go.com/toontown/en/
+whitelist-url http://download.sunrise.games/launcher/
 whitelist-stage-dir game/whitelist
 
 # Resources
