@@ -4,9 +4,9 @@
 from aiohttp import web
 import asyncio, requests, lxml.etree as et, random, sys
 
-deleteEndpoint = 'https://toontastic.sunrise.games/api/authDelete'
-usernameAvailabilityEndpoint = 'https://toontastic.sunrise.games/api/checkUsernameAvailability'
-regEndpoint = 'https://toontastic.sunrise.games/register/'
+deleteEndpoint = 'https://127.0.0.1/api/authDelete'
+usernameAvailabilityEndpoint = 'https://127.0.0.1/api/checkUsernameAvailability'
+regEndpoint = 'https://127.0.0.1/register/'
 
 headers = {
     'User-Agent': 'Sunrise Games - EndpointManager'

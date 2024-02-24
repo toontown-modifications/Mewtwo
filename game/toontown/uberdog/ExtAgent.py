@@ -191,7 +191,7 @@ class ExtAgent(ServerBase):
             # Create our database folder.
             os.makedirs(self.databasePath)
 
-        self.banEndpointBase = 'https://toontastic.sunrise.games/bans'
+        self.banEndpointBase = 'https://127.0.0.1/bans'
 
         self.requestHeaders = {
             'User-Agent': 'Sunrise Games - ExtAgent'
@@ -239,7 +239,7 @@ class ExtAgent(ServerBase):
     def getStatus(self):
         try:
             serverType = ServerGlobals.serverToName[ServerGlobals.FINAL_TOONTOWN]
-            endpoint = f'https://api.sunrise.games/api/getStatusForServer?serverType={serverType}'
+            endpoint = f'https://127.0.0.1/api/getStatusForServer?serverType={serverType}'
             request = requests.get(endpoint.format(serverType), headers = self.requestHeaders)
             return request.text
         except:
@@ -1407,7 +1407,7 @@ class ExtAgent(ServerBase):
                         'serverName': ServerGlobals.serverToName[ServerGlobals.FINAL_TOONTOWN]
                     }
 
-                    requests.post('https://sunrise.games/panel/names/approve.php', data, headers = headers)
+                    requests.post('https://127.0.0.1/panel/names/approve.php', data, headers = headers)
 
             # Prepare the wish name response.
             resp = PyDatagram()

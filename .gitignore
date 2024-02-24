@@ -7,7 +7,7 @@ otpd/databases/accounts.json
 otpd/databases/bak/*
 otpd/databases/otpdb/*.yaml
 PYTHON_PATH
-
+game/whitelist/twhitelist.dat
 .idea/*
 venv/*
 backups/*

@@ -4,7 +4,7 @@ import requests
 # Load our configuration.
 loadPrcFile('../../config/local.prc')
 
-banEndpoint = 'https://toontastic.sunrise.games/bans/BanAccount.php'
+banEndpoint = 'https://127.0.0.1/bans/BanAccount.php'
 
 username = eval(input('Username: '))
 reason = eval(input('Reason for Ban: '))

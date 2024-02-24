@@ -4,7 +4,7 @@ import requests
 # Load our configuration.
 loadPrcFile('../../config/local.prc')
 
-banEndpoint = 'https://toontastic.sunrise.games/bans/ChatBanEmail.php'
+banEndpoint = 'https://127.0.0.1/bans/ChatBanEmail.php'
 
 playToken = eval(input('Playtoken: '))
 chatMessages = eval(input('Chat messages: '))

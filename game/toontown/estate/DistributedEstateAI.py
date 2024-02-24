@@ -3,7 +3,7 @@ from panda3d.toontown import *
 from direct.distributed.ClockDelta import *
 from game.toontown.toonbase.ToontownGlobals import *
 from game.otp.otpbase import OTPGlobals
-from game.otp.ai.AIZoneData import AIZoneData
+from otp.ai.AIZoneData import AIZoneData
 from direct.distributed import DistributedObjectAI
 from . import DistributedHouseAI
 #from . import DistributedPlantAI

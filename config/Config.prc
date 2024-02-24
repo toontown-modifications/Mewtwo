@@ -22,10 +22,10 @@ want-cogdominiums true
 want-coderedemption true
 want-do-live-updates true
 want-discord-integration true
-want-parties false
+want-parties true
 want-instant-parties true
 want-loyalty-requirement true
-want-ds-anydbm false
+want-ds-anydbm true
 want-token-expirations false
 
 # Code Redemption

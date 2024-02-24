@@ -11,7 +11,7 @@ from game.toontown.ai.HolidayManagerAI import HolidayManagerAI
 from game.toontown.toonbase import ToontownGlobals
 from game.toontown.catalog.CatalogManagerAI import CatalogManagerAI
 from game.otp.distributed import OtpDoGlobals
-from game.otp.ai.AIZoneData import AIZoneDataStore
+from otp.ai.AIZoneData import AIZoneDataStore
 from game.toontown.ai import WelcomeValleyManagerAI
 from game.toontown.uberdog.DistributedInGameNewsMgrAI import DistributedInGameNewsMgrAI
 from game.toontown.toon import NPCToons
@@ -142,7 +142,7 @@ class ToontownAIRepository(ToontownInternalRepository, ServerBase):
         }
 
         try:
-            requests.post('https://api.sunrise.games/api/setPopulation', json = data, headers = headers)
+            requests.post('https://127.0.0.1/api/setPopulation', json = data, headers = headers)
         except:
             self.notify.warning('Failed to send district population!')
 

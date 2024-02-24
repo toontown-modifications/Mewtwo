@@ -4,7 +4,7 @@ from direct.distributed.DistributedObjectAI import DistributedObjectAI
 from direct.fsm import ClassicFSM, State
 from game.toontown.cogdominium import CogdoGameConsts
 from game.toontown.cogdominium.DistCogdoGameBase import DistCogdoGameBase
-from game.otp.ai.Barrier import Barrier
+from otp.ai.Barrier import Barrier
 
 class SadCallbackToken:
     pass

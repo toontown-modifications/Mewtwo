@@ -4,7 +4,7 @@ import requests
 # Load our configuration.
 loadPrcFile('../../config/local.prc')
 
-terminateEndpoint = 'https://toontastic.sunrise.games/bans/TerminateAccount.php'
+terminateEndpoint = 'https://127.0.0.1/bans/TerminateAccount.php'
 
 username = eval(input('Username: '))
 reason = 'Violated rules multiple times.'

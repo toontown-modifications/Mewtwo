@@ -1,7 +1,7 @@
 from pandac.PandaModules import *
 from direct.directnotify import DirectNotifyGlobal
 from direct.showbase import DirectObject
-from game.otp.ai.AIZoneData import AIZoneData
+from otp.ai.AIZoneData import AIZoneData
 from game.toontown.toonbase import ToontownGlobals
 from game.toontown.pets import PetConstants
 
