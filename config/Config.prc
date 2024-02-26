@@ -28,6 +28,9 @@ want-loyalty-requirement true
 want-ds-anydbm true
 want-token-expirations false
 
+# Turning this off fixes parties for TTO Clients that use midi audio
+want-ogg-music true
+
 # Code Redemption
 max-code-redemption-attempts 5
 

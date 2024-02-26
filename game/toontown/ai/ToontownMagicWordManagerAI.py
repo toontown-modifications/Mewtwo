@@ -543,6 +543,58 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
         # Send out our response message.
         self.sendResponseMessage(av.doId, 'You are now Rocket!')
 
+    def d_setDNA(self, av, part, value):
+        # part
+        part = part.lower()
+
+        dna = ToonDNA()
+        dna.makeFromNetString(av.getDNAString())
+
+
+        if part == "headcolor":
+            if value not in range(1, 27):
+                self.sendResponseMessage(av.doId, 'Failed to execute command. Invalid headcolor')
+                return
+            else:
+                dna.headColor = value
+        elif part == "armcolor":
+            if value not in range(1, 27):
+                self.sendResponseMessage(av.doId, 'Failed to execute command. Invalid armcolor')
+                return
+            else:
+                dna.armColor = value
+        elif part == "color":
+            if value not in range(1, 27):
+                self.sendResponseMessage(av.doId, 'Failed to execute command. Invalid color')
+                return
+            else:
+                dna.armColor = value
+                dna.headColor = value
+                dna.legColor = value
+        elif part == 'gloves':
+            if value not in range(1, 27):
+                self.sendResponseMessage(av.doId, 'Failed to execute command. Invalid glove color')
+            else:
+                dna.gloveColor = value
+        elif part == 'gender':
+            if value == "male" or value == "female" or "0":
+                dna.gender = 'm'
+            elif value == "female" or value == "f" or "1":
+                dna.gender = 'f'
+            else:
+                self.sendResponseMessage(av.doId, 'Failed to execute command. You can only choose male or female.')
+        elif part == 'species':
+            species = ['dog', 'cat', 'horse', 'mouse', 'rabbit', 'duck', 'monkey', 'bear', 'pig']
+            if value not in species:
+                self.sendResponseMessage(av.doId, 'Failed to execute command. Invalid Species') 
+
+        # Set the new DNA string.
+        av.b_setDNAString(dna.makeNetString())
+
+
+        # Send out our response message.
+        self.sendResponseMessage(av.doId, 'setDNA Executed Successfully!')
+
     def d_skipPhoneToonTask(self, av):
         self.air.questManager.toonCalledClarabelle(av)
 
@@ -1336,7 +1388,7 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
             if not validation:
                 return
             self.d_endHoliday(avId, holidayId = int(args[0]))
-        elif self.hasAccess(accountType, 'Rocket') and magicWord == 'smsg':
+        elif self.hasAccess(accountType, 'Rocket') and magicWord == 'smsg' or magicWord == "system" or magicWord == "servermessage":
             if not validation:
                 return
             self.d_sendSystemMessage(message = string)
@@ -1351,6 +1403,15 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
             if not validation:
                 return
             self.d_restockUnites(avId, num = int(args[0]))
+        elif magicWord == 'setdna':
+            if not validation:
+                return
+            try:
+                part = str(args[0])
+                val = int(args[1])
+                self.d_setDNA(av, part, val)
+            except ValueError:
+                self.sendResponseMessage(avId, 'Invalid parameters.')
         elif self.hasAccess(accountType, 'Rocket') and magicWord == 'name':
             self.d_setName(avId, name = string)
         elif magicWord == 'pinkslips':
@@ -1476,7 +1537,7 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
             self.d_doParty(av, string)
         elif magicWord == 'refresh':
             self.refreshModules(av)
-        elif magicWord in ('spawninv', 'inv', 'startinv', 'summoninv', 'invasion'):
+        elif magicWord in ('spawninv', 'inv', 'startinv', 'summoninv', 'invasion', "spawninvasion"):
             if not validation:
                 return
             try:
