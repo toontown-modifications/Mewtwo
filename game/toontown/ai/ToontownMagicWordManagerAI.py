@@ -82,6 +82,12 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
         av.b_setMoney(av.getMaxMoney())
 
         self.sendResponseMessage(avId, 'You are now Jeff Bezos.')
+    
+    def d_setGoodSOS(self, avId):
+        av = self.air.doId2do.get(avId)
+
+        av.restockAllNPCFriends()
+        self.sendResponseMessage(avId, 'Restocked all SOS Cards successfully!')
 
     def d_setToonMax(self, avId):
         if avId not in self.air.doId2do:
@@ -192,6 +198,7 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
         av = self.air.doId2do.get(avId)
 
         av.b_setBankMoney(av.getMaxBankMoney())
+        self.sendResponseMessage("You now have a maxed bank!")
 
     def d_setTeleportAccess(self, avId):
         if avId not in self.air.doId2do:
@@ -202,6 +209,7 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
         av.b_setTeleportAccess([1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000, 11000, 12000, 13000])
         av.b_setHoodsVisited([1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000, 11000, 12000, 13000])
         av.b_setZonesVisited([1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000, 11000, 12000, 13000])
+        self.sendResponseMessage("You can now teleport anywhere!")
 
     def d_setAvatarToonUp(self, avId):
         if avId not in self.air.doId2do:
@@ -210,6 +218,7 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
         av = self.air.doId2do.get(avId)
 
         av.b_setHp(av.getMaxHp())
+        self.sendResponseMessage("You now a full toonup!")
 
     def d_setCogIndex(self, avId, num):
         av = self.air.doId2do.get(avId)
@@ -221,6 +230,7 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
             return
 
         av.b_setCogIndex(num)
+        self.sendResponseMessage(f"setCogIndex set to {num}")
 
     def d_setPinkSlips(self, avId, num):
         if avId not in self.air.doId2do:
@@ -229,6 +239,7 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
         av = self.air.doId2do.get(avId)
 
         av.b_setPinkSlips(num)
+        self.sendResponseMessage(f"setCogIndex set to {num}")
 
     def d_setNewSummons(self, avId, num):
         if avId not in self.air.doId2do:
@@ -347,7 +358,8 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
 
         self.sendResponseMessage(avId, response)
 
-    def d_spawnFO(self, avId, zoneId, foType):
+    def d_spawnFO(self, avId, zoneId, foType, difficulty):
+        from game.toontown.building import SuitBuildingGlobals
         av = self.air.doId2do.get(avId)
 
         if not av:
@@ -362,14 +374,17 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
         if not building:
             self.notify.info('Failed to find building!')
             return # No building was found.
+        if not 0 <= difficulty < len(SuitBuildingGlobals.SuitBuildingInfo):
+            self.notify.info('Difficulty out of bounds!')
+            return
 
-        foTypes = ['s']
+        foTypes = ['s', 'l']
 
         if foType.lower() not in foTypes:
             self.sendResponseMessage(avId, f'Incorrect Field Office type! The valid ones are {foTypes}!')
             return
 
-        building.cogdoTakeOver(foType, 2, 5)
+        building.cogdoTakeOver(foType, difficulty, 5)
 
         self.sendResponseMessage(avId, 'Spawned a Field Office!')
 
@@ -419,18 +434,17 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
                 self.sendResponseMessage(avId, 'Skipping to final round...')
                 return
 
-        if battle == 'next':
-            if boss.state in ('PrepareBattleOne', 'BattleOne'):
-                boss.exitIntroduction()
-                boss.b_setState('PrepareBattleThree')
-                self.sendResponseMessage(avId, 'Skipping current round...')
-                return
+        if boss.state in ('PrepareBattleOne', 'BattleOne'):
+            boss.exitIntroduction()
+            boss.b_setState('PrepareBattleThree')
+            self.sendResponseMessage(avId, 'Skipping current round...')
+            return
 
-            elif boss.state in ('PrepareBattleThree', 'BattleThree'):
-                boss.exitIntroduction()
-                boss.b_setState('Victory')
-                self.sendResponseMessage(avId, 'Skipping final round...')
-                return
+        elif boss.state in ('PrepareBattleThree', 'BattleThree'):
+            boss.exitIntroduction()
+            boss.b_setState('Victory')
+            self.sendResponseMessage(avId, 'Skipping final round...')
+            return
 
     def d_setNametagStyle(self, av, style):
         avId = self.air.getAvatarIdFromSender()
@@ -544,27 +558,27 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
         self.sendResponseMessage(av.doId, 'You are now Rocket!')
 
     def d_setDNA(self, av, part, value):
+
         # part
         part = part.lower()
-
         dna = ToonDNA()
         dna.makeFromNetString(av.getDNAString())
 
 
         if part == "headcolor":
-            if value not in range(1, 27):
+            if value not in ToonDNA.defaultBoyColorList():
                 self.sendResponseMessage(av.doId, 'Failed to execute command. Invalid headcolor')
                 return
             else:
                 dna.headColor = value
         elif part == "armcolor":
-            if value not in range(1, 27):
+            if value not in ToonDNA.defaultBoyColorList():
                 self.sendResponseMessage(av.doId, 'Failed to execute command. Invalid armcolor')
                 return
             else:
                 dna.armColor = value
         elif part == "color":
-            if value not in range(1, 27):
+            if value not in ToonDNA.defaultBoyColorList():
                 self.sendResponseMessage(av.doId, 'Failed to execute command. Invalid color')
                 return
             else:
@@ -572,7 +586,7 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
                 dna.headColor = value
                 dna.legColor = value
         elif part == 'gloves':
-            if value not in range(1, 27):
+            if value not in ToonDNA.defaultBoyColorList():
                 self.sendResponseMessage(av.doId, 'Failed to execute command. Invalid glove color')
             else:
                 dna.gloveColor = value
@@ -584,9 +598,8 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
             else:
                 self.sendResponseMessage(av.doId, 'Failed to execute command. You can only choose male or female.')
         elif part == 'species':
-            species = ['dog', 'cat', 'horse', 'mouse', 'rabbit', 'duck', 'monkey', 'bear', 'pig']
-            if value not in species:
-                self.sendResponseMessage(av.doId, 'Failed to execute command. Invalid Species') 
+            species_list = ToonDNA.getSpeciesName(value)
+            dna.head = value + dna.head[1:3]
 
         # Set the new DNA string.
         av.b_setDNAString(dna.makeNetString())
@@ -886,6 +899,24 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
         av.b_setHat(hatId, hatTex, 0)
 
         response = 'Set hat!'
+        self.sendResponseMessage(avId, response)
+
+    def d_setGlasses(self, avId, glassesId, glassesTex):
+        av = self.air.doId2do.get(avId)
+
+        if not 0 <= glassesId <= 21:
+            response = 'Invalid Glasses specified.'
+            self.sendResponseMessage(avId, response)
+            return
+
+        if not 0 <= glassesTex <= 4:
+            response = 'Invalid Glasses texture specified.'
+            self.sendResponseMessage(avId, response)
+            return
+
+        av.b_setGlasses(glassesId, glassesTex, 0)
+
+        response = 'Set Glasses!'
         self.sendResponseMessage(avId, response)
 
     def d_setAutoRestock(self, avId):
@@ -1376,6 +1407,8 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
             self.d_setAvatarRich(avId)
         elif magicWord == 'maxtoon':
             self.d_setToonMax(avId)
+        elif magicWord in ('goodsos', 'sostoons', 'stackedsos', 'restocksos'):
+            self.d_setGoodSOS(avId)
         elif magicWord == 'toonup':
             self.d_setAvatarToonUp(avId)
         elif magicWord == 'enabletpall':
@@ -1392,7 +1425,7 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
             if not validation:
                 return
             self.d_sendSystemMessage(message = string)
-        elif magicWord in ('cogindex', 'setcogindex'):
+        elif magicWord in ('cogindex', 'setcogindex', 'cog'):
             if not validation:
                 return
             try:
@@ -1408,7 +1441,7 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
                 return
             try:
                 part = str(args[0])
-                val = int(args[1])
+                val = str(args[1])
                 self.d_setDNA(av, part, val)
             except ValueError:
                 self.sendResponseMessage(avId, 'Invalid parameters.')
@@ -1443,7 +1476,10 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
         elif magicWord == 'spawnfo':
             if not validation:
                 return
-            self.d_spawnFO(avId, zoneId, foType = args[0])
+            try:
+                self.d_spawnFO(avId, zoneId, foType = args[0], difficulty = int(args[1]))
+            except ValueError:
+                self.sendResponseMessage(avId, 'Invalid parameters.')
         elif magicWord == 'setgm':
             if not validation:
                 return
@@ -1506,7 +1542,7 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
                 return
             if self.hasAccess(accountType, 'Rocket'):
                 self.d_injectOnAI(avId, code = string)
-        elif magicWord == 'sethat':
+        elif magicWord in ('sethat', 'hat'):
             if not validation:
                 return
             if not len(args) == 2:
@@ -1514,6 +1550,16 @@ class ToontownMagicWordManagerAI(MagicWordManagerAI):
                 return
             try:
                 self.d_setHat(avId, int(args[0]), int(args[1]))
+            except ValueError:
+                self.sendResponseMessage(avId, 'Invalid parameters.')
+        elif magicWord in ('setglasses', 'glasses'):
+            if not validation:
+                return
+            if not len(args) == 2:
+                self.sendResponseMessage(avId, 'You specified not enough arguments for this command!')
+                return
+            try:
+                self.d_setGlasses(avId, int(args[0]), int(args[1]))
             except ValueError:
                 self.sendResponseMessage(avId, 'Invalid parameters.')
         elif magicWord == 'autorestock':
