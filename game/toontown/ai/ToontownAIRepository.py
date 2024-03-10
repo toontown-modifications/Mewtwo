@@ -19,6 +19,7 @@ from game.toontown.hood.TTHoodDataAI import TTHoodDataAI
 from game.toontown.hood.DDHoodDataAI import DDHoodDataAI
 from game.toontown.hood.OZHoodDataAI import OZHoodDataAI
 from game.toontown.hood.GZHoodDataAI import GZHoodDataAI
+from game.toontown.spellbook.ToontownMagicWordManagerAI import ToontownMagicWordManagerAI
 from game.toontown.hood.DGHoodDataAI import DGHoodDataAI
 from game.toontown.hood.MMHoodDataAI import MMHoodDataAI
 from game.toontown.hood.BRHoodDataAI import BRHoodDataAI
@@ -51,7 +52,7 @@ from game.toontown.racing.DistributedViewPadAI import DistributedViewPadAI
 from game.toontown.racing.DistributedStartingBlockAI import DistributedStartingBlockAI, DistributedViewingBlockAI
 from game.toontown.racing.DistributedLeaderBoardAI import DistributedLeaderBoardAI
 from game.toontown.racing.RaceManagerAI import RaceManagerAI
-from game.toontown.ai.ToontownMagicWordManagerAI import ToontownMagicWordManagerAI
+from game.toontown.spellbook.ToontownMagicWordManagerAI import ToontownMagicWordManagerAI
 from game.toontown.parties import ToontownTimeManager
 from game.toontown.quest import QuestManagerAI
 from game.toontown.tutorial.TutorialManagerAI import TutorialManagerAI
@@ -329,8 +330,9 @@ class ToontownAIRepository(ToontownInternalRepository, ServerBase):
         self.safeZoneManager = SafeZoneManagerAI(self)
         self.safeZoneManager.generateWithRequired(OtpDoGlobals.OTP_ZONE_ID_MANAGEMENT)
 
-        self.magicWordMgr = ToontownMagicWordManagerAI(self)
-        self.magicWordMgr.generateWithRequired(OtpDoGlobals.OTP_ZONE_ID_MANAGEMENT)
+        # Generate our magic word manager...
+        self.magicWordManager = ToontownMagicWordManagerAI(self)
+        self.magicWordManager.generateWithRequired(OtpDoGlobals.OTP_ZONE_ID_MANAGEMENT)
 
         self.tutorialManager = TutorialManagerAI(self)
         self.tutorialManager.generateWithRequired(OtpDoGlobals.OTP_ZONE_ID_MANAGEMENT)

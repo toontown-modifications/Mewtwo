@@ -738,7 +738,7 @@ class ToontownClientRepository(OTPClientRepository.OTPClientRepository):
 
             self.notify.info('dumpAllSubShardObjects: defaultShard is %s' %
                              localAvatar.defaultShard)
-            ignoredClasses = ('MagicWordManager', 'TimeManager',
+            ignoredClasses = ('TimeManager',
                               'DistributedDistrict', 'FriendManager',
                               'NewsManager', 'ToontownMagicWordManager',
                               'WelcomeValleyManager', 'DistributedTrophyMgr',

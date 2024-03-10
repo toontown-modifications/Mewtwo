@@ -28,6 +28,7 @@ want-loyalty-requirement true
 want-ds-anydbm true
 want-token-expirations false
 want-system-responses true
+want-octaves true
 
 # Turning this off fixes parties for TTO Clients that use midi audio
 want-ogg-music true
@@ -44,6 +45,6 @@ bingo-server-data-folder backups/bingo
 # Whitelist
 whitelist-url http://download.sunrise.games/launcher/
 whitelist-stage-dir game/whitelist
-
+want-whitelist true
 # Resources
 model-path game/resources

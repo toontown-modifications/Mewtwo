@@ -95,7 +95,7 @@ class LoginTTSpecificDevAccount(LoginTTAccount.LoginTTAccount):
         datagram.addString('dev')
         datagram.addUint32(cr.hashVal)
         datagram.addUint32(4)
-        magicWords = base.config.GetString('want-magic-words', '')
+        magicWords = False
         datagram.addString(magicWords)
         cr.send(datagram)
 

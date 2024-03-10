@@ -352,3 +352,12 @@ AccessInvalid = 3
 AvatarPendingCreate = -1
 AvatarSlotUnavailable = -2
 AvatarSlotAvailable = -3
+AccessLevelName2Int = {
+ 'TT_DEVELOPER': 800
+}
+
+AccessLevelInt2Name = {v: k for k, v in AccessLevelName2Int.items()}
+
+AccessLevelDebug2Name = {
+    'TT_DEVELOPER': 'Developer'
+}

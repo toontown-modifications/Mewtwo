@@ -42,6 +42,7 @@ class DistributedPlayer(DistributedAvatar.DistributedAvatar, PlayerBase.PlayerBa
             self._districtWeAreGeneratedOn = None
             self.DISLname = ''
             self.DISLid = 0
+            self.accessLevel = 800
             self.autoRun = 0
             self.whiteListEnabled = base.config.GetBool('whitelist-chat-enabled', 1)
 
@@ -447,6 +448,9 @@ class DistributedPlayer(DistributedAvatar.DistributedAvatar, PlayerBase.PlayerBa
 
     def setDISLid(self, id):
         self.DISLid = id
+
+    def setAccessLevel(self, accessLevel):
+        self.accessLevel = accessLevel
 
     def setAutoRun(self, value):
         self.autoRun = value
